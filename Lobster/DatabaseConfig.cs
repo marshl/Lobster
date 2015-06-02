@@ -11,7 +11,6 @@ namespace Lobster
         public string username;
         public string password;
         public string dataSource;
-
         public string codeSource;
     }
 }

@@ -23,116 +23,135 @@ namespace Lobster
             this.dataGridList = new List<DataGridView>();
             foreach ( ClobType clobType in this.lobsterModel.clobTypes )
             {
-                TabPage clobTab = new TabPage();
-                clobTab.Name = clobType.directory;
-                clobTab.Padding = new Padding( 3 );
-                clobTab.Size = new Size( 970, 655 );
-                clobTab.Text = clobType.directory;
-                clobTab.UseVisualStyleBackColor = true;
+                DataGridView dataGridView = this.CreateClobTab( clobType );
+                this.dataGridList.Add( dataGridView );
+            }
+        }
 
-                this.MainTabControl.Controls.Add( clobTab );
+        private DataGridView CreateClobTab( ClobType _clobType )
+        {
+            TabPage clobTab = new TabPage();
+            clobTab.Name = _clobType.directory;
+            clobTab.Padding = new Padding( 3 );
+            clobTab.Size = new Size( 970, 655 );
+            clobTab.Text = _clobType.directory;
+            clobTab.UseVisualStyleBackColor = true;
 
-                DataGridViewTextBoxColumn fileNameColumn = new DataGridViewTextBoxColumn(); ;
-                fileNameColumn.HeaderText = "File Name";
-                fileNameColumn.Name = "FileName";
-                fileNameColumn.ReadOnly = true;
-                // 
-                // LastModified
-                // 
-                DataGridViewTextBoxColumn lastModifiedColumn = new DataGridViewTextBoxColumn();
-                lastModifiedColumn.HeaderText = "Last Modified";
-                lastModifiedColumn.Name = "LastModified";
-                lastModifiedColumn.ReadOnly = true;
-                // 
-                // LastClobbed
-                // 
-                DataGridViewTextBoxColumn lastClobbedColumn = new DataGridViewTextBoxColumn();
-                lastClobbedColumn.HeaderText = "Last Clobbed";
-                lastClobbedColumn.Name = "LastClobbed";
-                lastClobbedColumn.ReadOnly = true;
-                // 
-                // Create
-                // 
-                DataGridViewButtonColumn createColumn = new DataGridViewButtonColumn();
-                createColumn.HeaderText = "Create";
-                createColumn.Name = "Create";
-                createColumn.ReadOnly = true;
-                // 
-                // Reclob
-                // 
-                DataGridViewButtonColumn reclobColumn = new DataGridViewButtonColumn();
-                reclobColumn.HeaderText = "Reclob";
-                reclobColumn.Name = "Reclob";
-                reclobColumn.ReadOnly = true;
+            this.MainTabControl.Controls.Add( clobTab );
 
-                DataGridView dataGridView = new DataGridView();
-                dataGridView.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-                dataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-                dataGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-                dataGridView.Columns.AddRange( new DataGridViewColumn[] {
+            DataGridViewTextBoxColumn fileNameColumn = new DataGridViewTextBoxColumn(); ;
+            fileNameColumn.HeaderText = "File Name";
+            fileNameColumn.Name = "FileName";
+            fileNameColumn.ReadOnly = true;
+
+            // LastModified
+            DataGridViewTextBoxColumn lastModifiedColumn = new DataGridViewTextBoxColumn();
+            lastModifiedColumn.HeaderText = "Last Modified";
+            lastModifiedColumn.Name = "LastModified";
+            lastModifiedColumn.ReadOnly = true;
+
+            // LastClobbed
+            DataGridViewTextBoxColumn lastClobbedColumn = new DataGridViewTextBoxColumn();
+            lastClobbedColumn.HeaderText = "Last Clobbed";
+            lastClobbedColumn.Name = "LastClobbed";
+            lastClobbedColumn.ReadOnly = true;
+
+            // Create
+            DataGridViewDisableButtonColumn createColumn = new DataGridViewDisableButtonColumn();
+            createColumn.HeaderText = "Create";
+            createColumn.Name = "Create";
+            createColumn.ReadOnly = true;
+
+            // Reclob
+            DataGridViewDisableButtonColumn reclobColumn = new DataGridViewDisableButtonColumn();
+            reclobColumn.HeaderText = "Reclob";
+            reclobColumn.Name = "Reclob";
+            reclobColumn.ReadOnly = true;
+
+            DataGridView dataGridView = new DataGridView();
+            dataGridView.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            dataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dataGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridView.Columns.AddRange( new DataGridViewColumn[] {
                     fileNameColumn,
                     lastModifiedColumn,
                     lastClobbedColumn,
                     createColumn,
                     reclobColumn
                 } );
-                dataGridView.Location = new Point( 6, 6 );
-                dataGridView.Name = "dataGridView";
-                dataGridView.RowTemplate.Height = 28;
-                dataGridView.Size = new Size( 958, 643 );
-                dataGridView.AllowUserToAddRows = false;
-                dataGridView.AllowUserToDeleteRows = false;
-                clobTab.Controls.Add( dataGridView );
+            dataGridView.Location = new Point( 6, 6 );
+            dataGridView.Name = "dataGridView";
+            dataGridView.RowTemplate.Height = 28;
+            dataGridView.Size = new Size( 958, 643 );
+            dataGridView.AllowUserToAddRows = false;
+            dataGridView.AllowUserToDeleteRows = false;
+            clobTab.Controls.Add( dataGridView );
 
-                dataGridView.CellContentClick += new DataGridViewCellEventHandler( this.dataGridView_CellContentClick );
+            dataGridView.CellContentClick += new DataGridViewCellEventHandler( this.dataGridView_CellContentClick );
 
 
-                foreach ( KeyValuePair<string, ClobFile> pair in clobType.fileMap )
-                {
-                    ClobFile file = pair.Value;
-                    dataGridView.Rows.Add( 
-                        file.filename, 
-                        file.lastModified,
-                        file.lastModified,
-                        "Create", 
-                        "Reclob" );
-                }
-                dataGridView.Sort( dataGridView.Columns["FileName"], ListSortDirection.Ascending );
-                clobType.dataGridView = dataGridView;
-                this.dataGridList.Add( dataGridView );
+            foreach ( KeyValuePair<string, ClobFile> pair in _clobType.fileMap )
+            {
+                ClobFile file = pair.Value;
+                int index = dataGridView.Rows.Add(
+                    file.filename,
+                    file.lastModified,
+                    file.lastModified,
+                    "Create",
+                    "Reclob" );
+                DataGridViewRow row = dataGridView.Rows[index];
+                DataGridViewDisableButtonCell createButton = (DataGridViewDisableButtonCell)row.Cells["Create"];
+                createButton.Enabled = (file.status == ClobFile.STATUS.LOCAL_ONLY);
+
+                DataGridViewDisableButtonCell reclobButton = (DataGridViewDisableButtonCell)row.Cells["Reclob"];
+                reclobButton.Enabled = ( file.status != ClobFile.STATUS.LOCAL_ONLY );
             }
+            dataGridView.Sort( dataGridView.Columns["FileName"], ListSortDirection.Ascending );
+            _clobType.dataGridView = dataGridView;
+            return dataGridView;
         }
 
         private void dataGridView_CellContentClick( object _sender, DataGridViewCellEventArgs _e )
         {
             var senderGrid = (DataGridView)_sender;
 
-            if ( senderGrid.Columns[_e.ColumnIndex] is DataGridViewButtonColumn 
-              && _e.RowIndex >= 0 )
+            if ( !( senderGrid.Columns[_e.ColumnIndex] is DataGridViewDisableButtonColumn )
+              || _e.RowIndex < 0 )
             {
-                switch ( senderGrid.Columns[_e.ColumnIndex].Name )
+                return;
+            }
+            DataGridViewDisableButtonCell cell = senderGrid.Rows[_e.RowIndex].Cells[_e.ColumnIndex] as DataGridViewDisableButtonCell;
+            if ( cell != null && !cell.Enabled )
+            {
+                return;
+            }
+
+            ClobType clobType = null;
+            for ( int i = 0; i < this.dataGridList.Count; ++i )
+            {
+                if ( this.dataGridList[i] == senderGrid )
                 {
-                    case "Create":
+                    clobType = this.lobsterModel.clobTypes[i];
+                    break;
+                }
+            }
+
+            switch ( senderGrid.Columns[_e.ColumnIndex].Name )
+            {
+                case "Create":
                     {
-                        throw new NotImplementedException();
-                    }
-                    case "Reclob":
-                    {
-                        for ( int i = 0; i < this.dataGridList.Count; ++i )
-                        {
-                            if ( this.dataGridList[i] == senderGrid )
-                            {
-                                this.lobsterModel.clobTypes[i].fileList[_e.RowIndex].ClobToDatabase();
-                                break;
-                            }
-                        }
+                        clobType.fileList[_e.RowIndex].InsertIntoDatabase();
                         break;
                     }
-                    default:
+                case "Reclob":
+                    {
+                        clobType.fileList[_e.RowIndex].UpdateDatabase();
+                        break;
+                    }
+                default:
                     {
                         throw new InvalidEnumArgumentException();
                     }
-                }
             }
         }
     }

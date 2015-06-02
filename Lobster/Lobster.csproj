@@ -54,10 +54,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClobContainer.cs" />
     <Compile Include="ClobFile.cs" />
     <Compile Include="ClobType.cs" />
     <Compile Include="DatabaseConfig.cs" />
+    <Compile Include="DataGridViewDisableButtonCell.cs" />
     <Compile Include="LobsterMain.cs">
       <SubType>Form</SubType>
     </Compile>

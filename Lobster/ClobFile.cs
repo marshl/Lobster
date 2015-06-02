@@ -18,7 +18,7 @@ namespace Lobster
         public STATUS status;
         public enum STATUS
         {
-            SYNCED,
+            SYNCHRONISED,
             LOCAL_ONLY,
             DELETED,
         }
@@ -28,37 +28,38 @@ namespace Lobster
             return this.parentClobType.parentModel.dbConfig.codeSource + "/" + this.parentClobType.directory + "/" + this.filename;
         }
 
-        public void ClobToDatabase()
+        public void UpdateDatabase()
         {
+            string mnemonic = this.filename.Replace( ".xml", "" );
             OracleConnection con = this.parentClobType.parentModel.oracleCon;
             OracleCommand command = con.CreateCommand();
-            string schema = this.parentClobType.schema;
-            string tableName = this.parentClobType.table;
-            string clobColumn = this.parentClobType.clobColumn;
-            string mnemonicColumn = this.parentClobType.mnemonicColumn;
-            string mnemonic = this.filename.Replace( ".xml", "" );
-
-            //command.CommandText = "UPDATE envmgr.nav_bar_action_groups SET xml_data = :data";
-            command.CommandText = "UPDATE " + schema + "." + tableName + " SET " + clobColumn + " = :data WHERE " + mnemonicColumn + " = '" + mnemonic + "'";
-            // OracleParameter dataParam = new OracleParameter( "input", OracleDbType.XmlType );
+            command.CommandText = "UPDATE " + this.parentClobType.schema + "." + this.parentClobType.table
+                + " SET " + this.parentClobType.clobColumn + " = :data" 
+                + " WHERE " + this.parentClobType.mnemonicColumn + " = '" + mnemonic + "'";
             string fullPath = this.GetFullPath();
             string contents = File.ReadAllText( this.GetFullPath() );
-            //OracleClob clob = OracleClob.
-            //OracleXmlType xmlType = new OracleXmlType();
-            //command.Parameters.Add( new OracleParameter( "data", OracleDbType.XmlType, contents )  );
+
             command.Parameters.Add( "data", OracleDbType.XmlType, contents, ParameterDirection.Input );
-
-            //dataParam.Value = contents;
             command.ExecuteNonQuery();
-            /*OracleDataReader reader = command.ExecuteReader();
-
-            while ( reader.Read() )
-            {
-                Console.WriteLine( reader.GetString( 0 ) );
-            }
-
-            reader.Dispose();*/
             command.Dispose();
         }
+
+        public void InsertIntoDatabase()
+        {
+            string mnemonic = this.filename.Replace( ".xml", "" );
+            OracleConnection con = this.parentClobType.parentModel.oracleCon;
+            OracleCommand command = con.CreateCommand();
+            command.CommandText = "INSERT INTO " + this.parentClobType.schema + "." + this.parentClobType.table
+                + " ( " + this.parentClobType.mnemonicColumn + ", " + this.parentClobType.clobColumn + " )"
+                + " VALUES ( '" + mnemonic + "', :data )";
+            string fullPath = this.GetFullPath();
+            string contents = File.ReadAllText( this.GetFullPath() );
+
+            command.Parameters.Add( "data", OracleDbType.XmlType, contents, ParameterDirection.Input );
+            command.ExecuteNonQuery();
+            command.Dispose();
+        }
+
+
     }
 }

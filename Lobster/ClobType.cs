@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Oracle.DataAccess.Client;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -28,18 +29,18 @@ namespace Lobster
         [XmlIgnore]
         public DataGridView dataGridView;
 
-        public void LoadFiles( string _codeSource )
+        public void LoadFiles()
         {
             this.fileList = new List<ClobFile>();
             this.fileMap = new Dictionary<string, ClobFile>();
-            DirectoryInfo clobTypeDir = Directory.CreateDirectory( _codeSource + "/" + this.directory );
+            DirectoryInfo clobTypeDir = Directory.CreateDirectory( this.parentModel.dbConfig.codeSource + "/" + this.directory );
             foreach ( FileInfo file in clobTypeDir.GetFiles() )
             {
                 ClobFile clobFile = new ClobFile();
                 clobFile.filename = file.Name;
                 clobFile.lastModified = file.LastWriteTime;
-                this.fileMap.Add( file.Name, clobFile );
                 clobFile.parentClobType = this;
+                this.fileMap.Add( file.Name, clobFile );
                 this.fileList.Add( clobFile );
             }
 
@@ -51,6 +52,31 @@ namespace Lobster
             fileWatcher.EnableRaisingEvents = true;
         }
 
+        public void CompareToDatabase()
+        {
+            // Assume the file is local only
+            foreach ( ClobFile file in this.fileList )
+            {
+                file.status = ClobFile.STATUS.LOCAL_ONLY;
+            }
+
+            OracleConnection con = this.parentModel.oracleCon;
+            OracleCommand command = con.CreateCommand();
+            command.CommandText = "SELECT " + this.mnemonicColumn + " FROM " + this.schema + "." + this.table;
+            OracleDataReader reader = command.ExecuteReader();
+
+            while ( reader.Read() )
+            {
+                string mnemonic = reader.GetString( 0 ) + ".xml";
+                // Any files found on the database are "synchronised" 
+                if ( this.fileMap.ContainsKey( mnemonic ) )
+                {
+                    this.fileMap[mnemonic].status = ClobFile.STATUS.SYNCHRONISED;
+                }
+            }
+            command.Dispose();
+        }
+
         public void OnFileChanged( object _source, FileSystemEventArgs _e )
         {
             if ( File.Exists( _e.FullPath ) )
@@ -60,10 +86,9 @@ namespace Lobster
                 clobFile.lastModified = fileInfo.LastWriteTime;
                 if ( !fileInfo.IsReadOnly )
                 {
-                    clobFile.ClobToDatabase();
+                    clobFile.UpdateDatabase();
                 }
             }
-            Console.WriteLine( "!!!" );
         }
 
         public void OnFileCreated( object _source, FileSystemEventArgs _e )
