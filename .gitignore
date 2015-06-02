@@ -1,0 +1,13 @@
+*.7z
+Lobster/obj/Debug/Lobster.Properties.Resources.resources
+Lobster/obj/Debug/Lobster.csproj.FileListAbsolute.txt
+Lobster/obj/Debug/TemporaryGeneratedFile_036C0B5B-1481-4323-8D20-8F5ADCB23D92.cs
+Lobster/obj/Debug/TemporaryGeneratedFile_5937a670-0e60-4077-877b-f7221da3dda1.cs
+Lobster/obj/Debug/TemporaryGeneratedFile_E7A71F73-0F8D-4B9B-B56E-8E70B10BC5D3.cs
+Lobster/obj/Debug/Lobster.LobsterMain.resources
+Lobster/obj/Release/
+Lobster/bin/Debug/Lobster.exe.config
+Lobster/bin/Debug/Lobster.vshost.exe.config
+Lobster/bin/Debug/Lobster.vshost.exe.manifest
+Lobster/bin/Release/Lobster.exe.config
+Lobster/bin/Release/Lobster.vshost.exe.config
