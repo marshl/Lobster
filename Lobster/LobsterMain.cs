@@ -21,20 +21,20 @@ namespace Lobster
             InitializeComponent();
 
             this.dataGridList = new List<DataGridView>();
-            foreach ( ClobType clobType in this.lobsterModel.clobTypes )
+            foreach ( ClobDirectory clobDirectory in this.lobsterModel.clobDirectories )
             {
-                DataGridView dataGridView = this.CreateClobTab( clobType );
+                DataGridView dataGridView = this.CreateClobTab( clobDirectory );
                 this.dataGridList.Add( dataGridView );
             }
         }
 
-        private DataGridView CreateClobTab( ClobType _clobType )
+        private DataGridView CreateClobTab( ClobDirectory _clobDirectory )
         {
             TabPage clobTab = new TabPage();
-            clobTab.Name = _clobType.directory;
+            clobTab.Name = _clobDirectory.clobType.directory;
             clobTab.Padding = new Padding( 3 );
             clobTab.Size = new Size( 970, 655 );
-            clobTab.Text = _clobType.directory;
+            clobTab.Text = _clobDirectory.clobType.directory;
             clobTab.UseVisualStyleBackColor = true;
 
             this.MainTabControl.Controls.Add( clobTab );
@@ -90,7 +90,7 @@ namespace Lobster
             dataGridView.CellContentClick += new DataGridViewCellEventHandler( this.dataGridView_CellContentClick );
 
 
-            foreach ( KeyValuePair<string, ClobFile> pair in _clobType.fileMap )
+            foreach ( KeyValuePair<string, ClobFile> pair in _clobDirectory.fileMap )
             {
                 ClobFile file = pair.Value;
                 int index = dataGridView.Rows.Add(
@@ -107,7 +107,7 @@ namespace Lobster
                 reclobButton.Enabled = ( file.status != ClobFile.STATUS.LOCAL_ONLY );
             }
             dataGridView.Sort( dataGridView.Columns["FileName"], ListSortDirection.Ascending );
-            _clobType.dataGridView = dataGridView;
+            _clobDirectory.dataGridView = dataGridView;
             return dataGridView;
         }
 
@@ -126,12 +126,12 @@ namespace Lobster
                 return;
             }
 
-            ClobType clobType = null;
+            ClobDirectory clobDirectory = null;
             for ( int i = 0; i < this.dataGridList.Count; ++i )
             {
                 if ( this.dataGridList[i] == senderGrid )
                 {
-                    clobType = this.lobsterModel.clobTypes[i];
+                    clobDirectory = this.lobsterModel.clobDirectories[i];
                     break;
                 }
             }
@@ -140,12 +140,12 @@ namespace Lobster
             {
                 case "Create":
                     {
-                        clobType.fileList[_e.RowIndex].InsertIntoDatabase();
+                        clobDirectory.fileList[_e.RowIndex].InsertIntoDatabase();
                         break;
                     }
                 case "Reclob":
                     {
-                        clobType.fileList[_e.RowIndex].UpdateDatabase();
+                        clobDirectory.fileList[_e.RowIndex].UpdateDatabase();
                         break;
                     }
                 default:

@@ -11,7 +11,7 @@ namespace Lobster
         public DatabaseConfig dbConfig;
         public OracleConnection oracleCon;
 
-        public List<ClobType> clobTypes;
+        public List<ClobDirectory> clobDirectories;
 
         public void LoadDatabaseConfig()
         {
@@ -33,7 +33,7 @@ namespace Lobster
 
         public void LoadClobTypes()
         {
-            this.clobTypes = new List<ClobType>();
+            this.clobDirectories = new List<ClobDirectory>();
             DirectoryInfo clobTypeDir = Directory.CreateDirectory( Program.SETTINGS_DIR + "/" + Program.CLOB_TYPE_DIR );
             foreach ( FileInfo file in clobTypeDir.GetFiles() )
             {
@@ -44,11 +44,13 @@ namespace Lobster
                 XmlReader xmlReader = XmlReader.Create( streamReader );
                 clobType = (ClobType)xmls.Deserialize( xmlReader );
 
-                clobType.parentModel = this;
-                clobType.LoadFiles();
-                clobType.CompareToDatabase();
+                ClobDirectory clobDirectory = new ClobDirectory();
+                clobDirectory.clobType = clobType;
+                clobDirectory.parentModel = this;
+                clobDirectory.LoadFiles();
+                clobDirectory.CompareToDatabase();
 
-                this.clobTypes.Add( clobType );
+                this.clobDirectories.Add( clobDirectory );
             }
         }
     }

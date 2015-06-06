@@ -8,7 +8,7 @@ namespace Lobster
 {
     public class ClobFile
     {
-        public ClobType parentClobType;
+        public ClobDirectory parentClobDirectory;
 
         public string filename;
         
@@ -25,17 +25,17 @@ namespace Lobster
 
         public string GetFullPath()
         {
-            return this.parentClobType.parentModel.dbConfig.codeSource + "/" + this.parentClobType.directory + "/" + this.filename;
+            return this.parentClobDirectory.parentModel.dbConfig.codeSource + "/" + this.parentClobDirectory.clobType.directory + "/" + this.filename;
         }
 
         public void UpdateDatabase()
         {
             string mnemonic = this.filename.Replace( ".xml", "" );
-            OracleConnection con = this.parentClobType.parentModel.oracleCon;
+            OracleConnection con = this.parentClobDirectory.parentModel.oracleCon;
             OracleCommand command = con.CreateCommand();
-            command.CommandText = "UPDATE " + this.parentClobType.schema + "." + this.parentClobType.table
-                + " SET " + this.parentClobType.clobColumn + " = :data" 
-                + " WHERE " + this.parentClobType.mnemonicColumn + " = '" + mnemonic + "'";
+            command.CommandText = "UPDATE " + this.parentClobDirectory.clobType.schema + "." + this.parentClobDirectory.clobType.table
+                + " SET " + this.parentClobDirectory.clobType.clobColumn + " = :data" 
+                + " WHERE " + this.parentClobDirectory.clobType.mnemonicColumn + " = '" + mnemonic + "'";
             string fullPath = this.GetFullPath();
             string contents = File.ReadAllText( this.GetFullPath() );
 
@@ -47,10 +47,10 @@ namespace Lobster
         public void InsertIntoDatabase()
         {
             string mnemonic = this.filename.Replace( ".xml", "" );
-            OracleConnection con = this.parentClobType.parentModel.oracleCon;
+            OracleConnection con = this.parentClobDirectory.parentModel.oracleCon;
             OracleCommand command = con.CreateCommand();
-            command.CommandText = "INSERT INTO " + this.parentClobType.schema + "." + this.parentClobType.table
-                + " ( " + this.parentClobType.mnemonicColumn + ", " + this.parentClobType.clobColumn + " )"
+            command.CommandText = "INSERT INTO " + this.parentClobDirectory.clobType.schema + "." + this.parentClobDirectory.clobType.table
+                + " ( " + this.parentClobDirectory.clobType.mnemonicColumn + ", " + this.parentClobDirectory.clobType.clobColumn + " )"
                 + " VALUES ( '" + mnemonic + "', :data )";
             string fullPath = this.GetFullPath();
             string contents = File.ReadAllText( this.GetFullPath() );
