@@ -66,6 +66,7 @@
       <DependentUpon>LobsterMain.cs</DependentUpon>
     </Compile>
     <Compile Include="LobsterModel.cs" />
+    <Compile Include="MessageLog.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="LobsterMain.resx">

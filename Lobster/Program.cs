@@ -22,18 +22,9 @@ namespace Lobster
         [STAThread]
         static void Main()
         {
-
-            LobsterModel lobsterModel = new LobsterModel();
-
-            lobsterModel.LoadDatabaseConfig();
-            lobsterModel.OpenConnection();
-            lobsterModel.LoadClobTypes();
-
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault( false );
-            Application.Run( new LobsterMain( lobsterModel ) );
-
-            lobsterModel.oracleCon.Dispose();
+            Application.Run( new LobsterMain() );
         }
     }
 }

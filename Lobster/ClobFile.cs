@@ -28,7 +28,7 @@ namespace Lobster
             return this.parentClobDirectory.parentModel.dbConfig.codeSource + "/" + this.parentClobDirectory.clobType.directory + "/" + this.filename;
         }
 
-        public void UpdateDatabase()
+        public bool UpdateDatabase()
         {
             string mnemonic = this.filename.Replace( ".xml", "" );
             OracleConnection con = this.parentClobDirectory.parentModel.oracleCon;
@@ -40,11 +40,20 @@ namespace Lobster
             string contents = File.ReadAllText( this.GetFullPath() );
 
             command.Parameters.Add( "data", OracleDbType.XmlType, contents, ParameterDirection.Input );
-            command.ExecuteNonQuery();
+            try
+            {
+                command.ExecuteNonQuery();
+            }
+            catch ( Exception _e )
+            {
+                MessageLog.Log( "Error updating database: " + _e.Message );
+                return false;
+            }
             command.Dispose();
+            return true;
         }
 
-        public void InsertIntoDatabase()
+        public bool InsertIntoDatabase()
         {
             string mnemonic = this.filename.Replace( ".xml", "" );
             OracleConnection con = this.parentClobDirectory.parentModel.oracleCon;
@@ -56,8 +65,18 @@ namespace Lobster
             string contents = File.ReadAllText( this.GetFullPath() );
 
             command.Parameters.Add( "data", OracleDbType.XmlType, contents, ParameterDirection.Input );
-            command.ExecuteNonQuery();
+
+            try
+            {
+                command.ExecuteNonQuery();
+            }
+            catch ( Exception _e )
+            {
+                MessageLog.Log( "Error creating new clob: " + _e.Message );
+                return false; 
+            }
             command.Dispose();
+            return true;
         }
 
 

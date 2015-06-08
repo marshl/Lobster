@@ -1,4 +1,5 @@
 ﻿using Oracle.DataAccess.Client;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
@@ -22,13 +23,31 @@ namespace Lobster
             this.dbConfig = (DatabaseConfig)xmls.Deserialize( xmlReader );
         }
 
-        public void OpenConnection()
+        public bool OpenConnection()
         {
             this.oracleCon = new OracleConnection();
             this.oracleCon.ConnectionString = "User Id=" + this.dbConfig.username
                 + ";Password=" + this.dbConfig.password
                 + ";Data Source=" + this.dbConfig.dataSource;
-            this.oracleCon.Open();
+            try
+            {
+                this.oracleCon.Open();
+            }
+            catch ( Exception _e )
+            {
+                MessageLog.Log( _e.Message );
+                return false;
+            }
+            MessageLog.Log( "Connection successful" );
+            return true;
+        }
+
+        public void CompareToDatabase()
+        {
+            foreach ( ClobDirectory clobDir in this.clobDirectories )
+            {
+                clobDir.CompareToDatabase();
+            }
         }
 
         public void LoadClobTypes()
@@ -48,7 +67,6 @@ namespace Lobster
                 clobDirectory.clobType = clobType;
                 clobDirectory.parentModel = this;
                 clobDirectory.LoadFiles();
-                clobDirectory.CompareToDatabase();
 
                 this.clobDirectories.Add( clobDirectory );
             }

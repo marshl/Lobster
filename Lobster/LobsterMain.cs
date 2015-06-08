@@ -15,10 +15,24 @@ namespace Lobster
         LobsterModel lobsterModel;
 
         public List<DataGridView> dataGridList;
-        public LobsterMain( LobsterModel _lobsterModel )
+        public LobsterMain()
         {
-            this.lobsterModel = _lobsterModel;
             InitializeComponent();
+
+            MessageLog messageLog = new MessageLog();
+            messageLog.textBox = this.logTextBox;
+
+            this.lobsterModel = new LobsterModel();
+
+            this.lobsterModel.LoadDatabaseConfig();
+            
+            this.lobsterModel.LoadClobTypes();
+
+            if ( this.lobsterModel.OpenConnection() )
+            {
+                this.lobsterModel.CompareToDatabase();
+            }
+
 
             this.dataGridList = new List<DataGridView>();
             foreach ( ClobDirectory clobDirectory in this.lobsterModel.clobDirectories )
