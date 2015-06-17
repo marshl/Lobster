@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ClobType xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <name>BPDs</name>
+  <directory>BusinessProcessDefinitions</directory>
+  <schema>bpmmgr</schema>
+  <table>business_process_definitions</table>
+  <mnemonicColumn>bp_id</mnemonicColumn>
+  <clobColumn>xml_data</clobColumn>
+  <dateColumnName>true</dateColumnName>
+  
+  <hasParentTable>true</hasParentTable>
+  <parentTable>business_processes</parentTable>
+  <parentIDColumn>id</parentIDColumn>
+  <parentMnemonicColumn>short_name</parentMnemonicColumn>
+</ClobType>

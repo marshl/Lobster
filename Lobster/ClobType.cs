@@ -19,7 +19,13 @@ namespace Lobster
         public string table;
         public string mnemonicColumn;
         public string clobColumn;
+        public string dateColumnName; //Optional
 
-        
+        // All optional
+        public bool hasParentTable;
+        public string parentTable;
+        public string parentIDColumn;
+        public string parentMnemonicColumn;
+
     }
 }

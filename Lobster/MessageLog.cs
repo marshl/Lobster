@@ -7,6 +7,7 @@ using System.Windows.Forms;
 
 namespace Lobster
 {
+    [System.Obsolete]
     public class MessageLog
     {
         private static MessageLog instance;
@@ -19,8 +20,9 @@ namespace Lobster
 
         private void InternalLog( string _message )
         {
-            _message = "\r\n" + this.GetDivider() + "\r\n" + System.DateTime.Now + "\r\n" + _message;
-            this.textBox.AppendText( _message );
+            _message = "\r\n" + this.GetDivider() + "\r\n" + DateTime.Now + "\r\n" + _message;
+            //this.textBox.AppendText( _message );
+            Console.WriteLine( _message );
         }
 
         public static void Log( string _message )

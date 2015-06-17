@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+
 namespace Lobster
 {
     public partial class LobsterMain : Form
@@ -15,24 +16,10 @@ namespace Lobster
         LobsterModel lobsterModel;
 
         public List<DataGridView> dataGridList;
-        public LobsterMain()
+        public LobsterMain( LobsterModel _lobsterModel )
         {
+            this.lobsterModel = _lobsterModel;
             InitializeComponent();
-
-            MessageLog messageLog = new MessageLog();
-            messageLog.textBox = this.logTextBox;
-
-            this.lobsterModel = new LobsterModel();
-
-            this.lobsterModel.LoadDatabaseConfig();
-            
-            this.lobsterModel.LoadClobTypes();
-
-            if ( this.lobsterModel.OpenConnection() )
-            {
-                this.lobsterModel.CompareToDatabase();
-            }
-
 
             this.dataGridList = new List<DataGridView>();
             foreach ( ClobDirectory clobDirectory in this.lobsterModel.clobDirectories )

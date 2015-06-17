@@ -51,7 +51,19 @@ namespace Lobster
 
             OracleConnection con = this.parentModel.oracleCon;
             OracleCommand command = con.CreateCommand();
-            command.CommandText = "SELECT " + this.clobType.mnemonicColumn + " FROM " + this.clobType.schema + "." + this.clobType.table;
+
+            if ( this.clobType.hasParentTable )
+            {
+                command.CommandText = "SELECT parent." + this.clobType.parentMnemonicColumn
+                    + " FROM " + this.clobType.schema + "." + this.clobType.parentTable + " parent"
+                    + " JOIN " + this.clobType.schema + "." + this.clobType.table + " child"
+                    + " ON child." + this.clobType.mnemonicColumn + " = parent." + this.clobType.parentIDColumn;
+            }
+            else
+            {
+                command.CommandText = "SELECT " + this.clobType.mnemonicColumn + " FROM " + this.clobType.schema + "." + this.clobType.table;
+            }
+            
             OracleDataReader reader = command.ExecuteReader();
 
             while ( reader.Read() )

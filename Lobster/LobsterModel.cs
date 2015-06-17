@@ -35,10 +35,10 @@ namespace Lobster
             }
             catch ( Exception _e )
             {
-                MessageLog.Log( _e.Message );
+                Console.WriteLine( "Connection error: " + _e.Message );
                 return false;
             }
-            MessageLog.Log( "Connection successful" );
+            Console.WriteLine( "Connection successful" );
             return true;
         }
 

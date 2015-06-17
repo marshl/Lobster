@@ -33,9 +33,23 @@ namespace Lobster
             string mnemonic = this.filename.Replace( ".xml", "" );
             OracleConnection con = this.parentClobDirectory.parentModel.oracleCon;
             OracleCommand command = con.CreateCommand();
-            command.CommandText = "UPDATE " + this.parentClobDirectory.clobType.schema + "." + this.parentClobDirectory.clobType.table
-                + " SET " + this.parentClobDirectory.clobType.clobColumn + " = :data" 
-                + " WHERE " + this.parentClobDirectory.clobType.mnemonicColumn + " = '" + mnemonic + "'";
+
+            if ( this.parentClobDirectory.clobType.hasParentTable )
+            {
+                command.CommandText =
+                    "UPDATE " + this.parentClobDirectory.clobType.schema + "." + this.parentClobDirectory.clobType.table + " child"
+                    + " SET " + this.parentClobDirectory.clobType.clobColumn + " = :data"
+                    + " WHERE " + this.parentClobDirectory.clobType.mnemonicColumn + " = ("
+                        + "SELECT parent." + this.parentClobDirectory.clobType.parentIDColumn
+                        + " FROM " + this.parentClobDirectory.clobType.schema + " parent"
+                        + " WHERE parent." + this.parentClobDirectory.clobType.parentMnemonicColumn + " = " + mnemonic;
+            }
+            else
+            {
+                command.CommandText = "UPDATE " + this.parentClobDirectory.clobType.schema + "." + this.parentClobDirectory.clobType.table
+                    + " SET " + this.parentClobDirectory.clobType.clobColumn + " = :data"
+                    + " WHERE " + this.parentClobDirectory.clobType.mnemonicColumn + " = '" + mnemonic + "'";
+            }
             string fullPath = this.GetFullPath();
             string contents = File.ReadAllText( this.GetFullPath() );
 
@@ -46,7 +60,7 @@ namespace Lobster
             }
             catch ( Exception _e )
             {
-                MessageLog.Log( "Error updating database: " + _e.Message );
+                Console.WriteLine( "Error updating database: " + _e.Message );
                 return false;
             }
             command.Dispose();
@@ -72,7 +86,7 @@ namespace Lobster
             }
             catch ( Exception _e )
             {
-                MessageLog.Log( "Error creating new clob: " + _e.Message );
+                Console.WriteLine( "Error creating new clob: " + _e.Message );
                 return false; 
             }
             command.Dispose();
