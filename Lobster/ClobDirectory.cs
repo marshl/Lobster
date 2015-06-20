@@ -14,41 +14,16 @@ namespace Lobster
         public ClobType clobType;
 
         public LobsterModel parentModel;
-        public List<ClobFile> fileList;
-        public Dictionary<string, ClobFile> fileMap;
+        public Dictionary<string, ClobFile> fileMap = new Dictionary<string, ClobFile>();
         public DataGridView dataGridView;
         public ClobNode rootClobNode;
-
-
-        /*public void LoadFiles()
-        {
-            this.fileList = new List<ClobFile>();
-            this.fileMap = new Dictionary<string, ClobFile>();
-            DirectoryInfo clobTypeDir = Directory.CreateDirectory( this.parentModel.dbConfig.codeSource + "/" + this.clobType.directory );
-            foreach ( FileInfo file in clobTypeDir.GetFiles() )
-            {
-                ClobFile clobFile = new ClobFile();
-                clobFile.filename = file.Name;
-                clobFile.lastModified = file.LastWriteTime;
-                clobFile.parentClobDirectory = this;
-                this.fileMap.Add( file.Name, clobFile );
-                this.fileList.Add( clobFile );
-            }
-
-            FileSystemWatcher fileWatcher = new FileSystemWatcher();
-            fileWatcher.Path = clobTypeDir.FullName;
-            fileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.CreationTime;
-            fileWatcher.Changed += new FileSystemEventHandler( OnFileChanged );
-            fileWatcher.Created += new FileSystemEventHandler( OnFileCreated );
-            fileWatcher.EnableRaisingEvents = true;
-        }*/
 
         public void CompareToDatabase()
         {
             // Assume the file is local only
-            foreach ( ClobFile file in this.fileList )
+            foreach ( KeyValuePair<string, ClobFile> pair in this.fileMap )
             {
-                file.status = ClobFile.STATUS.LOCAL_ONLY;
+                pair.Value.status = ClobFile.STATUS.LOCAL_ONLY;
             }
 
             OracleConnection con = this.parentModel.oracleCon;
@@ -80,13 +55,22 @@ namespace Lobster
             command.Dispose();
         }
 
+        public void CreateFileWatchers()
+        {
+            FileSystemWatcher fileWatcher = new FileSystemWatcher();
+            fileWatcher.Path = this.rootClobNode.dirInfo.FullName;
+            fileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.CreationTime;
+            fileWatcher.Changed += new FileSystemEventHandler( OnFileChanged );
+            fileWatcher.Created += new FileSystemEventHandler( OnFileCreated );
+            fileWatcher.EnableRaisingEvents = true;
+        }
+
         public void OnFileChanged( object _source, FileSystemEventArgs _e )
         {
             if ( File.Exists( _e.FullPath ) )
             {
-                ClobFile clobFile = this.fileMap[_e.Name];
+                ClobFile clobFile = this.fileMap[_e.FullPath];
                 FileInfo fileInfo = new FileInfo( _e.FullPath );
-                //clobFile.lastModified = fileInfo.LastWriteTime;
                 if ( !fileInfo.IsReadOnly )
                 {
                     clobFile.UpdateDatabase();

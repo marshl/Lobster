@@ -14,15 +14,12 @@ namespace Lobster
         public OracleConnection oracleCon;
 
         public List<ClobDirectory> clobDirectories;
-
-        //public ClobNode rootClobNode;
- 
+        
         public LobsterModel()
         {
             this.LoadDatabaseConfig();
             this.OpenConnection();
             this.LoadClobTypes();
-            //this.PopulateTreeView();
         }
 
         private void LoadDatabaseConfig()
@@ -77,18 +74,14 @@ namespace Lobster
                 ClobDirectory clobDirectory = new ClobDirectory();
                 clobDirectory.clobType = clobType;
                 clobDirectory.parentModel = this;
-                //clobDirectory.LoadFiles();
-                //clobDirectory.rootClobNode = new ClobNode( )
                 this.PopulateTreeView( clobDirectory );
-                //this.GetDirectories( clobDirectory );
                 this.clobDirectories.Add( clobDirectory );
+                clobDirectory.CreateFileWatchers();
             }
         }
 
-
         private bool PopulateTreeView( ClobDirectory _clobDirectory )
         {
-            //DirectoryInfo info = new DirectoryInfo( this.dbConfig.codeSource );
             DirectoryInfo info = new DirectoryInfo( this.dbConfig.codeSource + "/" + _clobDirectory.clobType.directory );
             if ( !info.Exists )
             {
@@ -96,39 +89,25 @@ namespace Lobster
                 return false;
             }
 
-            //this.rootClobNode = new ClobNode( info );
             _clobDirectory.rootClobNode = new ClobNode( info );
-            //GetDirectories( info.GetDirectories(), this.rootClobNode, null );
-            GetDirectories( _clobDirectory.rootClobNode );
+            GetDirectories( _clobDirectory.rootClobNode, _clobDirectory );
             return true;
         }
 
-        //private void GetDirectories( DirectoryInfo[] _subDirs, ClobNode _nodeToAddTo, ClobDirectory _clobDirectory )
-        //private void GetDirectories( ClobDirectory _clobDir )
-        private void GetDirectories( ClobNode _clobNode )
-        
+        private void GetDirectories( ClobNode _clobNode, ClobDirectory _clobDirectory )
         {
-            //ClobNode childNode;
             DirectoryInfo[] subDirs = _clobNode.dirInfo.GetDirectories();
-            //DirectoryInfo[] subSubDirs;
             foreach ( DirectoryInfo subDir in subDirs )
             {
                 ClobNode childNode = new ClobNode( subDir );
-                //subSubDirs = subDir.GetDirectories();
-                //if ( subSubDirs.Length != 0 )
-                {
-                    //GetDirectories( subSubDirs, childNode, _clobDirectory );
-                }
-                GetDirectories( childNode );
-                //_nodeToAddTo.subDirs.Add( childNode );
+                GetDirectories( childNode, _clobDirectory);
                 _clobNode.subDirs.Add( childNode );
             }
 
-            //foreach ( FileInfo fileInfo in _nodeToAddTo.dirInfo.GetFiles() )
             foreach ( FileInfo fileInfo in _clobNode.dirInfo.GetFiles() )
             {
-                //ClobFile clobFile = new ClobFile( fileInfo, _nodeToAddTo, _clobDirectory );
-                ClobFile clobFile = new ClobFile( fileInfo, _clobNode );
+                ClobFile clobFile = new ClobFile( fileInfo, _clobNode, _clobDirectory );
+                _clobDirectory.fileMap.Add( fileInfo.FullName, clobFile );
                 _clobNode.clobFiles.Add( clobFile );
             }
         }
