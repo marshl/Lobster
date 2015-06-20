@@ -34,14 +34,6 @@ namespace Lobster
             AllocConsole();
 
             LobsterModel lobsterModel = new LobsterModel();
-            lobsterModel.LoadDatabaseConfig();
-
-            lobsterModel.LoadClobTypes();
-
-            if ( lobsterModel.OpenConnection() )
-            {
-                lobsterModel.CompareToDatabase();
-            }
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault( false );

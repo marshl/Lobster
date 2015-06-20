@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,6 +27,60 @@ namespace Lobster
             {
                 DataGridView dataGridView = this.CreateClobTab( clobDirectory );
                 this.dataGridList.Add( dataGridView );
+            }
+
+            PopulateTreeView();
+        }
+
+        private void PopulateTreeView()
+        {
+            TreeNode rootNode;
+            /*DirectoryInfo info = new DirectoryInfo( @"C:\ICONWS\trunk\CodeSource" );
+            if ( info.Exists )
+            {
+                rootNode = new TreeNode( "CodeSource", 0, 0 );
+                rootNode.Tag = info;
+                GetDirectories( info.GetDirectories(), rootNode );
+                treeView1.Nodes.Add( rootNode );
+            }*/
+            rootNode = new TreeNode( "CodeSource", 0, 0 );
+            //rootNode.Tag = this.lobsterModel.rootClobNode;
+            rootNode.Expand();
+            foreach ( ClobDirectory clobDir in this.lobsterModel.clobDirectories )
+            {
+                TreeNode dirNode = new TreeNode( clobDir.rootClobNode.dirInfo.Name, 0, 0 );
+                dirNode.Tag = clobDir.rootClobNode;
+
+                this.GetDirectories( clobDir.rootClobNode, dirNode );
+
+                rootNode.Nodes.Add( dirNode );
+            }
+
+            //GetDirectories( this.lobsterModel.rootClobNode, rootNode );
+            treeView1.Nodes.Add( rootNode );
+        }
+
+        private void GetDirectories( ClobNode _clobNode, TreeNode _treeNode )
+        //private void GetDirectories( DirectoryInfo[] subDirs, TreeNode nodeToAddTo )
+        {
+            TreeNode aNode;
+            //DirectoryInfo[] subSubDirs;
+            //foreach ( DirectoryInfo subDir in subDirs )
+            foreach ( ClobNode child in _clobNode.subDirs )
+            {
+                //aNode = new TreeNode( subDir.Name, 0, 0 );
+                aNode = new TreeNode( child.dirInfo.Name );
+                //aNode.Tag = subDir;
+                aNode.Tag = child;
+                aNode.ImageKey = "folder";
+                //subSubDirs = subDir.GetDirectories();
+                //if ( subDirs.Length != 0)
+                {
+                //    GetDirectories( subSubDirs, aNode );
+                }
+                GetDirectories( child, aNode );
+                //nodeToAddTo.Nodes.Add( aNode );
+                _treeNode.Nodes.Add( aNode );
             }
         }
 
@@ -91,7 +146,7 @@ namespace Lobster
             dataGridView.CellContentClick += new DataGridViewCellEventHandler( this.dataGridView_CellContentClick );
 
 
-            foreach ( KeyValuePair<string, ClobFile> pair in _clobDirectory.fileMap )
+            /*foreach ( KeyValuePair<string, ClobFile> pair in _clobDirectory.fileMap )
             {
                 ClobFile file = pair.Value;
                 int index = dataGridView.Rows.Add(
@@ -106,8 +161,8 @@ namespace Lobster
 
                 DataGridViewDisableButtonCell reclobButton = (DataGridViewDisableButtonCell)row.Cells["Reclob"];
                 reclobButton.Enabled = ( file.status != ClobFile.STATUS.LOCAL_ONLY );
-            }
-            dataGridView.Sort( dataGridView.Columns["FileName"], ListSortDirection.Ascending );
+            }*/
+            //dataGridView.Sort( dataGridView.Columns["FileName"], ListSortDirection.Ascending );
             _clobDirectory.dataGridView = dataGridView;
             return dataGridView;
         }
@@ -154,6 +209,56 @@ namespace Lobster
                         throw new InvalidEnumArgumentException();
                     }
             }
+        }
+
+        private void treeView1_NodeMouseClick( object sender, TreeNodeMouseClickEventArgs e )
+        {
+            TreeNode newSelected = e.Node;
+            listView1.Items.Clear();
+            ClobNode clobNode = (ClobNode)newSelected.Tag;
+            if ( clobNode == null )
+            {
+                return;
+            }
+            DirectoryInfo nodeDirInfo = clobNode.dirInfo;// (DirectoryInfo)newSelected.Tag;
+            ListViewItem.ListViewSubItem[] subItems;
+            ListViewItem item = null;
+
+            /*foreach ( DirectoryInfo dir in nodeDirInfo.GetDirectories() )
+            {
+                item = new ListViewItem( dir.Name, 0 );
+                subItems = new ListViewItem.ListViewSubItem[]
+                {
+                    new ListViewItem.ListViewSubItem(item,"Directory"),
+                    new ListViewItem.ListViewSubItem( item, dir.LastAccessTime.ToShortDateString())
+                };
+                item.SubItems.AddRange( subItems );
+                listView1.Items.Add( item );
+            }*/
+            /*foreach ( FileInfo file in nodeDirInfo.GetFiles())
+            {
+                item = new ListViewItem( file.Name, 1 );
+                subItems = new ListViewItem.ListViewSubItem[]
+                {
+                    new ListViewItem.ListViewSubItem(item,"File"),
+                    new ListViewItem.ListViewSubItem(item,file.LastAccessTime.ToShortDateString())
+                };
+                item.SubItems.AddRange( subItems );
+                listView1.Items.Add( item );
+
+            }*/
+            foreach ( ClobFile clobFile in clobNode.clobFiles )
+            {
+                item = new ListViewItem( clobFile.fileInfo.Name, 1 );
+                subItems = new ListViewItem.ListViewSubItem[]
+                {
+                    new ListViewItem.ListViewSubItem(item, "File"),
+                    new ListViewItem.ListViewSubItem(item, clobFile.fileInfo.LastAccessTime.ToShortDateString())
+                };
+                item.SubItems.AddRange( subItems );
+                listView1.Items.Add( item );
+            }
+            listView1.AutoResizeColumns( ColumnHeaderAutoResizeStyle.HeaderSize );
         }
     }
 }

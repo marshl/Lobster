@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ClobType xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <name>Fox5 Modules</name>
+  <directory>Fox5Modules</directory>
+  <schema>envmgr</schema>
+  <table>fox_components_fox5</table>
+  <mnemonicColumn>name</mnemonicColumn>
+  <clobColumn>data</clobColumn>
+</ClobType>

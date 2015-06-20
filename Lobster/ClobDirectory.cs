@@ -17,8 +17,10 @@ namespace Lobster
         public List<ClobFile> fileList;
         public Dictionary<string, ClobFile> fileMap;
         public DataGridView dataGridView;
+        public ClobNode rootClobNode;
 
-        public void LoadFiles()
+
+        /*public void LoadFiles()
         {
             this.fileList = new List<ClobFile>();
             this.fileMap = new Dictionary<string, ClobFile>();
@@ -39,7 +41,7 @@ namespace Lobster
             fileWatcher.Changed += new FileSystemEventHandler( OnFileChanged );
             fileWatcher.Created += new FileSystemEventHandler( OnFileCreated );
             fileWatcher.EnableRaisingEvents = true;
-        }
+        }*/
 
         public void CompareToDatabase()
         {
@@ -84,7 +86,7 @@ namespace Lobster
             {
                 ClobFile clobFile = this.fileMap[_e.Name];
                 FileInfo fileInfo = new FileInfo( _e.FullPath );
-                clobFile.lastModified = fileInfo.LastWriteTime;
+                //clobFile.lastModified = fileInfo.LastWriteTime;
                 if ( !fileInfo.IsReadOnly )
                 {
                     clobFile.UpdateDatabase();

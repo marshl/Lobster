@@ -19,7 +19,7 @@ namespace Lobster
         public string table;
         public string mnemonicColumn;
         public string clobColumn;
-        public string dateColumnName; //Optional
+        public string dateColumnName; //Optional TODO: Set to SYSDATE on insert/update
 
         // All optional
         public bool hasParentTable;

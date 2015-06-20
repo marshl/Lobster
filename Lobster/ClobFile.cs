@@ -8,12 +8,25 @@ namespace Lobster
 {
     public class ClobFile
     {
-        public ClobDirectory parentClobDirectory;
+        /*public ClobFile( DirectoryInfo _dirInfo )
+        {
+            this.dirInfo = _dirInfo;
+        }
 
-        public string filename;
+        public DirectoryInfo dirInfo;*/
+        //public string filename;
+
+        public ClobFile( FileInfo _fileInfo, ClobNode _parentClobNode )
+        {
+            this.fileInfo = _fileInfo;
+            this.parentClobNode = _parentClobNode;
+        }
+        public FileInfo fileInfo;
+        public ClobNode parentClobNode;
+
+        public ClobDirectory parentClobDirectory;
         
         public DateTime lastClobbed;
-        public DateTime lastModified;
 
         public STATUS status;
         public enum STATUS
@@ -23,14 +36,10 @@ namespace Lobster
             DELETED,
         }
 
-        public string GetFullPath()
-        {
-            return this.parentClobDirectory.parentModel.dbConfig.codeSource + "/" + this.parentClobDirectory.clobType.directory + "/" + this.filename;
-        }
-
         public bool UpdateDatabase()
         {
-            string mnemonic = this.filename.Replace( ".xml", "" );
+            //string mnemonic = this.filename.Replace( ".xml", "" );
+            string mnemonic = this.fileInfo.Name.Replace( ".xml", "" );
             OracleConnection con = this.parentClobDirectory.parentModel.oracleCon;
             OracleCommand command = con.CreateCommand();
 
@@ -50,8 +59,9 @@ namespace Lobster
                     + " SET " + this.parentClobDirectory.clobType.clobColumn + " = :data"
                     + " WHERE " + this.parentClobDirectory.clobType.mnemonicColumn + " = '" + mnemonic + "'";
             }
-            string fullPath = this.GetFullPath();
-            string contents = File.ReadAllText( this.GetFullPath() );
+            //string fullPath = this.GetFullPath();
+            string fullPath = this.fileInfo.FullName;
+            string contents = File.ReadAllText( fullPath );
 
             command.Parameters.Add( "data", OracleDbType.XmlType, contents, ParameterDirection.Input );
             try
@@ -69,14 +79,15 @@ namespace Lobster
 
         public bool InsertIntoDatabase()
         {
-            string mnemonic = this.filename.Replace( ".xml", "" );
+            //string mnemonic = this.filename.Replace( ".xml", "" );
+            string mnemonic = this.fileInfo.Name.Replace( ".xml", "" );
             OracleConnection con = this.parentClobDirectory.parentModel.oracleCon;
             OracleCommand command = con.CreateCommand();
             command.CommandText = "INSERT INTO " + this.parentClobDirectory.clobType.schema + "." + this.parentClobDirectory.clobType.table
                 + " ( " + this.parentClobDirectory.clobType.mnemonicColumn + ", " + this.parentClobDirectory.clobType.clobColumn + " )"
                 + " VALUES ( '" + mnemonic + "', :data )";
-            string fullPath = this.GetFullPath();
-            string contents = File.ReadAllText( this.GetFullPath() );
+            //string fullPath = this.GetFullPath();
+            string contents = File.ReadAllText( this.fileInfo.FullName );
 
             command.Parameters.Add( "data", OracleDbType.XmlType, contents, ParameterDirection.Input );
 

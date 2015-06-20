@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Serialization;
 
@@ -14,7 +15,17 @@ namespace Lobster
 
         public List<ClobDirectory> clobDirectories;
 
-        public void LoadDatabaseConfig()
+        //public ClobNode rootClobNode;
+ 
+        public LobsterModel()
+        {
+            this.LoadDatabaseConfig();
+            this.OpenConnection();
+            this.LoadClobTypes();
+            //this.PopulateTreeView();
+        }
+
+        private void LoadDatabaseConfig()
         {
             this.dbConfig = new DatabaseConfig();
             XmlSerializer xmls = new XmlSerializer( typeof( DatabaseConfig ) );
@@ -23,7 +34,7 @@ namespace Lobster
             this.dbConfig = (DatabaseConfig)xmls.Deserialize( xmlReader );
         }
 
-        public bool OpenConnection()
+        private bool OpenConnection()
         {
             this.oracleCon = new OracleConnection();
             this.oracleCon.ConnectionString = "User Id=" + this.dbConfig.username
@@ -42,7 +53,7 @@ namespace Lobster
             return true;
         }
 
-        public void CompareToDatabase()
+        private void CompareToDatabase()
         {
             foreach ( ClobDirectory clobDir in this.clobDirectories )
             {
@@ -50,7 +61,7 @@ namespace Lobster
             }
         }
 
-        public void LoadClobTypes()
+        private void LoadClobTypes()
         {
             this.clobDirectories = new List<ClobDirectory>();
             DirectoryInfo clobTypeDir = Directory.CreateDirectory( Program.SETTINGS_DIR + "/" + Program.CLOB_TYPE_DIR );
@@ -66,9 +77,59 @@ namespace Lobster
                 ClobDirectory clobDirectory = new ClobDirectory();
                 clobDirectory.clobType = clobType;
                 clobDirectory.parentModel = this;
-                clobDirectory.LoadFiles();
-
+                //clobDirectory.LoadFiles();
+                //clobDirectory.rootClobNode = new ClobNode( )
+                this.PopulateTreeView( clobDirectory );
+                //this.GetDirectories( clobDirectory );
                 this.clobDirectories.Add( clobDirectory );
+            }
+        }
+
+
+        private bool PopulateTreeView( ClobDirectory _clobDirectory )
+        {
+            //DirectoryInfo info = new DirectoryInfo( this.dbConfig.codeSource );
+            DirectoryInfo info = new DirectoryInfo( this.dbConfig.codeSource + "/" + _clobDirectory.clobType.directory );
+            if ( !info.Exists )
+            {
+                Console.WriteLine( "CodeSource folder \"{0}\" could not be found", this.dbConfig.codeSource );
+                return false;
+            }
+
+            //this.rootClobNode = new ClobNode( info );
+            _clobDirectory.rootClobNode = new ClobNode( info );
+            //GetDirectories( info.GetDirectories(), this.rootClobNode, null );
+            GetDirectories( _clobDirectory.rootClobNode );
+            return true;
+        }
+
+        //private void GetDirectories( DirectoryInfo[] _subDirs, ClobNode _nodeToAddTo, ClobDirectory _clobDirectory )
+        //private void GetDirectories( ClobDirectory _clobDir )
+        private void GetDirectories( ClobNode _clobNode )
+        
+        {
+            //ClobNode childNode;
+            DirectoryInfo[] subDirs = _clobNode.dirInfo.GetDirectories();
+            //DirectoryInfo[] subSubDirs;
+            foreach ( DirectoryInfo subDir in subDirs )
+            {
+                ClobNode childNode = new ClobNode( subDir );
+                //subSubDirs = subDir.GetDirectories();
+                //if ( subSubDirs.Length != 0 )
+                {
+                    //GetDirectories( subSubDirs, childNode, _clobDirectory );
+                }
+                GetDirectories( childNode );
+                //_nodeToAddTo.subDirs.Add( childNode );
+                _clobNode.subDirs.Add( childNode );
+            }
+
+            //foreach ( FileInfo fileInfo in _nodeToAddTo.dirInfo.GetFiles() )
+            foreach ( FileInfo fileInfo in _clobNode.dirInfo.GetFiles() )
+            {
+                //ClobFile clobFile = new ClobFile( fileInfo, _nodeToAddTo, _clobDirectory );
+                ClobFile clobFile = new ClobFile( fileInfo, _clobNode );
+                _clobNode.clobFiles.Add( clobFile );
             }
         }
     }

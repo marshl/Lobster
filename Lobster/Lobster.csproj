@@ -62,6 +62,7 @@
     <Compile Include="ClobType.cs" />
     <Compile Include="DatabaseConfig.cs" />
     <Compile Include="DataGridViewDisableButtonCell.cs" />
+    <Compile Include="ClobNode.cs" />
     <Compile Include="LobsterMain.cs">
       <SubType>Form</SubType>
     </Compile>
