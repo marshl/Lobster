@@ -75,8 +75,9 @@ namespace Lobster
                 clobDirectory.clobType = clobType;
                 clobDirectory.parentModel = this;
                 this.PopulateTreeView( clobDirectory );
-                this.clobDirectories.Add( clobDirectory );
                 clobDirectory.CreateFileWatchers();
+                clobDirectory.CompareToDatabase();
+                this.clobDirectories.Add( clobDirectory );
             }
         }
 
@@ -107,7 +108,8 @@ namespace Lobster
             foreach ( FileInfo fileInfo in _clobNode.dirInfo.GetFiles() )
             {
                 ClobFile clobFile = new ClobFile( fileInfo, _clobNode, _clobDirectory );
-                _clobDirectory.fileMap.Add( fileInfo.FullName, clobFile );
+                _clobDirectory.fullpathClobMap.Add( fileInfo.FullName, clobFile );
+                _clobDirectory.filenameClobMap.Add( fileInfo.Name, clobFile );
                 _clobNode.clobFiles.Add( clobFile );
             }
         }

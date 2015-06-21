@@ -73,13 +73,38 @@ namespace Lobster
                 item = new ListViewItem( clobFile.fileInfo.Name, 1 );
                 subItems = new ListViewItem.ListViewSubItem[]
                 {
-                    new ListViewItem.ListViewSubItem(item, "File"),
-                    new ListViewItem.ListViewSubItem(item, clobFile.fileInfo.LastAccessTime.ToShortDateString())
+                    new ListViewItem.ListViewSubItem(item, clobFile.fileInfo.LastAccessTime.ToShortDateString()),
+                    new ListViewItem.ListViewSubItem(item, clobFile.status.ToString() ),
                 };
+                item.Tag = clobFile;
                 item.SubItems.AddRange( subItems );
                 listView1.Items.Add( item );
             }
             listView1.AutoResizeColumns( ColumnHeaderAutoResizeStyle.HeaderSize );
+        }
+
+        private void listView1_MouseClick( object sender, MouseEventArgs e )
+        {
+            if ( e.Button == MouseButtons.Right )
+            {
+                if ( listView1.FocusedItem.Bounds.Contains( e.Location ) == true )
+                {
+                    contextMenuStrip1.Show( Cursor.Position );
+                    contextMenuStrip1.Tag = listView1.FocusedItem;//.Tag;
+                }
+            }
+        }
+
+        private void insertToolStripMenuItem_Click( object sender, EventArgs e )
+        {
+            ToolStripItem item = (ToolStripItem)sender;
+            //ClobFile clobFile = (ClobFile)item.GetCurrentParent().Tag;
+            ListViewItem listItem = (ListViewItem)item.GetCurrentParent().Tag;
+            ClobFile clobFile = (ClobFile)listItem.Tag;
+            if ( clobFile.InsertIntoDatabase() )
+            {
+                listItem.SubItems[2].Text = clobFile.status.ToString();
+            }
         }
     }
 }

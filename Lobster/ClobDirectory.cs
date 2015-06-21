@@ -14,14 +14,15 @@ namespace Lobster
         public ClobType clobType;
 
         public LobsterModel parentModel;
-        public Dictionary<string, ClobFile> fileMap = new Dictionary<string, ClobFile>();
+        public Dictionary<string, ClobFile> fullpathClobMap = new Dictionary<string, ClobFile>();
+        public Dictionary<string, ClobFile> filenameClobMap = new Dictionary<string, ClobFile>();
         public DataGridView dataGridView;
         public ClobNode rootClobNode;
 
         public void CompareToDatabase()
         {
             // Assume the file is local only
-            foreach ( KeyValuePair<string, ClobFile> pair in this.fileMap )
+            foreach ( KeyValuePair<string, ClobFile> pair in this.fullpathClobMap )
             {
                 pair.Value.status = ClobFile.STATUS.LOCAL_ONLY;
             }
@@ -47,9 +48,9 @@ namespace Lobster
             {
                 string mnemonic = reader.GetString( 0 ) + ".xml";
                 // Any files found on the database are "synchronised" 
-                if ( this.fileMap.ContainsKey( mnemonic ) )
+                if ( this.filenameClobMap.ContainsKey( mnemonic ) )
                 {
-                    this.fileMap[mnemonic].status = ClobFile.STATUS.SYNCHRONISED;
+                    this.filenameClobMap[mnemonic].status = ClobFile.STATUS.SYNCHRONISED;
                 }
             }
             command.Dispose();
@@ -69,9 +70,9 @@ namespace Lobster
         {
             if ( File.Exists( _e.FullPath ) )
             {
-                ClobFile clobFile = this.fileMap[_e.FullPath];
+                ClobFile clobFile = this.fullpathClobMap[_e.FullPath];
                 FileInfo fileInfo = new FileInfo( _e.FullPath );
-                if ( !fileInfo.IsReadOnly )
+                if ( !fileInfo.IsReadOnly && clobFile.status == ClobFile.STATUS.SYNCHRONISED )
                 {
                     clobFile.UpdateDatabase();
                 }

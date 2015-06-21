@@ -21,12 +21,11 @@ namespace Lobster
         
         public DateTime lastClobbed;
 
-        public STATUS status;
+        public STATUS? status;
         public enum STATUS
         {
             SYNCHRONISED,
             LOCAL_ONLY,
-            DELETED,
         }
 
         public bool UpdateDatabase()
@@ -35,21 +34,23 @@ namespace Lobster
             OracleConnection con = this.parentClobDirectory.parentModel.oracleCon;
             OracleCommand command = con.CreateCommand();
 
-            if ( this.parentClobDirectory.clobType.hasParentTable )
+            ClobType ct = this.parentClobDirectory.clobType;
+
+            if ( ct.hasParentTable )
             {
                 command.CommandText =
-                    "UPDATE " + this.parentClobDirectory.clobType.schema + "." + this.parentClobDirectory.clobType.table + " child"
-                    + " SET " + this.parentClobDirectory.clobType.clobColumn + " = :data"
-                    + " WHERE " + this.parentClobDirectory.clobType.mnemonicColumn + " = ("
-                        + "SELECT parent." + this.parentClobDirectory.clobType.parentIDColumn
-                        + " FROM " + this.parentClobDirectory.clobType.schema + " parent"
-                        + " WHERE parent." + this.parentClobDirectory.clobType.parentMnemonicColumn + " = " + mnemonic;
+                    "UPDATE " + ct.schema + "." + ct.table + " child"
+                    + " SET " + ct.clobColumn + " = :data"
+                    + " WHERE " + ct.mnemonicColumn + " = ("
+                        + "SELECT parent." + ct.parentIDColumn
+                        + " FROM " + ct.schema + " parent"
+                        + " WHERE parent." + ct.parentMnemonicColumn + " = " + mnemonic;
             }
             else
             {
-                command.CommandText = "UPDATE " + this.parentClobDirectory.clobType.schema + "." + this.parentClobDirectory.clobType.table
-                    + " SET " + this.parentClobDirectory.clobType.clobColumn + " = :data"
-                    + " WHERE " + this.parentClobDirectory.clobType.mnemonicColumn + " = '" + mnemonic + "'";
+                command.CommandText = "UPDATE " + ct.schema + "." + ct.table
+                    + " SET " + ct.clobColumn + " = :data"
+                    + " WHERE " + ct.mnemonicColumn + " = '" + mnemonic + "'";
             }
             string fullPath = this.fileInfo.FullName;
             string contents = File.ReadAllText( fullPath );
@@ -73,11 +74,45 @@ namespace Lobster
             string mnemonic = this.fileInfo.Name.Replace( ".xml", "" );
             OracleConnection con = this.parentClobDirectory.parentModel.oracleCon;
             OracleCommand command = con.CreateCommand();
-            command.CommandText = "INSERT INTO " + this.parentClobDirectory.clobType.schema + "." + this.parentClobDirectory.clobType.table
-                + " ( " + this.parentClobDirectory.clobType.mnemonicColumn + ", " + this.parentClobDirectory.clobType.clobColumn + " )"
-                + " VALUES ( '" + mnemonic + "', :data )";
-            string contents = File.ReadAllText( this.fileInfo.FullName );
+            OracleTransaction trans = con.BeginTransaction();
+            ClobType ct = this.parentClobDirectory.clobType;
 
+            if ( ct.hasParentTable )
+            {
+                command.CommandText = "INSERT INTO " + ct.schema + "." + ct.parentTable
+                    + " (" + ct.parentIDColumn + ", " + ct.parentMnemonicColumn + " )"
+                    + " VALUES( ( SELECT MAX( " + ct.parentIDColumn + " ) + 1 "
+                    + " FROM " + ct.schema + "." + ct.parentTable + " ), '" + mnemonic + "' )";
+
+                try
+                {
+                    command.ExecuteNonQuery();
+                }
+                catch ( Exception _e )
+                {
+                    trans.Rollback();
+                    Console.WriteLine( "Error creating new clob: " + _e.Message );
+                    return false;
+                }
+                command.Dispose();
+
+                command = con.CreateCommand();
+                command.CommandText = "INSERT INTO " + ct.schema + "." + ct.table
+                    + "( " + ct.mnemonicColumn + ", " + ct.parentIDColumn + ", start_datetime, " + ct.clobColumn + " )"
+                    + "VALUES( ( SELECT MAX( " + ct.parentIDColumn + " ) + 1 FROM " + ct.schema + "." + ct.table + " ), "
+                    + "( SELECT " + ct.parentIDColumn + " FROM " + ct.schema + "." + ct.parentTable
+                        + " WHERE " + ct.parentMnemonicColumn + " = '" + mnemonic + "'),"
+                    + " SYSDATE, :data )";
+            }
+            else
+            {
+                command.CommandText = "INSERT INTO " + ct.schema + "." + ct.table
+                    + " ( " + ct.mnemonicColumn + ", " + ct.clobColumn + " )"
+                    + " VALUES ( '" + mnemonic + "', :data )";
+                
+            }
+
+            string contents = File.ReadAllText( this.fileInfo.FullName );
             command.Parameters.Add( "data", OracleDbType.XmlType, contents, ParameterDirection.Input );
 
             try
@@ -86,13 +121,14 @@ namespace Lobster
             }
             catch ( Exception _e )
             {
+                trans.Rollback();
                 Console.WriteLine( "Error creating new clob: " + _e.Message );
                 return false; 
             }
             command.Dispose();
+            trans.Commit();
+            this.status = STATUS.SYNCHRONISED;
             return true;
         }
-
-
     }
 }
