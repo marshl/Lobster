@@ -37,13 +37,13 @@
             this.listView1 = new System.Windows.Forms.ListView();
             this.nameColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.lastModifiedColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.statusColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.MainTabControl = new System.Windows.Forms.TabControl();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.insertToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.clobToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showInExplorerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.diffWithDatabaseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.statusColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SettingsTab.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -58,7 +58,7 @@
             this.SettingsTab.Controls.Add(this.splitContainer1);
             this.SettingsTab.Location = new System.Drawing.Point(4, 29);
             this.SettingsTab.Name = "SettingsTab";
-            this.SettingsTab.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.SettingsTab.Padding = new System.Windows.Forms.Padding(3);
             this.SettingsTab.Size = new System.Drawing.Size(970, 655);
             this.SettingsTab.TabIndex = 0;
             this.SettingsTab.Text = "Settings";
@@ -128,6 +128,10 @@
             // 
             this.lastModifiedColumn.Text = "Last Modified";
             // 
+            // statusColumn
+            // 
+            this.statusColumn.Text = "Status";
+            // 
             // MainTabControl
             // 
             this.MainTabControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -169,16 +173,14 @@
             this.showInExplorerToolStripMenuItem.Name = "showInExplorerToolStripMenuItem";
             this.showInExplorerToolStripMenuItem.Size = new System.Drawing.Size(257, 30);
             this.showInExplorerToolStripMenuItem.Text = "Show In Explorer";
+            this.showInExplorerToolStripMenuItem.Click += new System.EventHandler(this.showInExplorerToolStripMenuItem_Click);
             // 
             // diffWithDatabaseToolStripMenuItem
             // 
             this.diffWithDatabaseToolStripMenuItem.Name = "diffWithDatabaseToolStripMenuItem";
             this.diffWithDatabaseToolStripMenuItem.Size = new System.Drawing.Size(257, 30);
             this.diffWithDatabaseToolStripMenuItem.Text = "Diff with Database";
-            // 
-            // statusColumn
-            // 
-            this.statusColumn.Text = "Status";
+            this.diffWithDatabaseToolStripMenuItem.Click += new System.EventHandler(this.diffWithDatabaseToolStripMenuItem_Click);
             // 
             // LobsterMain
             // 

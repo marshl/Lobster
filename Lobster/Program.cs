@@ -38,6 +38,11 @@ namespace Lobster
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault( false );
             Application.Run( new LobsterMain( lobsterModel ) );
+
+            foreach ( FileInfo tempFile in lobsterModel.tempFileList )
+            {
+                File.Delete( tempFile.FullName );
+            }
         }
     }
 }

@@ -63,6 +63,11 @@
     <Compile Include="DatabaseConfig.cs" />
     <Compile Include="DataGridViewDisableButtonCell.cs" />
     <Compile Include="ClobNode.cs" />
+    <Compile Include="Images.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Images.resx</DependentUpon>
+    </Compile>
     <Compile Include="LobsterMain.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -73,6 +78,13 @@
     <Compile Include="MessageLog.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TaskbarNotifier.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <EmbeddedResource Include="Images.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Images.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="LobsterMain.resx">
       <DependentUpon>LobsterMain.cs</DependentUpon>
     </EmbeddedResource>
@@ -100,6 +112,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="cartoon-lobster.ico" />
+    <None Include="img\popup_success.bmp" />
+    <None Include="img\popup_failure.bmp" />
+    <None Include="img\popup.bmp" />
+    <None Include="Resources\popup.bmp.bmp" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

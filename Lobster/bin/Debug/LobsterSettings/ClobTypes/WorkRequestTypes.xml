@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ClobType xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <name>Work Request Types</name>
+  <directory>ApplicationMetadata/WorkRequestTypes</directory>
+  <schema>iconmgr</schema>
+  <table>work_request_types</table>
+  <mnemonicColumn>mnem</mnemonicColumn>
+  <clobColumn>xml_data</clobColumn>
+</ClobType>

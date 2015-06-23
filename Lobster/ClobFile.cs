@@ -30,7 +30,7 @@ namespace Lobster
 
         public bool UpdateDatabase()
         {
-            string mnemonic = this.fileInfo.Name.Replace( ".xml", "" );
+            string mnemonic = Path.GetFileNameWithoutExtension( this.fileInfo.Name );
             OracleConnection con = this.parentClobDirectory.parentModel.oracleCon;
             OracleCommand command = con.CreateCommand();
 
@@ -54,8 +54,8 @@ namespace Lobster
             }
             string fullPath = this.fileInfo.FullName;
             string contents = File.ReadAllText( fullPath );
-
-            command.Parameters.Add( "data", OracleDbType.XmlType, contents, ParameterDirection.Input );
+            command.Parameters.Add( "data", ct.clobDataType == "clob" ? OracleDbType.Clob : OracleDbType.XmlType, contents, ParameterDirection.Input );
+           
             try
             {
                 command.ExecuteNonQuery();
@@ -71,7 +71,7 @@ namespace Lobster
 
         public bool InsertIntoDatabase()
         {
-            string mnemonic = this.fileInfo.Name.Replace( ".xml", "" );
+            string mnemonic = Path.GetFileNameWithoutExtension( this.fileInfo.Name );
             OracleConnection con = this.parentClobDirectory.parentModel.oracleCon;
             OracleCommand command = con.CreateCommand();
             OracleTransaction trans = con.BeginTransaction();
@@ -109,11 +109,10 @@ namespace Lobster
                 command.CommandText = "INSERT INTO " + ct.schema + "." + ct.table
                     + " ( " + ct.mnemonicColumn + ", " + ct.clobColumn + " )"
                     + " VALUES ( '" + mnemonic + "', :data )";
-                
             }
 
             string contents = File.ReadAllText( this.fileInfo.FullName );
-            command.Parameters.Add( "data", OracleDbType.XmlType, contents, ParameterDirection.Input );
+            command.Parameters.Add( "data", ct.clobDataType == "clob" ? OracleDbType.Clob : OracleDbType.XmlType, contents, ParameterDirection.Input );
 
             try
             {
@@ -129,6 +128,55 @@ namespace Lobster
             trans.Commit();
             this.status = STATUS.SYNCHRONISED;
             return true;
+        }
+
+        public string GetDatabaseContent()
+        {
+            string mnemonic = Path.GetFileNameWithoutExtension( this.fileInfo.Name );
+            OracleConnection con = this.parentClobDirectory.parentModel.oracleCon;
+            OracleCommand command = con.CreateCommand();
+
+            ClobType ct = this.parentClobDirectory.clobType;
+
+            if ( ct.hasParentTable )
+            {
+                command.CommandText =
+                    "SELECT " + ct.clobColumn + " FROM " + ct.schema + "." + ct.parentTable + " parent"
+                    + " JOIN " + ct.schema + "." + ct.table + " child"
+                    + " ON child." + ct.mnemonicColumn + " = parent." + ct.parentIDColumn
+                    + " WHERE parent." + ct.parentMnemonicColumn + " = '" + mnemonic + "'";
+            }
+            else
+            {
+                command.CommandText =
+                    "SELECT " + ct.clobColumn + " FROM " + ct.schema + "." + ct.table
+                    + " WHERE " + ct.mnemonicColumn + " = '" + mnemonic + "'";
+            }
+            
+            try
+            {
+                OracleDataReader reader = command.ExecuteReader();
+                while ( reader.Read() )
+                {
+                    if ( ct.clobDataType == "clob" )
+                    {
+                        OracleClob clob = reader.GetOracleClob( 0 );
+                        return clob.Value;
+                    }
+                    else
+                    {
+                        OracleXmlType xml = reader.GetOracleXmlType( 0 );
+                        return xml.Value;
+                    }
+                }
+            }
+            catch ( Exception _e )
+            {
+                Console.WriteLine( "Error retrieving data: " + _e.Message );
+                return null;
+            }
+            Console.WriteLine( "No data found" );
+            return null;
         }
     }
 }

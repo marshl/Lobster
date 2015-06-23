@@ -6,4 +6,6 @@
   <table>fox_components_fox5</table>
   <mnemonicColumn>name</mnemonicColumn>
   <clobColumn>data</clobColumn>
+  
+  <clobDataType>clob</clobDataType>
 </ClobType>

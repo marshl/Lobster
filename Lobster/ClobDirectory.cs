@@ -41,8 +41,17 @@ namespace Lobster
             {
                 command.CommandText = "SELECT " + this.clobType.mnemonicColumn + " FROM " + this.clobType.schema + "." + this.clobType.table;
             }
-            
-            OracleDataReader reader = command.ExecuteReader();
+
+            OracleDataReader reader;
+            try
+            {
+                reader = command.ExecuteReader();
+            }
+            catch ( Exception _e )
+            {
+                Console.WriteLine( "Error comparing to database: " + _e.Message );
+                return;
+            }
 
             while ( reader.Read() )
             {
@@ -60,9 +69,11 @@ namespace Lobster
         {
             FileSystemWatcher fileWatcher = new FileSystemWatcher();
             fileWatcher.Path = this.rootClobNode.dirInfo.FullName;
+            fileWatcher.IncludeSubdirectories = true;
             fileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.CreationTime;
             fileWatcher.Changed += new FileSystemEventHandler( OnFileChanged );
             fileWatcher.Created += new FileSystemEventHandler( OnFileCreated );
+            fileWatcher.Deleted += new FileSystemEventHandler( OnFileDeleted );
             fileWatcher.EnableRaisingEvents = true;
         }
 
@@ -80,6 +91,11 @@ namespace Lobster
         }
 
         public void OnFileCreated( object _source, FileSystemEventArgs _e )
+        {
+            Console.WriteLine( "!!!" );
+        }
+
+        private void OnFileDeleted( object sender, FileSystemEventArgs e )
         {
             Console.WriteLine( "!!!" );
         }

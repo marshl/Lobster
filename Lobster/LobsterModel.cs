@@ -14,7 +14,8 @@ namespace Lobster
         public OracleConnection oracleCon;
 
         public List<ClobDirectory> clobDirectories;
-        
+        public List<FileInfo> tempFileList = new List<FileInfo>();
+
         public LobsterModel()
         {
             this.LoadDatabaseConfig();

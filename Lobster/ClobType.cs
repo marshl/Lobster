@@ -21,6 +21,8 @@ namespace Lobster
         public string clobColumn;
         public string dateColumnName; //Optional TODO: Set to SYSDATE on insert/update
 
+        public string clobDataType;
+
         // All optional
         public bool hasParentTable;
         public string parentTable;
