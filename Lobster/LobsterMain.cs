@@ -92,6 +92,7 @@ namespace Lobster
                     new ListViewItem.ListViewSubItem(item, clobFile.status.ToString() ),
                 };
                 item.Tag = clobFile;
+                item.ForeColor = clobFile.status == ClobFile.STATUS.LOCAL_ONLY ? Color.Green : Color.Black;
                 item.SubItems.AddRange( subItems );
                 listView1.Items.Add( item );
             }
@@ -105,7 +106,11 @@ namespace Lobster
                 if ( listView1.FocusedItem.Bounds.Contains( e.Location ) == true )
                 {
                     contextMenuStrip1.Show( Cursor.Position );
+                    ClobFile clobFile = (ClobFile)listView1.FocusedItem.Tag;
                     contextMenuStrip1.Tag = listView1.FocusedItem;
+                    insertToolStripMenuItem.Enabled = clobFile.status == ClobFile.STATUS.LOCAL_ONLY;
+                    clobToolStripMenuItem.Enabled = clobFile.status == ClobFile.STATUS.SYNCHRONISED;
+                    diffWithDatabaseToolStripMenuItem.Enabled = !new List<string>{ ".png",".gif",".bmp"}.Contains( Path.GetExtension( clobFile.fileInfo.Name ) );
                 }
             }
         }
@@ -115,9 +120,20 @@ namespace Lobster
             ToolStripItem item = (ToolStripItem)sender;
             ListViewItem listItem = (ListViewItem)item.GetCurrentParent().Tag;
             ClobFile clobFile = (ClobFile)listItem.Tag;
-            if ( clobFile.InsertIntoDatabase() )
+
+            DatatypePicker typePicker = new DatatypePicker( clobFile.parentClobDirectory.clobType );
+            DialogResult dialogResult = typePicker.ShowDialog();
+            if ( dialogResult == DialogResult.OK )
             {
-                listItem.SubItems[2].Text = clobFile.status.ToString();
+                string chosenType = typePicker.datatypeComboBox.Text;
+                Console.WriteLine( chosenType );
+                if ( this.lobsterModel.InsertDatabaseClob( clobFile, chosenType ) )
+                {
+                    listItem.SubItems[2].Text = clobFile.status.ToString();
+                    this.notifyIcon1.BalloonTipText = "bar";
+                    this.notifyIcon1.BalloonTipTitle = "foo";
+                    this.notifyIcon1.ShowBalloonTip( 3000 );
+                }
             }
         }
 
@@ -143,11 +159,18 @@ namespace Lobster
             ListViewItem listItem = (ListViewItem)item.GetCurrentParent().Tag;
             ClobFile clobFile = (ClobFile)listItem.Tag;
 
-            string databaseContent = clobFile.GetDatabaseContent();
+            string databaseContent = this.lobsterModel.GetDatabaseClobData( clobFile );
+
+            if ( databaseContent == null )
+            {
+                //TODO: Error message
+                return;
+            }
 
             string tempName = Path.GetTempFileName();
             FileInfo fileInfo = new FileInfo( tempName );
             StreamWriter streamWriter = File.AppendText( tempName );
+            //TODO
             streamWriter.Write( databaseContent );
             streamWriter.Close();
             streamWriter.Dispose();
@@ -157,10 +180,37 @@ namespace Lobster
             {
                 Process.Start( "tortoisemerge", "/mine:" + tempName + " /theirs:" + clobFile.fileInfo.FullName );
             }
-            catch (Win32Exception _e )
+            catch ( Win32Exception _e )
             {
                 Console.WriteLine( "An error occurred while diffing the files: " + _e.Message );
             }
+        }
+
+        private void clobToolStripMenuItem_Click( object sender, EventArgs e )
+        {
+            ToolStripItem item = (ToolStripItem)sender;
+            ListViewItem listItem = (ListViewItem)item.GetCurrentParent().Tag;
+            ClobFile clobFile = (ClobFile)listItem.Tag;
+            this.lobsterModel.UpdateDatabaseClob( clobFile );
+
+            this.notifyIcon1.BalloonTipText = "bar";
+            this.notifyIcon1.BalloonTipTitle = "foo";
+            this.notifyIcon1.ShowBalloonTip( 3000 );
+        }
+
+        private void LobsterMain_Resize( object sender, EventArgs e )
+        {
+            if ( this.WindowState == FormWindowState.Minimized )
+            {
+                this.Hide();
+            }
+        }
+
+        private void notifyIcon1_MouseClick( object sender, MouseEventArgs e )
+        {
+            this.Show();
+            this.BringToFront();
+            this.WindowState = FormWindowState.Normal;
         }
     }
 }

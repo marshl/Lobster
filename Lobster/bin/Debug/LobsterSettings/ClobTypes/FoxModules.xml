@@ -8,4 +8,24 @@
   <clobColumn>data</clobColumn>
   
   <clobDataType>clob</clobDataType>
+  
+  <dataTypeColumnName>type</dataTypeColumnName>
+  <dataTypes>
+    <string>module</string>
+    <string>image/gif</string>
+    <string>image/jpg</string>
+    <string>image/png</string>
+    <string>image/x-icon</string>
+    <string>test/html</string>
+    <string>text/css</string>
+    <string>text/javascript</string>
+  </dataTypes>
+  
+  <blobColumnName>bindata</blobColumnName>
+  <blobColumnTypes>
+    <string>image/gif</string>
+    <string>image/jpg</string>
+    <string>image/png</string>
+    <string>image/x-icon</string>
+  </blobColumnTypes>
 </ClobType>

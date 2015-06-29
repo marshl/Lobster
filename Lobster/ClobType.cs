@@ -29,5 +29,10 @@ namespace Lobster
         public string parentIDColumn;
         public string parentMnemonicColumn;
 
+        public string dataTypeColumnName;
+        public List<string> dataTypes;
+
+        public string blobColumnName;
+        public List<string> blobColumnTypes;
     }
 }

@@ -44,6 +44,7 @@
             this.clobToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showInExplorerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.diffWithDatabaseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.SettingsTab.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -110,6 +111,7 @@
             this.lastModifiedColumn,
             this.statusColumn});
             this.listView1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listView1.FullRowSelect = true;
             this.listView1.Location = new System.Drawing.Point(0, 0);
             this.listView1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.listView1.Name = "listView1";
@@ -153,7 +155,7 @@
             this.showInExplorerToolStripMenuItem,
             this.diffWithDatabaseToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(258, 157);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(258, 124);
             // 
             // insertToolStripMenuItem
             // 
@@ -167,6 +169,7 @@
             this.clobToolStripMenuItem.Name = "clobToolStripMenuItem";
             this.clobToolStripMenuItem.Size = new System.Drawing.Size(257, 30);
             this.clobToolStripMenuItem.Text = "Force Clob";
+            this.clobToolStripMenuItem.Click += new System.EventHandler(this.clobToolStripMenuItem_Click);
             // 
             // showInExplorerToolStripMenuItem
             // 
@@ -182,6 +185,13 @@
             this.diffWithDatabaseToolStripMenuItem.Text = "Diff with Database";
             this.diffWithDatabaseToolStripMenuItem.Click += new System.EventHandler(this.diffWithDatabaseToolStripMenuItem_Click);
             // 
+            // notifyIcon1
+            // 
+            this.notifyIcon1.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon1.Icon")));
+            this.notifyIcon1.Text = "Lobster";
+            this.notifyIcon1.Visible = true;
+            this.notifyIcon1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseClick);
+            // 
             // LobsterMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -191,6 +201,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "LobsterMain";
             this.Text = "Lobster";
+            this.Resize += new System.EventHandler(this.LobsterMain_Resize);
             this.SettingsTab.ResumeLayout(false);
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
@@ -218,6 +229,7 @@
         private System.Windows.Forms.ToolStripMenuItem showInExplorerToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem diffWithDatabaseToolStripMenuItem;
         private System.Windows.Forms.ColumnHeader statusColumn;
+        private System.Windows.Forms.NotifyIcon notifyIcon1;
     }
 }
 

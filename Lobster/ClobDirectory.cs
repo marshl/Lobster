@@ -21,25 +21,22 @@ namespace Lobster
 
         public void CompareToDatabase()
         {
-            // Assume the file is local only
-            foreach ( KeyValuePair<string, ClobFile> pair in this.fullpathClobMap )
-            {
-                pair.Value.status = ClobFile.STATUS.LOCAL_ONLY;
-            }
-
-            OracleConnection con = this.parentModel.oracleCon;
+            OracleConnection con = this.parentModel.connection;
             OracleCommand command = con.CreateCommand();
 
             if ( this.clobType.hasParentTable )
             {
                 command.CommandText = "SELECT parent." + this.clobType.parentMnemonicColumn
+                    + ( this.clobType.dataTypeColumnName != null ? ", child." + this.clobType.dataTypeColumnName : null )
                     + " FROM " + this.clobType.schema + "." + this.clobType.parentTable + " parent"
                     + " JOIN " + this.clobType.schema + "." + this.clobType.table + " child"
                     + " ON child." + this.clobType.mnemonicColumn + " = parent." + this.clobType.parentIDColumn;
             }
             else
             {
-                command.CommandText = "SELECT " + this.clobType.mnemonicColumn + " FROM " + this.clobType.schema + "." + this.clobType.table;
+                command.CommandText = "SELECT " + this.clobType.mnemonicColumn
+                    + ( this.clobType.dataTypeColumnName != null ? ", " + this.clobType.dataTypeColumnName : null )
+                    + " FROM " + this.clobType.schema + "." + this.clobType.table;
             }
 
             OracleDataReader reader;
@@ -53,13 +50,29 @@ namespace Lobster
                 return;
             }
 
+            // Assume the file is local only
+            foreach ( KeyValuePair<string, ClobFile> pair in this.fullpathClobMap )
+            {
+                pair.Value.status = ClobFile.STATUS.LOCAL_ONLY;
+            }
+
             while ( reader.Read() )
             {
-                string mnemonic = reader.GetString( 0 ) + ".xml";
-                // Any files found on the database are "synchronised" 
-                if ( this.filenameClobMap.ContainsKey( mnemonic ) )
+                string mnemonic = reader.GetString( 0 );
+
+                string internalMnemonic = null;
+                if ( mnemonic.Contains('/') )
                 {
-                    this.filenameClobMap[mnemonic].status = ClobFile.STATUS.SYNCHRONISED;
+                    internalMnemonic = mnemonic.Substring( mnemonic.IndexOf( '/' ) + 1 );
+                }
+
+                // Any files found on the database are "synchronised" 
+                ClobFile clobFile;
+                if ( this.filenameClobMap.TryGetValue( internalMnemonic ?? mnemonic, out clobFile ) )
+                {
+                    clobFile.status = ClobFile.STATUS.SYNCHRONISED;
+                    clobFile.databaseMnemonic = mnemonic;
+                    clobFile.databaseType = reader.FieldCount > 1 ? reader.GetString( 1 ) : null;
                 }
             }
             command.Dispose();
@@ -85,7 +98,7 @@ namespace Lobster
                 FileInfo fileInfo = new FileInfo( _e.FullPath );
                 if ( !fileInfo.IsReadOnly && clobFile.status == ClobFile.STATUS.SYNCHRONISED )
                 {
-                    clobFile.UpdateDatabase();
+                    this.parentModel.UpdateDatabaseClob( clobFile );
                 }
             }
         }

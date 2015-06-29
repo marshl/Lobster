@@ -63,6 +63,12 @@
     <Compile Include="DatabaseConfig.cs" />
     <Compile Include="DataGridViewDisableButtonCell.cs" />
     <Compile Include="ClobNode.cs" />
+    <Compile Include="DatatypePicker.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DatatypePicker.Designer.cs">
+      <DependentUpon>DatatypePicker.cs</DependentUpon>
+    </Compile>
     <Compile Include="Images.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -81,6 +87,9 @@
     <Compile Include="TaskbarNotifier.cs">
       <SubType>Form</SubType>
     </Compile>
+    <EmbeddedResource Include="DatatypePicker.resx">
+      <DependentUpon>DatatypePicker.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Images.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Images.Designer.cs</LastGenOutput>
