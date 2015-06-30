@@ -13,7 +13,7 @@ namespace Lobster
     public class LobsterModel
     {
         public DatabaseConfig dbConfig;
-        public OracleConnection connection;
+        //public OracleConnection connection;
 
         public List<ClobDirectory> clobDirectories;
         public List<FileInfo> tempFileList = new List<FileInfo>();
@@ -34,23 +34,24 @@ namespace Lobster
             this.dbConfig = (DatabaseConfig)xmls.Deserialize( xmlReader );
         }
 
-        private bool OpenConnection()
+        //TODO: Make private
+        public OracleConnection OpenConnection()
         {
-            this.connection = new OracleConnection();
-            this.connection.ConnectionString = "User Id=" + this.dbConfig.username
+            OracleConnection con = new OracleConnection();
+            con.ConnectionString = "User Id=" + this.dbConfig.username
                 + ";Password=" + this.dbConfig.password
                 + ";Data Source=" + this.dbConfig.dataSource;
             try
             {
-                this.connection.Open();
+                con.Open();
             }
             catch ( Exception _e )
             {
                 Console.WriteLine( "Connection error: " + _e.Message );
-                return false;
+                return null;
             }
             Console.WriteLine( "Connection successful" );
-            return true;
+            return con;
         }
 
         private void CompareToDatabase()
@@ -130,7 +131,8 @@ namespace Lobster
         public bool UpdateDatabaseClob( ClobFile _clobFile )
         {
             //string mnemonic = Path.GetFileNameWithoutExtension( _clobFile.fileInfo.Name );
-            OracleCommand command = this.connection.CreateCommand();
+            OracleConnection con = this.OpenConnection();
+            OracleCommand command = con.CreateCommand();
             ClobType ct = _clobFile.parentClobDirectory.clobType;
             bool useBlobColumn = ct.blobColumnName != null
                 && ct.blobColumnTypes.Contains( _clobFile.databaseType );
@@ -160,15 +162,18 @@ namespace Lobster
                 if ( rowsAffected != 1 )
                 {
                     Console.WriteLine( "No rows were affected in the update." );
+                    con.Close();
                     return false;
                 }
             }
             catch ( Exception _e )
             {
+                con.Close();
                 Console.WriteLine( "Error updating database: " + _e.Message );
                 return false;
             }
             command.Dispose();
+            con.Close();
             return true;
         }
 
@@ -194,8 +199,9 @@ namespace Lobster
         public bool InsertDatabaseClob( ClobFile _clobFile, string _dataType )
         {
             string mnemonic = Path.GetFileNameWithoutExtension( _clobFile.fileInfo.Name );
-            OracleCommand command = this.connection.CreateCommand();
-            OracleTransaction trans = this.connection.BeginTransaction();
+            OracleConnection con = this.OpenConnection();
+            OracleCommand command = con.CreateCommand();
+            OracleTransaction trans = con.BeginTransaction();
             ClobType ct = _clobFile.parentClobDirectory.clobType;
 
             bool useBlobColumn = ct.blobColumnName != null
@@ -221,7 +227,7 @@ namespace Lobster
                 command.Dispose();
 
                 // Child table
-                command = this.connection.CreateCommand();
+                command = con.CreateCommand();
                 command.CommandText = "INSERT INTO " + ct.schema + "." + ct.table
                     + "( " + ct.mnemonicColumn + ", " + ct.parentIDColumn + ", start_datetime, " + ( useBlobColumn ? ct.blobColumnName : ct.clobColumn );
 
@@ -267,18 +273,20 @@ namespace Lobster
                 // Discard the insert amde into the parent table
                 trans.Rollback();
                 Console.WriteLine( "Error creating new clob: " + _e.Message );
+                con.Close();
                 return false;
             }
             command.Dispose();
             trans.Commit();
+            con.Close();
             _clobFile.status = ClobFile.STATUS.SYNCHRONISED;
             return true;
         }
 
         public string GetDatabaseClobData( ClobFile _clobFile )
         {
-            //string mnemonic = Path.GetFileNameWithoutExtension( _clobFile.fileInfo.Name );
-            OracleCommand command = this.connection.CreateCommand();
+            OracleConnection con = this.OpenConnection();
+            OracleCommand command = con.CreateCommand();
 
             ClobType ct = _clobFile.parentClobDirectory.clobType;
 
@@ -317,9 +325,11 @@ namespace Lobster
             catch ( Exception _e )
             {
                 Console.WriteLine( "Error retrieving data: " + _e.Message );
+                con.Close();
                 return null;
             }
             Console.WriteLine( "No data found" );
+            con.Close();
             return null;
         }
     }

@@ -21,7 +21,7 @@ namespace Lobster
 
         public void CompareToDatabase()
         {
-            OracleConnection con = this.parentModel.connection;
+            OracleConnection con = this.parentModel.OpenConnection();
             OracleCommand command = con.CreateCommand();
 
             if ( this.clobType.hasParentTable )
@@ -47,6 +47,7 @@ namespace Lobster
             catch ( Exception _e )
             {
                 Console.WriteLine( "Error comparing to database: " + _e.Message );
+                con.Close();
                 return;
             }
 
@@ -63,7 +64,7 @@ namespace Lobster
                 string internalMnemonic = null;
                 if ( mnemonic.Contains('/') )
                 {
-                    internalMnemonic = mnemonic.Substring( mnemonic.IndexOf( '/' ) + 1 );
+                    internalMnemonic = mnemonic.Substring( mnemonic.LastIndexOf( '/' ) + 1 );
                 }
 
                 // Any files found on the database are "synchronised" 
@@ -74,8 +75,13 @@ namespace Lobster
                     clobFile.databaseMnemonic = mnemonic;
                     clobFile.databaseType = reader.FieldCount > 1 ? reader.GetString( 1 ) : null;
                 }
+                else
+                {
+                    Console.WriteLine( "No file found for " + internalMnemonic +" / " + mnemonic );
+                }
             }
             command.Dispose();
+            con.Close();
         }
 
         public void CreateFileWatchers()
