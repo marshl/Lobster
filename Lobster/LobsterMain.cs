@@ -18,28 +18,19 @@ namespace Lobster
     {
         private LobsterModel lobsterModel;
 
-        TaskbarNotifier taskbarNotifier;
+        // TODO: Die singleton, die!
+        public static LobsterMain instance;
 
         public LobsterMain( LobsterModel _lobsterModel )
         {
+            instance = this;
             this.lobsterModel = _lobsterModel;
             InitializeComponent();
 
-            this.PopulateTreeView();
-
-            taskbarNotifier = new TaskbarNotifier();
-            taskbarNotifier.SetBackgroundBitmap( Images.popup_success, Color.FromArgb( 255, 0, 255 ) );
-            //taskbarNotifier.SetCloseBitmap( Images.popup, Color.FromArgb( 255, 0, 255 ), new Point( 127, 8 ) );
-            taskbarNotifier.TitleRectangle = new Rectangle( 0, 0, 300, 100 );
-            taskbarNotifier.NormalTitleColor = taskbarNotifier.NormalContentColor = Color.Black;
-            taskbarNotifier.ContentRectangle = new Rectangle( 0, 0, 300, 100 );
-            //taskbarNotifier.TitleClick += new EventHandler( TitleClick );
-            //taskbarNotifier.ContentClick += new EventHandler( ContentClick );
-            //taskbarNotifier.CloseClick += new EventHandler( CloseClick );
-
+            this.CreateTreeView();
         }
 
-        private void PopulateTreeView()
+        private void CreateTreeView()
         {
             TreeNode rootNode;
             rootNode = new TreeNode( "CodeSource", 0, 0 );
@@ -48,24 +39,21 @@ namespace Lobster
             {
                 TreeNode dirNode = new TreeNode( clobDir.rootClobNode.dirInfo.Name, 0, 0 );
                 dirNode.Tag = clobDir.rootClobNode;
-
-                this.GetDirectories( clobDir.rootClobNode, dirNode );
-
+                this.PopulateTreeNode_r( clobDir.rootClobNode, dirNode );
                 rootNode.Nodes.Add( dirNode );
             }
-            treeView1.Nodes.Add( rootNode );
+            this.fileTreeView.Nodes.Add( rootNode );
         }
 
-        private void GetDirectories( ClobNode _clobNode, TreeNode _treeNode )
+        private void PopulateTreeNode_r( ClobNode _clobNode, TreeNode _treeNode )
         {
-            TreeNode aNode;
             foreach ( ClobNode child in _clobNode.subDirs )
             {
-                aNode = new TreeNode( child.dirInfo.Name );
+                TreeNode aNode = new TreeNode( child.dirInfo.Name );
                 aNode.Tag = child;
                 aNode.ImageKey = "folder";
                 
-                GetDirectories( child, aNode );
+                PopulateTreeNode_r( child, aNode );
                 _treeNode.Nodes.Add( aNode );
             }
         }
@@ -73,20 +61,19 @@ namespace Lobster
         private void treeView1_NodeMouseClick( object sender, TreeNodeMouseClickEventArgs e )
         {
             TreeNode newSelected = e.Node;
-            listView1.Items.Clear();
+            fileListView.Items.Clear();
             ClobNode clobNode = (ClobNode)newSelected.Tag;
             if ( clobNode == null )
             {
                 return;
             }
             DirectoryInfo nodeDirInfo = clobNode.dirInfo;
-            ListViewItem.ListViewSubItem[] subItems;
-            ListViewItem item = null;
 
-            foreach ( ClobFile clobFile in clobNode.clobFiles )
+            foreach ( KeyValuePair<string, ClobFile> pair in clobNode.clobFileMap )
             {
-                item = new ListViewItem( clobFile.fileInfo.Name, 1 );
-                subItems = new ListViewItem.ListViewSubItem[]
+                ClobFile clobFile = pair.Value;
+                ListViewItem item = new ListViewItem( clobFile.fileInfo.Name, 1 );
+                ListViewItem.ListViewSubItem[] subItems = new ListViewItem.ListViewSubItem[]
                 {
                     new ListViewItem.ListViewSubItem(item, clobFile.fileInfo.LastAccessTime.ToShortDateString()),
                     new ListViewItem.ListViewSubItem(item, clobFile.status.ToString() ),
@@ -94,23 +81,23 @@ namespace Lobster
                 item.Tag = clobFile;
                 item.ForeColor = clobFile.status == ClobFile.STATUS.LOCAL_ONLY ? Color.Green : Color.Black;
                 item.SubItems.AddRange( subItems );
-                listView1.Items.Add( item );
+                this.fileListView.Items.Add( item );
             }
-            listView1.AutoResizeColumns( ColumnHeaderAutoResizeStyle.HeaderSize );
+            this.fileListView.AutoResizeColumns( ColumnHeaderAutoResizeStyle.HeaderSize );
         }
 
         private void listView1_MouseClick( object sender, MouseEventArgs e )
         {
             if ( e.Button == MouseButtons.Right )
             {
-                if ( listView1.FocusedItem.Bounds.Contains( e.Location ) == true )
+                if ( fileListView.FocusedItem.Bounds.Contains( e.Location ) == true )
                 {
                     contextMenuStrip1.Show( Cursor.Position );
-                    ClobFile clobFile = (ClobFile)listView1.FocusedItem.Tag;
-                    contextMenuStrip1.Tag = listView1.FocusedItem;
+                    ClobFile clobFile = (ClobFile)fileListView.FocusedItem.Tag;
+                    contextMenuStrip1.Tag = fileListView.FocusedItem;
                     insertToolStripMenuItem.Enabled = clobFile.status == ClobFile.STATUS.LOCAL_ONLY;
                     clobToolStripMenuItem.Enabled = clobFile.status == ClobFile.STATUS.SYNCHRONISED;
-                    diffWithDatabaseToolStripMenuItem.Enabled = !new List<string>{ ".png",".gif",".bmp"}.Contains( Path.GetExtension( clobFile.fileInfo.Name ) );
+                    diffWithDatabaseToolStripMenuItem.Enabled = !new List<string>{ ".png",".gif",".bmp" }.Contains( Path.GetExtension( clobFile.fileInfo.Name ) );
                 }
             }
         }
@@ -120,21 +107,29 @@ namespace Lobster
             ToolStripItem item = (ToolStripItem)sender;
             ListViewItem listItem = (ListViewItem)item.GetCurrentParent().Tag;
             ClobFile clobFile = (ClobFile)listItem.Tag;
+            bool result;
 
-            DatatypePicker typePicker = new DatatypePicker( clobFile.parentClobDirectory.clobType );
-            DialogResult dialogResult = typePicker.ShowDialog();
-            if ( dialogResult == DialogResult.OK )
+            if ( clobFile.parentClobDirectory.clobType.dataTypeColumnName != null )
             {
-                string chosenType = typePicker.datatypeComboBox.Text;
-                Console.WriteLine( chosenType );
-                if ( this.lobsterModel.InsertDatabaseClob( clobFile, chosenType ) )
+                DatatypePicker typePicker = new DatatypePicker( clobFile.parentClobDirectory.clobType );
+                DialogResult dialogResult = typePicker.ShowDialog();
+                if ( dialogResult != DialogResult.OK )
                 {
-                    listItem.SubItems[2].Text = clobFile.status.ToString();
-                    this.notifyIcon1.BalloonTipText = "bar";
-                    this.notifyIcon1.BalloonTipTitle = "foo";
-                    this.notifyIcon1.ShowBalloonTip( 3000 );
+                    return;
                 }
+                string chosenType = typePicker.datatypeComboBox.Text;
+                result = this.lobsterModel.InsertDatabaseClob( clobFile, chosenType );
             }
+            else
+            {
+                result = this.lobsterModel.InsertDatabaseClob( clobFile, null );
+            }
+
+            if ( result )
+            {
+                listItem.SubItems[2].Text = clobFile.status.ToString();
+            }
+            this.OnFileInsertComplete( clobFile, result );
         }
 
         private void showInExplorerToolStripMenuItem_Click( object sender, EventArgs e )
@@ -147,14 +142,6 @@ namespace Lobster
 
         private void diffWithDatabaseToolStripMenuItem_Click( object sender, EventArgs e )
         {
-            /*taskbarNotifier.CloseClickable = true;
-            taskbarNotifier.TitleClickable = true;
-            taskbarNotifier.ContentClickable = true;
-            taskbarNotifier.EnableSelectionRectangle = true;
-            taskbarNotifier.KeepVisibleOnMousOver = true;
-            taskbarNotifier.ReShowOnMouseOver = true;*/
-
-            //taskbarNotifier.Show( "foo", "bar", 125, 1500, 125 );
             ToolStripItem item = (ToolStripItem)sender;
             ListViewItem listItem = (ListViewItem)item.GetCurrentParent().Tag;
             ClobFile clobFile = (ClobFile)listItem.Tag;
@@ -191,11 +178,8 @@ namespace Lobster
             ToolStripItem item = (ToolStripItem)sender;
             ListViewItem listItem = (ListViewItem)item.GetCurrentParent().Tag;
             ClobFile clobFile = (ClobFile)listItem.Tag;
-            this.lobsterModel.UpdateDatabaseClob( clobFile );
-
-            this.notifyIcon1.BalloonTipText = "bar";
-            this.notifyIcon1.BalloonTipTitle = "foo";
-            this.notifyIcon1.ShowBalloonTip( 3000 );
+            bool result = this.lobsterModel.UpdateDatabaseClob( clobFile );
+            this.OnFileUpdateComplete( clobFile, result );
         }
 
         private void LobsterMain_Resize( object sender, EventArgs e )
@@ -211,6 +195,22 @@ namespace Lobster
             this.Show();
             this.BringToFront();
             this.WindowState = FormWindowState.Normal;
+        }
+
+        public void OnFileInsertComplete( ClobFile _clobFile, bool _result )
+        {
+            this.notifyIcon1.ShowBalloonTip( Program.BALLOON_TOOLTIP_DURATION,
+                _result ? "File Inserted" : "File Insert Failed",
+                _clobFile.fileInfo.Name,
+                _result ? ToolTipIcon.Info : ToolTipIcon.Error );
+        }
+
+        public void OnFileUpdateComplete( ClobFile _clobFile, bool _result )
+        {
+            this.notifyIcon1.ShowBalloonTip( Program.BALLOON_TOOLTIP_DURATION,
+                _result ? "Database Updated" : "Database Update Failed",
+                _clobFile.fileInfo.Name,
+                _result ? ToolTipIcon.Info : ToolTipIcon.Error );
         }
     }
 }

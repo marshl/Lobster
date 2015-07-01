@@ -17,6 +17,8 @@ namespace Lobster
         public static string DB_CONFIG_FILE = "DatabaseConfig.xml";
         public static string CLOB_TYPE_DIR = "ClobTypes";
 
+        public static int BALLOON_TOOLTIP_DURATION = 3000;
+
         [DllImport( "kernel32.dll" )]
         static extern bool AttachConsole( uint dwProcessId );
 

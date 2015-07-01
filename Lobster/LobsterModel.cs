@@ -1,6 +1,8 @@
 ﻿using Oracle.DataAccess.Client;
 using Oracle.DataAccess.Types;
 using System;
+using System.Text;
+using System.Linq;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -13,15 +15,12 @@ namespace Lobster
     public class LobsterModel
     {
         public DatabaseConfig dbConfig;
-        //public OracleConnection connection;
-
         public List<ClobDirectory> clobDirectories;
         public List<FileInfo> tempFileList = new List<FileInfo>();
 
         public LobsterModel()
         {
             this.LoadDatabaseConfig();
-            this.OpenConnection();
             this.LoadClobTypes();
         }
 
@@ -34,8 +33,7 @@ namespace Lobster
             this.dbConfig = (DatabaseConfig)xmls.Deserialize( xmlReader );
         }
 
-        //TODO: Make private
-        public OracleConnection OpenConnection()
+        private OracleConnection OpenConnection()
         {
             OracleConnection con = new OracleConnection();
             con.ConnectionString = "User Id=" + this.dbConfig.username
@@ -54,14 +52,6 @@ namespace Lobster
             return con;
         }
 
-        private void CompareToDatabase()
-        {
-            foreach ( ClobDirectory clobDir in this.clobDirectories )
-            {
-                clobDir.CompareToDatabase();
-            }
-        }
-
         private void LoadClobTypes()
         {
             this.clobDirectories = new List<ClobDirectory>();
@@ -76,13 +66,12 @@ namespace Lobster
                 clobType = (ClobType)xmls.Deserialize( xmlReader );
                 streamReader.Close();
 
-                ClobDirectory clobDirectory = new ClobDirectory();
-                clobDirectory.clobType = clobType;
-                clobDirectory.parentModel = this;
-                this.PopulateTreeView( clobDirectory );
-                clobDirectory.CreateFileWatchers();
-                clobDirectory.CompareToDatabase();
-                this.clobDirectories.Add( clobDirectory );
+                ClobDirectory clobDir = new ClobDirectory();
+                clobDir.clobType = clobType;
+                clobDir.parentModel = this;
+                this.PopulateTreeView( clobDir );
+                this.CompareDirectoryToDatabase( clobDir );
+                this.clobDirectories.Add( clobDir );
             }
         }
 
@@ -95,7 +84,7 @@ namespace Lobster
                 return false;
             }
 
-            _clobDirectory.rootClobNode = new ClobNode( info );
+            _clobDirectory.rootClobNode = new ClobNode( info, this );
             GetDirectories( _clobDirectory.rootClobNode, _clobDirectory );
             return true;
         }
@@ -105,7 +94,7 @@ namespace Lobster
             DirectoryInfo[] subDirs = _clobNode.dirInfo.GetDirectories();
             foreach ( DirectoryInfo subDir in subDirs )
             {
-                ClobNode childNode = new ClobNode( subDir );
+                ClobNode childNode = new ClobNode( subDir, this );
                 GetDirectories( childNode, _clobDirectory);
                 _clobNode.subDirs.Add( childNode );
             }
@@ -117,14 +106,13 @@ namespace Lobster
                 string key = Path.GetFileNameWithoutExtension( fileInfo.Name );
                 try
                 {
-                    _clobDirectory.filenameClobMap.Add( key, clobFile );
+                    _clobNode.clobFileMap.Add( key, clobFile );
                 }
                 catch ( Exception _e )
                 {
                     Console.WriteLine( "A file with the name '" + key + "' already exists" + _e.Message );
                     //TODO: Something clever here
                 }
-                _clobNode.clobFiles.Add( clobFile );
             }
         }
 
@@ -222,6 +210,7 @@ namespace Lobster
                 catch ( Exception _e )
                 {
                     Console.WriteLine( "Error creating new clob: " + _e.Message );
+                    con.Close();
                     return false;
                 }
                 command.Dispose();
@@ -331,6 +320,72 @@ namespace Lobster
             Console.WriteLine( "No data found" );
             con.Close();
             return null;
+        }
+
+        public void CompareDirectoryToDatabase( ClobDirectory _clobDir )
+        {
+            OracleConnection con = this.OpenConnection();
+            OracleCommand command = con.CreateCommand();
+
+            ClobType ct = _clobDir.clobType;
+            if ( ct.hasParentTable )
+            {
+                command.CommandText = "SELECT parent." + ct.parentMnemonicColumn
+                    + ( ct.dataTypeColumnName != null ? ", child." + ct.dataTypeColumnName : null )
+                    + " FROM " + ct.schema + "." + ct.parentTable + " parent"
+                    + " JOIN " + ct.schema + "." + ct.table + " child"
+                    + " ON child." + ct.mnemonicColumn + " = parent." + ct.parentIDColumn;
+            }
+            else
+            {
+                command.CommandText = "SELECT " + ct.mnemonicColumn
+                    + ( ct.dataTypeColumnName != null ? ", " + ct.dataTypeColumnName : null )
+                    + " FROM " + ct.schema + "." + ct.table;
+            }
+
+            OracleDataReader reader;
+            try
+            {
+                reader = command.ExecuteReader();
+            }
+            catch ( Exception _e )
+            {
+                Console.WriteLine( "Error comparing to database: " + _e.Message );
+                con.Close();
+                return;
+            }
+
+            // Assume the file is local only
+            foreach ( KeyValuePair<string, ClobFile> pair in _clobDir.fullpathClobMap )
+            {
+                pair.Value.status = ClobFile.STATUS.LOCAL_ONLY;
+            }
+
+            while ( reader.Read() )
+            {
+                string mnemonic = reader.GetString( 0 );
+
+                string internalMnemonic = null;
+                if ( mnemonic.Contains( '/' ) )
+                {
+                    internalMnemonic = mnemonic.Substring( mnemonic.LastIndexOf( '/' ) + 1 );
+                }
+
+                // Any files found on the database are "synchronised" 
+                ClobFile clobFile = _clobDir.rootClobNode.FindFileWithName( internalMnemonic ?? mnemonic );
+                if ( clobFile != null )
+                {
+                    clobFile.status = ClobFile.STATUS.SYNCHRONISED;
+                    clobFile.databaseMnemonic = mnemonic;
+                    clobFile.databaseType = reader.FieldCount > 1 ? reader.GetString( 1 ) : null;
+                }
+                else
+                {
+                    Console.WriteLine( "No file found for " + internalMnemonic + " / " + mnemonic );
+                }
+            }
+            command.Dispose();
+            con.Close();
         }
     }
 }
