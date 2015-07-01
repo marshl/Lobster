@@ -63,12 +63,12 @@ namespace Lobster
             }
 
             ClobFile clobFile;
-            if ( this.clobFileMap.TryGetValue( Path.GetFileNameWithoutExtension( _e.Name ), out clobFile ) )
+            if ( this.clobFileMap.TryGetValue( _e.Name, out clobFile ) )
             { 
                 FileInfo fileInfo = new FileInfo( _e.FullPath );
                 if ( !fileInfo.IsReadOnly && clobFile.status == ClobFile.STATUS.SYNCHRONISED )
                 {
-                    bool result = this.model.UpdateDatabaseClob( clobFile );
+                    bool result = this.model.SendUpdateClobMessage( clobFile );
                     
                     LobsterMain.instance.OnFileUpdateComplete( clobFile, result );
                 }

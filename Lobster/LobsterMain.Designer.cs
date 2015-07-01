@@ -202,6 +202,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "LobsterMain";
             this.Text = "Lobster";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.LobsterMain_FormClosed);
             this.Resize += new System.EventHandler(this.LobsterMain_Resize);
             this.treeViewTab.ResumeLayout(false);
             this.splitContainer1.Panel1.ResumeLayout(false);

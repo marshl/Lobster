@@ -21,12 +21,11 @@ namespace Lobster
         // TODO: Die singleton, die!
         public static LobsterMain instance;
 
-        public LobsterMain( LobsterModel _lobsterModel )
+        public LobsterMain()
         {
             instance = this;
-            this.lobsterModel = _lobsterModel;
-            InitializeComponent();
-
+            this.InitializeComponent();
+            this.lobsterModel = new LobsterModel();
             this.CreateTreeView();
         }
 
@@ -118,11 +117,11 @@ namespace Lobster
                     return;
                 }
                 string chosenType = typePicker.datatypeComboBox.Text;
-                result = this.lobsterModel.InsertDatabaseClob( clobFile, chosenType );
+                result = this.lobsterModel.SendInsertClobMessage( clobFile, chosenType );
             }
             else
             {
-                result = this.lobsterModel.InsertDatabaseClob( clobFile, null );
+                result = this.lobsterModel.SendInsertClobMessage( clobFile, null );
             }
 
             if ( result )
@@ -146,11 +145,11 @@ namespace Lobster
             ListViewItem listItem = (ListViewItem)item.GetCurrentParent().Tag;
             ClobFile clobFile = (ClobFile)listItem.Tag;
 
-            string databaseContent = this.lobsterModel.GetDatabaseClobData( clobFile );
+            string databaseContent = this.lobsterModel.SendGetClobDataMessage( clobFile );
 
             if ( databaseContent == null )
             {
-                //TODO: Error message
+                this.OnErrorMessage( "Diff with Database", "An error ocurred when fetching the file data." );
                 return;
             }
 
@@ -162,15 +161,10 @@ namespace Lobster
             streamWriter.Close();
             streamWriter.Dispose();
 
+            MessageLog.Log( "Temp file \"" + fileInfo.FullName + "\" created" );
             this.lobsterModel.tempFileList.Add( fileInfo );
-            try
-            {
-                Process.Start( "tortoisemerge", "/mine:" + tempName + " /theirs:" + clobFile.fileInfo.FullName );
-            }
-            catch ( Win32Exception _e )
-            {
-                Console.WriteLine( "An error occurred while diffing the files: " + _e.Message );
-            }
+
+            Process.Start( "tortoisemerge", "/mine:" + tempName + " /theirs:" + clobFile.fileInfo.FullName );
         }
 
         private void clobToolStripMenuItem_Click( object sender, EventArgs e )
@@ -178,7 +172,7 @@ namespace Lobster
             ToolStripItem item = (ToolStripItem)sender;
             ListViewItem listItem = (ListViewItem)item.GetCurrentParent().Tag;
             ClobFile clobFile = (ClobFile)listItem.Tag;
-            bool result = this.lobsterModel.UpdateDatabaseClob( clobFile );
+            bool result = this.lobsterModel.SendUpdateClobMessage( clobFile );
             this.OnFileUpdateComplete( clobFile, result );
         }
 
@@ -211,6 +205,19 @@ namespace Lobster
                 _result ? "Database Updated" : "Database Update Failed",
                 _clobFile.fileInfo.Name,
                 _result ? ToolTipIcon.Info : ToolTipIcon.Error );
+        }
+
+        public void OnErrorMessage( string _caption, string _text )
+        {
+            DialogResult result = MessageBox.Show( _text, _caption, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1 );
+        }
+
+        private void LobsterMain_FormClosed( object sender, FormClosedEventArgs e )
+        {
+            foreach ( FileInfo tempFile in this.lobsterModel.tempFileList )
+            {
+                File.Delete( tempFile.FullName );
+            }
         }
     }
 }

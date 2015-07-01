@@ -16,8 +16,9 @@ namespace Lobster
         public static string SETTINGS_DIR = "LobsterSettings";
         public static string DB_CONFIG_FILE = "DatabaseConfig.xml";
         public static string CLOB_TYPE_DIR = "ClobTypes";
+        public static string LOG_FILE = SETTINGS_DIR + "\\Lobster.log";
 
-        public static int BALLOON_TOOLTIP_DURATION = 3000;
+        public static int BALLOON_TOOLTIP_DURATION = 2000;
 
         [DllImport( "kernel32.dll" )]
         static extern bool AttachConsole( uint dwProcessId );
@@ -32,19 +33,13 @@ namespace Lobster
         [STAThread]
         static void Main()
         {
-            AttachConsole( 0x0ffffffff );
-            AllocConsole();
-
-            LobsterModel lobsterModel = new LobsterModel();
+            MessageLog log = new MessageLog();
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault( false );
-            Application.Run( new LobsterMain( lobsterModel ) );
+            Application.Run( new LobsterMain() );
 
-            foreach ( FileInfo tempFile in lobsterModel.tempFileList )
-            {
-                File.Delete( tempFile.FullName );
-            }
+            log.Close();
         }
     }
 }
