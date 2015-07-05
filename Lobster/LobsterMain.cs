@@ -66,9 +66,15 @@ namespace Lobster
             {
                 return;
             }
-            DirectoryInfo nodeDirInfo = clobNode.dirInfo;
 
-            foreach ( KeyValuePair<string, ClobFile> pair in clobNode.clobFileMap )
+            this.PopulateListView( clobNode );
+        }
+
+        private void PopulateListView( ClobNode _clobNode )
+        {
+            DirectoryInfo nodeDirInfo = _clobNode.dirInfo;
+
+            foreach ( KeyValuePair<string, ClobFile> pair in _clobNode.clobFileMap )
             {
                 ClobFile clobFile = pair.Value;
                 ListViewItem item = new ListViewItem( clobFile.fileInfo.Name, 1 );
@@ -218,6 +224,12 @@ namespace Lobster
             {
                 File.Delete( tempFile.FullName );
             }
+        }
+
+        public void OnDirectoryStructureChanged()
+        {
+            //TODO: Thread problems here...
+            //this.PopulateListView( (ClobNode)this.fileTreeView.SelectedNode.Tag );
         }
     }
 }

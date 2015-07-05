@@ -1,4 +1,6 @@
-﻿namespace Lobster
+﻿using System;
+
+namespace Lobster
 {
     partial class LobsterMain
     {

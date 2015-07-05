@@ -48,7 +48,7 @@ namespace Lobster
             FileSystemWatcher fileWatcher = new FileSystemWatcher();
             fileWatcher.Path = this.dirInfo.FullName;
             //fileWatcher.IncludeSubdirectories = true;
-            fileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.CreationTime;
+            fileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.CreationTime;// | NotifyFilters.Attributes;
             fileWatcher.Changed += new FileSystemEventHandler( OnFileChanged );
             fileWatcher.Created += new FileSystemEventHandler( OnFileCreated );
             fileWatcher.Deleted += new FileSystemEventHandler( OnFileDeleted );
@@ -80,9 +80,13 @@ namespace Lobster
             Console.WriteLine( "!!!" );
         }
 
-        private void OnFileDeleted( object sender, FileSystemEventArgs e )
+        private void OnFileDeleted( object _sender, FileSystemEventArgs _e )
         {
-            Console.WriteLine( "!!!" );
+            if ( this.clobFileMap.ContainsKey( _e.Name ) )
+            {
+                this.clobFileMap.Remove( _e.Name );
+                LobsterMain.instance.OnDirectoryStructureChanged();
+            }
         }
     }
 }

@@ -1,12 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Xml.Serialization;
-using Oracle.DataAccess.Client;
-using System.IO;
-using System.Xml;
 using System.Runtime.InteropServices;
 
 namespace Lobster
@@ -16,7 +9,7 @@ namespace Lobster
         public static string SETTINGS_DIR = "LobsterSettings";
         public static string DB_CONFIG_FILE = "DatabaseConfig.xml";
         public static string CLOB_TYPE_DIR = "ClobTypes";
-        public static string LOG_FILE = SETTINGS_DIR + "\\Lobster.log";
+        public static string LOG_FILE = "lobster.log";
 
         public static int BALLOON_TOOLTIP_DURATION = 2000;
 
@@ -35,11 +28,20 @@ namespace Lobster
         {
             MessageLog log = new MessageLog();
 
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault( false );
-            Application.Run( new LobsterMain() );
-
-            log.Close();
+            try
+            {
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault( false );
+                Application.Run( new LobsterMain() );
+            }
+            catch ( Exception _e )
+            {
+                MessageLog.Log( _e.ToString() );
+            }
+            finally
+            {
+                log.Close();
+            }
         }
     }
 }

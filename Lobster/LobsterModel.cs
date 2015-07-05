@@ -40,6 +40,7 @@ namespace Lobster
             con.ConnectionString = "User Id=" + this.dbConfig.username
                 + ";Password=" + this.dbConfig.password
                 + ";Data Source=" + this.dbConfig.dataSource;
+                //+ ";Pooling=false";
             try
             {
                 con.Open();
@@ -66,7 +67,7 @@ namespace Lobster
             {
                 this.CompareDirectoryToDatabase( clobDir, con );
             }
-            con.Close();
+            con.Dispose();
         }
 
         private void LoadClobTypes()
@@ -99,7 +100,7 @@ namespace Lobster
                 return false;
             }
             bool result = this.UpdateDatabaseClob( _clobFile, con );
-            con.Close();
+            con.Dispose();
             return result;
         }
 
@@ -152,7 +153,7 @@ namespace Lobster
                 return false;
             }
             bool result = this.InsertDatabaseClob( _clobFile, _chosenType, con );
-            con.Close();
+            con.Dispose();
             return result;
         }
 
@@ -203,6 +204,7 @@ namespace Lobster
             }
             trans.Commit();
             command.Dispose();
+            MessageLog.Log( "Clob file update successful: " + _clobFile.fileInfo.Name );
             return true;
         }
 
@@ -214,7 +216,7 @@ namespace Lobster
                 return null;
             }
             string result = this.GetDatabaseClobData( _clobFile, con );
-            con.Close();
+            con.Dispose();
             return result;
         }
 
@@ -322,6 +324,7 @@ namespace Lobster
             command.Dispose();
             trans.Commit();
             _clobFile.status = ClobFile.STATUS.SYNCHRONISED;
+            MessageLog.Log( "Clob file creation successful: " + _clobFile.fileInfo.Name );
             return true;
         }
 
