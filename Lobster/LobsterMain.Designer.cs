@@ -33,7 +33,7 @@ namespace Lobster
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LobsterMain));
             this.treeViewTab = new System.Windows.Forms.TabPage();
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.treeViewSplitContainer = new System.Windows.Forms.SplitContainer();
             this.fileTreeView = new System.Windows.Forms.TreeView();
             this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.fileListView = new System.Windows.Forms.ListView();
@@ -41,6 +41,11 @@ namespace Lobster
             this.lastModifiedColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.statusColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.MainTabControl = new System.Windows.Forms.TabControl();
+            this.workingFileTab = new System.Windows.Forms.TabPage();
+            this.workingFileList = new System.Windows.Forms.ListView();
+            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.insertToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.clobToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -48,17 +53,18 @@ namespace Lobster
             this.diffWithDatabaseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.treeViewTab.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
-            this.splitContainer1.Panel1.SuspendLayout();
-            this.splitContainer1.Panel2.SuspendLayout();
-            this.splitContainer1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.treeViewSplitContainer)).BeginInit();
+            this.treeViewSplitContainer.Panel1.SuspendLayout();
+            this.treeViewSplitContainer.Panel2.SuspendLayout();
+            this.treeViewSplitContainer.SuspendLayout();
             this.MainTabControl.SuspendLayout();
+            this.workingFileTab.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // treeViewTab
             // 
-            this.treeViewTab.Controls.Add(this.splitContainer1);
+            this.treeViewTab.Controls.Add(this.treeViewSplitContainer);
             this.treeViewTab.Location = new System.Drawing.Point(4, 29);
             this.treeViewTab.Name = "treeViewTab";
             this.treeViewTab.Padding = new System.Windows.Forms.Padding(3);
@@ -67,24 +73,24 @@ namespace Lobster
             this.treeViewTab.Text = "Tree View";
             this.treeViewTab.UseVisualStyleBackColor = true;
             // 
-            // splitContainer1
+            // treeViewSplitContainer
             // 
-            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(3, 3);
-            this.splitContainer1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.splitContainer1.Name = "splitContainer1";
+            this.treeViewSplitContainer.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.treeViewSplitContainer.Location = new System.Drawing.Point(3, 3);
+            this.treeViewSplitContainer.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.treeViewSplitContainer.Name = "treeViewSplitContainer";
             // 
-            // splitContainer1.Panel1
+            // treeViewSplitContainer.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.fileTreeView);
+            this.treeViewSplitContainer.Panel1.Controls.Add(this.fileTreeView);
             // 
-            // splitContainer1.Panel2
+            // treeViewSplitContainer.Panel2
             // 
-            this.splitContainer1.Panel2.Controls.Add(this.fileListView);
-            this.splitContainer1.Size = new System.Drawing.Size(1108, 649);
-            this.splitContainer1.SplitterDistance = 280;
-            this.splitContainer1.SplitterWidth = 6;
-            this.splitContainer1.TabIndex = 0;
+            this.treeViewSplitContainer.Panel2.Controls.Add(this.fileListView);
+            this.treeViewSplitContainer.Size = new System.Drawing.Size(1108, 649);
+            this.treeViewSplitContainer.SplitterDistance = 280;
+            this.treeViewSplitContainer.SplitterWidth = 6;
+            this.treeViewSplitContainer.TabIndex = 0;
             // 
             // fileTreeView
             // 
@@ -105,6 +111,7 @@ namespace Lobster
             this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
             this.imageList1.Images.SetKeyName(0, "folder");
             this.imageList1.Images.SetKeyName(1, "document");
+            this.imageList1.Images.SetKeyName(2, "lock");
             // 
             // fileListView
             // 
@@ -143,11 +150,55 @@ namespace Lobster
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.MainTabControl.Controls.Add(this.treeViewTab);
+            this.MainTabControl.Controls.Add(this.workingFileTab);
             this.MainTabControl.Location = new System.Drawing.Point(12, 12);
             this.MainTabControl.Name = "MainTabControl";
             this.MainTabControl.SelectedIndex = 0;
             this.MainTabControl.Size = new System.Drawing.Size(1122, 688);
             this.MainTabControl.TabIndex = 1;
+            this.MainTabControl.Selecting += new System.Windows.Forms.TabControlCancelEventHandler(this.MainTabControl_Selecting);
+            // 
+            // workingFileTab
+            // 
+            this.workingFileTab.Controls.Add(this.workingFileList);
+            this.workingFileTab.Location = new System.Drawing.Point(4, 29);
+            this.workingFileTab.Name = "workingFileTab";
+            this.workingFileTab.Padding = new System.Windows.Forms.Padding(3);
+            this.workingFileTab.Size = new System.Drawing.Size(1114, 655);
+            this.workingFileTab.TabIndex = 1;
+            this.workingFileTab.Text = "Working Files";
+            this.workingFileTab.UseVisualStyleBackColor = true;
+            // 
+            // workingFileList
+            // 
+            this.workingFileList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader1,
+            this.columnHeader2,
+            this.columnHeader3});
+            this.workingFileList.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.workingFileList.FullRowSelect = true;
+            this.workingFileList.Location = new System.Drawing.Point(3, 3);
+            this.workingFileList.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.workingFileList.MultiSelect = false;
+            this.workingFileList.Name = "workingFileList";
+            this.workingFileList.Size = new System.Drawing.Size(1108, 649);
+            this.workingFileList.SmallImageList = this.imageList1;
+            this.workingFileList.TabIndex = 1;
+            this.workingFileList.UseCompatibleStateImageBehavior = false;
+            this.workingFileList.View = System.Windows.Forms.View.Details;
+            this.workingFileList.MouseClick += new System.Windows.Forms.MouseEventHandler(this.workingFileList_MouseClick);
+            // 
+            // columnHeader1
+            // 
+            this.columnHeader1.Text = "Name";
+            // 
+            // columnHeader2
+            // 
+            this.columnHeader2.Text = "Last Modified";
+            // 
+            // columnHeader3
+            // 
+            this.columnHeader3.Text = "Status";
             // 
             // contextMenuStrip1
             // 
@@ -207,11 +258,12 @@ namespace Lobster
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.LobsterMain_FormClosed);
             this.Resize += new System.EventHandler(this.LobsterMain_Resize);
             this.treeViewTab.ResumeLayout(false);
-            this.splitContainer1.Panel1.ResumeLayout(false);
-            this.splitContainer1.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
-            this.splitContainer1.ResumeLayout(false);
+            this.treeViewSplitContainer.Panel1.ResumeLayout(false);
+            this.treeViewSplitContainer.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.treeViewSplitContainer)).EndInit();
+            this.treeViewSplitContainer.ResumeLayout(false);
             this.MainTabControl.ResumeLayout(false);
+            this.workingFileTab.ResumeLayout(false);
             this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -221,7 +273,7 @@ namespace Lobster
 
         private System.Windows.Forms.TabPage treeViewTab;
         private System.Windows.Forms.TabControl MainTabControl;
-        private System.Windows.Forms.SplitContainer splitContainer1;
+        private System.Windows.Forms.SplitContainer treeViewSplitContainer;
         private System.Windows.Forms.TreeView fileTreeView;
         private System.Windows.Forms.ImageList imageList1;
         private System.Windows.Forms.ListView fileListView;
@@ -234,6 +286,11 @@ namespace Lobster
         private System.Windows.Forms.ToolStripMenuItem diffWithDatabaseToolStripMenuItem;
         private System.Windows.Forms.ColumnHeader statusColumn;
         private System.Windows.Forms.NotifyIcon notifyIcon1;
+        private System.Windows.Forms.TabPage workingFileTab;
+        private System.Windows.Forms.ListView workingFileList;
+        private System.Windows.Forms.ColumnHeader columnHeader1;
+        private System.Windows.Forms.ColumnHeader columnHeader2;
+        private System.Windows.Forms.ColumnHeader columnHeader3;
     }
 }
 

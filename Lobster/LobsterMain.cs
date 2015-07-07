@@ -46,7 +46,7 @@ namespace Lobster
 
         private void PopulateTreeNode_r( ClobNode _clobNode, TreeNode _treeNode )
         {
-            foreach ( ClobNode child in _clobNode.subDirs )
+            foreach ( ClobNode child in _clobNode.childNodes )
             {
                 TreeNode aNode = new TreeNode( child.dirInfo.Name );
                 aNode.Tag = child;
@@ -77,18 +77,39 @@ namespace Lobster
             foreach ( KeyValuePair<string, ClobFile> pair in _clobNode.clobFileMap )
             {
                 ClobFile clobFile = pair.Value;
-                ListViewItem item = new ListViewItem( clobFile.fileInfo.Name, 1 );
-                ListViewItem.ListViewSubItem[] subItems = new ListViewItem.ListViewSubItem[]
-                {
-                    new ListViewItem.ListViewSubItem(item, clobFile.fileInfo.LastAccessTime.ToShortDateString()),
-                    new ListViewItem.ListViewSubItem(item, clobFile.status.ToString() ),
-                };
-                item.Tag = clobFile;
-                item.ForeColor = clobFile.status == ClobFile.STATUS.LOCAL_ONLY ? Color.Green : Color.Black;
-                item.SubItems.AddRange( subItems );
+                clobFile.fileInfo.Refresh();
+                ListViewItem item = this.GetClobFileRow( clobFile );
                 this.fileListView.Items.Add( item );
             }
             this.fileListView.AutoResizeColumns( ColumnHeaderAutoResizeStyle.HeaderSize );
+        }
+
+        public ListViewItem GetClobFileRow( ClobFile _clobFile )
+        {
+            ListViewItem item = new ListViewItem( _clobFile.fileInfo.Name, _clobFile.fileInfo.IsReadOnly ? 2 : 1 );
+            ListViewItem.ListViewSubItem[] subItems = new ListViewItem.ListViewSubItem[]
+            {
+                    new ListViewItem.ListViewSubItem(item, _clobFile.fileInfo.LastAccessTime.ToShortDateString()),
+                    new ListViewItem.ListViewSubItem(item, _clobFile.status.ToString() ),
+            };
+            item.Tag = _clobFile;
+            item.ForeColor = _clobFile.status == ClobFile.STATUS.LOCAL_ONLY ? Color.Green : Color.Black;
+            item.SubItems.AddRange( subItems );
+            return item;
+        }
+
+        private void PopulateWorkingFileView()
+        {
+            this.workingFileList.Items.Clear();
+            List<ClobFile> workingFiles = new List<ClobFile>();
+            this.lobsterModel.GetWorkingFiles( ref workingFiles );
+
+            foreach ( ClobFile clobFile in workingFiles )
+            {
+                ListViewItem item = this.GetClobFileRow( clobFile );
+                this.workingFileList.Items.Add( item );
+            }
+            this.workingFileList.AutoResizeColumns( ColumnHeaderAutoResizeStyle.HeaderSize );
         }
 
         private void listView1_MouseClick( object sender, MouseEventArgs e )
@@ -99,12 +120,19 @@ namespace Lobster
                 {
                     contextMenuStrip1.Show( Cursor.Position );
                     ClobFile clobFile = (ClobFile)fileListView.FocusedItem.Tag;
-                    contextMenuStrip1.Tag = fileListView.FocusedItem;
-                    insertToolStripMenuItem.Enabled = clobFile.status == ClobFile.STATUS.LOCAL_ONLY;
-                    clobToolStripMenuItem.Enabled = clobFile.status == ClobFile.STATUS.SYNCHRONISED;
-                    diffWithDatabaseToolStripMenuItem.Enabled = !new List<string>{ ".png",".gif",".bmp" }.Contains( Path.GetExtension( clobFile.fileInfo.Name ) );
+                    this.ShowClobFileContextMenu( clobFile, fileListView );
                 }
             }
+        }
+
+        private void ShowClobFileContextMenu( ClobFile _clobFile, ListView _fileListView )
+        {
+            contextMenuStrip1.Tag = _fileListView.FocusedItem;
+            insertToolStripMenuItem.Enabled = _clobFile.status == ClobFile.STATUS.LOCAL_ONLY;
+            clobToolStripMenuItem.Enabled = _clobFile.status == ClobFile.STATUS.SYNCHRONISED;
+            diffWithDatabaseToolStripMenuItem.Enabled = 
+                !new List<string> { ".png", ".gif", ".bmp" }.Contains( Path.GetExtension( _clobFile.fileInfo.Name ) )
+             && _clobFile.status == ClobFile.STATUS.SYNCHRONISED;
         }
 
         private void insertToolStripMenuItem_Click( object sender, EventArgs e )
@@ -178,8 +206,21 @@ namespace Lobster
             ToolStripItem item = (ToolStripItem)sender;
             ListViewItem listItem = (ListViewItem)item.GetCurrentParent().Tag;
             ClobFile clobFile = (ClobFile)listItem.Tag;
-            bool result = this.lobsterModel.SendUpdateClobMessage( clobFile );
-            this.OnFileUpdateComplete( clobFile, result );
+
+            if ( clobFile.fileInfo.IsReadOnly )
+            {
+                DialogResult result = MessageBox.Show( 
+                    clobFile.fileInfo.Name + " is locked. Are you sure you want to clob it?",
+                    "File is Locked",
+                    MessageBoxButtons.OKCancel );
+                if ( result != DialogResult.OK )
+                {
+                    return;
+                } 
+            }
+
+            bool clobbed = this.lobsterModel.SendUpdateClobMessage( clobFile );
+            this.OnFileUpdateComplete( clobFile, clobbed );
         }
 
         private void LobsterMain_Resize( object sender, EventArgs e )
@@ -187,6 +228,7 @@ namespace Lobster
             if ( this.WindowState == FormWindowState.Minimized )
             {
                 this.Hide();
+                this.notifyIcon1.ShowBalloonTip( 2000, "Lobster has been minimised", "Click on the notification icon to show it again", ToolTipIcon.Info );
             }
         }
 
@@ -222,6 +264,7 @@ namespace Lobster
         {
             foreach ( FileInfo tempFile in this.lobsterModel.tempFileList )
             {
+                MessageLog.Log( "Temporary file \"" + tempFile.FullName + "\" deleted" );
                 File.Delete( tempFile.FullName );
             }
         }
@@ -230,6 +273,27 @@ namespace Lobster
         {
             //TODO: Thread problems here...
             //this.PopulateListView( (ClobNode)this.fileTreeView.SelectedNode.Tag );
+        }
+
+        private void MainTabControl_Selecting( object sender, TabControlCancelEventArgs e )
+        {
+            if ( this.MainTabControl.SelectedTab == this.workingFileTab )
+            {
+                this.PopulateWorkingFileView();
+            }
+        }
+
+        private void workingFileList_MouseClick( object sender, MouseEventArgs e )
+        {
+            if ( e.Button == MouseButtons.Right )
+            {
+                if ( workingFileList.FocusedItem.Bounds.Contains( e.Location ) == true )
+                {
+                    contextMenuStrip1.Show( Cursor.Position );
+                    ClobFile clobFile = (ClobFile)workingFileList.FocusedItem.Tag;
+                    this.ShowClobFileContextMenu( clobFile, workingFileList);
+                }
+            }
         }
     }
 }

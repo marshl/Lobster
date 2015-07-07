@@ -8,9 +8,10 @@ namespace Lobster
 {
     public class DatabaseConfig
     {
+        public string host;
+        public string sid;
         public string username;
         public string password;
-        public string dataSource;
         public string codeSource;
     }
 }

@@ -1,10 +1,4 @@
-﻿using Oracle.DataAccess.Client;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using System.Windows.Forms;
 
 namespace Lobster
@@ -17,5 +11,10 @@ namespace Lobster
         public Dictionary<string, ClobFile> fullpathClobMap = new Dictionary<string, ClobFile>();
         public DataGridView dataGridView;
         public ClobNode rootClobNode;
+
+        public void GetWorkingFiles( ref List<ClobFile> _workingFiles )
+        {
+            this.rootClobNode.GetWorkingFiles( ref _workingFiles );
+        }
     }
 }

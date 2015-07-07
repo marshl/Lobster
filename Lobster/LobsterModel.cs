@@ -1,14 +1,12 @@
-﻿using Oracle.DataAccess.Client;
-using Oracle.DataAccess.Types;
-using System;
-using System.Text;
+﻿using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
-using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Serialization;
+using Oracle.ManagedDataAccess.Client;
+using Oracle.ManagedDataAccess.Types;
 
 namespace Lobster
 {
@@ -39,8 +37,12 @@ namespace Lobster
             OracleConnection con = new OracleConnection();
             con.ConnectionString = "User Id=" + this.dbConfig.username
                 + ";Password=" + this.dbConfig.password
-                + ";Data Source=" + this.dbConfig.dataSource;
-                //+ ";Pooling=false";
+                + ";Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)("
+                + "HOST=" + this.dbConfig.host + ")(PORT=1521)))(CONNECT_DATA="
+                + "(SID=" + this.dbConfig.sid + ")(SERVER=DEDICATED)))";
+               // + ";Data Source=" + this.dbConfig.dataSource;
+                
+            //+ ";Pooling=false";
             try
             {
                 con.Open();
@@ -94,6 +96,9 @@ namespace Lobster
 
         public bool SendUpdateClobMessage( ClobFile _clobFile )
         {
+            /*Task task = Task.Delay( 200 );
+            task.
+            */
             OracleConnection con = this.OpenConnection();
             if ( con == null )
             {
@@ -102,6 +107,14 @@ namespace Lobster
             bool result = this.UpdateDatabaseClob( _clobFile, con );
             con.Dispose();
             return result;
+        }
+
+        public void GetWorkingFiles( ref List<ClobFile> _workingFiles )
+        {
+            foreach ( ClobDirectory clobDir in this.clobDirectories )
+            {
+                clobDir.GetWorkingFiles( ref _workingFiles );
+            }
         }
 
         private bool PopulateTreeView( ClobDirectory _clobDirectory )
@@ -126,17 +139,17 @@ namespace Lobster
             {
                 ClobNode childNode = new ClobNode( subDir, this );
                 GetDirectories( childNode, _clobDirectory);
-                _clobNode.subDirs.Add( childNode );
+                _clobNode.childNodes.Add( childNode );
             }
 
             foreach ( FileInfo fileInfo in _clobNode.dirInfo.GetFiles() )
             {
                 ClobFile clobFile = new ClobFile( fileInfo, _clobNode, _clobDirectory );
-                _clobDirectory.fullpathClobMap.Add( fileInfo.FullName, clobFile );
+                _clobDirectory.fullpathClobMap.Add( fileInfo.FullName.ToLower(), clobFile );
                 string key = fileInfo.Name;
                 try
                 {
-                    _clobNode.clobFileMap.Add( key, clobFile );
+                    _clobNode.clobFileMap.Add( key.ToLower(), clobFile );
                 }
                 catch ( Exception _e )
                 {
@@ -182,7 +195,17 @@ namespace Lobster
                     + " WHERE " + ct.mnemonicColumn + " = '" + _clobFile.databaseMnemonic + "'";
             }
 
-            this.AddFileDataParameter( command, _clobFile, ct, useBlobColumn );
+            try
+            {
+                this.AddFileDataParameter( command, _clobFile, ct, useBlobColumn );
+            }
+            catch ( IOException _e )
+            {
+                trans.Rollback();
+                LobsterMain.instance.OnErrorMessage( "Clob Update Failed", "An IO Exception occurred when updating the database: " + _e.Message );
+                MessageLog.Log( "Clob update failed: " + _e.Message );
+                return false;
+            }
 
             try
             {
@@ -199,7 +222,7 @@ namespace Lobster
             {
                 trans.Rollback();
                 LobsterMain.instance.OnErrorMessage( "Clob Update Failed", "An invalid operation occurred when updating the database: " + _e.Message );
-                MessageLog.Log( "Clob update failed: " + _e.Message );
+                MessageLog.Log( "Clob update failed: " + _e.Message + " for command " + command.CommandText );
                 return false;
             }
             trans.Commit();
@@ -234,6 +257,7 @@ namespace Lobster
             else
             {
                 string contents = File.ReadAllText( _clobFile.fileInfo.FullName );
+                contents += this.GetClobFooterMessage();
                 OracleDbType insertType = _ct.clobDataType == "clob" ? OracleDbType.Clob : OracleDbType.XmlType;
                 command.Parameters.Add( "data", insertType, contents, ParameterDirection.Input );
             }
@@ -442,7 +466,7 @@ namespace Lobster
                 }
 
                 // Any files found on the database are "synchronised" 
-                ClobFile clobFile = _clobDir.rootClobNode.FindFileWithName( filename );
+                ClobFile clobFile = _clobDir.rootClobNode.FindFileWithName( filename.ToLower() );
                 if ( clobFile != null )
                 {
                     clobFile.status = ClobFile.STATUS.SYNCHRONISED;
@@ -486,6 +510,45 @@ namespace Lobster
                 default:
                     throw new ArgumentException( "Unknown prefix " + _prefix );
             }
+        }
+
+        private string GetClobFooterMessage()
+        {
+            return String.Format( "<!-- Last clobbered by {0} ({1}) at {2} using Lobster build {3} -->",
+                Environment.UserName,
+                Environment.MachineName,
+                DateTime.Now,
+                RetrieveLinkerTimestamp() );
+        }
+
+        //http://stackoverflow.com/questions/1600962/displaying-the-build-date
+        private DateTime RetrieveLinkerTimestamp()
+        {
+            string filePath = System.Reflection.Assembly.GetCallingAssembly().Location;
+            const int c_PeHeaderOffset = 60;
+            const int c_LinkerTimestampOffset = 8;
+            byte[] b = new byte[2048];
+            System.IO.Stream s = null;
+
+            try
+            {
+                s = new System.IO.FileStream( filePath, System.IO.FileMode.Open, System.IO.FileAccess.Read );
+                s.Read( b, 0, 2048 );
+            }
+            finally
+            {
+                if ( s != null )
+                {
+                    s.Close();
+                }
+            }
+
+            int i = System.BitConverter.ToInt32( b, c_PeHeaderOffset );
+            int secondsSince1970 = System.BitConverter.ToInt32( b, i + c_LinkerTimestampOffset );
+            DateTime dt = new DateTime( 1970, 1, 1, 0, 0, 0, DateTimeKind.Utc );
+            dt = dt.AddSeconds( secondsSince1970 );
+            dt = dt.ToLocalTime();
+            return dt;
         }
     }
 }

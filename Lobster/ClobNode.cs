@@ -20,8 +20,24 @@ namespace Lobster
         public DirectoryInfo dirInfo;
         private LobsterModel model;
 
-        public List<ClobNode> subDirs = new List<ClobNode>();
+        public List<ClobNode> childNodes = new List<ClobNode>();
         public Dictionary<string, ClobFile> clobFileMap = new Dictionary<string, ClobFile>();
+
+        public void GetWorkingFiles( ref List<ClobFile> _workingFiles )
+        {
+            foreach ( KeyValuePair<string, ClobFile> pair in this.clobFileMap )
+            {
+                if ( !pair.Value.fileInfo.IsReadOnly )
+                {
+                    _workingFiles.Add( pair.Value );
+                }
+            }
+
+            foreach ( ClobNode node in this.childNodes )
+            {
+                node.GetWorkingFiles( ref _workingFiles );
+            }
+        }
 
         public ClobFile FindFileWithName( string _filename )
         {
@@ -31,7 +47,7 @@ namespace Lobster
                 return clobFile;
             }
 
-            foreach ( ClobNode subDir in this.subDirs )
+            foreach ( ClobNode subDir in this.childNodes )
             {
                 clobFile = subDir.FindFileWithName( _filename );
                 if ( clobFile != null )
@@ -47,7 +63,6 @@ namespace Lobster
         {
             FileSystemWatcher fileWatcher = new FileSystemWatcher();
             fileWatcher.Path = this.dirInfo.FullName;
-            //fileWatcher.IncludeSubdirectories = true;
             fileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.CreationTime;// | NotifyFilters.Attributes;
             fileWatcher.Changed += new FileSystemEventHandler( OnFileChanged );
             fileWatcher.Created += new FileSystemEventHandler( OnFileCreated );
@@ -63,7 +78,7 @@ namespace Lobster
             }
 
             ClobFile clobFile;
-            if ( this.clobFileMap.TryGetValue( _e.Name, out clobFile ) )
+            if ( this.clobFileMap.TryGetValue( _e.Name.ToLower(), out clobFile ) )
             { 
                 FileInfo fileInfo = new FileInfo( _e.FullPath );
                 if ( !fileInfo.IsReadOnly && clobFile.status == ClobFile.STATUS.SYNCHRONISED )
@@ -82,9 +97,9 @@ namespace Lobster
 
         private void OnFileDeleted( object _sender, FileSystemEventArgs _e )
         {
-            if ( this.clobFileMap.ContainsKey( _e.Name ) )
+            if ( this.clobFileMap.ContainsKey( _e.Name.ToLower() ) )
             {
-                this.clobFileMap.Remove( _e.Name );
+                this.clobFileMap.Remove( _e.Name.ToLower() );
                 LobsterMain.instance.OnDirectoryStructureChanged();
             }
         }

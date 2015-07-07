@@ -1,8 +1,4 @@
-﻿using Oracle.DataAccess.Client;
-using Oracle.DataAccess.Types;
-using System;
-using System.Data;
-using System.IO;
+﻿using System.IO;
 
 namespace Lobster
 {
@@ -12,7 +8,7 @@ namespace Lobster
         {
             this.fileInfo = _fileInfo;
             this.parentClobNode = _parentClobNode;
-            this.parentClobDirectory = _parentClobDirectory;    
+            this.parentClobDirectory = _parentClobDirectory;
         }
         public FileInfo fileInfo;
         public ClobNode parentClobNode;
