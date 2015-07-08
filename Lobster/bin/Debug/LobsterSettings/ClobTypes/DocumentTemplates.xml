@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ClobType xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <name>DocumentTemplates</name>
+  <directory>DocumentTemplates</directory>
+  <schema>decmgr</schema>
+  <table>document_templates</table>
+  <mnemonicColumn>name</mnemonicColumn>
+  <clobColumn>xml_data</clobColumn>
+</ClobType>

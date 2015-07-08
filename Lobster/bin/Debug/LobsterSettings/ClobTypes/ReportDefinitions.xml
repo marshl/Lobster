@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ClobType xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <name>ReportDefinitions</name>
+  <directory>ReportDefinitions</directory>
+  <schema>reportmgr</schema>
+  <table>report_definitions</table>
+  <mnemonicColumn>domain</mnemonicColumn>
+  <clobColumn>xml_data</clobColumn>
+</ClobType>
