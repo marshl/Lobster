@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Threading;
 
 namespace Lobster
 {
@@ -19,7 +20,8 @@ namespace Lobster
 
         public STATUS? status;
         public string databaseMnemonic;
-        public string databaseType;
+        public string componentType;
+        public bool awaitingUpdate = false;
 
         public enum STATUS
         {

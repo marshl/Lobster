@@ -11,7 +11,7 @@ namespace Lobster
         public static string CLOB_TYPE_DIR = "ClobTypes";
         public static string LOG_FILE = "lobster.log";
 
-        public static int BALLOON_TOOLTIP_DURATION = 2000;
+        public static int BALLOON_TOOLTIP_DURATION_MS = 2000;
 
         [DllImport( "kernel32.dll" )]
         static extern bool AttachConsole( uint dwProcessId );
@@ -19,6 +19,9 @@ namespace Lobster
         [DllImport( "kernel32.dll", SetLastError = true )]
         static extern bool AllocConsole();
         private static uint ATTACH_PARENT_PROCESS = 0x0ffffffff;
+
+        public static int CLOB_DELAY_DURATION_MS = 200;
+
 
         /// <summary>
         /// The main entry point for the application.

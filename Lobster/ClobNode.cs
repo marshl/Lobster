@@ -10,15 +10,17 @@ namespace Lobster
 {
     public class ClobNode
     {
-        public ClobNode( DirectoryInfo _dirInfo, LobsterModel _model )
+        public ClobNode( DirectoryInfo _dirInfo, LobsterModel _model, ClobDirectory _baseDirectory )
         {
             this.dirInfo = _dirInfo;
             this.model = _model;
+            this.baseDirectory = _baseDirectory;
             this.CreateFileWatchers();
         }
 
         public DirectoryInfo dirInfo;
         private LobsterModel model;
+        private ClobDirectory baseDirectory;
 
         public List<ClobNode> childNodes = new List<ClobNode>();
         public Dictionary<string, ClobFile> clobFileMap = new Dictionary<string, ClobFile>();
@@ -83,16 +85,15 @@ namespace Lobster
                 FileInfo fileInfo = new FileInfo( _e.FullPath );
                 if ( !fileInfo.IsReadOnly && clobFile.status == ClobFile.STATUS.SYNCHRONISED )
                 {
-                    bool result = this.model.SendUpdateClobMessage( clobFile );
-                    
-                    LobsterMain.instance.OnFileUpdateComplete( clobFile, result );
+                    this.model.SendUpdateClobMessage( clobFile );
                 }
             }
         }
 
         public void OnFileCreated( object _source, FileSystemEventArgs _e )
         {
-            Console.WriteLine( "!!!" );
+            ClobFile clobFile = this.AddClobFile( new FileInfo( _e.FullPath ) );
+            clobFile.status = ClobFile.STATUS.LOCAL_ONLY;
         }
 
         private void OnFileDeleted( object _sender, FileSystemEventArgs _e )
@@ -100,8 +101,25 @@ namespace Lobster
             if ( this.clobFileMap.ContainsKey( _e.Name.ToLower() ) )
             {
                 this.clobFileMap.Remove( _e.Name.ToLower() );
+                this.baseDirectory.fullpathClobMap.Remove( _e.Name.ToLower() );
                 LobsterMain.instance.OnDirectoryStructureChanged();
             }
+        }
+
+        public ClobFile AddClobFile( FileInfo fileInfo )
+        {
+            ClobFile clobFile = new ClobFile( fileInfo, this, this.baseDirectory );
+            string key = fileInfo.Name;
+            try
+            {
+                this.baseDirectory.fullpathClobMap.Add( fileInfo.FullName.ToLower(), clobFile );
+                this.clobFileMap.Add( key.ToLower(), clobFile );
+            }
+            catch ( Exception _e )
+            {
+                MessageLog.Log( "A file with the name '" + key + "' already exists" + _e.Message );
+            }
+            return clobFile;
         }
     }
 }

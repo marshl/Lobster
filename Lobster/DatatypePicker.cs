@@ -15,11 +15,15 @@ namespace Lobster
         public DatatypePicker( ClobType _clobType )
         {
             InitializeComponent();
-            foreach ( string str in _clobType.dataTypes )
+            foreach ( string str in _clobType.componentTypes )
             {
                 this.datatypeComboBox.Items.Add( str );
             }
-            this.datatypeComboBox.SelectedIndex = 0;
+
+            if ( _clobType.componentTypes.Count > 0 )
+            {
+                this.datatypeComboBox.SelectedIndex = 0;
+            }
         }
 
         private void datatypeAccept_Click_1( object sender, EventArgs e )

@@ -9,8 +9,8 @@
   
   <clobDataType>clob</clobDataType>
   
-  <dataTypeColumnName>type</dataTypeColumnName>
-  <dataTypes>
+  <componentTypeColumn>type</componentTypeColumn>
+  <componentTypes>
     <string>module</string>
     <string>image/gif</string>
     <string>image/jpg</string>
@@ -19,7 +19,7 @@
     <string>test/html</string>
     <string>text/css</string>
     <string>text/javascript</string>
-  </dataTypes>
+  </componentTypes>
   
   <blobColumnName>bindata</blobColumnName>
   <blobColumnTypes>

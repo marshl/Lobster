@@ -7,6 +7,10 @@ using System.Xml;
 using System.Xml.Serialization;
 using Oracle.ManagedDataAccess.Client;
 using Oracle.ManagedDataAccess.Types;
+using System.Diagnostics;
+using System.Windows.Forms;
+using System.Timers;
+using System.Threading;
 
 namespace Lobster
 {
@@ -16,20 +20,42 @@ namespace Lobster
         public List<ClobDirectory> clobDirectories;
         public List<FileInfo> tempFileList = new List<FileInfo>();
 
-        public LobsterModel()
-        {
-            this.LoadDatabaseConfig();
-            this.LoadClobTypes();
-            this.CompareFilesToDatabase();
-        }
-
-        private void LoadDatabaseConfig()
+        public bool LoadDatabaseConfig()
         {
             this.dbConfig = new DatabaseConfig();
             XmlSerializer xmls = new XmlSerializer( typeof( DatabaseConfig ) );
             StreamReader streamReader = new StreamReader( Program.SETTINGS_DIR + "/" + Program.DB_CONFIG_FILE );
             XmlReader xmlReader = XmlReader.Create( streamReader );
             this.dbConfig = (DatabaseConfig)xmls.Deserialize( xmlReader );
+            streamReader.Close();
+
+            if ( this.dbConfig.codeSource == null || !Directory.Exists( this.dbConfig.codeSource ) )
+            {
+                 return this.PromptForCodeSource();
+            }
+            return true;
+        }
+
+        private bool PromptForCodeSource()
+        {
+            FolderBrowserDialog fbd = new FolderBrowserDialog();
+            fbd.Description = "Please select your CodeSource folder.";
+            DialogResult result = fbd.ShowDialog();
+            if ( result != DialogResult.OK )
+            {
+                return false;
+            }
+            this.dbConfig.codeSource = fbd.SelectedPath;
+
+            this.SerialiseConfig();
+            return true;
+        }
+
+        private void SerialiseConfig()
+        {
+            XmlSerializer xmls = new XmlSerializer( typeof( DatabaseConfig ) );
+            StreamWriter streamWriter = new StreamWriter( Program.SETTINGS_DIR + "/" + Program.DB_CONFIG_FILE );
+            xmls.Serialize( streamWriter, this.dbConfig );
         }
 
         private OracleConnection OpenConnection()
@@ -38,25 +64,28 @@ namespace Lobster
             con.ConnectionString = "User Id=" + this.dbConfig.username
                 + ";Password=" + this.dbConfig.password
                 + ";Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)("
-                + "HOST=" + this.dbConfig.host + ")(PORT=1521)))(CONNECT_DATA="
-                + "(SID=" + this.dbConfig.sid + ")(SERVER=DEDICATED)))";
-               // + ";Data Source=" + this.dbConfig.dataSource;
-                
-            //+ ";Pooling=false";
+                + "HOST=" + this.dbConfig.host + ")"
+                + "(PORT=" + this.dbConfig.port + ")))(CONNECT_DATA="
+                + "(SID=" + this.dbConfig.sid + ")(SERVER=DEDICATED)))"
+                + ";Pooling=" + (this.dbConfig.usePooling ? "true" : "false");
             try
             {
                 con.Open();
             }
             catch ( Exception _e )
             {
-                LobsterMain.instance.OnErrorMessage( "Database Connection Failure", "Cannot open connection to database: " + _e.Message );
-                MessageLog.Log( "Connection to Oracle failed: " + _e.Message );
-                return null;
+                if ( _e is InvalidOperationException || _e is OracleException )
+                {
+                    LobsterMain.instance.OnErrorMessage( "Database Connection Failure", "Cannot open connection to database: " + _e.Message );
+                    MessageLog.Log( "Connection to Oracle failed: " + _e.Message );
+                    return null;
+                }
+                throw;
             }
             return con;
         }
 
-        private void CompareFilesToDatabase()
+        public void CompareFilesToDatabase()
         {
             OracleConnection con = this.OpenConnection();
             if ( con == null )
@@ -72,7 +101,7 @@ namespace Lobster
             con.Dispose();
         }
 
-        private void LoadClobTypes()
+        public void LoadClobTypes()
         {
             this.clobDirectories = new List<ClobDirectory>();
             DirectoryInfo clobTypeDir = Directory.CreateDirectory( Program.SETTINGS_DIR + "/" + Program.CLOB_TYPE_DIR );
@@ -94,23 +123,41 @@ namespace Lobster
             }
         }
 
-        public bool SendUpdateClobMessage( ClobFile _clobFile )
+        public void SendUpdateClobMessage( ClobFile _clobFile )
         {
-            /*Task task = Task.Delay( 200 );
-            task.
-            */
+            if ( !_clobFile.awaitingUpdate )
+            {
+                _clobFile.awaitingUpdate = true;
+                System.Threading.Timer timer = new System.Threading.Timer( OnUpdateClobEvent, _clobFile, Program.CLOB_DELAY_DURATION_MS, Timeout.Infinite );
+            }
+        }
+
+        private void OnUpdateClobEvent( Object stateInfo )
+        {
+            ClobFile clobFile = (ClobFile)stateInfo;
+            clobFile.awaitingUpdate = false;
             OracleConnection con = this.OpenConnection();
+            bool result;
             if ( con == null )
             {
-                return false;
+                result = false;
+                return;
             }
-            bool result = this.UpdateDatabaseClob( _clobFile, con );
-            con.Dispose();
-            return result;
+            else
+            {
+                result = this.UpdateDatabaseClob( clobFile, con );
+                con.Dispose();
+            }
+            LobsterMain.instance.OnFileUpdateComplete( clobFile, result );
         }
 
         public void GetWorkingFiles( ref List<ClobFile> _workingFiles )
         {
+            if ( this.clobDirectories == null )
+            {
+                return;
+            }
+
             foreach ( ClobDirectory clobDir in this.clobDirectories )
             {
                 clobDir.GetWorkingFiles( ref _workingFiles );
@@ -122,12 +169,12 @@ namespace Lobster
             DirectoryInfo info = new DirectoryInfo( this.dbConfig.codeSource + "/" + _clobDirectory.clobType.directory );
             if ( !info.Exists )
             {
-                MessageLog.Log( "CodeSource folder \"" + this.dbConfig.codeSource + "\" could not be found" );
+                MessageLog.Log( "Folder folder \"" + info.FullName + "\" could not be found" );
                 LobsterMain.instance.OnErrorMessage( "Folder not found", "CodeSource folder \"" + this.dbConfig.codeSource + "\" could not be found" );
                 return false;
             }
 
-            _clobDirectory.rootClobNode = new ClobNode( info, this );
+            _clobDirectory.rootClobNode = new ClobNode( info, this, _clobDirectory );
             GetDirectories( _clobDirectory.rootClobNode, _clobDirectory );
             return true;
         }
@@ -137,24 +184,14 @@ namespace Lobster
             DirectoryInfo[] subDirs = _clobNode.dirInfo.GetDirectories();
             foreach ( DirectoryInfo subDir in subDirs )
             {
-                ClobNode childNode = new ClobNode( subDir, this );
+                ClobNode childNode = new ClobNode( subDir, this, _clobDirectory );
                 GetDirectories( childNode, _clobDirectory);
                 _clobNode.childNodes.Add( childNode );
             }
 
             foreach ( FileInfo fileInfo in _clobNode.dirInfo.GetFiles() )
             {
-                ClobFile clobFile = new ClobFile( fileInfo, _clobNode, _clobDirectory );
-                _clobDirectory.fullpathClobMap.Add( fileInfo.FullName.ToLower(), clobFile );
-                string key = fileInfo.Name;
-                try
-                {
-                    _clobNode.clobFileMap.Add( key.ToLower(), clobFile );
-                }
-                catch ( Exception _e )
-                {
-                    MessageLog.Log( "A file with the name '" + key + "' already exists" + _e.Message );
-                }
+                _clobNode.AddClobFile( fileInfo );
             }
         }
 
@@ -176,13 +213,16 @@ namespace Lobster
             OracleCommand command = _con.CreateCommand();
             ClobType ct = _clobFile.parentClobDirectory.clobType;
             bool useBlobColumn = ct.blobColumnName != null
-                && ct.blobColumnTypes.Contains( _clobFile.databaseType );
+                && ct.blobColumnTypes.Contains( _clobFile.componentType );
+
+            Debug.Assert( _clobFile.databaseMnemonic != null );
 
             if ( ct.hasParentTable )
             {
                 command.CommandText =
                     "UPDATE " + ct.schema + "." + ct.table + " child"
                     + " SET " + ( useBlobColumn ? ct.blobColumnName : ct.clobColumn ) + " = :data"
+                    + ( ct.dateColumnName != null ? ", " + ct.dateColumnName + " = SYSDATE " : null )
                     + " WHERE " + ct.mnemonicColumn + " = ("
                         + "SELECT parent." + ct.parentIDColumn
                         + " FROM " + ct.schema + "." + ct.parentTable + " parent"
@@ -192,6 +232,7 @@ namespace Lobster
             {
                 command.CommandText = "UPDATE " + ct.schema + "." + ct.table
                     + " SET " + ( useBlobColumn ? ct.blobColumnName : ct.clobColumn ) + " = :data"
+                    + ( ct.dateColumnName != null ? ", " + ct.dateColumnName + " = SYSDATE " : null )
                     + " WHERE " + ct.mnemonicColumn + " = '" + _clobFile.databaseMnemonic + "'";
             }
 
@@ -218,12 +259,16 @@ namespace Lobster
                     return false;
                 }
             }
-            catch ( InvalidOperationException _e )
+            catch ( Exception _e )
             {
-                trans.Rollback();
-                LobsterMain.instance.OnErrorMessage( "Clob Update Failed", "An invalid operation occurred when updating the database: " + _e.Message );
-                MessageLog.Log( "Clob update failed: " + _e.Message + " for command " + command.CommandText );
-                return false;
+                if ( _e is OracleException || _e is InvalidOperationException )
+                {
+                    trans.Rollback();
+                    LobsterMain.instance.OnErrorMessage( "Clob Update Failed", "An invalid operation occurred when updating the database: " + _e.Message );
+                    MessageLog.Log( "Clob update failed: " + _e.Message + " for command " + command.CommandText );
+                    return false;
+                }
+                throw;
             }
             trans.Commit();
             command.Dispose();
@@ -263,15 +308,15 @@ namespace Lobster
             }
         }
 
-        private bool InsertDatabaseClob( ClobFile _clobFile, string _dataType, OracleConnection _con )
+        private bool InsertDatabaseClob( ClobFile _clobFile, string _componentType, OracleConnection _con )
         {
-            string mnemonic = Path.GetFileNameWithoutExtension( _clobFile.fileInfo.Name );
             OracleCommand command = _con.CreateCommand();
             OracleTransaction trans = _con.BeginTransaction();
             ClobType ct = _clobFile.parentClobDirectory.clobType;
+            string mnemonic = this.ConvertFilenameToMnemonic( _clobFile, ct, _componentType );
 
             bool useBlobColumn = ct.blobColumnName != null
-                && ct.blobColumnTypes.Contains( _dataType );
+                && ct.blobColumnTypes.Contains( _componentType );
 
             if ( ct.hasParentTable )
             {
@@ -285,7 +330,7 @@ namespace Lobster
                 {
                     command.ExecuteNonQuery();
                 }
-                catch ( InvalidOperationException _e )
+                catch ( Exception _e )
                 {
                     LobsterMain.instance.OnErrorMessage( "Clob Insert Error",
                         "An invalid operation occurred when inserting into the parent table of " + _clobFile.fileInfo.Name + ": " + _e.Message );
@@ -297,37 +342,32 @@ namespace Lobster
                 // Child table
                 command = _con.CreateCommand();
                 command.CommandText = "INSERT INTO " + ct.schema + "." + ct.table
-                    + "( " + ct.mnemonicColumn + ", " + ct.parentIDColumn + ", start_datetime, " + ( useBlobColumn ? ct.blobColumnName : ct.clobColumn );
+                    + "( " + ct.mnemonicColumn + ", " + ct.parentIDColumn
+                        + ( ct.dateColumnName != null ? ", " + ct.dateColumnName : null ) + ", "
+                    + ( useBlobColumn ? ct.blobColumnName : ct.clobColumn );
 
-                if ( _dataType != null )
+                if ( _componentType != null )
                 {
-                    command.CommandText += ", type";
+                    command.CommandText += ", " + ct.componentTypeColumn;
                 }
                 command.CommandText += " ) VALUES( ( SELECT MAX( " + ct.parentIDColumn + " ) + 1 FROM " + ct.schema + "." + ct.table + " ), "
                     + "( SELECT " + ct.parentIDColumn + " FROM " + ct.schema + "." + ct.parentTable
-                        + " WHERE " + ct.parentMnemonicColumn + " = '" + mnemonic + "'),"
-                    + " SYSDATE, :data ";
-                if ( _dataType != null )
+                        + " WHERE " + ct.parentMnemonicColumn + " = '" + mnemonic + "')"
+                    + ( ct.dateColumnName != null ? ", SYSDATE " : null ) + ", :data ";
+                if ( _componentType != null )
                 {
-                    command.CommandText += ", '" + _dataType + "'";
+                    command.CommandText += ", '" + _componentType + "'";
                 }
                 command.CommandText += " )";
             }
             else // No parent table
             {
                 command.CommandText = "INSERT INTO " + ct.schema + "." + ct.table
-                    + " ( " + ct.mnemonicColumn + ", " + ( useBlobColumn ? ct.blobColumnName : ct.clobColumn );
-
-                if ( _dataType != null )
-                {
-                    command.CommandText += ", type";
-                }
-                command.CommandText += ") VALUES ( '" + mnemonic + "', :data";
-                if ( _dataType != null )
-                {
-                    command.CommandText += ", '" + _dataType + "'";
-                }
-                command.CommandText += ")";
+                    + " ( " + ct.mnemonicColumn + ", " + ( useBlobColumn ? ct.blobColumnName : ct.clobColumn )
+                    + ( _componentType != null ? ", type" : null )
+                    + ") VALUES ( '" + mnemonic + "', :data"
+                    + ( _componentType != null ? ", '" + _componentType + "'" : null )
+                    + ")";
             }
 
             this.AddFileDataParameter( command, _clobFile, ct, useBlobColumn );
@@ -336,18 +376,23 @@ namespace Lobster
             {
                 command.ExecuteNonQuery();
             }
-            catch ( InvalidOperationException _e )
+            catch ( Exception _e )
             {
-                // Discard the insert amde into the parent table
-                trans.Rollback();
-                LobsterMain.instance.OnErrorMessage( "Clob Insert Error",
-                        "An invalid operation occurred when inserting " + _clobFile.fileInfo.Name + ": " + _e.Message );
-                MessageLog.Log( "Error creating new clob: " + _e.Message );
-                return false;
+                if ( _e is InvalidOperationException || _e is OracleException )
+                {
+                    // Discard the insert amde into the parent table
+                    trans.Rollback();
+                    LobsterMain.instance.OnErrorMessage( "Clob Insert Error",
+                            "An invalid operation occurred when inserting " + _clobFile.fileInfo.Name + ": " + _e.Message );
+                    MessageLog.Log( "Error creating new clob: " + _e.Message + " with command: " + command.CommandText );
+                    return false;
+                }
+                throw;
             }
             command.Dispose();
             trans.Commit();
             _clobFile.status = ClobFile.STATUS.SYNCHRONISED;
+            _clobFile.databaseMnemonic = mnemonic;
             MessageLog.Log( "Clob file creation successful: " + _clobFile.fileInfo.Name );
             return true;
         }
@@ -411,7 +456,7 @@ namespace Lobster
             if ( ct.hasParentTable )
             {
                 command.CommandText = "SELECT parent." + ct.parentMnemonicColumn
-                    + ( ct.dataTypeColumnName != null ? ", child." + ct.dataTypeColumnName : null )
+                    + ( ct.componentTypeColumn != null ? ", child." + ct.componentTypeColumn : null )
                     + " FROM " + ct.schema + "." + ct.parentTable + " parent"
                     + " JOIN " + ct.schema + "." + ct.table + " child"
                     + " ON child." + ct.mnemonicColumn + " = parent." + ct.parentIDColumn;
@@ -419,7 +464,7 @@ namespace Lobster
             else
             {
                 command.CommandText = "SELECT " + ct.mnemonicColumn
-                    + ( ct.dataTypeColumnName != null ? ", " + ct.dataTypeColumnName : null )
+                    + ( ct.componentTypeColumn != null ? ", " + ct.componentTypeColumn : null )
                     + " FROM " + ct.schema + "." + ct.table;
             }
 
@@ -444,26 +489,10 @@ namespace Lobster
 
             while ( reader.Read() )
             {
-                string mnemonic, filename;
-                mnemonic = filename = reader.GetString( 0 );
-                string databaseType = ct.dataTypeColumnName != null ? reader.GetString( 1 ) : null;
-
-                string prefix = null;
-                if ( mnemonic.Contains( '/' ) )
-                {
-                    prefix = mnemonic.Substring( 0, mnemonic.LastIndexOf( '/' ) );
-                    filename = mnemonic.Substring( mnemonic.LastIndexOf( '/' ) + 1 );
-                }
-
-                // Assume xml data types for tables without a datatype column
-                if ( ct.dataTypeColumnName == null || prefix == null )
-                {
-                    filename += ".xml";
-                }
-                else
-                {
-                    filename += this.ConvertPrefixToExtension( prefix, databaseType );
-                }
+                string mnemonic;
+                mnemonic = reader.GetString( 0 );
+                string databaseType = ct.componentTypeColumn != null ? reader.GetString( 1 ) : null;
+                string filename = this.ConvertMnemonicToFilename( mnemonic, ct, databaseType );
 
                 // Any files found on the database are "synchronised" 
                 ClobFile clobFile = _clobDir.rootClobNode.FindFileWithName( filename.ToLower() );
@@ -471,7 +500,7 @@ namespace Lobster
                 {
                     clobFile.status = ClobFile.STATUS.SYNCHRONISED;
                     clobFile.databaseMnemonic = mnemonic;
-                    clobFile.databaseType = databaseType;
+                    clobFile.componentType = databaseType;
                 }
                 else
                 {
@@ -512,6 +541,26 @@ namespace Lobster
             }
         }
 
+        private string GetDataTypePrefix( string _dataType )
+        {
+            switch ( _dataType )
+            {
+                case null:
+                case "module":
+                case "text/html":
+                    return null;
+                case ".css":
+                    return "css/";
+                case "image/png":
+                case "image/gif":
+                case "image/jpg":
+                case "image/x-icon":
+                    return "img/";
+                default:
+                    throw new ArgumentException( "Unknown data type: " + _dataType );
+            }
+        }
+
         private string GetClobFooterMessage()
         {
             return String.Format( "<!-- Last clobbered by {0} ({1}) at {2} using Lobster build {3} -->",
@@ -549,6 +598,40 @@ namespace Lobster
             dt = dt.AddSeconds( secondsSince1970 );
             dt = dt.ToLocalTime();
             return dt;
+        }
+
+        public string ConvertFilenameToMnemonic( ClobFile _clobFile, ClobType _ct, string _componentType )
+        {
+            string mnemonic = Path.GetFileNameWithoutExtension( _clobFile.fileInfo.Name );
+            if ( _ct.componentTypeColumn != null )
+            {
+                mnemonic = this.GetDataTypePrefix( _componentType ) + mnemonic;
+            }
+
+            return mnemonic;
+        }
+
+        public string ConvertMnemonicToFilename( string _mnemonic, ClobType _ct, string _databaseType )
+        {
+            string filename = _mnemonic;
+            
+            string prefix = null;
+            if ( _mnemonic.Contains( '/' ) )
+            {
+                prefix = _mnemonic.Substring( 0, _mnemonic.LastIndexOf( '/' ) );
+                filename = _mnemonic.Substring( _mnemonic.LastIndexOf( '/' ) + 1 );
+            }
+
+            // Assume xml data types for tables without a datatype column
+            if ( _ct.componentTypeColumn == null || prefix == null )
+            {
+                filename += ".xml";
+            }
+            else
+            {
+                filename += this.ConvertPrefixToExtension( prefix, _databaseType );
+            }
+            return filename;
         }
     }
 }

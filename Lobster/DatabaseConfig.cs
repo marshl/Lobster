@@ -9,9 +9,11 @@ namespace Lobster
     public class DatabaseConfig
     {
         public string host;
+        public string port;
         public string sid;
         public string username;
         public string password;
         public string codeSource;
+        public bool usePooling;
     }
 }

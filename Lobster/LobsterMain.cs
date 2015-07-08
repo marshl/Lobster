@@ -26,6 +26,15 @@ namespace Lobster
             instance = this;
             this.InitializeComponent();
             this.lobsterModel = new LobsterModel();
+            
+            bool result = this.lobsterModel.LoadDatabaseConfig();
+            if ( !result )
+            {
+                //this.Close();
+                return;
+            }
+            this.lobsterModel.LoadClobTypes();
+            this.lobsterModel.CompareFilesToDatabase();
             this.CreateTreeView();
         }
 
@@ -142,7 +151,7 @@ namespace Lobster
             ClobFile clobFile = (ClobFile)listItem.Tag;
             bool result;
 
-            if ( clobFile.parentClobDirectory.clobType.dataTypeColumnName != null )
+            if ( clobFile.parentClobDirectory.clobType.componentTypeColumn != null )
             {
                 DatatypePicker typePicker = new DatatypePicker( clobFile.parentClobDirectory.clobType );
                 DialogResult dialogResult = typePicker.ShowDialog();
@@ -219,8 +228,7 @@ namespace Lobster
                 } 
             }
 
-            bool clobbed = this.lobsterModel.SendUpdateClobMessage( clobFile );
-            this.OnFileUpdateComplete( clobFile, clobbed );
+            this.lobsterModel.SendUpdateClobMessage( clobFile );
         }
 
         private void LobsterMain_Resize( object sender, EventArgs e )
@@ -241,7 +249,7 @@ namespace Lobster
 
         public void OnFileInsertComplete( ClobFile _clobFile, bool _result )
         {
-            this.notifyIcon1.ShowBalloonTip( Program.BALLOON_TOOLTIP_DURATION,
+            this.notifyIcon1.ShowBalloonTip( Program.BALLOON_TOOLTIP_DURATION_MS,
                 _result ? "File Inserted" : "File Insert Failed",
                 _clobFile.fileInfo.Name,
                 _result ? ToolTipIcon.Info : ToolTipIcon.Error );
@@ -249,7 +257,7 @@ namespace Lobster
 
         public void OnFileUpdateComplete( ClobFile _clobFile, bool _result )
         {
-            this.notifyIcon1.ShowBalloonTip( Program.BALLOON_TOOLTIP_DURATION,
+            this.notifyIcon1.ShowBalloonTip( Program.BALLOON_TOOLTIP_DURATION_MS,
                 _result ? "Database Updated" : "Database Update Failed",
                 _clobFile.fileInfo.Name,
                 _result ? ToolTipIcon.Info : ToolTipIcon.Error );
