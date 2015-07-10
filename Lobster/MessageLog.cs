@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Lobster
@@ -20,12 +16,12 @@ namespace Lobster
             MessageLog.instance = this;
             this.stream = new StreamWriter( Program.LOG_FILE, true );
             this.stream.Write( "\n\n" );
-            Log( "Lobster Started" );
+            Log( "Lobster Logger Started" );
         }
 
         public void Close()
         {
-            Log( "Lobster Terminated Normally" );
+            Log( "Lobster Logger Stopped" );
             this.stream.Close();
         }
 
@@ -33,9 +29,6 @@ namespace Lobster
         {
             _message = DateTime.Now + ": " + _message;
             this.stream.WriteLine( _message );
-#if DEBUG
-            this.stream.Flush();
-#endif
         }
 
         public static void Log( string _message )

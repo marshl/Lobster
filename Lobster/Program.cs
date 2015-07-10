@@ -40,6 +40,7 @@ namespace Lobster
             catch ( Exception _e )
             {
                 MessageLog.Log( _e.ToString() );
+                DialogResult result = MessageBox.Show( "An unhandled " + _e.GetType().ToString() + " was thrown. Check " + LOG_FILE + " for more information.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1 );
             }
             finally
             {

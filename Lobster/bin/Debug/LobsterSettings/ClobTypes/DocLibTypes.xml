@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ClobType xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <name>DocLibTypes</name>
+  <directory>DocLibTypes</directory>
+  <schema>doclibmgr</schema>
+  <table>document_library_types</table>
+  <mnemonicColumn>document_library_type</mnemonicColumn>
+  <clobColumn>xml_data</clobColumn>
+  <dateColumnName>created_datetime</dateColumnName>
+</ClobType>

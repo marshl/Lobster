@@ -8,5 +8,5 @@
   <!-- The location of your Fox project CodeSource folder -->
   <codeSource>C:\IconWS\trunk\CodeSource</codeSource>
   <!-- Using pooling will keep a session open but inactive in the database, but improves Lobster performance -->
-  <usePooling>true</usePooling>
+  <usePooling>false</usePooling>
 </DatabaseConfig>

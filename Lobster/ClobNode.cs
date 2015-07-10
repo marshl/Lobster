@@ -117,7 +117,7 @@ namespace Lobster
             }
             catch ( Exception _e )
             {
-                MessageLog.Log( "A file with the name '" + key + "' already exists" + _e.Message );
+                MessageLog.Log( "A file with the name '" + key + "' already exists " + _e.Message );
             }
             return clobFile;
         }

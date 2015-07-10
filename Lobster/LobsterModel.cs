@@ -77,7 +77,7 @@ namespace Lobster
                 if ( _e is InvalidOperationException || _e is OracleException )
                 {
                     LobsterMain.instance.OnErrorMessage( "Database Connection Failure", "Cannot open connection to database: " + _e.Message );
-                    MessageLog.Log( "Connection to Oracle failed: " + _e.Message );
+                    MessageLog.Log( "Connection to Oracle failed: " + _e.Message + " using connection string: " + con.ConnectionString );
                     return null;
                 }
                 throw;
@@ -118,8 +118,11 @@ namespace Lobster
                 ClobDirectory clobDir = new ClobDirectory();
                 clobDir.clobType = clobType;
                 clobDir.parentModel = this;
-                this.PopulateTreeView( clobDir );
-                this.clobDirectories.Add( clobDir );
+                bool result = this.PopulateClobDirectory( clobDir );
+                if ( result )
+                {
+                    this.clobDirectories.Add( clobDir );
+                }
             }
         }
 
@@ -164,28 +167,28 @@ namespace Lobster
             }
         }
 
-        private bool PopulateTreeView( ClobDirectory _clobDirectory )
+        private bool PopulateClobDirectory( ClobDirectory _clobDirectory )
         {
             DirectoryInfo info = new DirectoryInfo( this.dbConfig.codeSource + "/" + _clobDirectory.clobType.directory );
             if ( !info.Exists )
             {
-                MessageLog.Log( "Folder folder \"" + info.FullName + "\" could not be found" );
-                LobsterMain.instance.OnErrorMessage( "Folder not found", "CodeSource folder \"" + this.dbConfig.codeSource + "\" could not be found" );
+                MessageLog.Log( "Folder \"" + info.FullName + "\" could not be found" );
+                LobsterMain.instance.OnErrorMessage( "Folder not found", "Folder \"" + info.FullName + "\" could not be found for ClobType " + _clobDirectory.clobType.name );
                 return false;
             }
 
             _clobDirectory.rootClobNode = new ClobNode( info, this, _clobDirectory );
-            GetDirectories( _clobDirectory.rootClobNode, _clobDirectory );
+            GetClobNodeDirectories( _clobDirectory.rootClobNode, _clobDirectory );
             return true;
         }
 
-        private void GetDirectories( ClobNode _clobNode, ClobDirectory _clobDirectory )
+        private void GetClobNodeDirectories( ClobNode _clobNode, ClobDirectory _clobDirectory )
         {
             DirectoryInfo[] subDirs = _clobNode.dirInfo.GetDirectories();
             foreach ( DirectoryInfo subDir in subDirs )
             {
                 ClobNode childNode = new ClobNode( subDir, this, _clobDirectory );
-                GetDirectories( childNode, _clobDirectory);
+                GetClobNodeDirectories( childNode, _clobDirectory);
                 _clobNode.childNodes.Add( childNode );
             }
 
@@ -244,7 +247,7 @@ namespace Lobster
             {
                 trans.Rollback();
                 LobsterMain.instance.OnErrorMessage( "Clob Update Failed", "An IO Exception occurred when updating the database: " + _e.Message );
-                MessageLog.Log( "Clob update failed: " + _e.Message );
+                MessageLog.Log( "Clob update failed: " + _e.Message + " on command " + command.CommandText );
                 return false;
             }
 
@@ -254,7 +257,7 @@ namespace Lobster
                 if ( rowsAffected != 1 )
                 {
                     LobsterMain.instance.OnErrorMessage( "Clob Update Failed", rowsAffected + " rows were affected during the update (expected only 1). Rolling back..." );
-                    MessageLog.Log( rowsAffected + " rows were updated" );
+                    MessageLog.Log( "In invalid number of rows ( " + rowsAffected + ") were updated when executing command: " + command.CommandText );
                     trans.Rollback();
                     return false;
                 }
@@ -265,7 +268,7 @@ namespace Lobster
                 {
                     trans.Rollback();
                     LobsterMain.instance.OnErrorMessage( "Clob Update Failed", "An invalid operation occurred when updating the database: " + _e.Message );
-                    MessageLog.Log( "Clob update failed: " + _e.Message + " for command " + command.CommandText );
+                    MessageLog.Log( "Clob update failed: " + _e.Message + " for execution of command: " + command.CommandText );
                     return false;
                 }
                 throw;
@@ -334,7 +337,7 @@ namespace Lobster
                 {
                     LobsterMain.instance.OnErrorMessage( "Clob Insert Error",
                         "An invalid operation occurred when inserting into the parent table of " + _clobFile.fileInfo.Name + ": " + _e.Message );
-                    MessageLog.Log( "Error creating new clob: " + _e.Message );
+                    MessageLog.Log( "Error creating new clob: " + _e.Message + " when executing command: " + command.CommandText );
                     return false;
                 }
                 command.Dispose();
@@ -384,7 +387,7 @@ namespace Lobster
                     trans.Rollback();
                     LobsterMain.instance.OnErrorMessage( "Clob Insert Error",
                             "An invalid operation occurred when inserting " + _clobFile.fileInfo.Name + ": " + _e.Message );
-                    MessageLog.Log( "Error creating new clob: " + _e.Message + " with command: " + command.CommandText );
+                    MessageLog.Log( "Error creating new clob: " + _e.Message + " when executing command: " + command.CommandText );
                     return false;
                 }
                 throw;
@@ -421,30 +424,44 @@ namespace Lobster
             try
             {
                 OracleDataReader reader = command.ExecuteReader();
-                while ( reader.Read() )
+                if ( reader.Read() )
                 {
+                    string result;
                     if ( ct.clobDataType == "clob" )
                     {
                         OracleClob clob = reader.GetOracleClob( 0 );
-                        return clob.Value;
+                        result = clob.Value;
                     }
                     else
                     {
                         OracleXmlType xml = reader.GetOracleXmlType( 0 );
-                        return xml.Value;
+                        result = xml.Value;
+                    }
+
+                    if ( !reader.Read() )
+                    {
+                        return result;
+                    }
+                    else
+                    {
+                        LobsterMain.instance.OnErrorMessage( "Clob Data Fetch Error",
+                       "Too many rows were found for " + _clobFile.fileInfo.Name );
+                        MessageLog.Log( "Too many rows found on clob retrieval of " + _clobFile.fileInfo.Name + " when executing command: " + command.CommandText );
+                        return null;
                     }
                 }
             }
-            catch ( InvalidOperationException _e )
+            catch ( Exception _e )
             {
                 LobsterMain.instance.OnErrorMessage( "Clob Data Fetch Error",
                         "An invalid operation occurred when retreiving the data of " + _clobFile.fileInfo.Name + ": " + _e.Message );
-                MessageLog.Log( "Error retrieving data: " + _e.Message );
+                MessageLog.Log( "Error retrieving data: " + _e.Message + " when executing command " + command.CommandText );
                 return null;
             }
+
             LobsterMain.instance.OnErrorMessage( "Clob Data Fetch Error",
                         "No data was found for " + _clobFile.fileInfo.Name );
-            MessageLog.Log( "No data found on clob retrieval" );
+            MessageLog.Log( "No data found on clob retrieval of " + _clobFile.fileInfo.Name + " when executing command: " + command.CommandText );
             return null;
         }
 
@@ -477,7 +494,7 @@ namespace Lobster
             {
                 LobsterMain.instance.OnErrorMessage( "Directory Comparison Error",
                         "An invalid operation occurred when retriving the file list for  " + ct.schema + "." + ct.table + ": " + _e.Message );
-                MessageLog.Log( "Error comparing to database: " + _e.Message );
+                MessageLog.Log( "Error comparing to database: " + _e.Message + " when executing command " + command.CommandText );
                 return;
             }
 
@@ -504,7 +521,7 @@ namespace Lobster
                 }
                 else
                 {
-                    MessageLog.Log( "No file found for " + filename + " (" + mnemonic + ")" );
+                    MessageLog.Log( "When retreiving rows from " + ct.name + " no file was found for fabricated filename '" + filename + "' ( database mnemonic of '" + mnemonic + "')" );
                 }
             }
             command.Dispose();
@@ -571,7 +588,7 @@ namespace Lobster
         }
 
         //http://stackoverflow.com/questions/1600962/displaying-the-build-date
-        private DateTime RetrieveLinkerTimestamp()
+        private static DateTime RetrieveLinkerTimestamp()
         {
             string filePath = System.Reflection.Assembly.GetCallingAssembly().Location;
             const int c_PeHeaderOffset = 60;
