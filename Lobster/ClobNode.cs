@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace Lobster
 {
@@ -20,16 +16,17 @@ namespace Lobster
 
         public DirectoryInfo dirInfo;
         private LobsterModel model;
-        private ClobDirectory baseDirectory;
+        public ClobDirectory baseDirectory;
 
         public List<ClobNode> childNodes = new List<ClobNode>();
-        public Dictionary<string, ClobFile> clobFileMap = new Dictionary<string, ClobFile>();
+        public Dictionary<string, ClobFile> clobFileMap;
 
         public void GetWorkingFiles( ref List<ClobFile> _workingFiles )
         {
             foreach ( KeyValuePair<string, ClobFile> pair in this.clobFileMap )
             {
-                if ( !pair.Value.fileInfo.IsReadOnly )
+                ClobFile clobFile = pair.Value;
+                if ( clobFile.localClobFile != null && !clobFile.localClobFile.fileInfo.IsReadOnly )
                 {
                     _workingFiles.Add( pair.Value );
                 }
@@ -69,6 +66,7 @@ namespace Lobster
             fileWatcher.Changed += new FileSystemEventHandler( OnFileChanged );
             fileWatcher.Created += new FileSystemEventHandler( OnFileCreated );
             fileWatcher.Deleted += new FileSystemEventHandler( OnFileDeleted );
+            fileWatcher.Renamed += new RenamedEventHandler( OnFileRenamed );
             fileWatcher.EnableRaisingEvents = true;
         }
 
@@ -82,8 +80,7 @@ namespace Lobster
             ClobFile clobFile;
             if ( this.clobFileMap.TryGetValue( _e.Name.ToLower(), out clobFile ) )
             { 
-                FileInfo fileInfo = new FileInfo( _e.FullPath );
-                if ( !fileInfo.IsReadOnly && clobFile.status == ClobFile.STATUS.SYNCHRONISED )
+                if ( clobFile.localClobFile != null && clobFile.localClobFile.fileInfo.IsReadOnly == false )
                 {
                     this.model.SendUpdateClobMessage( clobFile );
                 }
@@ -92,34 +89,43 @@ namespace Lobster
 
         public void OnFileCreated( object _source, FileSystemEventArgs _e )
         {
-            ClobFile clobFile = this.AddClobFile( new FileInfo( _e.FullPath ) );
-            clobFile.status = ClobFile.STATUS.LOCAL_ONLY;
+            this.baseDirectory.RefreshFileLists();
         }
 
         private void OnFileDeleted( object _sender, FileSystemEventArgs _e )
         {
-            if ( this.clobFileMap.ContainsKey( _e.Name.ToLower() ) )
-            {
-                this.clobFileMap.Remove( _e.Name.ToLower() );
-                this.baseDirectory.fullpathClobMap.Remove( _e.Name.ToLower() );
-                LobsterMain.instance.OnDirectoryStructureChanged();
-            }
+            this.baseDirectory.RefreshFileLists();
         }
 
-        public ClobFile AddClobFile( FileInfo fileInfo )
+        private void OnFileRenamed( object _sender, FileSystemEventArgs _e )
         {
-            ClobFile clobFile = new ClobFile( fileInfo, this, this.baseDirectory );
-            string key = fileInfo.Name;
-            try
+            this.baseDirectory.RefreshFileLists();
+        }
+
+        public void AddLocalClobFile( FileInfo _fileInfo )
+        {
+            ClobFile clobFile = new ClobFile( this.baseDirectory );
+            clobFile.parentClobDirectory = this.baseDirectory;
+
+            clobFile.localClobFile = new LocalClobFile();
+            clobFile.localClobFile.fileInfo = _fileInfo;
+
+            this.clobFileMap.Add( _fileInfo.Name, clobFile );
+            this.baseDirectory.filenameClobMap.Add( _fileInfo.Name, clobFile );
+        }
+
+        public void RepopulateFileLists_r()
+        {
+            this.clobFileMap = new Dictionary<string, ClobFile>();
+            foreach ( FileInfo fileInfo in this.dirInfo.GetFiles() )
             {
-                this.baseDirectory.fullpathClobMap.Add( fileInfo.FullName.ToLower(), clobFile );
-                this.clobFileMap.Add( key.ToLower(), clobFile );
+                this.AddLocalClobFile( fileInfo );
             }
-            catch ( Exception _e )
+
+            foreach ( ClobNode child in this.childNodes )
             {
-                MessageLog.Log( "A file with the name '" + key + "' already exists " + _e.Message );
+                child.RepopulateFileLists_r();
             }
-            return clobFile;
         }
     }
 }

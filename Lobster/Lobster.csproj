@@ -88,6 +88,7 @@
     <Compile Include="DatatypePicker.Designer.cs">
       <DependentUpon>DatatypePicker.cs</DependentUpon>
     </Compile>
+    <Compile Include="DBClobFile.cs" />
     <Compile Include="Images.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -100,6 +101,7 @@
       <DependentUpon>LobsterMain.cs</DependentUpon>
     </Compile>
     <Compile Include="LobsterModel.cs" />
+    <Compile Include="LocalClobFile.cs" />
     <Compile Include="MessageLog.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -142,6 +144,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="cartoon-lobster.ico" />
+    <None Include="img\112_RefreshArrow_Blue.ico" />
     <None Include="img\popup_success.bmp" />
     <None Include="img\popup_failure.bmp" />
     <None Include="img\popup.bmp" />

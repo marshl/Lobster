@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
+using System.Media;
 
 namespace Lobster
 {
@@ -35,7 +36,8 @@ namespace Lobster
             {
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault( false );
-                Application.Run( new LobsterMain() );
+                LobsterMain lobsterMain = new LobsterMain();
+                Application.Run( lobsterMain );
             }
             catch ( Exception _e )
             {

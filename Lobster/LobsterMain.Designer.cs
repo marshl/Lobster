@@ -51,7 +51,10 @@ namespace Lobster
             this.clobToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showInExplorerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.diffWithDatabaseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openDatabaseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
+            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.requeryDatabaseButton = new System.Windows.Forms.ToolStripButton();
             this.treeViewTab.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.treeViewSplitContainer)).BeginInit();
             this.treeViewSplitContainer.Panel1.SuspendLayout();
@@ -60,6 +63,7 @@ namespace Lobster
             this.MainTabControl.SuspendLayout();
             this.workingFileTab.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
+            this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // treeViewTab
@@ -68,7 +72,7 @@ namespace Lobster
             this.treeViewTab.Location = new System.Drawing.Point(4, 29);
             this.treeViewTab.Name = "treeViewTab";
             this.treeViewTab.Padding = new System.Windows.Forms.Padding(3);
-            this.treeViewTab.Size = new System.Drawing.Size(1114, 655);
+            this.treeViewTab.Size = new System.Drawing.Size(1138, 613);
             this.treeViewTab.TabIndex = 0;
             this.treeViewTab.Text = "Tree View";
             this.treeViewTab.UseVisualStyleBackColor = true;
@@ -87,8 +91,8 @@ namespace Lobster
             // treeViewSplitContainer.Panel2
             // 
             this.treeViewSplitContainer.Panel2.Controls.Add(this.fileListView);
-            this.treeViewSplitContainer.Size = new System.Drawing.Size(1108, 649);
-            this.treeViewSplitContainer.SplitterDistance = 280;
+            this.treeViewSplitContainer.Size = new System.Drawing.Size(1132, 607);
+            this.treeViewSplitContainer.SplitterDistance = 286;
             this.treeViewSplitContainer.SplitterWidth = 6;
             this.treeViewSplitContainer.TabIndex = 0;
             // 
@@ -101,7 +105,7 @@ namespace Lobster
             this.fileTreeView.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.fileTreeView.Name = "fileTreeView";
             this.fileTreeView.SelectedImageIndex = 0;
-            this.fileTreeView.Size = new System.Drawing.Size(280, 649);
+            this.fileTreeView.Size = new System.Drawing.Size(286, 607);
             this.fileTreeView.TabIndex = 0;
             this.fileTreeView.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.treeView1_NodeMouseClick);
             // 
@@ -110,8 +114,9 @@ namespace Lobster
             this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
             this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
             this.imageList1.Images.SetKeyName(0, "folder");
-            this.imageList1.Images.SetKeyName(1, "document");
+            this.imageList1.Images.SetKeyName(1, "Page.png");
             this.imageList1.Images.SetKeyName(2, "lock");
+            this.imageList1.Images.SetKeyName(3, "attach_file.png");
             // 
             // fileListView
             // 
@@ -125,7 +130,7 @@ namespace Lobster
             this.fileListView.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.fileListView.MultiSelect = false;
             this.fileListView.Name = "fileListView";
-            this.fileListView.Size = new System.Drawing.Size(822, 649);
+            this.fileListView.Size = new System.Drawing.Size(840, 607);
             this.fileListView.SmallImageList = this.imageList1;
             this.fileListView.TabIndex = 0;
             this.fileListView.UseCompatibleStateImageBehavior = false;
@@ -151,10 +156,10 @@ namespace Lobster
             | System.Windows.Forms.AnchorStyles.Right)));
             this.MainTabControl.Controls.Add(this.treeViewTab);
             this.MainTabControl.Controls.Add(this.workingFileTab);
-            this.MainTabControl.Location = new System.Drawing.Point(12, 12);
+            this.MainTabControl.Location = new System.Drawing.Point(0, 41);
             this.MainTabControl.Name = "MainTabControl";
             this.MainTabControl.SelectedIndex = 0;
-            this.MainTabControl.Size = new System.Drawing.Size(1122, 688);
+            this.MainTabControl.Size = new System.Drawing.Size(1146, 646);
             this.MainTabControl.TabIndex = 1;
             this.MainTabControl.Selecting += new System.Windows.Forms.TabControlCancelEventHandler(this.MainTabControl_Selecting);
             // 
@@ -164,7 +169,7 @@ namespace Lobster
             this.workingFileTab.Location = new System.Drawing.Point(4, 29);
             this.workingFileTab.Name = "workingFileTab";
             this.workingFileTab.Padding = new System.Windows.Forms.Padding(3);
-            this.workingFileTab.Size = new System.Drawing.Size(1114, 655);
+            this.workingFileTab.Size = new System.Drawing.Size(1114, 633);
             this.workingFileTab.TabIndex = 1;
             this.workingFileTab.Text = "Working Files";
             this.workingFileTab.UseVisualStyleBackColor = true;
@@ -181,7 +186,7 @@ namespace Lobster
             this.workingFileList.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.workingFileList.MultiSelect = false;
             this.workingFileList.Name = "workingFileList";
-            this.workingFileList.Size = new System.Drawing.Size(1108, 649);
+            this.workingFileList.Size = new System.Drawing.Size(1108, 627);
             this.workingFileList.SmallImageList = this.imageList1;
             this.workingFileList.TabIndex = 1;
             this.workingFileList.UseCompatibleStateImageBehavior = false;
@@ -207,9 +212,10 @@ namespace Lobster
             this.insertToolStripMenuItem,
             this.clobToolStripMenuItem,
             this.showInExplorerToolStripMenuItem,
-            this.diffWithDatabaseToolStripMenuItem});
+            this.diffWithDatabaseToolStripMenuItem,
+            this.openDatabaseToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(258, 124);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(285, 187);
             // 
             // insertToolStripMenuItem
             // 
@@ -239,6 +245,14 @@ namespace Lobster
             this.diffWithDatabaseToolStripMenuItem.Text = "Diff with Database";
             this.diffWithDatabaseToolStripMenuItem.Click += new System.EventHandler(this.diffWithDatabaseToolStripMenuItem_Click);
             // 
+            // openDatabaseToolStripMenuItem
+            // 
+            this.openDatabaseToolStripMenuItem.Name = "openDatabaseToolStripMenuItem";
+            this.openDatabaseToolStripMenuItem.ShortcutKeyDisplayString = "";
+            this.openDatabaseToolStripMenuItem.Size = new System.Drawing.Size(284, 30);
+            this.openDatabaseToolStripMenuItem.Text = "Open Database Version";
+            this.openDatabaseToolStripMenuItem.Click += new System.EventHandler(this.openDatabaseToolStripMenuItem_Click);
+            // 
             // notifyIcon1
             // 
             this.notifyIcon1.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon1.Icon")));
@@ -246,11 +260,33 @@ namespace Lobster
             this.notifyIcon1.Visible = true;
             this.notifyIcon1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseClick);
             // 
+            // toolStrip1
+            // 
+            this.toolStrip1.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.requeryDatabaseButton});
+            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
+            this.toolStrip1.Name = "toolStrip1";
+            this.toolStrip1.Size = new System.Drawing.Size(1146, 25);
+            this.toolStrip1.TabIndex = 2;
+            this.toolStrip1.Text = "toolStrip1";
+            // 
+            // requeryDatabaseButton
+            // 
+            this.requeryDatabaseButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.requeryDatabaseButton.Image = global::Lobster.Images._112_RefreshArrow_Blue;
+            this.requeryDatabaseButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.requeryDatabaseButton.Name = "requeryDatabaseButton";
+            this.requeryDatabaseButton.Size = new System.Drawing.Size(23, 25);
+            this.requeryDatabaseButton.Text = "Requery Database";
+            this.requeryDatabaseButton.Click += new System.EventHandler(this.requeryDatabaseButton_Click);
+            // 
             // LobsterMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1146, 712);
+            this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.MainTabControl);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "LobsterMain";
@@ -265,7 +301,10 @@ namespace Lobster
             this.MainTabControl.ResumeLayout(false);
             this.workingFileTab.ResumeLayout(false);
             this.contextMenuStrip1.ResumeLayout(false);
+            this.toolStrip1.ResumeLayout(false);
+            this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -291,6 +330,9 @@ namespace Lobster
         private System.Windows.Forms.ColumnHeader columnHeader1;
         private System.Windows.Forms.ColumnHeader columnHeader2;
         private System.Windows.Forms.ColumnHeader columnHeader3;
+        private System.Windows.Forms.ToolStripMenuItem openDatabaseToolStripMenuItem;
+        private System.Windows.Forms.ToolStrip toolStrip1;
+        private System.Windows.Forms.ToolStripButton requeryDatabaseButton;
     }
 }
 
