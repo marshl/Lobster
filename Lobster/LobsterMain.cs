@@ -6,7 +6,6 @@ using System.IO;
 using System.Media;
 using System.Windows.Forms;
 
-
 namespace Lobster
 {
     public partial class LobsterMain : Form

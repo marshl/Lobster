@@ -9,7 +9,6 @@ using Oracle.ManagedDataAccess.Client;
 using Oracle.ManagedDataAccess.Types;
 using System.Diagnostics;
 using System.Windows.Forms;
-using System.Timers;
 using System.Threading;
 
 namespace Lobster
@@ -549,60 +548,6 @@ namespace Lobster
             }
             command.Dispose();
         }
-
-        /*private string GetFileExtensionForComponentType( string _prefix, string _datatype )
-        {
-            switch ( _prefix )
-            {
-                case "js":
-                    return ".js";
-                case "css":
-                    return ".css";
-                case "Fox":
-                    return ".xml";
-                case "img":
-                {
-                    switch ( _datatype )
-                    {
-                        case "image/png":
-                            return ".png";
-                        case "image/gif":
-                            return ".gif";
-                        case "image/jpg":
-                            return ".jpg";
-                        case "image/jpeg":
-                            return ".jpeg";
-                        case "image/x-icon":
-                            return ".ico";
-                        default:
-                            throw new ArgumentException( "Unknown datatype " + _datatype + " for prefix " + _prefix );
-                    }
-                }
-                default:
-                    throw new ArgumentException( "Unknown prefix " + _prefix );
-            }
-        }*/
-
-        /*private string GetMnemonicPrefixForComponentType( string _dataType )
-        {
-            switch ( _dataType )
-            {
-                case null:
-                case "module":
-                case "text/html":
-                    return null;
-                case "text/css":
-                    return "css/";
-                case "image/png":
-                case "image/gif":
-                case "image/jpg":
-                case "image/jpeg":
-                case "image/x-icon":
-                    return "img/";
-                default:
-                    throw new ArgumentException( "Unknown data type: " + _dataType );
-            }
-        }*/
 
         private string GetClobFooterMessage()
         {

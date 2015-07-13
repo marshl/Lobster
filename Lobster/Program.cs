@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Windows.Forms;
-using System.Runtime.InteropServices;
-using System.Media;
 
 namespace Lobster
 {
@@ -13,16 +11,7 @@ namespace Lobster
         public static string LOG_FILE = "lobster.log";
 
         public static int BALLOON_TOOLTIP_DURATION_MS = 2000;
-
-        [DllImport( "kernel32.dll" )]
-        static extern bool AttachConsole( uint dwProcessId );
-
-        [DllImport( "kernel32.dll", SetLastError = true )]
-        static extern bool AllocConsole();
-        private static uint ATTACH_PARENT_PROCESS = 0x0ffffffff;
-
         public static int CLOB_DELAY_DURATION_MS = 200;
-
 
         /// <summary>
         /// The main entry point for the application.

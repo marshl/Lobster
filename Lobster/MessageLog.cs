@@ -16,12 +16,12 @@ namespace Lobster
             MessageLog.instance = this;
             this.stream = new StreamWriter( Program.LOG_FILE, true );
             this.stream.Write( "\n\n" );
-            Log( "Lobster Logger Started" );
+            Log( "Starting Lobster" );
         }
 
         public void Close()
         {
-            Log( "Lobster Logger Stopped" );
+            Log( "Lobster Stopped" );
             this.stream.Close();
         }
 
