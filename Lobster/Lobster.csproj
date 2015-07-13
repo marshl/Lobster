@@ -103,6 +103,7 @@
     <Compile Include="LobsterModel.cs" />
     <Compile Include="LocalClobFile.cs" />
     <Compile Include="MessageLog.cs" />
+    <Compile Include="MimeMapper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TaskbarNotifier.cs">

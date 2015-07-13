@@ -99,6 +99,7 @@ namespace Lobster
             // fileTreeView
             // 
             this.fileTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.fileTreeView.HideSelection = false;
             this.fileTreeView.ImageIndex = 0;
             this.fileTreeView.ImageList = this.imageList1;
             this.fileTreeView.Location = new System.Drawing.Point(0, 0);
@@ -169,7 +170,7 @@ namespace Lobster
             this.workingFileTab.Location = new System.Drawing.Point(4, 29);
             this.workingFileTab.Name = "workingFileTab";
             this.workingFileTab.Padding = new System.Windows.Forms.Padding(3);
-            this.workingFileTab.Size = new System.Drawing.Size(1114, 633);
+            this.workingFileTab.Size = new System.Drawing.Size(1138, 613);
             this.workingFileTab.TabIndex = 1;
             this.workingFileTab.Text = "Working Files";
             this.workingFileTab.UseVisualStyleBackColor = true;
@@ -186,7 +187,7 @@ namespace Lobster
             this.workingFileList.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.workingFileList.MultiSelect = false;
             this.workingFileList.Name = "workingFileList";
-            this.workingFileList.Size = new System.Drawing.Size(1108, 627);
+            this.workingFileList.Size = new System.Drawing.Size(1132, 607);
             this.workingFileList.SmallImageList = this.imageList1;
             this.workingFileList.TabIndex = 1;
             this.workingFileList.UseCompatibleStateImageBehavior = false;
@@ -215,33 +216,33 @@ namespace Lobster
             this.diffWithDatabaseToolStripMenuItem,
             this.openDatabaseToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(285, 187);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(285, 154);
             // 
             // insertToolStripMenuItem
             // 
             this.insertToolStripMenuItem.Name = "insertToolStripMenuItem";
-            this.insertToolStripMenuItem.Size = new System.Drawing.Size(257, 30);
+            this.insertToolStripMenuItem.Size = new System.Drawing.Size(284, 30);
             this.insertToolStripMenuItem.Text = "Insert Into Database";
             this.insertToolStripMenuItem.Click += new System.EventHandler(this.insertToolStripMenuItem_Click);
             // 
             // clobToolStripMenuItem
             // 
             this.clobToolStripMenuItem.Name = "clobToolStripMenuItem";
-            this.clobToolStripMenuItem.Size = new System.Drawing.Size(257, 30);
+            this.clobToolStripMenuItem.Size = new System.Drawing.Size(284, 30);
             this.clobToolStripMenuItem.Text = "Force Clob";
             this.clobToolStripMenuItem.Click += new System.EventHandler(this.clobToolStripMenuItem_Click);
             // 
             // showInExplorerToolStripMenuItem
             // 
             this.showInExplorerToolStripMenuItem.Name = "showInExplorerToolStripMenuItem";
-            this.showInExplorerToolStripMenuItem.Size = new System.Drawing.Size(257, 30);
+            this.showInExplorerToolStripMenuItem.Size = new System.Drawing.Size(284, 30);
             this.showInExplorerToolStripMenuItem.Text = "Show In Explorer";
             this.showInExplorerToolStripMenuItem.Click += new System.EventHandler(this.showInExplorerToolStripMenuItem_Click);
             // 
             // diffWithDatabaseToolStripMenuItem
             // 
             this.diffWithDatabaseToolStripMenuItem.Name = "diffWithDatabaseToolStripMenuItem";
-            this.diffWithDatabaseToolStripMenuItem.Size = new System.Drawing.Size(257, 30);
+            this.diffWithDatabaseToolStripMenuItem.Size = new System.Drawing.Size(284, 30);
             this.diffWithDatabaseToolStripMenuItem.Text = "Diff with Database";
             this.diffWithDatabaseToolStripMenuItem.Click += new System.EventHandler(this.diffWithDatabaseToolStripMenuItem_Click);
             // 
@@ -263,21 +264,22 @@ namespace Lobster
             // toolStrip1
             // 
             this.toolStrip1.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.requeryDatabaseButton});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1146, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(1146, 31);
             this.toolStrip1.TabIndex = 2;
             this.toolStrip1.Text = "toolStrip1";
             // 
             // requeryDatabaseButton
             // 
             this.requeryDatabaseButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.requeryDatabaseButton.Image = global::Lobster.Images._112_RefreshArrow_Blue;
+            this.requeryDatabaseButton.Image = global::Lobster.Images.refresh_arrow_blue;
             this.requeryDatabaseButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.requeryDatabaseButton.Name = "requeryDatabaseButton";
-            this.requeryDatabaseButton.Size = new System.Drawing.Size(23, 25);
+            this.requeryDatabaseButton.Size = new System.Drawing.Size(28, 28);
             this.requeryDatabaseButton.Text = "Requery Database";
             this.requeryDatabaseButton.Click += new System.EventHandler(this.requeryDatabaseButton_Click);
             // 

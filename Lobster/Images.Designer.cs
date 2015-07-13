@@ -63,16 +63,6 @@ namespace Lobster {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap _112_RefreshArrow_Blue {
-            get {
-                object obj = ResourceManager.GetObject("112_RefreshArrow_Blue", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap popup_failure {
             get {
                 object obj = ResourceManager.GetObject("popup_failure", resourceCulture);
@@ -86,6 +76,16 @@ namespace Lobster {
         internal static System.Drawing.Bitmap popup_success {
             get {
                 object obj = ResourceManager.GetObject("popup_success", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap refresh_arrow_blue {
+            get {
+                object obj = ResourceManager.GetObject("refresh_arrow_blue", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

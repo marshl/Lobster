@@ -104,6 +104,12 @@ namespace Lobster
 
         public void AddLocalClobFile( FileInfo _fileInfo )
         {
+            if ( this.baseDirectory.filenameClobMap.ContainsKey( _fileInfo.Name ) )
+            {
+                LobsterMain.OnErrorMessage( "Duplicate File", "A duplicate file entry for " + _fileInfo.Name + " has been found. File names must be unique within a Clob Type (bug fix required)." );
+                return;
+            }
+
             ClobFile clobFile = new ClobFile( this.baseDirectory );
             clobFile.parentClobDirectory = this.baseDirectory;
 

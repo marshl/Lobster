@@ -20,6 +20,15 @@ namespace Lobster
         public List<ClobDirectory> clobDirectories;
         public List<FileInfo> tempFileList = new List<FileInfo>();
 
+        public Dictionary<string, string> mimeToPrefixMap;
+        public Dictionary<string, string> mimeToExtensionMap;
+
+        public LobsterModel()
+        {
+            LoadFileIntoMap( @"LobsterSettings\mime_to_prefix.ini", out this.mimeToPrefixMap );
+            LoadFileIntoMap( @"LobsterSettings\mime_to_extension.ini", out this.mimeToExtensionMap );
+        }
+
         public bool LoadDatabaseConfig()
         {
             this.dbConfig = new DatabaseConfig();
@@ -76,7 +85,7 @@ namespace Lobster
             {
                 if ( _e is InvalidOperationException || _e is OracleException )
                 {
-                    LobsterMain.instance.OnErrorMessage( "Database Connection Failure", "Cannot open connection to database: " + _e.Message );
+                    LobsterMain.OnErrorMessage( "Database Connection Failure", "Cannot open connection to database: " + _e.Message );
                     MessageLog.Log( "Connection to Oracle failed: " + _e.Message + " using connection string: " + con.ConnectionString );
                     return null;
                 }
@@ -121,7 +130,6 @@ namespace Lobster
                 bool result = this.PopulateClobDirectory( clobDir );
                 if ( result )
                 {
-                    clobDir.rootClobNode.RepopulateFileLists_r();
                     this.clobDirectories.Add( clobDir );
                 }
             }
@@ -169,7 +177,7 @@ namespace Lobster
             if ( !info.Exists )
             {
                 MessageLog.Log( "Folder \"" + info.FullName + "\" could not be found" );
-                LobsterMain.instance.OnErrorMessage( "Folder not found", "Folder \"" + info.FullName + "\" could not be found for ClobType " + _clobDirectory.clobType.name );
+                LobsterMain.OnErrorMessage( "Folder not found", "Folder \"" + info.FullName + "\" could not be found for ClobType " + _clobDirectory.clobType.name );
                 return false;
             }
 
@@ -238,7 +246,7 @@ namespace Lobster
             catch ( IOException _e )
             {
                 trans.Rollback();
-                LobsterMain.instance.OnErrorMessage( "Clob Update Failed", "An IO Exception occurred when updating the database: " + _e.Message );
+                LobsterMain.OnErrorMessage( "Clob Update Failed", "An IO Exception occurred when updating the database: " + _e.Message );
                 MessageLog.Log( "Clob update failed: " + _e.Message + " on command " + command.CommandText );
                 return false;
             }
@@ -248,7 +256,7 @@ namespace Lobster
                 int rowsAffected = command.ExecuteNonQuery();
                 if ( rowsAffected != 1 )
                 {
-                    LobsterMain.instance.OnErrorMessage( "Clob Update Failed", rowsAffected + " rows were affected during the update (expected only 1). Rolling back..." );
+                    LobsterMain.OnErrorMessage( "Clob Update Failed", rowsAffected + " rows were affected during the update (expected only 1). Rolling back..." );
                     MessageLog.Log( "In invalid number of rows ( " + rowsAffected + ") were updated when executing command: " + command.CommandText );
                     trans.Rollback();
                     return false;
@@ -259,7 +267,7 @@ namespace Lobster
                 if ( _e is OracleException || _e is InvalidOperationException )
                 {
                     trans.Rollback();
-                    LobsterMain.instance.OnErrorMessage( "Clob Update Failed", "An invalid operation occurred when updating the database: " + _e.Message );
+                    LobsterMain.OnErrorMessage( "Clob Update Failed", "An invalid operation occurred when updating the database: " + _e.Message );
                     MessageLog.Log( "Clob update failed: " + _e.Message + " for execution of command: " + command.CommandText );
                     return false;
                 }
@@ -331,7 +339,7 @@ namespace Lobster
                 }
                 catch ( Exception _e )
                 {
-                    LobsterMain.instance.OnErrorMessage( "Clob Insert Error",
+                    LobsterMain.OnErrorMessage( "Clob Insert Error",
                         "An invalid operation occurred when inserting into the parent table of " + _clobFile.localClobFile.fileInfo.Name + ": " + _e.Message );
                     MessageLog.Log( "Error creating new clob: " + _e.Message + " when executing command: " + command.CommandText );
                     return false;
@@ -381,7 +389,7 @@ namespace Lobster
                 {
                     // Discard the insert amde into the parent table
                     trans.Rollback();
-                    LobsterMain.instance.OnErrorMessage( "Clob Insert Error",
+                    LobsterMain.OnErrorMessage( "Clob Insert Error",
                             "An invalid operation occurred when inserting " + _clobFile.localClobFile.fileInfo.Name + ": " + _e.Message );
                     MessageLog.Log( "Error creating new clob: " + _e.Message + " when executing command: " + command.CommandText );
                     return false;
@@ -472,7 +480,7 @@ namespace Lobster
                     }
                     else
                     {
-                        LobsterMain.instance.OnErrorMessage( "Clob Data Fetch Error",
+                        LobsterMain.OnErrorMessage( "Clob Data Fetch Error",
                        "Too many rows were found for " + _clobFile.localClobFile.fileInfo.Name );
                         MessageLog.Log( "Too many rows found on clob retrieval of " + _clobFile.dbClobFile.mnemonic + " when executing command: " + command.CommandText );
                         return null;
@@ -483,7 +491,7 @@ namespace Lobster
             {
                 if ( _e is InvalidOperationException || _e is OracleNullValueException )
                 {
-                    LobsterMain.instance.OnErrorMessage( "Clob Data Fetch Error",
+                    LobsterMain.OnErrorMessage( "Clob Data Fetch Error",
                             "An invalid operation occurred when retreiving the data of " + _clobFile.dbClobFile.mnemonic + ": " + _e.Message );
                     MessageLog.Log( "Error retrieving data: " + _e.Message + " when executing command " + command.CommandText );
                     return null;
@@ -491,7 +499,7 @@ namespace Lobster
                 throw;
             }
 
-            LobsterMain.instance.OnErrorMessage( "Clob Data Fetch Error",
+            LobsterMain.OnErrorMessage( "Clob Data Fetch Error",
                         "No data was found for " + _clobFile.dbClobFile.mnemonic );
             MessageLog.Log( "No data found on clob retrieval of " + _clobFile.dbClobFile.mnemonic + " when executing command: " + command.CommandText );
             return null;
@@ -525,7 +533,7 @@ namespace Lobster
             }
             catch ( InvalidOperationException _e )
             {
-                LobsterMain.instance.OnErrorMessage( "Directory Comparison Error",
+                LobsterMain.OnErrorMessage( "Directory Comparison Error",
                         "An invalid operation occurred when retriving the file list for  " + ct.schema + "." + ct.table + ": " + _e.Message );
                 MessageLog.Log( "Error comparing to database: " + _e.Message + " when executing command " + command.CommandText );
                 return;
@@ -542,7 +550,7 @@ namespace Lobster
             command.Dispose();
         }
 
-        private string ConvertPrefixToExtension( string _prefix, string _datatype )
+        /*private string GetFileExtensionForComponentType( string _prefix, string _datatype )
         {
             switch ( _prefix )
             {
@@ -562,18 +570,20 @@ namespace Lobster
                             return ".gif";
                         case "image/jpg":
                             return ".jpg";
+                        case "image/jpeg":
+                            return ".jpeg";
                         case "image/x-icon":
                             return ".ico";
                         default:
-                            throw new ArgumentException( "Unknown datatype " + _datatype + " for img prefix" );
+                            throw new ArgumentException( "Unknown datatype " + _datatype + " for prefix " + _prefix );
                     }
                 }
                 default:
                     throw new ArgumentException( "Unknown prefix " + _prefix );
             }
-        }
+        }*/
 
-        private string GetDataTypePrefix( string _dataType )
+        /*private string GetMnemonicPrefixForComponentType( string _dataType )
         {
             switch ( _dataType )
             {
@@ -581,17 +591,18 @@ namespace Lobster
                 case "module":
                 case "text/html":
                     return null;
-                case "test/css":
+                case "text/css":
                     return "css/";
                 case "image/png":
                 case "image/gif":
                 case "image/jpg":
+                case "image/jpeg":
                 case "image/x-icon":
                     return "img/";
                 default:
                     throw new ArgumentException( "Unknown data type: " + _dataType );
             }
-        }
+        }*/
 
         private string GetClobFooterMessage()
         {
@@ -638,7 +649,12 @@ namespace Lobster
             string mnemonic = Path.GetFileNameWithoutExtension( _clobFile.localClobFile.fileInfo.Name );
             if ( _ct.componentTypeColumn != null )
             {
-                mnemonic = this.GetDataTypePrefix( _componentType ) + mnemonic;
+                if ( !this.mimeToPrefixMap.ContainsKey( _componentType ) )
+                {
+                    throw new ArgumentException( "Unknown mime-to-prefix key " + _componentType );
+                }
+                string prefix = this.mimeToPrefixMap[_componentType];
+                mnemonic = prefix + mnemonic;
             }
 
             return mnemonic;
@@ -662,9 +678,41 @@ namespace Lobster
             }
             else
             {
-                filename += this.ConvertPrefixToExtension( prefix, _databaseType );
+                string extension;
+                if ( !this.mimeToExtensionMap.TryGetValue( _databaseType, out extension ) )
+                {
+                    throw new ArgumentException( "Unkown mime-to-extension key " + _databaseType );
+                }
+                filename += extension;
             }
             return filename;
+        }
+
+        public static void LoadFileIntoMap( string _path, out Dictionary<string, string> _map )
+        {
+            _map = new Dictionary<string, string>();
+            StreamReader reader = new StreamReader( _path );
+            string line;
+            while ( ( line = reader.ReadLine() ) != null )
+            {
+                line = line.Trim();
+                if ( line.Contains( '#' ) )
+                {
+                    line = line.Substring( line.IndexOf( '#' ) );
+                }
+
+                if ( line.Length == 0 || !line.Contains( '=' ) )
+                {
+                    continue;
+                }
+
+                string[] split = line.Split( '=' );
+                string extension = split[0];
+                string type = split[1];
+
+                _map.Add( extension, type );
+            }
+            reader.Close();
         }
     }
 }

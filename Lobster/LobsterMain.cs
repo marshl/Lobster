@@ -243,7 +243,7 @@ namespace Lobster
             FileInfo tempFile = this.lobsterModel.SendDownloadClobDataToFileMessage( clobFile );
             if ( tempFile == null )
             {
-                this.OnErrorMessage( "Diff with Database", "An error ocurred when fetching the file data." );
+                LobsterMain.OnErrorMessage( "Diff with Database", "An error ocurred when fetching the file data." );
                 return;
             }
 
@@ -312,7 +312,7 @@ namespace Lobster
             ( _result ? SystemSounds.Beep : SystemSounds.Exclamation ).Play();
         }
 
-        public void OnErrorMessage( string _caption, string _text )
+        public static void OnErrorMessage( string _caption, string _text )
         {
             DialogResult result = MessageBox.Show( _text, _caption, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1 );
         }
@@ -353,7 +353,7 @@ namespace Lobster
             FileInfo tempFile = this.lobsterModel.SendDownloadClobDataToFileMessage( clobFile );
             if ( tempFile == null )
             {
-                this.OnErrorMessage( "Open Database", "An error ocurred when fetching the file data." );
+                LobsterMain.OnErrorMessage( "Open Database", "An error ocurred when fetching the file data." );
                 return;
             }
             
