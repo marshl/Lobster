@@ -30,7 +30,16 @@ namespace Lobster
         [STAThread]
         static void Main()
         {
-            MessageLog log = new MessageLog();
+            MessageLog log;
+            try
+            {
+                log = new MessageLog();
+            }
+            catch ( Exception _e )
+            {
+                DialogResult result = MessageBox.Show( "An unhandled " + _e.GetType().ToString() + " occurred when attempting to craete the log file.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1 );
+                return;
+            }
 
             try
             {

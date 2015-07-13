@@ -41,7 +41,7 @@ namespace Lobster
         public ClobFile FindFileWithName( string _filename )
         {
             ClobFile clobFile;
-            if ( this.clobFileMap.TryGetValue( _filename, out clobFile ) )
+            if ( this.clobFileMap.TryGetValue( _filename.ToLower(), out clobFile ) )
             {
                 return clobFile;
             }
@@ -110,7 +110,7 @@ namespace Lobster
             clobFile.localClobFile = new LocalClobFile();
             clobFile.localClobFile.fileInfo = _fileInfo;
 
-            this.clobFileMap.Add( _fileInfo.Name, clobFile );
+            this.clobFileMap.Add( _fileInfo.Name.ToLower(), clobFile );
             this.baseDirectory.filenameClobMap.Add( _fileInfo.Name, clobFile );
         }
 
