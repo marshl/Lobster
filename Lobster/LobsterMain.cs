@@ -17,6 +17,9 @@ namespace Lobster
 
         private ClobNode currentNode;
 
+        private SoundPlayer successSoundPlayer;
+        private SoundPlayer failureSoundPlayer;
+
         public LobsterMain()
         {
             instance = this;
@@ -34,6 +37,10 @@ namespace Lobster
             //this.lobsterModel.CompareFilesToDatabase();
             this.lobsterModel.RequeryDatabase();
             this.CreateTreeView();
+
+            this.successSoundPlayer = new SoundPlayer( Program.SETTINGS_DIR + "/media/success.wav" );
+
+            this.failureSoundPlayer = new SoundPlayer( Program.SETTINGS_DIR + "/media/failure.wav" );
         }
 
         private void CreateTreeView()
@@ -80,6 +87,7 @@ namespace Lobster
 
         private void PopulateListView( ClobNode _clobNode )
         {
+            Debug.Assert( _clobNode != null );
             this.fileListView.Items.Clear();
             DirectoryInfo nodeDirInfo = _clobNode.dirInfo;
 
@@ -246,7 +254,7 @@ namespace Lobster
                 return;
             }
 
-            MessageLog.Log( "Temp file \"" + tempFile.FullName + "\" created" );
+            MessageLog.Log( "Temporary file created: " + tempFile.FullName );
             this.lobsterModel.tempFileList.Add( tempFile );
 
             Process.Start( "tortoisemerge", "/mine:" + tempFile.FullName + " /theirs:" + clobFile.localClobFile.fileInfo.FullName );
@@ -297,7 +305,8 @@ namespace Lobster
                 _clobFile.localClobFile.fileInfo.Name,
                 _result ? ToolTipIcon.Info : ToolTipIcon.Error );
 
-            ( _result ? SystemSounds.Beep : SystemSounds.Exclamation ).Play();
+            //( _result ? SystemSounds.Beep : SystemSounds.Exclamation ).Play();
+            ( _result ? this.successSoundPlayer : this.failureSoundPlayer ).Play();
         }
 
         public void OnFileUpdateComplete( ClobFile _clobFile, bool _result )
@@ -308,7 +317,8 @@ namespace Lobster
                 _clobFile.localClobFile.fileInfo.Name,
                 _result ? ToolTipIcon.Info : ToolTipIcon.Error );
 
-            ( _result ? SystemSounds.Beep : SystemSounds.Exclamation ).Play();
+            //( _result ? SystemSounds.Beep : SystemSounds.Exclamation ).Play();
+            ( _result ? this.successSoundPlayer : this.failureSoundPlayer ).Play();
         }
 
         public static void OnErrorMessage( string _caption, string _text )
@@ -320,7 +330,7 @@ namespace Lobster
         {
             foreach ( FileInfo tempFile in this.lobsterModel.tempFileList )
             {
-                MessageLog.Log( "Temporary file \"" + tempFile.FullName + "\" deleted" );
+                MessageLog.Log( "Temporary file deleted: " + tempFile.FullName );
                 File.Delete( tempFile.FullName );
             }
         }
@@ -356,7 +366,7 @@ namespace Lobster
                 return;
             }
             
-            MessageLog.Log( "Temp file \"" + tempFile.FullName + "\" created" );
+            MessageLog.Log( "Temporary file created: " + tempFile.FullName );
             this.lobsterModel.tempFileList.Add( tempFile );
 
             Process.Start( tempFile.FullName );
@@ -376,7 +386,10 @@ namespace Lobster
             }
             else if ( this.MainTabControl.SelectedTab == this.treeViewTab )
             {
-                this.PopulateListView( this.currentNode );
+                if ( this.currentNode != null )
+                {
+                    this.PopulateListView( this.currentNode );
+                }
             }
         }
     }

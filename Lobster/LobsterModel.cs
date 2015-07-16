@@ -136,30 +136,18 @@ namespace Lobster
 
         public void SendUpdateClobMessage( ClobFile _clobFile )
         {
-            if ( !_clobFile.awaitingUpdate )
-            {
-                _clobFile.awaitingUpdate = true;
-                System.Threading.Timer timer = new System.Threading.Timer( OnUpdateClobEvent, _clobFile, Program.CLOB_DELAY_DURATION_MS, Timeout.Infinite );
-            }
-        }
-
-        private void OnUpdateClobEvent( object stateInfo )
-        {
-            ClobFile clobFile = (ClobFile)stateInfo;
-            clobFile.awaitingUpdate = false;
             OracleConnection con = this.OpenConnection();
             bool result;
             if ( con == null )
             {
                 result = false;
-                return;
             }
             else
             {
-                result = this.UpdateDatabaseClob( clobFile, con );
+                result = this.UpdateDatabaseClob( _clobFile, con );
                 con.Dispose();
             }
-            LobsterMain.instance.OnFileUpdateComplete( clobFile, result );
+            LobsterMain.instance.OnFileUpdateComplete( _clobFile, result );
         }
 
         public void GetWorkingFiles( ref List<ClobFile> _workingFiles )
@@ -175,7 +163,7 @@ namespace Lobster
             DirectoryInfo info = new DirectoryInfo( this.dbConfig.codeSource + "/" + _clobDirectory.clobType.directory );
             if ( !info.Exists )
             {
-                MessageLog.Log( "Folder \"" + info.FullName + "\" could not be found" );
+                MessageLog.Log( "Folder could not be found: " + info.FullName );
                 LobsterMain.OnErrorMessage( "Folder not found", "Folder \"" + info.FullName + "\" could not be found for ClobType " + _clobDirectory.clobType.name );
                 return false;
             }
@@ -246,7 +234,7 @@ namespace Lobster
             {
                 trans.Rollback();
                 LobsterMain.OnErrorMessage( "Clob Update Failed", "An IO Exception occurred when updating the database: " + _e.Message );
-                MessageLog.Log( "Clob update failed: " + _e.Message + " on command " + command.CommandText );
+                MessageLog.Log( "Clob update failed with message \"" + _e.Message + "\" for command \"" + command.CommandText + "\"" );
                 return false;
             }
 
@@ -256,7 +244,7 @@ namespace Lobster
                 if ( rowsAffected != 1 )
                 {
                     LobsterMain.OnErrorMessage( "Clob Update Failed", rowsAffected + " rows were affected during the update (expected only 1). Rolling back..." );
-                    MessageLog.Log( "In invalid number of rows ( " + rowsAffected + ") were updated when executing command: " + command.CommandText );
+                    MessageLog.Log( "In invalid number of rows ( " + rowsAffected + ") were updated for command: " + command.CommandText );
                     trans.Rollback();
                     return false;
                 }
@@ -267,7 +255,7 @@ namespace Lobster
                 {
                     trans.Rollback();
                     LobsterMain.OnErrorMessage( "Clob Update Failed", "An invalid operation occurred when updating the database: " + _e.Message );
-                    MessageLog.Log( "Clob update failed: " + _e.Message + " for execution of command: " + command.CommandText );
+                    MessageLog.Log( "Clob update failed: " + _e.Message + " for command: " + command.CommandText );
                     return false;
                 }
                 throw;
@@ -551,7 +539,7 @@ namespace Lobster
 
         private string GetClobFooterMessage()
         {
-            return String.Format( "<!-- Last clobbered by {0} ({1}) at {2} using Lobster build {3} -->",
+            return String.Format( "<!-- Last clobbed by user {0} on machine {1} at {2} using Lobster build {3} -->",
                 Environment.UserName,
                 Environment.MachineName,
                 DateTime.Now,
@@ -599,7 +587,11 @@ namespace Lobster
                     throw new ArgumentException( "Unknown mime-to-prefix key " + _componentType );
                 }
                 string prefix = this.mimeToPrefixMap[_componentType];
-                mnemonic = prefix + mnemonic;
+
+                if ( prefix.Length > 0 )
+                {
+                    mnemonic = prefix + '/' + mnemonic;
+                }
             }
 
             return mnemonic;

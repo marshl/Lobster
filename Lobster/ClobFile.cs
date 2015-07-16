@@ -14,7 +14,5 @@ namespace Lobster
 
         public DBClobFile dbClobFile;
         public LocalClobFile localClobFile;
-
-        public bool awaitingUpdate = false;
     }
 }

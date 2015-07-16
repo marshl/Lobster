@@ -20,6 +20,8 @@ namespace Lobster
         public List<ClobNode> childNodes = new List<ClobNode>();
         public Dictionary<string, ClobFile> clobFileMap;
 
+        private FileSystemWatcher fileWatcher;
+
         public void GetWorkingFiles( ref List<ClobFile> _workingFiles )
         {
             foreach ( KeyValuePair<string, ClobFile> pair in this.clobFileMap )
@@ -59,18 +61,19 @@ namespace Lobster
 
         public void CreateFileWatchers()
         {
-            FileSystemWatcher fileWatcher = new FileSystemWatcher();
-            fileWatcher.Path = this.dirInfo.FullName;
-            fileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.CreationTime;// | NotifyFilters.Attributes;
-            fileWatcher.Changed += new FileSystemEventHandler( OnFileChanged );
-            fileWatcher.Created += new FileSystemEventHandler( OnFileCreated );
-            fileWatcher.Deleted += new FileSystemEventHandler( OnFileDeleted );
-            fileWatcher.Renamed += new RenamedEventHandler( OnFileRenamed );
-            fileWatcher.EnableRaisingEvents = true;
+            this.fileWatcher = new FileSystemWatcher();
+            this.fileWatcher.Path = this.dirInfo.FullName;
+            this.fileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.CreationTime;// | NotifyFilters.Attributes;
+            this.fileWatcher.Changed += new FileSystemEventHandler( OnFileChanged );
+            this.fileWatcher.Created += new FileSystemEventHandler( OnFileCreated );
+            this.fileWatcher.Deleted += new FileSystemEventHandler( OnFileDeleted );
+            this.fileWatcher.Renamed += new RenamedEventHandler( OnFileRenamed );
+            this.fileWatcher.EnableRaisingEvents = true;
         }
 
         public void OnFileChanged( object _source, FileSystemEventArgs _e )
         {
+            // Ensure that is not a directory
             if ( !File.Exists( _e.FullPath ) )
             {
                 return;
@@ -81,7 +84,9 @@ namespace Lobster
             { 
                 if ( clobFile.localClobFile != null && clobFile.localClobFile.fileInfo.IsReadOnly == false )
                 {
+                    this.fileWatcher.EnableRaisingEvents = false;
                     this.model.SendUpdateClobMessage( clobFile );
+                    this.fileWatcher.EnableRaisingEvents = true;
                 }
             }
         }
