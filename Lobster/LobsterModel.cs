@@ -35,6 +35,7 @@ namespace Lobster
             StreamReader streamReader = new StreamReader( Program.SETTINGS_DIR + "/" + Program.DB_CONFIG_FILE );
             XmlReader xmlReader = XmlReader.Create( streamReader );
             this.dbConfig = (DatabaseConfig)xmls.Deserialize( xmlReader );
+            xmlReader.Close();
             streamReader.Close();
 
             if ( this.dbConfig.codeSource == null || !Directory.Exists( this.dbConfig.codeSource ) )
@@ -121,6 +122,7 @@ namespace Lobster
                 StreamReader streamReader = new StreamReader( file.FullName );
                 XmlReader xmlReader = XmlReader.Create( streamReader );
                 clobType = (ClobType)xmls.Deserialize( xmlReader );
+                xmlReader.Close();
                 streamReader.Close();
 
                 ClobDirectory clobDir = new ClobDirectory();
@@ -433,7 +435,7 @@ namespace Lobster
             try
             {
                 OracleDataReader reader = command.ExecuteReader();
-                string tempName = Path.GetFileNameWithoutExtension( Path.GetTempFileName() ) + _clobFile.dbClobFile.filename;
+                string tempName = Path.GetTempFileName().Replace( ".tmp", "." ) + _clobFile.dbClobFile.filename;
                 FileInfo tempFile = new FileInfo( tempName );
 
                 if ( reader.Read() )
@@ -463,10 +465,12 @@ namespace Lobster
                     
                     if ( !reader.Read() )
                     {
+                        reader.Close();
                         return tempFile;
                     }
                     else
                     {
+                        reader.Close();
                         LobsterMain.OnErrorMessage( "Clob Data Fetch Error",
                        "Too many rows were found for " + _clobFile.localClobFile.fileInfo.Name );
                         MessageLog.Log( "Too many rows found on clob retrieval of " + _clobFile.dbClobFile.mnemonic + " when executing command: " + command.CommandText );
@@ -485,7 +489,6 @@ namespace Lobster
                 }
                 throw;
             }
-
             LobsterMain.OnErrorMessage( "Clob Data Fetch Error",
                         "No data was found for " + _clobFile.dbClobFile.mnemonic );
             MessageLog.Log( "No data found on clob retrieval of " + _clobFile.dbClobFile.mnemonic + " when executing command: " + command.CommandText );
@@ -520,6 +523,7 @@ namespace Lobster
             }
             catch ( InvalidOperationException _e )
             {
+                command.Dispose();
                 LobsterMain.OnErrorMessage( "Directory Comparison Error",
                         "An invalid operation occurred when retriving the file list for  " + ct.schema + "." + ct.table + ": " + _e.Message );
                 MessageLog.Log( "Error comparing to database: " + _e.Message + " when executing command " + command.CommandText );
@@ -534,6 +538,7 @@ namespace Lobster
                 dbClobFile.filename = this.ConvertMnemonicToFilename( dbClobFile.mnemonic, ct, dbClobFile.componentType );
                 _clobDir.databaseClobMap.Add( dbClobFile.mnemonic, dbClobFile );
             }
+            reader.Close();
             command.Dispose();
         }
 

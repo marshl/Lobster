@@ -20,6 +20,8 @@ namespace Lobster
         private SoundPlayer successSoundPlayer;
         private SoundPlayer failureSoundPlayer;
 
+        private bool initialised = false;
+
         public LobsterMain()
         {
             instance = this;
@@ -41,6 +43,8 @@ namespace Lobster
             this.successSoundPlayer = new SoundPlayer( Program.SETTINGS_DIR + "/media/success.wav" );
 
             this.failureSoundPlayer = new SoundPlayer( Program.SETTINGS_DIR + "/media/failure.wav" );
+
+            this.initialised = true;
         }
 
         private void CreateTreeView()
@@ -390,6 +394,17 @@ namespace Lobster
                 {
                     this.PopulateListView( this.currentNode );
                 }
+            }
+        }
+
+        public void UpdateUIThread()
+        {
+            if ( this.initialised )
+            {
+                this.Invoke( (MethodInvoker)delegate
+                {
+                    RefreshClobLists();
+                } );
             }
         }
     }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Lobster
@@ -21,6 +22,7 @@ namespace Lobster
         public Dictionary<string, ClobFile> clobFileMap;
 
         private FileSystemWatcher fileWatcher;
+        private FileSystemWatcher fileAttributeWatcher;
 
         public void GetWorkingFiles( ref List<ClobFile> _workingFiles )
         {
@@ -69,6 +71,19 @@ namespace Lobster
             this.fileWatcher.Deleted += new FileSystemEventHandler( OnFileDeleted );
             this.fileWatcher.Renamed += new RenamedEventHandler( OnFileRenamed );
             this.fileWatcher.EnableRaisingEvents = true;
+
+            this.fileAttributeWatcher = new FileSystemWatcher();
+            this.fileAttributeWatcher.Path = this.dirInfo.FullName;
+            this.fileAttributeWatcher.NotifyFilter = NotifyFilters.Attributes;
+            this.fileAttributeWatcher.Changed += new FileSystemEventHandler( OnFileAttributeChange );
+            this.fileAttributeWatcher.EnableRaisingEvents = true;
+        }
+
+        private void OnFileAttributeChange( object sender, FileSystemEventArgs e )
+        {
+            this.fileAttributeWatcher.EnableRaisingEvents = false;
+            this.baseDirectory.RefreshFileLists();
+            this.fileAttributeWatcher.EnableRaisingEvents = true;
         }
 
         public void OnFileChanged( object _source, FileSystemEventArgs _e )

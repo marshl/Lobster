@@ -56,6 +56,8 @@ namespace Lobster
             this.filenameClobMap.Clear();
             this.rootClobNode.RepopulateFileLists_r();
             this.CompareLocalFilesToDB();
+
+            LobsterMain.instance.UpdateUIThread();
         }
     }
 }
