@@ -12,11 +12,14 @@ namespace Lobster
         public string table;
         public string mnemonicColumn;
         public string clobColumn;
-        public string dateColumnName; //Optional TODO: Set to SYSDATE on insert/update
+
+        // Optional Columns
+        public string dateColumnName;
+        public string idColumnName;
 
         public string clobDataType;
 
-        // All optional
+        // Optional Parent Table Information
         public bool hasParentTable;
         public string parentTable;
         public string parentIDColumn;

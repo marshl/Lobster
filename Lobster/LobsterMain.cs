@@ -231,6 +231,7 @@ namespace Lobster
             if ( result )
             {
                 listItem = this.GetClobFileRow( clobFile );
+                this.RefreshClobLists();
             }
             this.OnFileInsertComplete( clobFile, result );
         }

@@ -6,16 +6,14 @@ namespace Lobster
 {
     public class ClobNode
     {
-        public ClobNode( DirectoryInfo _dirInfo, LobsterModel _model, ClobDirectory _baseDirectory )
+        public ClobNode( DirectoryInfo _dirInfo, ClobDirectory _baseDirectory )
         {
             this.dirInfo = _dirInfo;
-            this.model = _model;
             this.baseDirectory = _baseDirectory;
             this.CreateFileWatchers();
         }
 
         public DirectoryInfo dirInfo;
-        private LobsterModel model;
         public ClobDirectory baseDirectory;
 
         public List<ClobNode> childNodes = new List<ClobNode>();
@@ -81,13 +79,14 @@ namespace Lobster
 
         private void OnFileAttributeChange( object sender, FileSystemEventArgs e )
         {
-            this.fileAttributeWatcher.EnableRaisingEvents = false;
+            this.fileAttributeWatcher.EnableRaisingEvents = this.fileWatcher.EnableRaisingEvents = false;
             this.baseDirectory.RefreshFileLists();
-            this.fileAttributeWatcher.EnableRaisingEvents = true;
+            this.fileAttributeWatcher.EnableRaisingEvents = this.fileWatcher.EnableRaisingEvents = true;
         }
 
         public void OnFileChanged( object _source, FileSystemEventArgs _e )
         {
+            //this.fileAttributeWatcher.EnableRaisingEvents = this.fileWatcher.EnableRaisingEvents = false;
             // Ensure that is not a directory
             if ( !File.Exists( _e.FullPath ) )
             {
@@ -100,25 +99,32 @@ namespace Lobster
                 if ( clobFile.localClobFile != null && clobFile.localClobFile.fileInfo.IsReadOnly == false )
                 {
                     this.fileWatcher.EnableRaisingEvents = false;
-                    this.model.SendUpdateClobMessage( clobFile );
+                    this.baseDirectory.parentModel.SendUpdateClobMessage( clobFile );
                     this.fileWatcher.EnableRaisingEvents = true;
                 }
             }
+            //this.fileAttributeWatcher.EnableRaisingEvents = this.fileWatcher.EnableRaisingEvents = true;
         }
 
         public void OnFileCreated( object _source, FileSystemEventArgs _e )
         {
+            this.fileAttributeWatcher.EnableRaisingEvents = this.fileWatcher.EnableRaisingEvents = false;
             this.baseDirectory.RefreshFileLists();
+            this.fileAttributeWatcher.EnableRaisingEvents = this.fileWatcher.EnableRaisingEvents = true;
         }
 
         private void OnFileDeleted( object _sender, FileSystemEventArgs _e )
         {
+            this.fileAttributeWatcher.EnableRaisingEvents = this.fileWatcher.EnableRaisingEvents = false;
             this.baseDirectory.RefreshFileLists();
+            this.fileAttributeWatcher.EnableRaisingEvents = this.fileWatcher.EnableRaisingEvents = true;
         }
 
         private void OnFileRenamed( object _sender, FileSystemEventArgs _e )
         {
+            this.fileAttributeWatcher.EnableRaisingEvents = this.fileWatcher.EnableRaisingEvents = false;
             this.baseDirectory.RefreshFileLists();
+            this.fileAttributeWatcher.EnableRaisingEvents = this.fileWatcher.EnableRaisingEvents = true;
         }
 
         public void AddLocalClobFile( FileInfo _fileInfo )

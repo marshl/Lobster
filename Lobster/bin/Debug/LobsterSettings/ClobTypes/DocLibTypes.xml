@@ -4,6 +4,7 @@
   <directory>DocLibTypes</directory>
   <schema>doclibmgr</schema>
   <table>document_library_types</table>
+  <idColumnName>id</idColumnName>
   <mnemonicColumn>document_library_type</mnemonicColumn>
   <clobColumn>xml_data</clobColumn>
   <dateColumnName>created_datetime</dateColumnName>

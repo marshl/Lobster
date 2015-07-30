@@ -170,7 +170,7 @@ namespace Lobster
                 return false;
             }
 
-            _clobDirectory.rootClobNode = new ClobNode( info, this, _clobDirectory );
+            _clobDirectory.rootClobNode = new ClobNode( info, _clobDirectory );
             PopulateClobNodeDirectories( _clobDirectory.rootClobNode, _clobDirectory );
             return true;
         }
@@ -180,7 +180,7 @@ namespace Lobster
             DirectoryInfo[] subDirs = _clobNode.dirInfo.GetDirectories();
             foreach ( DirectoryInfo subDir in subDirs )
             {
-                ClobNode childNode = new ClobNode( subDir, this, _clobDirectory );
+                ClobNode childNode = new ClobNode( subDir, _clobDirectory );
                 PopulateClobNodeDirectories( childNode, _clobDirectory);
                 _clobNode.childNodes.Add( childNode );
             }
@@ -240,16 +240,10 @@ namespace Lobster
                 return false;
             }
 
+            int rowsAffected;
             try
             {
-                int rowsAffected = command.ExecuteNonQuery();
-                if ( rowsAffected != 1 )
-                {
-                    LobsterMain.OnErrorMessage( "Clob Update Failed", rowsAffected + " rows were affected during the update (expected only 1). Rolling back..." );
-                    MessageLog.Log( "In invalid number of rows ( " + rowsAffected + ") were updated for command: " + command.CommandText );
-                    trans.Rollback();
-                    return false;
-                }
+                rowsAffected = command.ExecuteNonQuery();
             }
             catch ( Exception _e )
             {
@@ -262,6 +256,15 @@ namespace Lobster
                 }
                 throw;
             }
+
+            if ( rowsAffected != 1 )
+            {
+                LobsterMain.OnErrorMessage( "Clob Update Failed", rowsAffected + " rows were affected during the update (expected only 1). Rolling back..." );
+                MessageLog.Log( "In invalid number of rows ( " + rowsAffected + ") were updated for command: " + command.CommandText );
+                trans.Rollback();
+                return false;
+            }
+
             trans.Commit();
             command.Dispose();
             MessageLog.Log( "Clob file update successful: " + _clobFile.localClobFile.fileInfo.Name );
@@ -349,7 +352,8 @@ namespace Lobster
                 command.CommandText += " ) VALUES( ( SELECT MAX( " + ct.parentIDColumn + " ) + 1 FROM " + ct.schema + "." + ct.table + " ), "
                     + "( SELECT " + ct.parentIDColumn + " FROM " + ct.schema + "." + ct.parentTable
                         + " WHERE " + ct.parentMnemonicColumn + " = '" + mnemonic + "')"
-                    + ( ct.dateColumnName != null ? ", SYSDATE " : null ) + ", :data ";
+                    + ( ct.dateColumnName != null ? ", SYSDATE " : null )
+                    + ", :data ";
                 if ( _componentType != null )
                 {
                     command.CommandText += ", '" + _componentType + "'";
@@ -360,9 +364,13 @@ namespace Lobster
             {
                 command.CommandText = "INSERT INTO " + ct.schema + "." + ct.table
                     + " ( " + ct.mnemonicColumn + ", " + ( useBlobColumn ? ct.blobColumnName : ct.clobColumn )
+                    + ( ct.idColumnName != null ? ", " + ct.idColumnName : null )
                     + ( _componentType != null ? ", type" : null )
+                    + ( ct.dateColumnName != null ? ", " + ct.dateColumnName : null )
                     + ") VALUES ( '" + mnemonic + "', :data"
+                    + ( ct.idColumnName != null ? ", ( SELECT NVL( MAX( " + ct.idColumnName + "), 0 ) + 1 FROM " + ct.schema + "." + ct.table + ")" : null )
                     + ( _componentType != null ? ", '" + _componentType + "'" : null )
+                    + ( ct.dateColumnName != null ? ", SYSDATE " : null )
                     + ")";
             }
 
