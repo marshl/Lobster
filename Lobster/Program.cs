@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Windows.Forms;
 
 namespace Lobster
@@ -6,8 +7,8 @@ namespace Lobster
     static class Program
     {
         public static string SETTINGS_DIR = "LobsterSettings";
-        public static string DB_CONFIG_FILE = "DatabaseConfig.xml";
-        public static string CLOB_TYPE_DIR = "ClobTypes";
+        public static string DB_CONFIG_DIR = SETTINGS_DIR + "\\DatabaseConnections";
+        public static string CLOB_TYPE_DIR = SETTINGS_DIR + "\\ClobTypes";
         public static string LOG_FILE = "lobster.log";
 
         public static int BALLOON_TOOLTIP_DURATION_MS = 2000;
@@ -27,6 +28,24 @@ namespace Lobster
             catch ( Exception _e )
             {
                 DialogResult result = MessageBox.Show( "An unhandled " + _e.GetType().ToString() + " occurred when attempting to craete the log file.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1 );
+                return;
+            }
+
+            if ( !Directory.Exists( SETTINGS_DIR ) )
+            {
+                DialogResult result = MessageBox.Show( "The settings directory " + SETTINGS_DIR + " could not be found.", "Directory Not Found", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1 );
+                return;
+            }
+
+            if ( !Directory.Exists( DB_CONFIG_DIR ) )
+            {
+                DialogResult result = MessageBox.Show( "The Database Connections directory " + DB_CONFIG_DIR + " could not be found.", "Directory Not Found", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1 );
+                return;
+            }
+
+            if ( !Directory.Exists( CLOB_TYPE_DIR ) )
+            {
+                DialogResult result = MessageBox.Show( "The Clob Type directory " + CLOB_TYPE_DIR + " could not be found.", "Directory Not Found", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1 );
                 return;
             }
 

@@ -9,14 +9,16 @@ using Oracle.ManagedDataAccess.Client;
 using Oracle.ManagedDataAccess.Types;
 using System.Diagnostics;
 using System.Windows.Forms;
-using System.Threading;
 
 namespace Lobster
 {
     public class LobsterModel
     {
-        public DatabaseConfig dbConfig;
-        public List<ClobDirectory> clobDirectories;
+        public List<DatabaseConfig> dbConfigList;
+        public DatabaseConfig currentConfig;
+
+        public List<ClobType> clobTypeList;
+        public Dictionary<ClobType, ClobDirectory> clobTypeToDirectoryMap;
         public List<FileInfo> tempFileList = new List<FileInfo>();
 
         public Dictionary<string, string> mimeToPrefixMap;
@@ -28,55 +30,75 @@ namespace Lobster
             LoadFileIntoMap( @"LobsterSettings\mime_to_extension.ini", out this.mimeToExtensionMap );
         }
 
-        public bool LoadDatabaseConfig()
+        public void LoadDatabaseConfig()
         {
-            this.dbConfig = new DatabaseConfig();
+            this.dbConfigList = new List<DatabaseConfig>();
+            foreach ( string filename in Directory.GetFiles( Program.DB_CONFIG_DIR ) )
+            {
+                DatabaseConfig dbConfig = LoadDatabaseConfigFile( filename );
+                if ( dbConfig != null )
+                {
+                    this.dbConfigList.Add( dbConfig );
+                }
+            }
+        }
+
+        private static DatabaseConfig LoadDatabaseConfigFile( string _fullpath )
+        {
+            DatabaseConfig dbConfig = new DatabaseConfig();
             XmlSerializer xmls = new XmlSerializer( typeof( DatabaseConfig ) );
-            StreamReader streamReader = new StreamReader( Program.SETTINGS_DIR + "/" + Program.DB_CONFIG_FILE );
+            StreamReader streamReader = new StreamReader( _fullpath );
             XmlReader xmlReader = XmlReader.Create( streamReader );
-            this.dbConfig = (DatabaseConfig)xmls.Deserialize( xmlReader );
+            dbConfig = (DatabaseConfig)xmls.Deserialize( xmlReader );
             xmlReader.Close();
             streamReader.Close();
 
-            if ( this.dbConfig.codeSource == null || !Directory.Exists( this.dbConfig.codeSource ) )
+            // If the CodeSource folder cannot be found, prompt the user for it
+            if ( dbConfig.codeSource == null || !Directory.Exists( dbConfig.codeSource ) )
             {
-                 return this.PromptForCodeSource();
+                string codeSourceDir = PromptForCodeSource();
+                if ( codeSourceDir != null )
+                {
+                    dbConfig.codeSource = codeSourceDir;
+                    SerialiseConfig( _fullpath, dbConfig );
+                }
+                else // Ignore config files that don't have a valid CodeSource folder
+                {
+                    return null;
+                }
             }
-            return true;
+            return dbConfig;
         }
 
-        private bool PromptForCodeSource()
+        private static string PromptForCodeSource()
         {
             FolderBrowserDialog fbd = new FolderBrowserDialog();
-            fbd.Description = "Please select your CodeSource folder.";
+            fbd.Description = "Please select your CodeSource directory.";
             DialogResult result = fbd.ShowDialog();
             if ( result != DialogResult.OK )
             {
-                return false;
+                return null;
             }
-            this.dbConfig.codeSource = fbd.SelectedPath;
-
-            this.SerialiseConfig();
-            return true;
+            return fbd.SelectedPath;
         }
 
-        private void SerialiseConfig()
+        private static void SerialiseConfig( string _fullpath, DatabaseConfig _config )
         {
             XmlSerializer xmls = new XmlSerializer( typeof( DatabaseConfig ) );
-            StreamWriter streamWriter = new StreamWriter( Program.SETTINGS_DIR + "/" + Program.DB_CONFIG_FILE );
-            xmls.Serialize( streamWriter, this.dbConfig );
+            StreamWriter streamWriter = new StreamWriter( _fullpath );
+            xmls.Serialize( streamWriter, _config );
         }
 
-        private OracleConnection OpenConnection()
+        private OracleConnection OpenConnection( DatabaseConfig _config )
         {
             OracleConnection con = new OracleConnection();
-            con.ConnectionString = "User Id=" + this.dbConfig.username
-                + ";Password=" + this.dbConfig.password
+            con.ConnectionString = "User Id=" + _config.username
+                + ";Password=" + _config.password
                 + ";Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)("
-                + "HOST=" + this.dbConfig.host + ")"
-                + "(PORT=" + this.dbConfig.port + ")))(CONNECT_DATA="
-                + "(SID=" + this.dbConfig.sid + ")(SERVER=DEDICATED)))"
-                + ";Pooling=" + ( this.dbConfig.usePooling ? "true" : "false" );
+                + "HOST=" + _config.host + ")"
+                + "(PORT=" + _config.port + ")))(CONNECT_DATA="
+                + "(SID=" + _config.sid + ")(SERVER=DEDICATED)))"
+                + ";Pooling=" + ( _config.usePooling ? "true" : "false" );
             try
             {
                 con.Open();
@@ -94,26 +116,26 @@ namespace Lobster
             return con;
         }
 
-        public void RetrieveDatabaseFiles()
+        public void GetDatabaseFileLists()
         { 
-            OracleConnection con = this.OpenConnection();
+            OracleConnection con = this.OpenConnection( this.currentConfig );
             if ( con == null )
             {
                 MessageLog.Log( "Connection failed, cannot diff files with database." );
                 return;
             }
-
-            foreach ( ClobDirectory clobDir in this.clobDirectories )
+            
+            foreach ( KeyValuePair<ClobType, ClobDirectory> pair in this.clobTypeToDirectoryMap )
             {
-                this.RetrieveDatabaseFiles( clobDir, con );
+                this.GetDatabaseFileListForDirectory( pair.Value, con );
             }
             con.Dispose();
         }
 
         public void LoadClobTypes()
         {
-            this.clobDirectories = new List<ClobDirectory>();
-            DirectoryInfo clobTypeDir = Directory.CreateDirectory( Program.SETTINGS_DIR + "/" + Program.CLOB_TYPE_DIR );
+            this.clobTypeList = new List<ClobType>();
+            DirectoryInfo clobTypeDir = Directory.CreateDirectory( Program.CLOB_TYPE_DIR );
             foreach ( FileInfo file in clobTypeDir.GetFiles() )
             {
                 ClobType clobType = new ClobType();
@@ -125,20 +147,29 @@ namespace Lobster
                 xmlReader.Close();
                 streamReader.Close();
 
+                this.clobTypeList.Add( clobType );
+            }
+        }
+
+        public void LoadClobDirectories()
+        {
+            this.clobTypeToDirectoryMap = new Dictionary<ClobType, ClobDirectory>();
+            foreach ( ClobType clobType in this.clobTypeList )
+            {
                 ClobDirectory clobDir = new ClobDirectory();
                 clobDir.clobType = clobType;
                 clobDir.parentModel = this;
                 bool result = this.PopulateClobDirectory( clobDir );
                 if ( result )
                 {
-                    this.clobDirectories.Add( clobDir );
+                    this.clobTypeToDirectoryMap.Add( clobType, clobDir );
                 }
             }
         }
 
         public void SendUpdateClobMessage( ClobFile _clobFile )
         {
-            OracleConnection con = this.OpenConnection();
+            OracleConnection con = this.OpenConnection( this.currentConfig );
             bool result;
             if ( con == null )
             {
@@ -154,15 +185,20 @@ namespace Lobster
 
         public void GetWorkingFiles( ref List<ClobFile> _workingFiles )
         {
-            foreach ( ClobDirectory clobDir in this.clobDirectories )
+            if ( this.clobTypeToDirectoryMap == null )
             {
-                clobDir.GetWorkingFiles( ref _workingFiles );
+                return;
+            }
+
+            foreach ( KeyValuePair<ClobType, ClobDirectory> pair in this.clobTypeToDirectoryMap )
+            {
+                pair.Value.GetWorkingFiles( ref _workingFiles );
             }
         }
 
         public bool PopulateClobDirectory( ClobDirectory _clobDirectory )
         {
-            DirectoryInfo info = new DirectoryInfo( this.dbConfig.codeSource + "/" + _clobDirectory.clobType.directory );
+            DirectoryInfo info = new DirectoryInfo( this.currentConfig.codeSource + "/" + _clobDirectory.clobType.directory );
             if ( !info.Exists )
             {
                 MessageLog.Log( "Folder could not be found: " + info.FullName );
@@ -188,7 +224,7 @@ namespace Lobster
 
         public bool SendInsertClobMessage( ClobFile _clobFile, string _chosenType )
         {
-            OracleConnection con = this.OpenConnection();
+            OracleConnection con = this.OpenConnection( this.currentConfig );
             if ( con == null )
             {
                 return false;
@@ -273,7 +309,7 @@ namespace Lobster
 
         public FileInfo SendDownloadClobDataToFileMessage( ClobFile _clobFile )
         {
-            OracleConnection con = this.OpenConnection();
+            OracleConnection con = this.OpenConnection( this.currentConfig );
             if ( con == null )
             {
                 return null;
@@ -404,13 +440,28 @@ namespace Lobster
             return true;
         }
 
+        public bool SetDatabaseConnection( DatabaseConfig _config )
+        {
+            OracleConnection con = this.OpenConnection( _config );
+            if ( con == null )
+            {
+                return false;
+            }
+            con.Close();
+
+            this.currentConfig = _config;
+            this.LoadClobDirectories();
+            this.RequeryDatabase();
+            return true;
+        }
+
         public void RequeryDatabase()
         {
-            this.RetrieveDatabaseFiles();
+            this.GetDatabaseFileLists();
 
-            foreach ( ClobDirectory clobDir in this.clobDirectories )
+            foreach ( KeyValuePair<ClobType, ClobDirectory> pair in this.clobTypeToDirectoryMap )
             {
-                clobDir.RefreshFileLists();
+                pair.Value.RefreshFileLists();
             }
         }
 
@@ -503,7 +554,7 @@ namespace Lobster
             return null;
         }
 
-        private void RetrieveDatabaseFiles( ClobDirectory _clobDir, OracleConnection _con )
+        private void GetDatabaseFileListForDirectory( ClobDirectory _clobDir, OracleConnection _con )
         {
             _clobDir.databaseClobMap = new Dictionary<string, DBClobFile>();
             OracleCommand command = _con.CreateCommand();
@@ -552,7 +603,7 @@ namespace Lobster
 
         private string GetClobFooterMessage()
         {
-            return String.Format( "<!-- Last clobbed by user {0} on machine {1} at {2} using Lobster build {3} -->",
+            return String.Format( "<!-- Last clobbed by user {0} on machine {1} at {2} (Build {3}) -->",
                 Environment.UserName,
                 Environment.MachineName,
                 DateTime.Now,
@@ -560,7 +611,7 @@ namespace Lobster
         }
 
         //http://stackoverflow.com/questions/1600962/displaying-the-build-date
-        private static DateTime RetrieveLinkerTimestamp()
+        public static DateTime RetrieveLinkerTimestamp()
         {
             string filePath = System.Reflection.Assembly.GetCallingAssembly().Location;
             const int c_PeHeaderOffset = 60;

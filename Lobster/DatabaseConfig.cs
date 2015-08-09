@@ -8,6 +8,7 @@ namespace Lobster
 {
     public class DatabaseConfig
     {
+        public string name;
         public string host;
         public string port;
         public string sid;

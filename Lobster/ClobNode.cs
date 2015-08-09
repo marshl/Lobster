@@ -86,8 +86,9 @@ namespace Lobster
 
         public void OnFileChanged( object _source, FileSystemEventArgs _e )
         {
-            //this.fileAttributeWatcher.EnableRaisingEvents = this.fileWatcher.EnableRaisingEvents = false;
-            // Ensure that is not a directory
+            this.fileAttributeWatcher.EnableRaisingEvents = this.fileWatcher.EnableRaisingEvents = false;
+            
+            // Ensure that the file changed exists and is not a directory
             if ( !File.Exists( _e.FullPath ) )
             {
                 return;
@@ -98,12 +99,10 @@ namespace Lobster
             { 
                 if ( clobFile.localClobFile != null && clobFile.localClobFile.fileInfo.IsReadOnly == false )
                 {
-                    this.fileWatcher.EnableRaisingEvents = false;
                     this.baseDirectory.parentModel.SendUpdateClobMessage( clobFile );
-                    this.fileWatcher.EnableRaisingEvents = true;
                 }
             }
-            //this.fileAttributeWatcher.EnableRaisingEvents = this.fileWatcher.EnableRaisingEvents = true;
+            this.fileAttributeWatcher.EnableRaisingEvents = this.fileWatcher.EnableRaisingEvents = true;
         }
 
         public void OnFileCreated( object _source, FileSystemEventArgs _e )
