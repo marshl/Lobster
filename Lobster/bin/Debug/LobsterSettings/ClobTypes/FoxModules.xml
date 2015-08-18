@@ -1,31 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ClobType xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <name>Fox Modules</name>
+<clobtype xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <name>FoxModules</name>
   <directory>FoxModules</directory>
-  <schema>envmgr</schema>
-  <table>fox_components</table>
-  <mnemonicColumn>name</mnemonicColumn>
-  <clobColumn>data</clobColumn>
-  
-  <clobDataType>clob</clobDataType>
-  
-  <componentTypeColumn>type</componentTypeColumn>
-  <componentTypes>
-    <string>module</string>
-    <string>image/gif</string>
-    <string>image/jpg</string>
-    <string>image/png</string>
-    <string>image/x-icon</string>
-    <string>test/html</string>
-    <string>text/css</string>
-    <string>text/javascript</string>
-  </componentTypes>
-  
-  <blobColumnName>bindata</blobColumnName>
-  <blobColumnTypes>
-    <string>image/gif</string>
-    <string>image/jpg</string>
-    <string>image/png</string>
-    <string>image/x-icon</string>
-  </blobColumnTypes>
-</ClobType>
+  <tables>
+    <table>
+      <schema>envmgr</schema>
+      <name>fox_components</name>
+      <columns>
+        <column>
+          <name>name</name>
+          <purpose>MNEMONIC</purpose>
+        </column>
+        <column>
+          <name>data</name>
+          <purpose>CLOB_DATA</purpose>
+          <dataType>CLOB</dataType>
+          <mimeTypes>
+            <string>module</string>
+            <string>test/html</string>
+            <string>text/css</string>
+            <string>text/javascript</string>
+          </mimeTypes>
+        </column>
+        <column>
+          <name>bindata</name>
+          <purpose>CLOB_DATA</purpose>
+          <dataType>BLOB</dataType>
+          <mimeTypes>
+            <string>image/gif</string>
+            <string>image/jpg</string>
+            <string>image/png</string>
+            <string>image/x-icon</string>
+          </mimeTypes>
+        </column>
+        <column>
+          <name>type</name>
+          <purpose>MIME_TYPE</purpose>
+        </column>
+      </columns>
+    </table>
+  </tables>
+</clobtype>

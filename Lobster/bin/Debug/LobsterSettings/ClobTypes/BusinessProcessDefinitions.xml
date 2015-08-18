@@ -1,15 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ClobType xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <name>BPDs</name>
+<clobtype xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <name>Business Process Definitions</name>
   <directory>BusinessProcessDefinitions</directory>
-  <schema>bpmmgr</schema>
-  <table>business_process_definitions</table>
-  <mnemonicColumn>bp_id</mnemonicColumn>
-  <clobColumn>xml_data</clobColumn>
-  <dateColumnName>start_datetime</dateColumnName>
-  
-  <hasParentTable>true</hasParentTable>
-  <parentTable>business_processes</parentTable>
-  <parentIDColumn>id</parentIDColumn>
-  <parentMnemonicColumn>short_name</parentMnemonicColumn>
-</ClobType>
+  <hasParentTable xsi:nil="true" />
+  <tables>
+    <table>
+      <schema>bpmmgr</schema>
+      <name>business_process_definitions</name>
+      <columns>
+        <column>
+          <name>bp_id</name>
+          <purpose>FOREIGN_KEY</purpose>
+        </column>
+        <column>
+          <name>xml_data</name>
+          <purpose>CLOB_DATA</purpose>
+          <dataType>XMLTYPE</dataType>
+        </column>
+        <column>
+          <name>start_datetime</name>
+          <purpose>DATETIME</purpose>
+        </column>
+      </columns>
+      <parentTable>
+        <schema>bpmmgr</schema>
+        <name>business_processes</name>
+        <columns>
+          <column>
+            <name>id</name>
+            <purpose>ID</purpose>
+          </column>
+          <column>
+            <name>short_name</name>
+            <purpose>MNEMONIC</purpose>
+          </column>
+        </columns>
+      </parentTable>
+    </table>
+  </tables>
+</clobtype>

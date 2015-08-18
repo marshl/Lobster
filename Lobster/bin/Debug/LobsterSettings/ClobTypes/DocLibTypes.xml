@@ -1,11 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ClobType xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<clobtype xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <name>DocLibTypes</name>
   <directory>DocLibTypes</directory>
-  <schema>doclibmgr</schema>
-  <table>document_library_types</table>
-  <idColumnName>id</idColumnName>
-  <mnemonicColumn>document_library_type</mnemonicColumn>
-  <clobColumn>xml_data</clobColumn>
-  <dateColumnName>created_datetime</dateColumnName>
-</ClobType>
+  <hasParentTable xsi:nil="true" />
+  <tables>
+    <table>
+      <schema>doclibmgr</schema>
+      <name>document_library_types</name>
+      <columns>
+        <column>
+          <name>id</name>
+          <purpose>ID</purpose>
+        </column>
+        <column>
+          <name>document_library_type</name>
+          <purpose>MNEMONIC</purpose>
+        </column>
+        <column>
+          <name>xml_data</name>
+          <purpose>CLOB_DATA</purpose>
+          <dataType>XMLTYPE</dataType>
+        </column>
+        <column>
+          <name>created_datetime</name>
+          <purpose>DATETIME</purpose>
+        </column>
+      </columns>
+    </table>
+  </tables>
+</clobtype>

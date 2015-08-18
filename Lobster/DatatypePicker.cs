@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -12,18 +13,15 @@ namespace Lobster
 {
     public partial class DatatypePicker : Form
     {
-        public DatatypePicker( ClobType _clobType )
+        public DatatypePicker( ClobType.Column _column )
         {
             InitializeComponent();
-            foreach ( string str in _clobType.componentTypes )
+            Debug.Assert( _column.mimeTypes.Count > 0 );
+            foreach ( string str in _column.mimeTypes )
             {
                 this.datatypeComboBox.Items.Add( str );
             }
-
-            if ( _clobType.componentTypes.Count > 0 )
-            {
-                this.datatypeComboBox.SelectedIndex = 0;
-            }
+            this.datatypeComboBox.SelectedIndex = 0;
         }
 
         private void datatypeAccept_Click_1( object sender, EventArgs e )

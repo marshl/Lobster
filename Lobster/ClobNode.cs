@@ -97,7 +97,7 @@ namespace Lobster
             ClobFile clobFile;
             if ( this.clobFileMap.TryGetValue( _e.Name.ToLower(), out clobFile ) )
             { 
-                if ( clobFile.localClobFile != null && clobFile.localClobFile.fileInfo.IsReadOnly == false )
+                if ( clobFile.localClobFile != null && clobFile.dbClobFile != null && clobFile.localClobFile.fileInfo.IsReadOnly == false )
                 {
                     this.baseDirectory.parentModel.SendUpdateClobMessage( clobFile );
                 }

@@ -14,5 +14,9 @@ namespace Lobster
 
         public DBClobFile dbClobFile;
         public LocalClobFile localClobFile;
+
+        public bool IsLocalOnly { get { return this.dbClobFile == null && this.localClobFile != null; } }
+        public bool IsDbOnly { get { return this.dbClobFile != null && this.localClobFile == null; } }
+        public bool IsSynced { get { return this.dbClobFile != null && this.localClobFile != null; } }
     }
 }

@@ -1,9 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ClobType xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<clobtype xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <name>DocumentTemplates</name>
   <directory>DocumentTemplates</directory>
-  <schema>decmgr</schema>
-  <table>document_templates</table>
-  <mnemonicColumn>name</mnemonicColumn>
-  <clobColumn>xml_data</clobColumn>
-</ClobType>
+  <tables>
+    <table>
+      <schema>decmgr</schema>
+      <name>document_templates</name>
+      <columns>
+        <column>
+          <name>name</name>
+          <purpose>MNEMONIC</purpose>
+        </column>
+        <column>
+          <name>xml_data</name>
+          <purpose>CLOB_DATA</purpose>
+          <dataType>XMLTYPE</dataType>
+        </column>
+      </columns>
+    </table>
+  </tables>
+</clobtype>

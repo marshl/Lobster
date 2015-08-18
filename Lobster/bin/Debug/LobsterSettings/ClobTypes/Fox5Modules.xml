@@ -1,25 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ClobType xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <name>Fox5 Modules</name>
+<clobtype xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <name>Fox5Modules</name>
   <directory>Fox5Modules</directory>
-  <schema>envmgr</schema>
-  <table>fox_components_fox5</table>
-  <mnemonicColumn>name</mnemonicColumn>
-  <clobColumn>data</clobColumn>
-  
-  <clobDataType>clob</clobDataType>
-  
-  <componentTypeColumn>type</componentTypeColumn>
-  <componentTypes>
-    <string>module</string>
-    <string>image/png</string>
-    <string>text/css</string>
-    <string>text/javascript</string>
-    <string>text/mustache</string>
-  </componentTypes>
-  
-  <blobColumnName>bindata</blobColumnName>
-  <blobColumnTypes>
-    <string>image/png</string>
-  </blobColumnTypes>
-</ClobType>
+  <tables>
+    <table>
+      <schema>envmgr</schema>
+      <name>fox_components_fox5</name>
+      <columns>
+        <column>
+          <name>name</name>
+          <purpose>MNEMONIC</purpose>
+        </column>
+        <column>
+          <name>data</name>
+          <purpose>CLOB_DATA</purpose>
+          <dataType>CLOB</dataType>
+          <mimeTypes>
+            <string>module</string>
+            <string>text/css</string>
+            <string>text/javascript</string>
+            <string>text/mustache</string>
+          </mimeTypes>
+        </column>
+        <column>
+          <name>bindata</name>
+          <purpose>CLOB_DATA</purpose>
+          <dataType>BLOB</dataType>
+          <mimeTypes>
+            <string>image/png</string>
+          </mimeTypes>
+        </column>
+        <column>
+          <name>type</name>
+          <purpose>MIME_TYPE</purpose>
+        </column>
+      </columns>
+    </table>
+  </tables>
+</clobtype>

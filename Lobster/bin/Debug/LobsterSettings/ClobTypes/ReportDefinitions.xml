@@ -1,9 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ClobType xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<clobtype xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <name>ReportDefinitions</name>
   <directory>ReportDefinitions</directory>
-  <schema>reportmgr</schema>
-  <table>report_definitions</table>
-  <mnemonicColumn>domain</mnemonicColumn>
-  <clobColumn>xml_data</clobColumn>
-</ClobType>
+  <tables>
+    <table>
+      <schema>reportmgr</schema>
+      <name>report_definitions</name>
+      <columns>
+        <column>
+          <name>domain</name>
+          <purpose>MNEMONIC</purpose>
+        </column>
+        <column>
+          <name>xml_data</name>
+          <purpose>CLOB_DATA</purpose>
+          <dataType>XMLTYPE</dataType>
+        </column>
+      </columns>
+    </table>
+  </tables>
+</clobtype>

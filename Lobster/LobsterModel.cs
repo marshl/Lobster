@@ -147,6 +147,11 @@ namespace Lobster
                 xmlReader.Close();
                 streamReader.Close();
 
+                foreach ( ClobType.Table t in clobType.tables )
+                {
+                    t.LinkColumns();
+                }
+
                 this.clobTypeList.Add( clobType );
             }
         }
@@ -222,51 +227,31 @@ namespace Lobster
             }
         }
 
-        public bool SendInsertClobMessage( ClobFile _clobFile, string _chosenType )
+        public bool SendInsertClobMessage( ClobFile _clobFile, ClobType.Table _table, string _mimeType )
         {
             OracleConnection con = this.OpenConnection( this.currentConfig );
             if ( con == null )
             {
                 return false;
             }
-            bool result = this.InsertDatabaseClob( _clobFile, _chosenType, con );
+            bool result = this.InsertDatabaseClob( _clobFile, _table, _mimeType, con );
             con.Dispose();
             return result;
         }
 
-        private bool UpdateDatabaseClob( ClobFile _clobFile, OracleConnection _con)
+        private bool UpdateDatabaseClob( ClobFile _clobFile, OracleConnection _con )
         {
             Debug.Assert( _clobFile.localClobFile != null && _clobFile.dbClobFile != null );
             Debug.Assert( _clobFile.dbClobFile.mnemonic != null );
 
             OracleTransaction trans = _con.BeginTransaction();
             OracleCommand command = _con.CreateCommand();
-            ClobType ct = _clobFile.parentClobDirectory.clobType;
-            bool useBlobColumn = ct.blobColumnName != null
-                && ct.blobColumnTypes.Contains( _clobFile.dbClobFile.componentType );
-
-            if ( ct.hasParentTable )
-            {
-                command.CommandText =
-                    "UPDATE " + ct.schema + "." + ct.table + " child"
-                    + " SET " + ( useBlobColumn ? ct.blobColumnName : ct.clobColumn ) + " = :data"
-                    + ( ct.dateColumnName != null ? ", " + ct.dateColumnName + " = SYSDATE " : null )
-                    + " WHERE " + ct.mnemonicColumn + " = ("
-                        + "SELECT parent." + ct.parentIDColumn
-                        + " FROM " + ct.schema + "." + ct.parentTable + " parent"
-                        + " WHERE parent." + ct.parentMnemonicColumn + " = '" + _clobFile.dbClobFile.mnemonic + "')";
-            }
-            else
-            {
-                command.CommandText = "UPDATE " + ct.schema + "." + ct.table
-                    + " SET " + ( useBlobColumn ? ct.blobColumnName : ct.clobColumn ) + " = :data"
-                    + ( ct.dateColumnName != null ? ", " + ct.dateColumnName + " = SYSDATE " : null )
-                    + " WHERE " + ct.mnemonicColumn + " = '" + _clobFile.dbClobFile.mnemonic + "'";
-            }
-
+            ClobType.Table table = _clobFile.dbClobFile.table;
+            command.CommandText = table.BuildUpdateStatement( _clobFile );
+            
             try
             {
-                this.AddFileDataParameter( command, _clobFile, ct, useBlobColumn );
+                this.AddFileDataParameter( command, _clobFile, _clobFile.dbClobFile.table, _clobFile.dbClobFile.mimeType );
             }
             catch ( IOException _e )
             {
@@ -319,47 +304,47 @@ namespace Lobster
             return result;
         }
 
-        private void AddFileDataParameter( OracleCommand command, ClobFile _clobFile, ClobType _ct, bool _useBlobColumn )
+        private void AddFileDataParameter( OracleCommand command, ClobFile _clobFile, ClobType.Table _table, string _mimeType )
         {
             Debug.Assert( _clobFile.localClobFile != null );
-            if ( _useBlobColumn )
+            // Wait for the file to unlock
+            using ( FileStream fs = Common.WaitForFile( _clobFile.localClobFile.fileInfo.FullName,
+                FileMode.Open, FileAccess.Read, FileShare.ReadWrite ) )
             {
-                FileStream fileStream = new FileStream( _clobFile.localClobFile.fileInfo.FullName, FileMode.Open, FileAccess.Read );
-                byte[] fileData = new byte[fileStream.Length];
-                fileStream.Read( fileData, 0, Convert.ToInt32( fileStream.Length ) );
-                fileStream.Close();
-                OracleParameter param = command.Parameters.Add( "data", OracleDbType.Blob );
-                param.Value = fileData;
-            }
-            else
-            {
-                string contents = File.ReadAllText( _clobFile.localClobFile.fileInfo.FullName );
-                contents += this.GetClobFooterMessage();
-                OracleDbType insertType = _ct.clobDataType == "clob" ? OracleDbType.Clob : OracleDbType.XmlType;
-                command.Parameters.Add( "data", insertType, contents, ParameterDirection.Input );
+                ClobType.Column column = _table.columns.Find( x => x.purpose == ClobType.Column.Purpose.CLOB_DATA
+                    && ( _mimeType == null || x.mimeTypes.Contains( _mimeType ) ) );
+                // Binary mode
+                if ( column.dataType == ClobType.Column.Datatype.BLOB )
+                {
+                    byte[] fileData = new byte[fs.Length];
+                    fs.Read( fileData, 0, Convert.ToInt32( fs.Length ) );
+                    OracleParameter param = command.Parameters.Add( "data", OracleDbType.Blob );
+                    param.Value = fileData;
+                }
+                else // Text mode
+                {
+                    StreamReader sr = new StreamReader( fs );
+                    string contents = sr.ReadToEnd();
+                    contents += this.GetClobFooterMessage();
+                    OracleDbType insertType = column.dataType == ClobType.Column.Datatype.CLOB ? OracleDbType.Clob : OracleDbType.XmlType;
+                    command.Parameters.Add( "data", insertType, contents, ParameterDirection.Input );
+                }
             }
         }
 
-        private bool InsertDatabaseClob( ClobFile _clobFile, string _componentType, OracleConnection _con )
+        private bool InsertDatabaseClob( ClobFile _clobFile, ClobType.Table _table, string _mimeType, OracleConnection _con )
         {
             Debug.Assert( _clobFile.localClobFile != null );
             Debug.Assert( _clobFile.dbClobFile == null );
 
             OracleCommand command = _con.CreateCommand();
             OracleTransaction trans = _con.BeginTransaction();
-            ClobType ct = _clobFile.parentClobDirectory.clobType;
-            string mnemonic = this.ConvertFilenameToMnemonic( _clobFile, ct, _componentType );
+            string mnemonic = this.ConvertFilenameToMnemonic( _clobFile, _table, _mimeType );
 
-            bool useBlobColumn = ct.blobColumnName != null
-                && ct.blobColumnTypes.Contains( _componentType );
-
-            if ( ct.hasParentTable )
+            if ( _table.parentTable != null )
             {
                 // Parent Table
-                command.CommandText = "INSERT INTO " + ct.schema + "." + ct.parentTable
-                    + " (" + ct.parentIDColumn + ", " + ct.parentMnemonicColumn + " )"
-                    + " VALUES( ( SELECT MAX( " + ct.parentIDColumn + " ) + 1 "
-                    + " FROM " + ct.schema + "." + ct.parentTable + " ), '" + mnemonic + "' )";
+                command.CommandText = _table.BuildInsertParentStatement( mnemonic );
 
                 try
                 {
@@ -373,45 +358,13 @@ namespace Lobster
                     return false;
                 }
                 command.Dispose();
-
-                // Child table
-                command = _con.CreateCommand();
-                command.CommandText = "INSERT INTO " + ct.schema + "." + ct.table
-                    + "( " + ct.mnemonicColumn + ", " + ct.parentIDColumn
-                        + ( ct.dateColumnName != null ? ", " + ct.dateColumnName : null ) + ", "
-                    + ( useBlobColumn ? ct.blobColumnName : ct.clobColumn );
-
-                if ( _componentType != null )
-                {
-                    command.CommandText += ", " + ct.componentTypeColumn;
-                }
-                command.CommandText += " ) VALUES( ( SELECT MAX( " + ct.parentIDColumn + " ) + 1 FROM " + ct.schema + "." + ct.table + " ), "
-                    + "( SELECT " + ct.parentIDColumn + " FROM " + ct.schema + "." + ct.parentTable
-                        + " WHERE " + ct.parentMnemonicColumn + " = '" + mnemonic + "')"
-                    + ( ct.dateColumnName != null ? ", SYSDATE " : null )
-                    + ", :data ";
-                if ( _componentType != null )
-                {
-                    command.CommandText += ", '" + _componentType + "'";
-                }
-                command.CommandText += " )";
-            }
-            else // No parent table
-            {
-                command.CommandText = "INSERT INTO " + ct.schema + "." + ct.table
-                    + " ( " + ct.mnemonicColumn + ", " + ( useBlobColumn ? ct.blobColumnName : ct.clobColumn )
-                    + ( ct.idColumnName != null ? ", " + ct.idColumnName : null )
-                    + ( _componentType != null ? ", type" : null )
-                    + ( ct.dateColumnName != null ? ", " + ct.dateColumnName : null )
-                    + ") VALUES ( '" + mnemonic + "', :data"
-                    + ( ct.idColumnName != null ? ", ( SELECT NVL( MAX( " + ct.idColumnName + "), 0 ) + 1 FROM " + ct.schema + "." + ct.table + ")" : null )
-                    + ( _componentType != null ? ", '" + _componentType + "'" : null )
-                    + ( ct.dateColumnName != null ? ", SYSDATE " : null )
-                    + ")";
             }
 
-            this.AddFileDataParameter( command, _clobFile, ct, useBlobColumn );
+            command = _con.CreateCommand();
+            command.CommandText = _table.BuildInsertChildStatement( mnemonic, _mimeType );
 
+            this.AddFileDataParameter( command, _clobFile, _table, _mimeType );
+            //command.Parameters.Add( new OracleParameter( "mnemonic", OracleDbType.Varchar2, mnemonic, ParameterDirection.Input ) );
             try
             {
                 command.ExecuteNonQuery();
@@ -435,6 +388,7 @@ namespace Lobster
             _clobFile.dbClobFile = new DBClobFile();
             _clobFile.dbClobFile.mnemonic = mnemonic;
             _clobFile.dbClobFile.filename = _clobFile.localClobFile.fileInfo.Name;
+            _clobFile.dbClobFile.table = _table;
 
             MessageLog.Log( "Clob file creation successful: " + _clobFile.localClobFile.fileInfo.Name );
             return true;
@@ -470,27 +424,10 @@ namespace Lobster
             Debug.Assert( _clobFile.dbClobFile != null );
             OracleCommand command = _con.CreateCommand();
 
-            ClobType ct = _clobFile.parentClobDirectory.clobType;
-            bool useBlobColumn = ct.blobColumnName != null
-                 && ct.blobColumnTypes.Contains( _clobFile.dbClobFile.componentType );
-
-            if ( ct.hasParentTable )
-            {
-                command.CommandText =
-                    "SELECT " + ( useBlobColumn ? ct.blobColumnName : ct.clobColumn )
-                    + " FROM " + ct.schema + "." + ct.parentTable + " parent"
-                    + " JOIN " + ct.schema + "." + ct.table + " child"
-                    + " ON child." + ct.mnemonicColumn + " = parent." + ct.parentIDColumn
-                    + " WHERE parent." + ct.parentMnemonicColumn + " = '" + _clobFile.dbClobFile.mnemonic + "'";
-            }
-            else
-            {
-                command.CommandText =
-                    "SELECT " + ( useBlobColumn ? ct.blobColumnName : ct.clobColumn )
-                    + " FROM " + ct.schema + "." + ct.table
-                    + " WHERE " + ct.mnemonicColumn + " = '" + _clobFile.dbClobFile.mnemonic + "'";
-            }
-
+            ClobType.Table table = _clobFile.dbClobFile.table;
+            ClobType.Column column = _clobFile.dbClobFile.GetColumn();
+            command.CommandText = table.BuildGetDataCommand( _clobFile );
+            command.Parameters.Add( new OracleParameter( "mnemonic", OracleDbType.Varchar2, _clobFile.dbClobFile.mnemonic, ParameterDirection.Input ) );
             try
             {
                 OracleDataReader reader = command.ExecuteReader();
@@ -500,7 +437,7 @@ namespace Lobster
                 if ( reader.Read() )
                 {
                     string result;
-                    if ( useBlobColumn )
+                    if ( column.dataType == ClobType.Column.Datatype.BLOB )
                     {
                         OracleBlob blob = reader.GetOracleBlob( 0 );
                         File.WriteAllBytes( tempName, blob.Value );
@@ -508,7 +445,8 @@ namespace Lobster
                     else
                     {
                         StreamWriter streamWriter = File.AppendText( tempName );
-                        if ( ct.clobDataType == "clob" )
+                        
+                        if ( _clobFile.dbClobFile.table.columns.Find( x => x.purpose == ClobType.Column.Purpose.CLOB_DATA ).dataType == ClobType.Column.Datatype.CLOB )
                         {
                             OracleClob clob = reader.GetOracleClob( 0 );
                             result = clob.Value;
@@ -557,48 +495,39 @@ namespace Lobster
         private void GetDatabaseFileListForDirectory( ClobDirectory _clobDir, OracleConnection _con )
         {
             _clobDir.databaseClobMap = new Dictionary<string, DBClobFile>();
-            OracleCommand command = _con.CreateCommand();
-
+            
             ClobType ct = _clobDir.clobType;
-            if ( ct.hasParentTable )
-            {
-                command.CommandText = "SELECT parent." + ct.parentMnemonicColumn
-                    + ( ct.componentTypeColumn != null ? ", child." + ct.componentTypeColumn : null )
-                    + " FROM " + ct.schema + "." + ct.parentTable + " parent"
-                    + " JOIN " + ct.schema + "." + ct.table + " child"
-                    + " ON child." + ct.mnemonicColumn + " = parent." + ct.parentIDColumn;
-            }
-            else
-            {
-                command.CommandText = "SELECT " + ct.mnemonicColumn
-                    + ( ct.componentTypeColumn != null ? ", " + ct.componentTypeColumn : null )
-                    + " FROM " + ct.schema + "." + ct.table;
-            }
 
-            OracleDataReader reader;
-            try
+            foreach ( ClobType.Table table in ct.tables )
             {
-                reader = command.ExecuteReader();
-            }
-            catch ( InvalidOperationException _e )
-            {
+                OracleCommand command = _con.CreateCommand();
+                command.CommandText = table.GetFileListCommand();
+                OracleDataReader reader;
+                try
+                {
+                    reader = command.ExecuteReader();
+                }
+                catch ( InvalidOperationException _e )
+                {
+                    command.Dispose();
+                    LobsterMain.OnErrorMessage( "Directory Comparison Error",
+                            "An invalid operation occurred when retriving the file list for  " + ct.name + ". Check the logs for more information." );
+                    MessageLog.Log( "Error comparing to database: " + _e.Message + " when executing command " + command.CommandText );
+                    return;
+                }
+
+                while ( reader.Read() )
+                {
+                    DBClobFile dbClobFile = new DBClobFile();
+                    dbClobFile.mnemonic = reader.GetString( 0 );
+                    dbClobFile.mimeType = table.columns.Find( x => x.purpose == ClobType.Column.Purpose.MIME_TYPE ) != null ? reader.GetString( 1 ) : null;
+                    dbClobFile.filename = this.ConvertMnemonicToFilename( dbClobFile.mnemonic, table, dbClobFile.mimeType );
+                    dbClobFile.table = table;
+                    _clobDir.databaseClobMap.Add( dbClobFile.mnemonic, dbClobFile );
+                }
+                reader.Close();
                 command.Dispose();
-                LobsterMain.OnErrorMessage( "Directory Comparison Error",
-                        "An invalid operation occurred when retriving the file list for  " + ct.schema + "." + ct.table + ": " + _e.Message );
-                MessageLog.Log( "Error comparing to database: " + _e.Message + " when executing command " + command.CommandText );
-                return;
             }
-
-            while ( reader.Read() )
-            {
-                DBClobFile dbClobFile = new DBClobFile();
-                dbClobFile.mnemonic = reader.GetString( 0 );
-                dbClobFile.componentType = ct.componentTypeColumn != null ? reader.GetString( 1 ) : null;
-                dbClobFile.filename = this.ConvertMnemonicToFilename( dbClobFile.mnemonic, ct, dbClobFile.componentType );
-                _clobDir.databaseClobMap.Add( dbClobFile.mnemonic, dbClobFile );
-            }
-            reader.Close();
-            command.Dispose();
         }
 
         private string GetClobFooterMessage()
@@ -640,11 +569,11 @@ namespace Lobster
             return dt;
         }
 
-        public string ConvertFilenameToMnemonic( ClobFile _clobFile, ClobType _ct, string _componentType )
+        public string ConvertFilenameToMnemonic( ClobFile _clobFile, ClobType.Table _table, string _componentType )
         {
             Debug.Assert( _clobFile.localClobFile != null );
             string mnemonic = Path.GetFileNameWithoutExtension( _clobFile.localClobFile.fileInfo.Name );
-            if ( _ct.componentTypeColumn != null )
+            if ( _table.columns.Find( x => x.purpose == ClobType.Column.Purpose.MIME_TYPE ) != null )
             {
                 if ( !this.mimeToPrefixMap.ContainsKey( _componentType ) )
                 {
@@ -661,7 +590,7 @@ namespace Lobster
             return mnemonic;
         }
 
-        public string ConvertMnemonicToFilename( string _mnemonic, ClobType _ct, string _databaseType )
+        public string ConvertMnemonicToFilename( string _mnemonic, ClobType.Table _table, string _databaseType )
         {
             string filename = _mnemonic;
             
@@ -673,7 +602,7 @@ namespace Lobster
             }
 
             // Assume xml data types for tables without a datatype column
-            if ( _ct.componentTypeColumn == null || prefix == null )
+            if ( _table.columns.Find( x => x.purpose == ClobType.Column.Purpose.MIME_TYPE ) == null || prefix == null )
             {
                 filename += ".xml";
             }

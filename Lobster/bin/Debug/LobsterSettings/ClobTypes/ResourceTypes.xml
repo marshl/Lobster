@@ -1,9 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ClobType xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<clobtype xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <name>Resource Types</name>
   <directory>ResourceTypes</directory>
-  <schema>decmgr</schema>
-  <table>resource_types</table>
-  <mnemonicColumn>res_type</mnemonicColumn>
-  <clobColumn>xml_data</clobColumn>
-</ClobType>
+  <tables>
+    <table>
+      <schema>decmgr</schema>
+      <name>resource_types</name>
+      <columns>
+        <column>
+          <name>res_type</name>
+          <purpose>MNEMONIC</purpose>
+        </column>
+        <column>
+          <name>xml_data</name>
+          <purpose>CLOB_DATA</purpose>
+          <dataType>XMLTYPE</dataType>
+        </column>
+      </columns>
+    </table>
+  </tables>
+</clobtype>
