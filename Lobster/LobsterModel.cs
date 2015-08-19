@@ -138,21 +138,33 @@ namespace Lobster
             DirectoryInfo clobTypeDir = Directory.CreateDirectory( Program.CLOB_TYPE_DIR );
             foreach ( FileInfo file in clobTypeDir.GetFiles() )
             {
-                ClobType clobType = new ClobType();
-
-                XmlSerializer xmls = new XmlSerializer( typeof( ClobType ) );
-                StreamReader streamReader = new StreamReader( file.FullName );
-                XmlReader xmlReader = XmlReader.Create( streamReader );
-                clobType = (ClobType)xmls.Deserialize( xmlReader );
-                xmlReader.Close();
-                streamReader.Close();
-
-                foreach ( ClobType.Table t in clobType.tables )
+                try
                 {
-                    t.LinkColumns();
-                }
+                    ClobType clobType = new ClobType();
+                    XmlSerializer xmls = new XmlSerializer( typeof( ClobType ) );
+                    StreamReader streamReader = new StreamReader( file.FullName );
+                    XmlReader xmlReader = XmlReader.Create( streamReader );
+                    clobType = (ClobType)xmls.Deserialize( xmlReader );
+                    xmlReader.Close();
+                    streamReader.Close();
 
-                this.clobTypeList.Add( clobType );
+                    if ( !clobType.enabled )
+                    {
+                        continue;
+                    }
+
+                    foreach ( ClobType.Table t in clobType.tables )
+                    {
+                        t.LinkColumns();
+                    }
+
+                    this.clobTypeList.Add( clobType );
+                }
+                catch ( InvalidOperationException _e )
+                {
+                    MessageBox.Show( "The ClobType " + file.Name + " failed to load. Check the log for more information.", "ClobType Load Failed", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1 );
+                    MessageLog.Log( String.Format( "An InvalidOperationException was thrown when loading the ClobType {0}: {1}", file.Name, _e.Message ) );
+                }
             }
         }
 
@@ -210,19 +222,21 @@ namespace Lobster
                 LobsterMain.OnErrorMessage( "Folder not found", "Folder \"" + info.FullName + "\" could not be found for ClobType " + _clobDirectory.clobType.name );
                 return false;
             }
-
             _clobDirectory.rootClobNode = new ClobNode( info, _clobDirectory );
-            PopulateClobNodeDirectories( _clobDirectory.rootClobNode, _clobDirectory );
+            if ( _clobDirectory.clobType.includeSubDirectories )
+            {
+                PopulateClobNodeDirectories_r( _clobDirectory.rootClobNode, _clobDirectory );
+            }
             return true;
         }
 
-        public void PopulateClobNodeDirectories( ClobNode _clobNode, ClobDirectory _clobDirectory )
+        public void PopulateClobNodeDirectories_r( ClobNode _clobNode, ClobDirectory _clobDirectory )
         {
             DirectoryInfo[] subDirs = _clobNode.dirInfo.GetDirectories();
             foreach ( DirectoryInfo subDir in subDirs )
             {
                 ClobNode childNode = new ClobNode( subDir, _clobDirectory );
-                PopulateClobNodeDirectories( childNode, _clobDirectory);
+                PopulateClobNodeDirectories_r( childNode, _clobDirectory );
                 _clobNode.childNodes.Add( childNode );
             }
         }
@@ -532,11 +546,11 @@ namespace Lobster
 
         private string GetClobFooterMessage()
         {
-            return String.Format( "<!-- Last clobbed by user {0} on machine {1} at {2} (Build {3}) -->",
+            return String.Format( "<!-- Last clobbed by user {0} on machine {1} at {2} (Lobster build {3}) -->",
                 Environment.UserName,
                 Environment.MachineName,
                 DateTime.Now,
-                RetrieveLinkerTimestamp() );
+                RetrieveLinkerTimestamp().ToShortDateString() );
         }
 
         //http://stackoverflow.com/questions/1600962/displaying-the-build-date

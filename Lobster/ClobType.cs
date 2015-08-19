@@ -14,6 +14,12 @@ namespace Lobster
         [XmlElement( ElementName = "directory" )]
         public string directory;
 
+        [XmlElement( ElementName = "includeSubDirectories")]
+        public bool includeSubDirectories;
+
+        [XmlElement( ElementName = "enabled" )]
+        public bool enabled = true;
+
         public List<Table> tables;
 
         [XmlType( TypeName = "table" )]
@@ -208,8 +214,7 @@ namespace Lobster
                 }
             }
         }
-
-        //[XmlElement( ElementName = "column")]
+        
         [XmlType( TypeName ="column")]
         public class Column
         {

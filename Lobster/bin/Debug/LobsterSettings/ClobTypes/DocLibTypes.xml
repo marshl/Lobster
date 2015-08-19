@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <clobtype xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <name>DocLibTypes</name>
+  <enabled>true</enabled>
   <directory>DocLibTypes</directory>
-  <hasParentTable xsi:nil="true" />
+  <includeSubDirectories>true</includeSubDirectories>
   <tables>
     <table>
       <schema>doclibmgr</schema>

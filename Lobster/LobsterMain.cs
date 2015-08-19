@@ -77,23 +77,27 @@ namespace Lobster
                 ClobDirectory clobDir = pair.Value;
                 TreeNode dirNode = new TreeNode( clobDir.rootClobNode.dirInfo.Name, 0, 0 );
                 dirNode.Tag = clobDir.rootClobNode;
-                this.PopulateTreeNode_r( clobDir.rootClobNode, dirNode );
+                bool recurse = clobDir.clobType.includeSubDirectories;
+                this.PopulateTreeNode_r( clobDir.rootClobNode, dirNode, recurse );
                 rootNode.Nodes.Add( dirNode );
             }
             this.fileTreeView.Nodes.Add( rootNode );
             rootNode.Expand();
         }
 
-        private void PopulateTreeNode_r( ClobNode _clobNode, TreeNode _treeNode )
+        private void PopulateTreeNode_r( ClobNode _clobNode, TreeNode _treeNode, bool _recurse )
         {
             foreach ( ClobNode child in _clobNode.childNodes )
             {
                 TreeNode aNode = new TreeNode( child.dirInfo.Name );
                 aNode.Tag = child;
                 aNode.ImageKey = "folder";
-                
-                PopulateTreeNode_r( child, aNode );
-                _treeNode.Nodes.Add( aNode );
+
+                if ( _recurse )
+                {
+                    PopulateTreeNode_r( child, aNode, true );
+                }
+                    _treeNode.Nodes.Add( aNode );
             }
         }
         
@@ -315,8 +319,7 @@ namespace Lobster
                 _result ? "File Inserted" : "File Insert Failed",
                 _clobFile.localClobFile.fileInfo.Name,
                 _result ? ToolTipIcon.Info : ToolTipIcon.Error );
-
-            //( _result ? SystemSounds.Beep : SystemSounds.Exclamation ).Play();
+            
             ( _result ? this.successSoundPlayer : this.failureSoundPlayer ).Play();
         }
 

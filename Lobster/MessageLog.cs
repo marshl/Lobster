@@ -4,7 +4,7 @@ using System.Windows.Forms;
 
 namespace Lobster
 {
-    public class MessageLog
+    public class MessageLog : IDisposable
     {
         private static MessageLog instance;
         public TextBox textBox;
@@ -16,7 +16,7 @@ namespace Lobster
             MessageLog.instance = this;
             this.stream = new StreamWriter( Program.LOG_FILE, true );
             this.stream.Write( "\n\n" );
-            Log( "Starting Lobster (build " + LobsterModel.RetrieveLinkerTimestamp() + ")" );
+            Log( String.Format( "Starting Lobster (build {0})", LobsterModel.RetrieveLinkerTimestamp() ) );
         }
 
         public void Close()
@@ -34,6 +34,11 @@ namespace Lobster
         public static void Log( string _message )
         {
             MessageLog.instance.InternalLog( _message );
+        }
+
+        public void Dispose()
+        {
+            this.stream.Close();
         }
     }
 }
