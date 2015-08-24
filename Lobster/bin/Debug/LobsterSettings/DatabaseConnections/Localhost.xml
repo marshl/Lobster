@@ -10,4 +10,5 @@
   <codeSource>C:\IconWS\trunk\CodeSource</codeSource>
   <!-- Using pooling will keep a session open but inactive in the database, but improves Lobster performance -->
   <usePooling>true</usePooling>
+  <clobTypeDir>C:\IconWS\trunk\LobsterClobTypes</clobTypeDir>
 </DatabaseConfig>

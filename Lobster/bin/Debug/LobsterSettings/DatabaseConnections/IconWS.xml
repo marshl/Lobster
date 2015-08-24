@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<DatabaseConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<DatabaseConfig xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <name>Icon Dev</name>
   <host>icondbdev</host>
   <port>1521</port>
@@ -10,4 +10,5 @@
   <codeSource>C:\IconWS\trunk\CodeSource</codeSource>
   <!-- Using pooling will keep a session open but inactive in the database, but improves Lobster performance -->
   <usePooling>false</usePooling>
+  <clobTypeDir>C:\IconWS\trunk\LobsterClobTypes</clobTypeDir>
 </DatabaseConfig>

@@ -4,8 +4,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Media;
-using System.Net;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace Lobster
@@ -29,7 +27,6 @@ namespace Lobster
             this.lobsterModel = new LobsterModel();
             
             this.lobsterModel.LoadDatabaseConfig();
-            this.lobsterModel.LoadClobTypes();
 
             this.PopulateConnectionList();
 
@@ -44,10 +41,6 @@ namespace Lobster
             {
                 ListViewItem item = new ListViewItem( config.name );
                 string ipAddress = config.host;
-                /*if ( !Regex.Match( ipAddress, @"\b(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\b" ).Success )
-                {
-                    ipAddress = Dns.GetHostEntry( config.host ).AddressList[0].ToString();
-                }*/
 
                 ListViewItem.ListViewSubItem[] subItems = new ListViewItem.ListViewSubItem[]
                 {
@@ -331,7 +324,6 @@ namespace Lobster
                 _clobFile.localClobFile.fileInfo.Name,
                 _result ? ToolTipIcon.Info : ToolTipIcon.Error );
 
-            //( _result ? SystemSounds.Beep : SystemSounds.Exclamation ).Play();
             ( _result ? this.successSoundPlayer : this.failureSoundPlayer ).Play();
         }
 

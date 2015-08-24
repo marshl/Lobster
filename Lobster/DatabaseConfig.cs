@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Xml.Serialization;
 
 namespace Lobster
 {
@@ -16,5 +12,9 @@ namespace Lobster
         public string password;
         public string codeSource;
         public bool usePooling;
+        public string clobTypeDir;
+
+        [XmlIgnore]
+        public string fileLocation;
     }
 }

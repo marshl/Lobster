@@ -52,11 +52,12 @@ namespace Lobster
             dbConfig = (DatabaseConfig)xmls.Deserialize( xmlReader );
             xmlReader.Close();
             streamReader.Close();
+            dbConfig.fileLocation = _fullpath;
 
             // If the CodeSource folder cannot be found, prompt the user for it
             if ( dbConfig.codeSource == null || !Directory.Exists( dbConfig.codeSource ) )
             {
-                string codeSourceDir = PromptForCodeSource();
+                string codeSourceDir = PromptForDirectory( "Please select your CodeSource directory.", null);
                 if ( codeSourceDir != null )
                 {
                     dbConfig.codeSource = codeSourceDir;
@@ -70,10 +71,14 @@ namespace Lobster
             return dbConfig;
         }
 
-        private static string PromptForCodeSource()
+        private static string PromptForDirectory( string _description, string _startingPath )
         {
             FolderBrowserDialog fbd = new FolderBrowserDialog();
-            fbd.Description = "Please select your CodeSource directory.";
+            fbd.Description = _description;
+            if ( _startingPath != null )
+            {
+                fbd.SelectedPath = _startingPath;
+            }
             DialogResult result = fbd.ShowDialog();
             if ( result != DialogResult.OK )
             {
@@ -85,8 +90,10 @@ namespace Lobster
         private static void SerialiseConfig( string _fullpath, DatabaseConfig _config )
         {
             XmlSerializer xmls = new XmlSerializer( typeof( DatabaseConfig ) );
-            StreamWriter streamWriter = new StreamWriter( _fullpath );
-            xmls.Serialize( streamWriter, _config );
+            using ( StreamWriter streamWriter = new StreamWriter( _fullpath ) )
+            {
+                xmls.Serialize( streamWriter, _config );
+            }
         }
 
         private OracleConnection OpenConnection( DatabaseConfig _config )
@@ -132,10 +139,17 @@ namespace Lobster
             con.Dispose();
         }
 
-        public void LoadClobTypes()
+        public void LoadClobTypes( DatabaseConfig _dbConfig )
         {
             this.clobTypeList = new List<ClobType>();
-            DirectoryInfo clobTypeDir = Directory.CreateDirectory( Program.CLOB_TYPE_DIR );
+            DirectoryInfo clobTypeDir = new DirectoryInfo( _dbConfig.clobTypeDir );
+            if ( !clobTypeDir.Exists )
+            {
+                MessageBox.Show( String.Format( "{0} could not be found.", clobTypeDir ), "ClobType Load Failed", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1 );
+                MessageLog.Log( String.Format( "The directory {0} could not be found when loading {1}.", clobTypeDir, _dbConfig.name ) );
+                return;
+            }
+
             foreach ( FileInfo file in clobTypeDir.GetFiles() )
             {
                 try
@@ -417,9 +431,24 @@ namespace Lobster
             }
             con.Close();
 
+            if ( _config.clobTypeDir == null || !Directory.Exists( _config.clobTypeDir ) )
+            {
+                _config.clobTypeDir = PromptForDirectory( String.Format( "Please select your Clob Type directory for {0}.", _config.name ), _config.codeSource );
+                if ( _config.clobTypeDir != null )
+                {
+                    SerialiseConfig( _config.fileLocation, _config );
+                }
+                else // Ignore config files that don't have a valid CodeSource folder
+                {
+                    return false;
+                }
+            }
+
             this.currentConfig = _config;
+            this.LoadClobTypes( _config );
             this.LoadClobDirectories();
             this.RequeryDatabase();
+
             return true;
         }
 
