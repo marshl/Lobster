@@ -15,10 +15,27 @@ namespace Lobster
 
         public ClobType.Column GetColumn()
         {
-            return this.table.columns.Find(
+            // Find the column that is used for storing the clob data that can store the mime type of this file
+            ClobType.Column col = this.table.columns.Find(
                 x => x.purpose == ClobType.Column.Purpose.CLOB_DATA
                     && ( this.mimeType == null || x.mimeTypes.Contains( this.mimeType ) ) );
-        }
 
+            if ( col == null )
+            {
+                throw new MimeTypeNotFoundException( this );
+            }
+
+            return col;
+        }
+    }
+
+    public class MimeTypeNotFoundException : Exception
+    {
+        public MimeTypeNotFoundException( DBClobFile _dbClobFile )
+            : base ( String.Format( "The mime type {0} of file {1} could not be found the table {2}",
+                _dbClobFile.filename, _dbClobFile.mimeType, _dbClobFile.table.FullName ) )
+        {
+            
+        }
     }
 }

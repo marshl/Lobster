@@ -64,8 +64,11 @@ namespace Lobster
 
         private void PopulateDirectoryTreeView()
         {
-            TreeNode rootNode = new TreeNode( "CodeSource", 0, 0 );
-            foreach ( KeyValuePair<ClobType, ClobDirectory> pair in this.lobsterModel.clobTypeToDirectoryMap )
+            Debug.Assert( this.lobsterModel.currentConnection != null );
+            // Use the folder name as the root element
+            DatabaseConnection dbc = this.lobsterModel.currentConnection;
+            TreeNode rootNode = new TreeNode( Path.GetFileName( dbc.dbConfig.codeSource ) ?? "CodeSource", 0, 0 );
+            foreach ( KeyValuePair<ClobType, ClobDirectory> pair in dbc.clobTypeToDirectoryMap )
             {
                 ClobDirectory clobDir = pair.Value;
                 TreeNode dirNode = new TreeNode( clobDir.rootClobNode.dirInfo.Name, 0, 0 );
@@ -152,7 +155,7 @@ namespace Lobster
                 dateValue = _clobFile.localClobFile.fileInfo.LastAccessTime.ToShortDateString();
                 if ( _clobFile.dbClobFile != null )
                 {
-                    status = "Synchronised with Database";
+                    status = "Synchronised";
                     foreColour = Color.Black;
                 }
                 else if ( _clobFile.localClobFile.fileInfo.Exists )
@@ -189,7 +192,7 @@ namespace Lobster
         {
             this.workingFileList.Items.Clear();
             List<ClobFile> workingFiles = new List<ClobFile>();
-            this.lobsterModel.GetWorkingFiles( ref workingFiles );
+            this.lobsterModel.currentConnection.GetWorkingFiles( ref workingFiles );
 
             foreach ( ClobFile clobFile in workingFiles )
             {
@@ -350,7 +353,7 @@ namespace Lobster
 
         private void MainTabControl_Selecting( object sender, TabControlCancelEventArgs e )
         {
-            if ( this.lobsterModel.currentConfig == null )
+            if ( this.lobsterModel.currentConnection == null )
             {
                 e.Cancel = true;
                 MessageBox.Show( "Not connected. You must select a connection and then press the Connect button." );
@@ -452,7 +455,7 @@ namespace Lobster
 
         private void refreshButtonClick( object sender, EventArgs e )
         {
-            if ( this.lobsterModel.currentConfig != null )
+            if ( this.lobsterModel.currentConnection != null )
             {
                 this.lobsterModel.RequeryDatabase();
                 this.RefreshClobLists();

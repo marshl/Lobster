@@ -15,10 +15,8 @@ namespace Lobster
     public class LobsterModel
     {
         public List<DatabaseConfig> dbConfigList;
-        public DatabaseConfig currentConfig;
+        public DatabaseConnection currentConnection;
 
-        public List<ClobType> clobTypeList;
-        public Dictionary<ClobType, ClobDirectory> clobTypeToDirectoryMap;
         public List<FileInfo> tempFileList = new List<FileInfo>();
 
         public Dictionary<string, string> mimeToPrefixMap;
@@ -52,6 +50,7 @@ namespace Lobster
             dbConfig = (DatabaseConfig)xmls.Deserialize( xmlReader );
             xmlReader.Close();
             streamReader.Close();
+            
             dbConfig.fileLocation = _fullpath;
 
             // If the CodeSource folder cannot be found, prompt the user for it
@@ -96,7 +95,7 @@ namespace Lobster
             }
         }
 
-        private OracleConnection OpenConnection( DatabaseConfig _config )
+        private static OracleConnection OpenConnection( DatabaseConfig _config )
         {
             OracleConnection con = new OracleConnection();
             con.ConnectionString = "User Id=" + _config.username
@@ -125,82 +124,23 @@ namespace Lobster
 
         public void GetDatabaseFileLists()
         { 
-            OracleConnection con = this.OpenConnection( this.currentConfig );
+            OracleConnection con = OpenConnection( this.currentConnection.dbConfig );
             if ( con == null )
             {
                 MessageLog.Log( "Connection failed, cannot diff files with database." );
                 return;
             }
             
-            foreach ( KeyValuePair<ClobType, ClobDirectory> pair in this.clobTypeToDirectoryMap )
+            foreach ( KeyValuePair<ClobType, ClobDirectory> pair in this.currentConnection.clobTypeToDirectoryMap )
             {
                 this.GetDatabaseFileListForDirectory( pair.Value, con );
             }
             con.Dispose();
         }
 
-        public void LoadClobTypes( DatabaseConfig _dbConfig )
-        {
-            this.clobTypeList = new List<ClobType>();
-            DirectoryInfo clobTypeDir = new DirectoryInfo( _dbConfig.clobTypeDir );
-            if ( !clobTypeDir.Exists )
-            {
-                MessageBox.Show( String.Format( "{0} could not be found.", clobTypeDir ), "ClobType Load Failed", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1 );
-                MessageLog.Log( String.Format( "The directory {0} could not be found when loading {1}.", clobTypeDir, _dbConfig.name ) );
-                return;
-            }
-
-            foreach ( FileInfo file in clobTypeDir.GetFiles() )
-            {
-                try
-                {
-                    ClobType clobType = new ClobType();
-                    XmlSerializer xmls = new XmlSerializer( typeof( ClobType ) );
-                    StreamReader streamReader = new StreamReader( file.FullName );
-                    XmlReader xmlReader = XmlReader.Create( streamReader );
-                    clobType = (ClobType)xmls.Deserialize( xmlReader );
-                    xmlReader.Close();
-                    streamReader.Close();
-
-                    if ( !clobType.enabled )
-                    {
-                        continue;
-                    }
-
-                    foreach ( ClobType.Table t in clobType.tables )
-                    {
-                        t.LinkColumns();
-                    }
-
-                    this.clobTypeList.Add( clobType );
-                }
-                catch ( InvalidOperationException _e )
-                {
-                    MessageBox.Show( "The ClobType " + file.Name + " failed to load. Check the log for more information.", "ClobType Load Failed", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1 );
-                    MessageLog.Log( String.Format( "An InvalidOperationException was thrown when loading the ClobType {0}: {1}", file.Name, _e.Message ) );
-                }
-            }
-        }
-
-        public void LoadClobDirectories()
-        {
-            this.clobTypeToDirectoryMap = new Dictionary<ClobType, ClobDirectory>();
-            foreach ( ClobType clobType in this.clobTypeList )
-            {
-                ClobDirectory clobDir = new ClobDirectory();
-                clobDir.clobType = clobType;
-                clobDir.parentModel = this;
-                bool result = this.PopulateClobDirectory( clobDir );
-                if ( result )
-                {
-                    this.clobTypeToDirectoryMap.Add( clobType, clobDir );
-                }
-            }
-        }
-
         public void SendUpdateClobMessage( ClobFile _clobFile )
         {
-            OracleConnection con = this.OpenConnection( this.currentConfig );
+            OracleConnection con = OpenConnection( this.currentConnection.dbConfig );
             bool result;
             if ( con == null )
             {
@@ -214,50 +154,11 @@ namespace Lobster
             LobsterMain.instance.OnFileUpdateComplete( _clobFile, result );
         }
 
-        public void GetWorkingFiles( ref List<ClobFile> _workingFiles )
-        {
-            if ( this.clobTypeToDirectoryMap == null )
-            {
-                return;
-            }
-
-            foreach ( KeyValuePair<ClobType, ClobDirectory> pair in this.clobTypeToDirectoryMap )
-            {
-                pair.Value.GetWorkingFiles( ref _workingFiles );
-            }
-        }
-
-        public bool PopulateClobDirectory( ClobDirectory _clobDirectory )
-        {
-            DirectoryInfo info = new DirectoryInfo( this.currentConfig.codeSource + "/" + _clobDirectory.clobType.directory );
-            if ( !info.Exists )
-            {
-                MessageLog.Log( "Folder could not be found: " + info.FullName );
-                LobsterMain.OnErrorMessage( "Folder not found", "Folder \"" + info.FullName + "\" could not be found for ClobType " + _clobDirectory.clobType.name );
-                return false;
-            }
-            _clobDirectory.rootClobNode = new ClobNode( info, _clobDirectory );
-            if ( _clobDirectory.clobType.includeSubDirectories )
-            {
-                PopulateClobNodeDirectories_r( _clobDirectory.rootClobNode, _clobDirectory );
-            }
-            return true;
-        }
-
-        public void PopulateClobNodeDirectories_r( ClobNode _clobNode, ClobDirectory _clobDirectory )
-        {
-            DirectoryInfo[] subDirs = _clobNode.dirInfo.GetDirectories();
-            foreach ( DirectoryInfo subDir in subDirs )
-            {
-                ClobNode childNode = new ClobNode( subDir, _clobDirectory );
-                PopulateClobNodeDirectories_r( childNode, _clobDirectory );
-                _clobNode.childNodes.Add( childNode );
-            }
-        }
+        
 
         public bool SendInsertClobMessage( ClobFile _clobFile, ClobType.Table _table, string _mimeType )
         {
-            OracleConnection con = this.OpenConnection( this.currentConfig );
+            OracleConnection con = OpenConnection( this.currentConnection.dbConfig );
             if ( con == null )
             {
                 return false;
@@ -275,8 +176,17 @@ namespace Lobster
             OracleTransaction trans = _con.BeginTransaction();
             OracleCommand command = _con.CreateCommand();
             ClobType.Table table = _clobFile.dbClobFile.table;
-            command.CommandText = table.BuildUpdateStatement( _clobFile );
-            
+
+            try
+            {
+                command.CommandText = table.BuildUpdateStatement( _clobFile );
+            }
+            catch ( MimeTypeNotFoundException _e )
+            {
+                LobsterMain.OnErrorMessage( "Clob Data Fetch Error", _e.Message );
+                MessageLog.Log( _e.Message );
+                return false;
+            }
             try
             {
                 this.AddFileDataParameter( command, _clobFile, _clobFile.dbClobFile.table, _clobFile.dbClobFile.mimeType );
@@ -322,7 +232,7 @@ namespace Lobster
 
         public FileInfo SendDownloadClobDataToFileMessage( ClobFile _clobFile )
         {
-            OracleConnection con = this.OpenConnection( this.currentConfig );
+            OracleConnection con = OpenConnection( this.currentConnection.dbConfig );
             if ( con == null )
             {
                 return null;
@@ -424,7 +334,7 @@ namespace Lobster
 
         public bool SetDatabaseConnection( DatabaseConfig _config )
         {
-            OracleConnection con = this.OpenConnection( _config );
+            OracleConnection con = OpenConnection( _config );
             if ( con == null )
             {
                 return false;
@@ -444,9 +354,9 @@ namespace Lobster
                 }
             }
 
-            this.currentConfig = _config;
-            this.LoadClobTypes( _config );
-            this.LoadClobDirectories();
+            this.currentConnection = new DatabaseConnection( _config );
+            this.currentConnection.LoadClobTypes();
+            this.currentConnection.LoadClobDirectories( this );
             this.RequeryDatabase();
 
             return true;
@@ -454,9 +364,10 @@ namespace Lobster
 
         public void RequeryDatabase()
         {
+            Debug.Assert( this.currentConnection != null );
             this.GetDatabaseFileLists();
 
-            foreach ( KeyValuePair<ClobType, ClobDirectory> pair in this.clobTypeToDirectoryMap )
+            foreach ( KeyValuePair<ClobType, ClobDirectory> pair in this.currentConnection.clobTypeToDirectoryMap )
             {
                 pair.Value.RefreshFileLists();
             }
@@ -468,8 +379,19 @@ namespace Lobster
             OracleCommand command = _con.CreateCommand();
 
             ClobType.Table table = _clobFile.dbClobFile.table;
-            ClobType.Column column = _clobFile.dbClobFile.GetColumn();
-            command.CommandText = table.BuildGetDataCommand( _clobFile );
+            ClobType.Column column;
+            try
+            {
+                column = _clobFile.dbClobFile.GetColumn();
+                command.CommandText = table.BuildGetDataCommand( _clobFile );
+            }
+            catch ( MimeTypeNotFoundException _e )
+            {
+                LobsterMain.OnErrorMessage( "Clob Data Fetch Error", _e.Message );
+                MessageLog.Log( _e.Message );
+                return null;
+            }
+            
             command.Parameters.Add( new OracleParameter( "mnemonic", OracleDbType.Varchar2, _clobFile.dbClobFile.mnemonic, ParameterDirection.Input ) );
             try
             {

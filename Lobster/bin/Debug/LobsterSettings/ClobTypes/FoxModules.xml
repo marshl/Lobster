@@ -19,7 +19,7 @@
           <dataType>CLOB</dataType>
           <mimeTypes>
             <string>module</string>
-            <string>test/html</string>
+            <string>text/html</string>
             <string>text/css</string>
             <string>text/javascript</string>
           </mimeTypes>
