@@ -65,6 +65,7 @@ namespace Lobster
         private void PopulateDirectoryTreeView()
         {
             Debug.Assert( this.lobsterModel.currentConnection != null );
+            this.fileTreeView.Nodes.Clear();
             // Use the folder name as the root element
             DatabaseConnection dbc = this.lobsterModel.currentConnection;
             TreeNode rootNode = new TreeNode( Path.GetFileName( dbc.dbConfig.codeSource ) ?? "CodeSource", 0, 0 );
