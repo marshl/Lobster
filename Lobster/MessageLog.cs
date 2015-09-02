@@ -16,7 +16,7 @@ namespace Lobster
             MessageLog.instance = this;
             this.stream = new StreamWriter( Program.LOG_FILE, true );
             this.stream.Write( "\n\n" );
-            Log( String.Format( "Starting Lobster (build {0})", LobsterModel.RetrieveLinkerTimestamp() ) );
+            this.InternalLog( String.Format( "Starting Lobster (build {0})", Common.RetrieveLinkerTimestamp() ) );
         }
 
         public void Close()

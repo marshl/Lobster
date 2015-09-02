@@ -396,12 +396,13 @@ namespace Lobster
             try
             {
                 OracleDataReader reader = command.ExecuteReader();
-                string tempName = Path.GetTempFileName().Replace( ".tmp", "." ) + _clobFile.dbClobFile.filename;
+                string tempPath = Path.GetTempFileName();
+                new FileInfo( tempPath ).Delete();
+                string tempName = tempPath.Replace( ".tmp", "." ) + _clobFile.dbClobFile.filename;
                 FileInfo tempFile = new FileInfo( tempName );
-
+                
                 if ( reader.Read() )
                 {
-                    string result;
                     if ( column.dataType == ClobType.Column.Datatype.BLOB )
                     {
                         OracleBlob blob = reader.GetOracleBlob( 0 );
@@ -409,9 +410,9 @@ namespace Lobster
                     }
                     else
                     {
-                        StreamWriter streamWriter = File.AppendText( tempName );
-                        
-                        if ( _clobFile.dbClobFile.table.columns.Find( x => x.purpose == ClobType.Column.Purpose.CLOB_DATA ).dataType == ClobType.Column.Datatype.CLOB )
+                        string result;
+                        ClobType.Column clobColumn =_clobFile.dbClobFile.table.columns.Find( x => x.purpose == ClobType.Column.Purpose.CLOB_DATA );
+                        if ( clobColumn.dataType == ClobType.Column.Datatype.CLOB )
                         {
                             OracleClob clob = reader.GetOracleClob( 0 );
                             result = clob.Value;
@@ -421,6 +422,7 @@ namespace Lobster
                             OracleXmlType xml = reader.GetOracleXmlType( 0 );
                             result = xml.Value;
                         }
+                        StreamWriter streamWriter = File.AppendText( tempName );
                         streamWriter.Write( result );
                         streamWriter.Close();
                     }
@@ -501,37 +503,7 @@ namespace Lobster
                 Environment.UserName,
                 Environment.MachineName,
                 DateTime.Now,
-                RetrieveLinkerTimestamp().ToShortDateString() );
-        }
-
-        //http://stackoverflow.com/questions/1600962/displaying-the-build-date
-        public static DateTime RetrieveLinkerTimestamp()
-        {
-            string filePath = System.Reflection.Assembly.GetCallingAssembly().Location;
-            const int c_PeHeaderOffset = 60;
-            const int c_LinkerTimestampOffset = 8;
-            byte[] b = new byte[2048];
-            System.IO.Stream s = null;
-
-            try
-            {
-                s = new System.IO.FileStream( filePath, System.IO.FileMode.Open, System.IO.FileAccess.Read );
-                s.Read( b, 0, 2048 );
-            }
-            finally
-            {
-                if ( s != null )
-                {
-                    s.Close();
-                }
-            }
-
-            int i = System.BitConverter.ToInt32( b, c_PeHeaderOffset );
-            int secondsSince1970 = System.BitConverter.ToInt32( b, i + c_LinkerTimestampOffset );
-            DateTime dt = new DateTime( 1970, 1, 1, 0, 0, 0, DateTimeKind.Utc );
-            dt = dt.AddSeconds( secondsSince1970 );
-            dt = dt.ToLocalTime();
-            return dt;
+                Common.RetrieveLinkerTimestamp().ToShortDateString() );
         }
 
         public string ConvertFilenameToMnemonic( ClobFile _clobFile, ClobType.Table _table, string _componentType )

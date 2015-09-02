@@ -44,7 +44,7 @@ namespace Lobster
             this.connectionCodeSourceColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.connectionPoolingColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.workingFileTab = new System.Windows.Forms.TabPage();
-            this.workingFileList = new System.Windows.Forms.ListView();
+            this.workingFileList = new Lobster.NativeListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -66,7 +66,7 @@ namespace Lobster
             this.pullDBFileButton = new System.Windows.Forms.Button();
             this.treeViewSplitContainer = new System.Windows.Forms.SplitContainer();
             this.fileTreeView = new Lobster.NativeTreeView();
-            this.fileListView = new System.Windows.Forms.ListView();
+            this.fileListView = new Lobster.NativeListView();
             this.nameColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.lastModifiedColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.statusColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));

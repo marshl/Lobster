@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms;
-using System.Xml;
-using System.Xml.Serialization;
 
 namespace Lobster
 {
@@ -21,6 +18,19 @@ namespace Lobster
         [STAThread]
         static void Main()
         {
+            DateTime? latestRelease = Common.GetLatestReleaseDate();
+            DateTime linkerDate = Common.RetrieveLinkerTimestamp();
+            if ( latestRelease != null )
+            {
+                if ( latestRelease > linkerDate )
+                {
+                    MessageBox.Show( String.Format( "A newer version of Lobster is available. Please download it from https://www.github.com/marshl/lobster\n" +
+                        "Current Build Date: {0}\n" +
+                        "Latest Release Date: {1}",
+                        linkerDate.ToShortDateString(), latestRelease.GetValueOrDefault().ToShortDateString() ) );
+                }
+            }
+
             MessageLog log;
             try
             {
