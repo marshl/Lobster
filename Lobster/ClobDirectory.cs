@@ -12,7 +12,7 @@ namespace Lobster
 
         public LobsterModel parentModel;
         public List<ClobFile> clobFileList;
-        public Dictionary<string, DBClobFile> databaseClobMap = new Dictionary<string, DBClobFile>();
+        public List<DBClobFile> dbClobFileList;
         public List<ClobFile> databaseOnlyFiles;
         public DataGridView dataGridView;
         public ClobNode rootClobNode;
@@ -30,9 +30,8 @@ namespace Lobster
             // Break any existing connections to clob files
             this.clobFileList.ForEach( x => x.dbClobFile = null );
 
-            foreach ( KeyValuePair<string, DBClobFile> pair in this.databaseClobMap )
-            {
-                DBClobFile dbClobFile = pair.Value;
+            foreach ( DBClobFile dbClobFile in this.dbClobFileList )
+            { 
                 Debug.Assert( dbClobFile.filename != null );
                 List<ClobFile> matchingFiles = this.clobFileList.FindAll( x => x.localClobFile.fileInfo.Name == dbClobFile.filename );
 

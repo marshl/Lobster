@@ -461,7 +461,7 @@ namespace Lobster
 
         private void GetDatabaseFileListForDirectory( ClobDirectory _clobDir, OracleConnection _con )
         {
-            _clobDir.databaseClobMap = new Dictionary<string, DBClobFile>();
+            _clobDir.dbClobFileList = new List<DBClobFile>();
             
             ClobType ct = _clobDir.clobType;
 
@@ -490,7 +490,7 @@ namespace Lobster
                     dbClobFile.mimeType = table.columns.Find( x => x.purpose == ClobType.Column.Purpose.MIME_TYPE ) != null ? reader.GetString( 1 ) : null;
                     dbClobFile.filename = this.ConvertMnemonicToFilename( dbClobFile.mnemonic, table, dbClobFile.mimeType );
                     dbClobFile.table = table;
-                    _clobDir.databaseClobMap.Add( dbClobFile.mnemonic, dbClobFile );
+                    _clobDir.dbClobFileList.Add( dbClobFile );
                 }
                 reader.Close();
                 command.Dispose();
