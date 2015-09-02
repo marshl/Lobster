@@ -11,7 +11,7 @@ namespace Lobster
         public ClobType clobType;
 
         public LobsterModel parentModel;
-        public Dictionary<string, ClobFile> filenameClobMap = new Dictionary<string, ClobFile>();
+        public List<ClobFile> clobFileList;
         public Dictionary<string, DBClobFile> databaseClobMap = new Dictionary<string, DBClobFile>();
         public List<ClobFile> databaseOnlyFiles;
         public DataGridView dataGridView;
@@ -28,21 +28,20 @@ namespace Lobster
             this.databaseOnlyFiles = new List<ClobFile>();
 
             // Break any existing connections to clob files
-            foreach ( KeyValuePair<string, ClobFile> pair in this.filenameClobMap )
-            {
-                pair.Value.dbClobFile = null;
-            }
+            this.clobFileList.ForEach( x => x.dbClobFile = null );
 
             foreach ( KeyValuePair<string, DBClobFile> pair in this.databaseClobMap )
             {
                 DBClobFile dbClobFile = pair.Value;
                 Debug.Assert( dbClobFile.filename != null );
-                ClobFile clobFile;
-                if ( this.filenameClobMap.TryGetValue( dbClobFile.filename, out clobFile ) )
+                List<ClobFile> matchingFiles = this.clobFileList.FindAll( x => x.localClobFile.fileInfo.Name == dbClobFile.filename );
+
+                // Link all matching local files to that database file
+                if ( matchingFiles.Count > 0 )
                 {
-                    clobFile.dbClobFile = dbClobFile;
+                    matchingFiles.ForEach( x => x.dbClobFile = dbClobFile );
                 }
-                else
+                else // If it has no local file to link it, then add it to the database only list
                 {
                     ClobFile dbOnlyClob = new ClobFile( this );
                     dbOnlyClob.dbClobFile = dbClobFile;
@@ -53,7 +52,7 @@ namespace Lobster
 
         public void RefreshFileLists()
         {
-            this.filenameClobMap.Clear();
+            this.clobFileList = new List<ClobFile>();
             this.rootClobNode.RepopulateFileLists_r();
             this.CompareLocalFilesToDB();
 
