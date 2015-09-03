@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml;
+using System.Xml.Schema;
 using System.Xml.Serialization;
 
 namespace Lobster
@@ -32,17 +33,49 @@ namespace Lobster
                 return;
             }
 
+            bool error = false;
+
+            XmlReaderSettings readerSettings = new XmlReaderSettings();
+            readerSettings.Schemas.Add( null, "LobsterSettings/ClobType.xsd" );
+            readerSettings.ValidationType = ValidationType.Schema;
+            readerSettings.ValidationFlags |= XmlSchemaValidationFlags.ProcessInlineSchema;
+            readerSettings.ValidationFlags |= XmlSchemaValidationFlags.ProcessSchemaLocation;
+            readerSettings.ValidationFlags |= XmlSchemaValidationFlags.ReportValidationWarnings;
+            
+            readerSettings.ValidationEventHandler += new ValidationEventHandler(
+            ( o, e ) =>
+            {
+                if ( e.Severity == XmlSeverityType.Warning )
+                {
+                    Console.Write( "WARNING: " );
+                    Console.WriteLine( e.Message );
+                }
+                else if ( e.Severity == XmlSeverityType.Error )
+                {
+                    Console.Write( "ERROR: " );
+                    Console.WriteLine( e.Message );
+                }
+                error = true;
+            } );
+
             foreach ( FileInfo file in clobTypeDir.GetFiles() )
             {
                 try
                 {
+                    error = false;
                     ClobType clobType = new ClobType();
                     XmlSerializer xmls = new XmlSerializer( typeof( ClobType ) );
                     StreamReader streamReader = new StreamReader( file.FullName );
-                    XmlReader xmlReader = XmlReader.Create( streamReader );
+                    XmlReader xmlReader = XmlReader.Create( streamReader, readerSettings );
+                    
                     clobType = (ClobType)xmls.Deserialize( xmlReader );
                     xmlReader.Close();
                     streamReader.Close();
+
+                    if ( error )
+                    {
+                        continue;
+                    }
 
                     if ( !clobType.enabled )
                     {
