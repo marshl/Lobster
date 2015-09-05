@@ -29,7 +29,7 @@ namespace Lobster
             if ( !clobTypeDir.Exists )
             {
                 MessageBox.Show( String.Format( "{0} could not be found.", clobTypeDir ), "ClobType Load Failed", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1 );
-                MessageLog.Log( String.Format( "The directory {0} could not be found when loading {1}.", clobTypeDir, this.dbConfig.name ) );
+                MessageLog.LogWarning( String.Format( "The directory {0} could not be found when loading {1}.", clobTypeDir, this.dbConfig.name ) );
                 return;
             }
 
@@ -92,7 +92,7 @@ namespace Lobster
                 catch ( InvalidOperationException _e )
                 {
                     MessageBox.Show( "The ClobType " + file.Name + " failed to load. Check the log for more information.", "ClobType Load Failed", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1 );
-                    MessageLog.Log( String.Format( "An InvalidOperationException was thrown when loading the ClobType {0}: {1}", file.Name, _e.Message ) );
+                    MessageLog.LogError( String.Format( "An InvalidOperationException was thrown when loading the ClobType {0}: {1}", file.Name, _e.Message ) );
                 }
             }
         }
@@ -118,7 +118,7 @@ namespace Lobster
             DirectoryInfo info = new DirectoryInfo( Path.Combine( this.dbConfig.codeSource, _clobDirectory.clobType.directory ) );
             if ( !info.Exists )
             {
-                MessageLog.Log( "Folder could not be found: " + info.FullName );
+                MessageLog.LogWarning( "Folder could not be found: " + info.FullName );
                 LobsterMain.OnErrorMessage( "Folder not found", "Folder \"" + info.FullName + "\" could not be found for ClobType " + _clobDirectory.clobType.name );
                 return false;
             }

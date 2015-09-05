@@ -343,11 +343,11 @@ namespace Lobster
                 try
                 {
                     File.Delete( tempFile.FullName );
-                    MessageLog.Log( "Temporary file deleted: " + tempFile.FullName );
+                    MessageLog.LogInfo( "Temporary file deleted: " + tempFile.FullName );
                 }
                 catch ( IOException _e )
                 {
-                    MessageLog.Log( "Failed to delete temporary file: " + tempFile.FullName + " " + _e );
+                    MessageLog.LogWarning( "Failed to delete temporary file: " + tempFile.FullName + " " + _e );
                 }
             }
         }
@@ -593,7 +593,7 @@ namespace Lobster
                 return;
             }
 
-            MessageLog.Log( "Temporary file created: " + tempFile.FullName );
+            MessageLog.LogInfo( "Temporary file created: " + tempFile.FullName );
             this.lobsterModel.tempFileList.Add( tempFile );
 
             Process.Start( "tortoisemerge", "/mine:" + tempFile.FullName + " /theirs:" + _clobFile.localClobFile.fileInfo.FullName );
@@ -622,7 +622,7 @@ namespace Lobster
                 return;
             }
 
-            MessageLog.Log( "Temporary file created: " + tempFile.FullName );
+            MessageLog.LogInfo( "Temporary file created: " + tempFile.FullName );
             this.lobsterModel.tempFileList.Add( tempFile );
 
             Process.Start( tempFile.FullName );
