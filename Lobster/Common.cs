@@ -1,4 +1,5 @@
-﻿using RestSharp;
+﻿using Newtonsoft.Json;
+using RestSharp;
 using System;
 using System.IO;
 using System.Net;
@@ -68,24 +69,6 @@ namespace Lobster
             dt = dt.AddSeconds( secondsSince1970 );
             dt = dt.ToLocalTime();
             return dt;
-        }
-
-        public static DateTime? GetLatestReleaseDate()
-        {
-            RestClient restClient = new RestClient( "https://api.github.com" );
-            var restRequest = new RestRequest( "/repos/marshl/lobster/releases/latest", Method.GET );
-            IRestResponse response = restClient.Execute( restRequest );
-            if ( response.StatusCode == HttpStatusCode.OK )
-            {
-                Regex regex = new Regex( "\"published_at\":\\s*\"(?<year>[0-9]{4})-(?<month>[0-9]{2})-(?<day>[0-9]{2})" );
-                Match match = regex.Match( response.Content );
-                if ( match.Success )
-                {
-                    DateTime dt = new DateTime( Int32.Parse( match.Groups["year"].Value ), Int32.Parse( match.Groups["month"].Value ), Int32.Parse( match.Groups["day"].Value ) );
-                    return dt;
-                }
-            }
-            return null;
         }
     }
 }
