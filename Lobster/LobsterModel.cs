@@ -9,6 +9,7 @@ using Oracle.ManagedDataAccess.Client;
 using Oracle.ManagedDataAccess.Types;
 using System.Diagnostics;
 using System.Windows.Forms;
+using System.Xml.Schema;
 
 namespace Lobster
 {
@@ -24,8 +25,8 @@ namespace Lobster
 
         public LobsterModel()
         {
-            LoadFileIntoMap( @"LobsterSettings\mime_to_prefix.ini", out this.mimeToPrefixMap );
-            LoadFileIntoMap( @"LobsterSettings\mime_to_extension.ini", out this.mimeToExtensionMap );
+            Common.LoadFileIntoMap( @"LobsterSettings\mime_to_prefix.ini", out this.mimeToPrefixMap );
+            Common.LoadFileIntoMap( @"LobsterSettings\mime_to_extension.ini", out this.mimeToExtensionMap );
         }
 
         public void LoadDatabaseConfig()
@@ -44,14 +45,23 @@ namespace Lobster
         private static DatabaseConfig LoadDatabaseConfigFile( string _fullpath )
         {
             MessageLog.LogInfo( "Loading Database Config File {0}", _fullpath );
-            DatabaseConfig dbConfig = new DatabaseConfig();
-            XmlSerializer xmls = new XmlSerializer( typeof( DatabaseConfig ) );
-            StreamReader streamReader = new StreamReader( _fullpath );
-            XmlReader xmlReader = XmlReader.Create( streamReader );
-            dbConfig = (DatabaseConfig)xmls.Deserialize( xmlReader );
-            xmlReader.Close();
-            streamReader.Close();
-            
+            DatabaseConfig dbConfig;
+            try
+            {
+                dbConfig = Common.DeserialiseXmlFileUsingSchema<DatabaseConfig>( _fullpath, "LobsterSettings/DatabaseConfig.xsd" );
+            }
+            catch ( Exception _e )
+            {
+                if ( _e is FileNotFoundException || _e is InvalidOperationException || _e is XmlException || _e is XmlSchemaValidationException )
+                {
+                    MessageBox.Show( "The ClobType {0} failed to load. Check the log for more information.", "ClobType Load Failed",
+                           MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1 );
+                    MessageLog.LogError( "An error occurred when loading the ClobType {0}: {1}", _fullpath, _e.Message );
+                    return null;
+                }
+                throw;
+            }
+
             dbConfig.fileLocation = _fullpath;
 
             // If the CodeSource folder cannot be found, prompt the user for it
@@ -61,7 +71,7 @@ namespace Lobster
                 if ( codeSourceDir != null )
                 {
                     dbConfig.codeSource = codeSourceDir;
-                    SerialiseConfig( _fullpath, dbConfig );
+                    DatabaseConfig.Serialise( _fullpath, dbConfig );
                 }
                 else // Ignore config files that don't have a valid CodeSource folder
                 {
@@ -85,15 +95,6 @@ namespace Lobster
                 return null;
             }
             return fbd.SelectedPath;
-        }
-
-        private static void SerialiseConfig( string _fullpath, DatabaseConfig _config )
-        {
-            XmlSerializer xmls = new XmlSerializer( typeof( DatabaseConfig ) );
-            using ( StreamWriter streamWriter = new StreamWriter( _fullpath ) )
-            {
-                xmls.Serialize( streamWriter, _config );
-            }
         }
 
         private static OracleConnection OpenConnection( DatabaseConfig _config )
@@ -155,8 +156,6 @@ namespace Lobster
             LobsterMain.instance.OnFileUpdateComplete( _clobFile, result );
         }
 
-        
-
         public bool SendInsertClobMessage( ClobFile _clobFile, ClobType.Table _table, string _mimeType )
         {
             OracleConnection con = OpenConnection( this.currentConnection.dbConfig );
@@ -171,8 +170,7 @@ namespace Lobster
 
         private bool UpdateDatabaseClob( ClobFile _clobFile, OracleConnection _con )
         {
-            Debug.Assert( _clobFile.localClobFile != null && _clobFile.dbClobFile != null );
-            Debug.Assert( _clobFile.dbClobFile.mnemonic != null );
+            Debug.Assert( _clobFile.IsSynced );
 
             OracleTransaction trans = _con.BeginTransaction();
             OracleCommand command = _con.CreateCommand();
@@ -182,7 +180,7 @@ namespace Lobster
             {
                 command.CommandText = table.BuildUpdateStatement( _clobFile );
             }
-            catch ( MimeTypeNotFoundException _e )
+            catch ( ClobColumnNotFoundException _e )
             {
                 LobsterMain.OnErrorMessage( "Clob Data Fetch Error", _e.Message );
                 MessageLog.LogError( _e.Message );
@@ -203,6 +201,7 @@ namespace Lobster
             int rowsAffected;
             try
             {
+                MessageLog.LogInfo( "Executing Update query: {0}", command.CommandText );
                 rowsAffected = command.ExecuteNonQuery();
             }
             catch ( Exception _e )
@@ -219,9 +218,9 @@ namespace Lobster
 
             if ( rowsAffected != 1 )
             {
-                LobsterMain.OnErrorMessage( "Clob Update Failed", rowsAffected + " rows were affected during the update (expected only 1). Rolling back..." );
-                MessageLog.LogError( "In invalid number of rows ( " + rowsAffected + ") were updated for command: " + command.CommandText );
                 trans.Rollback();
+                LobsterMain.OnErrorMessage( "Clob Update Failed", rowsAffected + " rows were affected during the update (expected only 1). The transaction has been rolled back." );
+                MessageLog.LogError( "In invalid number of rows ({0}) were updated for command: {1}", rowsAffected, command.CommandText );
                 return false;
             }
 
@@ -243,7 +242,7 @@ namespace Lobster
             return result;
         }
 
-        private void AddFileDataParameter( OracleCommand command, ClobFile _clobFile, ClobType.Table _table, string _mimeType )
+        private void AddFileDataParameter( OracleCommand _command, ClobFile _clobFile, ClobType.Table _table, string _mimeType )
         {
             Debug.Assert( _clobFile.localClobFile != null );
             // Wait for the file to unlock
@@ -257,24 +256,23 @@ namespace Lobster
                 {
                     byte[] fileData = new byte[fs.Length];
                     fs.Read( fileData, 0, Convert.ToInt32( fs.Length ) );
-                    OracleParameter param = command.Parameters.Add( "data", OracleDbType.Blob );
+                    OracleParameter param = _command.Parameters.Add( "data", OracleDbType.Blob );
                     param.Value = fileData;
                 }
                 else // Text mode
                 {
                     StreamReader sr = new StreamReader( fs );
                     string contents = sr.ReadToEnd();
-                    contents += this.GetClobFooterMessage();
+                    contents += this.GetClobFooterMessage( _mimeType );
                     OracleDbType insertType = column.dataType == ClobType.Column.Datatype.CLOB ? OracleDbType.Clob : OracleDbType.XmlType;
-                    command.Parameters.Add( "data", insertType, contents, ParameterDirection.Input );
+                    _command.Parameters.Add( "data", insertType, contents, ParameterDirection.Input );
                 }
             }
         }
 
         private bool InsertDatabaseClob( ClobFile _clobFile, ClobType.Table _table, string _mimeType, OracleConnection _con )
         {
-            Debug.Assert( _clobFile.localClobFile != null );
-            Debug.Assert( _clobFile.dbClobFile == null );
+            Debug.Assert( _clobFile.IsLocalOnly );
 
             OracleCommand command = _con.CreateCommand();
             OracleTransaction trans = _con.BeginTransaction();
@@ -287,6 +285,7 @@ namespace Lobster
 
                 try
                 {
+                    MessageLog.LogInfo( "Executing Insert query on parent table: {0}", command.CommandText );
                     command.ExecuteNonQuery();
                 }
                 catch ( Exception _e )
@@ -310,6 +309,7 @@ namespace Lobster
 
             try
             {
+                MessageLog.LogInfo( "Executing Insert query: {0}", command.CommandText );
                 command.ExecuteNonQuery();
             }
             catch ( Exception _e )
@@ -332,6 +332,7 @@ namespace Lobster
             _clobFile.dbClobFile.mnemonic = mnemonic;
             _clobFile.dbClobFile.filename = _clobFile.localClobFile.fileInfo.Name;
             _clobFile.dbClobFile.table = _table;
+            _clobFile.dbClobFile.mimeType = _mimeType;
 
             MessageLog.LogInfo( "Clob file creation successful: " + _clobFile.localClobFile.fileInfo.Name );
             return true;
@@ -351,7 +352,7 @@ namespace Lobster
                 _config.clobTypeDir = PromptForDirectory( String.Format( "Please select your Clob Type directory for {0}.", _config.name ), _config.codeSource );
                 if ( _config.clobTypeDir != null )
                 {
-                    SerialiseConfig( _config.fileLocation, _config );
+                    DatabaseConfig.Serialise( _config.fileLocation, _config );
                 }
                 else // Ignore config files that don't have a valid CodeSource folder
                 {
@@ -361,7 +362,7 @@ namespace Lobster
 
             this.currentConnection = new DatabaseConnection( _config );
             this.currentConnection.LoadClobTypes();
-            this.currentConnection.LoadClobDirectories( this );
+            this.currentConnection.PopulateClobDirectories( this );
             this.RequeryDatabase();
 
             return true;
@@ -390,7 +391,7 @@ namespace Lobster
                 column = _clobFile.dbClobFile.GetColumn();
                 command.CommandText = table.BuildGetDataCommand( _clobFile );
             }
-            catch ( MimeTypeNotFoundException _e )
+            catch ( ClobColumnNotFoundException _e )
             {
                 LobsterMain.OnErrorMessage( "Clob Data Fetch Error", _e.Message );
                 MessageLog.LogError( _e.Message );
@@ -441,8 +442,8 @@ namespace Lobster
                     {
                         reader.Close();
                         LobsterMain.OnErrorMessage( "Clob Data Fetch Error",
-                       "Too many rows were found for " + _clobFile.localClobFile.fileInfo.Name );
-                        MessageLog.LogError( "Too many rows found on clob retrieval of " + _clobFile.dbClobFile.mnemonic + " when executing command: " + command.CommandText );
+                       "Too many rows were found for " + _clobFile.dbClobFile.mnemonic );
+                        MessageLog.LogError( "Too many rows found on clob retrieval of {0}", _clobFile.dbClobFile.mnemonic );
                         return null;
                     }
                 }
@@ -502,13 +503,15 @@ namespace Lobster
             }
         }
 
-        private string GetClobFooterMessage()
+        private string GetClobFooterMessage( string _mimeType )
         {
-            return String.Format( "<!-- Last clobbed by user {0} on machine {1} at {2} (Lobster build {3}) -->",
+            return String.Format( "{0} Last clobbed by user {1} on machine {2} at {3} (Lobster build {4}) {5}",
+                _mimeType == "text/javascript" ? "/*" : "<!--",
                 Environment.UserName,
                 Environment.MachineName,
                 DateTime.Now,
-                Common.RetrieveLinkerTimestamp().ToShortDateString() );
+                Common.RetrieveLinkerTimestamp().ToShortDateString(),
+                _mimeType == "text/javascript" ? "*/" : "-->");
         }
 
         public string ConvertFilenameToMnemonic( ClobFile _clobFile, ClobType.Table _table, string _componentType )
@@ -558,33 +561,6 @@ namespace Lobster
                 filename += extension;
             }
             return filename;
-        }
-
-        public static void LoadFileIntoMap( string _path, out Dictionary<string, string> _map )
-        {
-            _map = new Dictionary<string, string>();
-            StreamReader reader = new StreamReader( _path );
-            string line;
-            while ( ( line = reader.ReadLine() ) != null )
-            {
-                line = line.Trim();
-                if ( line.Contains( '#' ) )
-                {
-                    line = line.Substring( line.IndexOf( '#' ) );
-                }
-
-                if ( line.Length == 0 || !line.Contains( '=' ) )
-                {
-                    continue;
-                }
-
-                string[] split = line.Split( '=' );
-                string extension = split[0];
-                string type = split[1];
-
-                _map.Add( extension, type );
-            }
-            reader.Close();
         }
     }
 }

@@ -2,9 +2,7 @@
 using RestSharp;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
@@ -19,14 +17,16 @@ namespace Lobster
             IRestResponse response = restClient.Execute( restRequest );
             if ( response.StatusCode != HttpStatusCode.OK )
             {
+                MessageLog.LogWarning( "An error occured when attempting to query GitHub: Http Status Code {0}", response.StatusCode );
                 return false;
             }
 
             GitHubRelease release = JsonConvert.DeserializeObject<GitHubRelease>( response.Content );
             Regex regex = new Regex( "(?<year>[0-9]{4})-(?<month>[0-9]{2})-(?<day>[0-9]{2})" );
-            Match match = regex.Match( response.Content );
+            Match match = regex.Match( release.published_at );
             if ( !match.Success )
             {
+                MessageLog.LogWarning( "An error occurred when attempting to extract the publish date" );
                 return false;
             }
             DateTime latestRelease = new DateTime( Int32.Parse( match.Groups["year"].Value ), Int32.Parse( match.Groups["month"].Value ), Int32.Parse( match.Groups["day"].Value ) );

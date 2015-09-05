@@ -22,20 +22,17 @@ namespace Lobster
 
             if ( col == null )
             {
-                throw new MimeTypeNotFoundException( this );
+                throw new ClobColumnNotFoundException( this );
             }
 
             return col;
         }
     }
 
-    public class MimeTypeNotFoundException : Exception
+    public class ClobColumnNotFoundException : Exception
     {
-        public MimeTypeNotFoundException( DBClobFile _dbClobFile )
-            : base ( String.Format( "The mime type {0} of file {1} could not be found the table {2}",
-                _dbClobFile.filename, _dbClobFile.mimeType, _dbClobFile.table.FullName ) )
-        {
-            
-        }
+        public ClobColumnNotFoundException( DBClobFile _dbClobFile )
+            : base ( String.Format( "The clob column for file {0} of mimetype {1} could not be found the table {2}",
+                _dbClobFile.filename, _dbClobFile.mimeType, _dbClobFile.table.FullName ) ) { }
     }
 }

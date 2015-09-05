@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Windows.Forms;
 
 namespace Lobster
@@ -39,6 +37,11 @@ namespace Lobster
                 if ( matchingFiles.Count > 0 )
                 {
                     matchingFiles.ForEach( x => x.dbClobFile = dbClobFile );
+                    if ( matchingFiles.Count > 1 )
+                    {
+                        MessageLog.LogWarning( "Multiple local files have been found for the database file {0} from the table {1}:", dbClobFile.filename, dbClobFile.table.FullName );
+                        matchingFiles.ForEach( x => MessageLog.LogWarning( "{0}", x.localClobFile.fileInfo.FullName ) );
+                    }
                 }
                 else // If it has no local file to link it, then add it to the database only list
                 {

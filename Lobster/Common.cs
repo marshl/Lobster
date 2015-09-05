@@ -1,10 +1,11 @@
-﻿using Newtonsoft.Json;
-using RestSharp;
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Net;
-using System.Text.RegularExpressions;
+using System.Linq;
 using System.Threading;
+using System.Windows.Forms;
+using System.Xml;
+using System.Xml.Schema;
 
 namespace Lobster
 {
@@ -69,6 +70,75 @@ namespace Lobster
             dt = dt.AddSeconds( secondsSince1970 );
             dt = dt.ToLocalTime();
             return dt;
+        }
+
+        public static T DeserialiseXmlFileUsingSchema<T>( string _xmlPath, string _schemaPath) where T : new()
+        {
+            XmlReaderSettings readerSettings = new XmlReaderSettings();
+            readerSettings.Schemas.Add( null, _schemaPath );
+            readerSettings.ValidationType = ValidationType.Schema;
+            readerSettings.ValidationFlags |= XmlSchemaValidationFlags.ProcessInlineSchema;
+            readerSettings.ValidationFlags |= XmlSchemaValidationFlags.ProcessSchemaLocation;
+            readerSettings.ValidationFlags |= XmlSchemaValidationFlags.ReportValidationWarnings;
+
+            bool error = false;
+            readerSettings.ValidationEventHandler += new ValidationEventHandler(
+            ( o, e ) =>
+            {
+                if ( e.Severity == XmlSeverityType.Warning )
+                {
+                    MessageLog.LogWarning( e.Message );
+                }
+                else if ( e.Severity == XmlSeverityType.Error )
+                {
+                    MessageLog.LogError( e.Message );
+                }
+                error = true;
+            } );
+
+            error = false;
+            T obj = new T();
+            System.Xml.Serialization.XmlSerializer xmls = new System.Xml.Serialization.XmlSerializer( typeof( T ) );
+            StreamReader streamReader = new StreamReader( _xmlPath );
+            XmlReader xmlReader = XmlReader.Create( streamReader, readerSettings );
+
+            obj = (T)xmls.Deserialize( xmlReader );
+            xmlReader.Close();
+            streamReader.Close();
+
+            if ( error )
+            {
+                throw new XmlSchemaValidationException( "One or more validation errors occurred. Check the log for more information." );
+            }
+            
+            return obj;
+        }
+
+        public static void LoadFileIntoMap( string _path, out Dictionary<string, string> _map )
+        {
+            _map = new Dictionary<string, string>();
+            StreamReader reader = new StreamReader( _path );
+            string line;
+            while ( ( line = reader.ReadLine() ) != null )
+            {
+                line = line.Trim();
+                if ( line.Contains( '#' ) )
+                {
+                    line = line.Substring( line.IndexOf( '#' ) );
+                }
+
+                if ( line.Length == 0 || !line.Contains( '=' ) )
+                {
+                    continue;
+                }
+
+                string[] split = line.Split( '=' );
+                string extension = split[0];
+                string type = split[1];
+
+                _map.Add( extension, type );
+            }
+            reader.Close();
         }
     }
 }

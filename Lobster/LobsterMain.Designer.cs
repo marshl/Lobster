@@ -294,7 +294,7 @@ namespace Lobster
             this.lobsterNotificationIcon.Icon = ((System.Drawing.Icon)(resources.GetObject("lobsterNotificationIcon.Icon")));
             this.lobsterNotificationIcon.Text = "Lobster";
             this.lobsterNotificationIcon.Visible = true;
-            this.lobsterNotificationIcon.MouseClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseClick);
+            this.lobsterNotificationIcon.MouseClick += new System.Windows.Forms.MouseEventHandler(this.lobsterNotificationIcon_MouseClick);
             // 
             // toolStrip1
             // 
@@ -424,7 +424,7 @@ namespace Lobster
             this.fileTreeView.ShowNodeToolTips = true;
             this.fileTreeView.Size = new System.Drawing.Size(286, 569);
             this.fileTreeView.TabIndex = 0;
-            this.fileTreeView.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.treeView1_NodeMouseClick);
+            this.fileTreeView.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.fileTreeView_NodeMouseClick);
             // 
             // fileListView
             // 
@@ -445,7 +445,7 @@ namespace Lobster
             this.fileListView.UseCompatibleStateImageBehavior = false;
             this.fileListView.View = System.Windows.Forms.View.Details;
             this.fileListView.SelectedIndexChanged += new System.EventHandler(this.fileListView_SelectedIndexChanged);
-            this.fileListView.MouseClick += new System.Windows.Forms.MouseEventHandler(this.listView1_MouseClick);
+            this.fileListView.MouseClick += new System.Windows.Forms.MouseEventHandler(this.fileListView_MouseClick);
             // 
             // nameColumn
             // 

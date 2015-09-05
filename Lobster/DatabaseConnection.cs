@@ -33,71 +33,38 @@ namespace Lobster
                 return;
             }
 
-            bool error = false;
-
-            XmlReaderSettings readerSettings = new XmlReaderSettings();
-            readerSettings.Schemas.Add( null, "LobsterSettings/ClobType.xsd" );
-            readerSettings.ValidationType = ValidationType.Schema;
-            readerSettings.ValidationFlags |= XmlSchemaValidationFlags.ProcessInlineSchema;
-            readerSettings.ValidationFlags |= XmlSchemaValidationFlags.ProcessSchemaLocation;
-            readerSettings.ValidationFlags |= XmlSchemaValidationFlags.ReportValidationWarnings;
-            
-            readerSettings.ValidationEventHandler += new ValidationEventHandler(
-            ( o, e ) =>
-            {
-                if ( e.Severity == XmlSeverityType.Warning )
-                {
-                    Console.Write( "WARNING: " );
-                    Console.WriteLine( e.Message );
-                }
-                else if ( e.Severity == XmlSeverityType.Error )
-                {
-                    Console.Write( "ERROR: " );
-                    Console.WriteLine( e.Message );
-                }
-                error = true;
-            } );
-
-            foreach ( FileInfo file in clobTypeDir.GetFiles() )
+            foreach ( FileInfo file in clobTypeDir.GetFiles( "*.xml" ) )
             {
                 try
                 {
-                    error = false;
-                    ClobType clobType = new ClobType();
-                    XmlSerializer xmls = new XmlSerializer( typeof( ClobType ) );
-                    StreamReader streamReader = new StreamReader( file.FullName );
-                    XmlReader xmlReader = XmlReader.Create( streamReader, readerSettings );
+                    MessageLog.LogInfo( "Loading ClobType file {0}", file.FullName );
+                    ClobType clobType = Common.DeserialiseXmlFileUsingSchema<ClobType>( file.FullName, "LobsterSettings/ClobType.xsd" );
                     
-                    clobType = (ClobType)xmls.Deserialize( xmlReader );
-                    xmlReader.Close();
-                    streamReader.Close();
-
-                    if ( error )
-                    {
-                        continue;
-                    }
-
                     if ( !clobType.enabled )
                     {
+                        MessageLog.LogWarning( "The ClobType file {0} was not loaded as it was marked as disabled.", file.FullName );
                         continue;
                     }
 
-                    foreach ( ClobType.Table t in clobType.tables )
-                    {
-                        t.LinkColumns();
-                    }
+                    clobType.Initialise();
 
                     this.clobTypeList.Add( clobType );
                 }
-                catch ( InvalidOperationException _e )
+                catch ( Exception _e )
                 {
-                    MessageBox.Show( "The ClobType " + file.Name + " failed to load. Check the log for more information.", "ClobType Load Failed", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1 );
-                    MessageLog.LogError( String.Format( "An InvalidOperationException was thrown when loading the ClobType {0}: {1}", file.Name, _e.Message ) );
+                    if ( _e is InvalidOperationException || _e is XmlException || _e is XmlSchemaValidationException || _e is IOException )
+                    {
+                        MessageBox.Show( "The ClobType " + file.Name + " failed to load. Check the log for more information.", "ClobType Load Failed",
+                            MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1 );
+                        MessageLog.LogError( "An error occurred when loading the ClobType {0}: {1}", file.Name, _e.Message );
+                        return;
+                    }
+                    throw;
                 }
             }
         }
 
-        public void LoadClobDirectories( LobsterModel _model )
+        public void PopulateClobDirectories( LobsterModel _model )
         {
             this.clobTypeToDirectoryMap = new Dictionary<ClobType, ClobDirectory>();
             foreach ( ClobType clobType in this.clobTypeList )
@@ -105,20 +72,20 @@ namespace Lobster
                 ClobDirectory clobDir = new ClobDirectory();
                 clobDir.clobType = clobType;
                 clobDir.parentModel = _model;
-                bool result = this.PopulateClobDirectory( clobDir );
-                if ( result )
+                bool success = this.PopulateClobDirectory( clobDir );
+                if ( success )
                 {
                     this.clobTypeToDirectoryMap.Add( clobType, clobDir );
                 }
             }
         }
 
-        public bool PopulateClobDirectory( ClobDirectory _clobDirectory )
+        private bool PopulateClobDirectory( ClobDirectory _clobDirectory )
         {
             DirectoryInfo info = new DirectoryInfo( Path.Combine( this.dbConfig.codeSource, _clobDirectory.clobType.directory ) );
             if ( !info.Exists )
             {
-                MessageLog.LogWarning( "Folder could not be found: " + info.FullName );
+                MessageLog.LogWarning( "{0} could not be found.", info.FullName );
                 LobsterMain.OnErrorMessage( "Folder not found", "Folder \"" + info.FullName + "\" could not be found for ClobType " + _clobDirectory.clobType.name );
                 return false;
             }

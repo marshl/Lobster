@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Xml.Serialization;
@@ -20,6 +21,14 @@ namespace Lobster
         public bool enabled = true;
 
         public List<Table> tables;
+
+        public void Initialise()
+        {
+            foreach ( ClobType.Table t in this.tables )
+            {
+                t.LinkColumns();
+            }
+        }
 
         [XmlType( TypeName = "table" )]
         public class Table
@@ -48,16 +57,18 @@ namespace Lobster
             public string BuildUpdateStatement( ClobFile _clobFile )
             {
                 Column clobCol = _clobFile.dbClobFile.GetColumn();
-                Column dateCol = this.columns.Find( x => x.purpose == Column.Purpose.DATETIME );
                 Debug.Assert( clobCol != null );
-
+                
                 string command =
                        "UPDATE " + this.FullName
-                       + " SET " + clobCol.FullName + " = :data";
+                     + " SET " + clobCol.FullName + " = :data";
+
+                Column dateCol = this.columns.Find( x => x.purpose == Column.Purpose.DATETIME );
                 if ( dateCol != null )
                 {
                     command += ", " + dateCol.FullName + " = SYSDATE";
                 }
+
                 if ( this.parentTable != null )
                 {
                     Table pt = this.parentTable;
@@ -213,7 +224,7 @@ namespace Lobster
                 }
             }
         }
-        
+
         [XmlType( TypeName ="column")]
         public class Column
         {

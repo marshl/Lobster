@@ -77,17 +77,21 @@ namespace Lobster
             this.fileAttributeWatcher.EnableRaisingEvents = true;
         }
 
+        public void SetFileWatchersEnabled( bool _enabled )
+        {
+            this.fileAttributeWatcher.EnableRaisingEvents = this.fileWatcher.EnableRaisingEvents = _enabled;
+        }
+
         private void OnFileAttributeChange( object sender, FileSystemEventArgs e )
         {
-            this.fileAttributeWatcher.EnableRaisingEvents = this.fileWatcher.EnableRaisingEvents = false;
+            this.SetFileWatchersEnabled( false );
             this.baseDirectory.RefreshFileLists();
-            this.fileAttributeWatcher.EnableRaisingEvents = this.fileWatcher.EnableRaisingEvents = true;
+            this.SetFileWatchersEnabled( true );
         }
 
         public void OnFileChanged( object _source, FileSystemEventArgs _e )
         {
-            this.fileAttributeWatcher.EnableRaisingEvents = this.fileWatcher.EnableRaisingEvents = false;
-            
+            this.SetFileWatchersEnabled( false );
             // Ensure that the file changed exists and is not a directory
             if ( !File.Exists( _e.FullPath ) )
             {
@@ -97,33 +101,33 @@ namespace Lobster
             ClobFile clobFile;
             if ( this.clobFileMap.TryGetValue( _e.Name.ToLower(), out clobFile ) )
             { 
-                if ( clobFile.localClobFile != null && clobFile.dbClobFile != null && clobFile.localClobFile.fileInfo.IsReadOnly == false )
+                if ( clobFile.IsSynced && clobFile.IsEditable )
                 {
                     this.baseDirectory.parentModel.SendUpdateClobMessage( clobFile );
                 }
             }
-            this.fileAttributeWatcher.EnableRaisingEvents = this.fileWatcher.EnableRaisingEvents = true;
+            this.SetFileWatchersEnabled( true );
         }
 
         public void OnFileCreated( object _source, FileSystemEventArgs _e )
         {
-            this.fileAttributeWatcher.EnableRaisingEvents = this.fileWatcher.EnableRaisingEvents = false;
+            this.SetFileWatchersEnabled( false );
             this.baseDirectory.RefreshFileLists();
-            this.fileAttributeWatcher.EnableRaisingEvents = this.fileWatcher.EnableRaisingEvents = true;
+            this.SetFileWatchersEnabled( true );
         }
 
         private void OnFileDeleted( object _sender, FileSystemEventArgs _e )
         {
-            this.fileAttributeWatcher.EnableRaisingEvents = this.fileWatcher.EnableRaisingEvents = false;
+            this.SetFileWatchersEnabled( false );
             this.baseDirectory.RefreshFileLists();
-            this.fileAttributeWatcher.EnableRaisingEvents = this.fileWatcher.EnableRaisingEvents = true;
+            this.SetFileWatchersEnabled( true );
         }
 
         private void OnFileRenamed( object _sender, FileSystemEventArgs _e )
         {
-            this.fileAttributeWatcher.EnableRaisingEvents = this.fileWatcher.EnableRaisingEvents = false;
+            this.SetFileWatchersEnabled( false );
             this.baseDirectory.RefreshFileLists();
-            this.fileAttributeWatcher.EnableRaisingEvents = this.fileWatcher.EnableRaisingEvents = true;
+            this.SetFileWatchersEnabled( true );
         }
 
         public void AddLocalClobFile( FileInfo _fileInfo )
