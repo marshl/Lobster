@@ -74,28 +74,32 @@ namespace Lobster
 
         public static T DeserialiseXmlFileUsingSchema<T>( string _xmlPath, string _schemaPath) where T : new()
         {
-            XmlReaderSettings readerSettings = new XmlReaderSettings();
-            readerSettings.Schemas.Add( null, _schemaPath );
-            readerSettings.ValidationType = ValidationType.Schema;
-            readerSettings.ValidationFlags |= XmlSchemaValidationFlags.ProcessInlineSchema;
-            readerSettings.ValidationFlags |= XmlSchemaValidationFlags.ProcessSchemaLocation;
-            readerSettings.ValidationFlags |= XmlSchemaValidationFlags.ReportValidationWarnings;
-
             bool error = false;
-            readerSettings.ValidationEventHandler += new ValidationEventHandler(
-            ( o, e ) =>
+            XmlReaderSettings readerSettings = null;
+            if ( _schemaPath != null )
             {
-                if ( e.Severity == XmlSeverityType.Warning )
-                {
-                    MessageLog.LogWarning( e.Message );
-                }
-                else if ( e.Severity == XmlSeverityType.Error )
-                {
-                    MessageLog.LogError( e.Message );
-                }
-                error = true;
-            } );
+                readerSettings = new XmlReaderSettings();
+                readerSettings.Schemas.Add( null, _schemaPath );
+                readerSettings.ValidationType = ValidationType.Schema;
+                readerSettings.ValidationFlags |= XmlSchemaValidationFlags.ProcessInlineSchema;
+                readerSettings.ValidationFlags |= XmlSchemaValidationFlags.ProcessSchemaLocation;
+                readerSettings.ValidationFlags |= XmlSchemaValidationFlags.ReportValidationWarnings;
 
+               
+                readerSettings.ValidationEventHandler += new ValidationEventHandler(
+                ( o, e ) =>
+                {
+                    if ( e.Severity == XmlSeverityType.Warning )
+                    {
+                        MessageLog.LogWarning( e.Message );
+                    }
+                    else if ( e.Severity == XmlSeverityType.Error )
+                    {
+                        MessageLog.LogError( e.Message );
+                    }
+                    error = true;
+                } );
+            }
             error = false;
             T obj = new T();
             System.Xml.Serialization.XmlSerializer xmls = new System.Xml.Serialization.XmlSerializer( typeof( T ) );

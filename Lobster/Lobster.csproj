@@ -117,7 +117,7 @@
     <Compile Include="LobsterModel.cs" />
     <Compile Include="LocalClobFile.cs" />
     <Compile Include="MessageLog.cs" />
-    <Compile Include="MimeMapper.cs" />
+    <Compile Include="MimeTypeList.cs" />
     <Compile Include="NativeListView.cs">
       <SubType>Component</SubType>
     </Compile>

@@ -20,13 +20,11 @@ namespace Lobster
 
         public List<FileInfo> tempFileList = new List<FileInfo>();
 
-        public Dictionary<string, string> mimeToPrefixMap;
-        public Dictionary<string, string> mimeToExtensionMap;
+        private MimeTypeList mimeTypeList;
 
         public LobsterModel()
         {
-            Common.LoadFileIntoMap( @"LobsterSettings\mime_to_prefix.ini", out this.mimeToPrefixMap );
-            Common.LoadFileIntoMap( @"LobsterSettings\mime_to_extension.ini", out this.mimeToExtensionMap );
+            this.mimeTypeList = Common.DeserialiseXmlFileUsingSchema<MimeTypeList>( "LobsterSettings/MimeTypes.xml", null );
         }
 
         public void LoadDatabaseConfig()
@@ -109,6 +107,7 @@ namespace Lobster
                 + ";Pooling=" + ( _config.usePooling ? "true" : "false" );
             try
             {
+                MessageLog.LogInfo( "Connecting to database {0} using connection string {1}", _config.name, con.ConnectionString );
                 con.Open();
             }
             catch ( Exception _e )
@@ -116,7 +115,7 @@ namespace Lobster
                 if ( _e is InvalidOperationException || _e is OracleException )
                 {
                     LobsterMain.OnErrorMessage( "Database Connection Failure", "Cannot open connection to database: " + _e.Message );
-                    MessageLog.LogError( "Connection to Oracle failed with message '{0}' using connection string '{1}'", _e.Message, con.ConnectionString );
+                    MessageLog.LogError( "Connection to Oracle failed: {0}", _e.Message );
                     return null;
                 }
                 throw;
@@ -514,28 +513,28 @@ namespace Lobster
                 _mimeType == "text/javascript" ? "*/" : "-->");
         }
 
-        public string ConvertFilenameToMnemonic( ClobFile _clobFile, ClobType.Table _table, string _componentType )
+        public string ConvertFilenameToMnemonic( ClobFile _clobFile, ClobType.Table _table, string _mimeType )
         {
             Debug.Assert( _clobFile.localClobFile != null );
             string mnemonic = Path.GetFileNameWithoutExtension( _clobFile.localClobFile.fileInfo.Name );
             if ( _table.columns.Find( x => x.purpose == ClobType.Column.Purpose.MIME_TYPE ) != null )
             {
-                if ( !this.mimeToPrefixMap.ContainsKey( _componentType ) )
+                MimeTypeList.MimeType mt = this.mimeTypeList.mimeTypes.Find( x => x.name == _mimeType );
+                if ( mt == null )
                 {
-                    throw new ArgumentException( "Unknown mime-to-prefix key " + _componentType );
+                    throw new ArgumentException( "Unknown mime-to-prefix key " + _mimeType );
                 }
-                string prefix = this.mimeToPrefixMap[_componentType];
-
-                if ( prefix.Length > 0 )
+                
+                if ( mt.prefix.Length > 0 )
                 {
-                    mnemonic = prefix + '/' + mnemonic;
+                    mnemonic = mt.prefix + '/' + mnemonic;
                 }
             }
 
             return mnemonic;
         }
 
-        public string ConvertMnemonicToFilename( string _mnemonic, ClobType.Table _table, string _databaseType )
+        public string ConvertMnemonicToFilename( string _mnemonic, ClobType.Table _table, string _mimeType )
         {
             string filename = _mnemonic;
             
@@ -553,12 +552,13 @@ namespace Lobster
             }
             else
             {
-                string extension;
-                if ( !this.mimeToExtensionMap.TryGetValue( _databaseType, out extension ) )
+                MimeTypeList.MimeType mt = this.mimeTypeList.mimeTypes.Find( x => x.name == _mimeType );
+
+                if ( mt == null )
                 {
-                    throw new ArgumentException( "Unkown mime-to-extension key " + _databaseType );
+                    throw new ArgumentException( "Unkown mime-to-extension key " + _mimeType );
                 }
-                filename += extension;
+                filename += mt.extension;
             }
             return filename;
         }
