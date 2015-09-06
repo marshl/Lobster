@@ -31,7 +31,7 @@ namespace Lobster
             foreach ( DBClobFile dbClobFile in this.dbClobFileList )
             { 
                 Debug.Assert( dbClobFile.filename != null );
-                List<ClobFile> matchingFiles = this.clobFileList.FindAll( x => x.localClobFile.fileInfo.Name == dbClobFile.filename );
+                List<ClobFile> matchingFiles = this.clobFileList.FindAll( x => x.localClobFile.fileInfo.Name.ToLower() == dbClobFile.filename.ToLower() );
 
                 // Link all matching local files to that database file
                 if ( matchingFiles.Count > 0 )

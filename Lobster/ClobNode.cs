@@ -38,27 +38,7 @@ namespace Lobster
                 node.GetWorkingFiles( ref _workingFiles );
             }
         }
-
-        public ClobFile FindFileWithName( string _filename )
-        {
-            ClobFile clobFile;
-            if ( this.clobFileMap.TryGetValue( _filename.ToLower(), out clobFile ) )
-            {
-                return clobFile;
-            }
-
-            foreach ( ClobNode subDir in this.childNodes )
-            {
-                clobFile = subDir.FindFileWithName( _filename );
-                if ( clobFile != null )
-                {
-                    return clobFile;
-                }
-            }
-
-            return null;
-        }
-
+        
         public void CreateFileWatchers()
         {
             this.fileWatcher = new FileSystemWatcher();
