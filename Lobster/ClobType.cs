@@ -100,8 +100,7 @@ namespace Lobster
 
                 string command = "INSERT INTO " + pt.FullName
                     + " (" + idCol.FullName + ", " + mnemCol.FullName + " )"
-                    + " VALUES( ( SELECT MAX( " + idCol.FullName + " ) + 1 "
-                        + " FROM " + pt.FullName + " ), :mnemonic )";
+                    + " VALUES( " + idCol.NextID + "), :mnemonic )";
 
                 return command;
             }
@@ -132,7 +131,7 @@ namespace Lobster
 
                     insertCommand += ", " + fkCol.FullName;
 
-                    valueCommand += "( SELECT MAX( " + parentIDCol.FullName + " ) + 1 FROM " + pt.FullName + " ), "
+                    valueCommand += parentIDCol.NextID + ", "
                             + "( SELECT " + parentIDCol.FullName + " FROM " + pt.FullName
                             + " WHERE " + parentMnemCol.FullName + " = '" + _mnemonic + "' )";
                 }
@@ -141,7 +140,7 @@ namespace Lobster
                     if ( idCol != null )
                     {
                         insertCommand += ", " + idCol.FullName;
-                        valueCommand += ", ( SELECT NVL( MAX( " + idCol.FullName + "), 0 ) + 1 FROM " + this.FullName + ")";
+                        valueCommand += ", " + idCol.NextID;
                     }
 
                     if ( _mimeType != null )
@@ -243,6 +242,16 @@ namespace Lobster
             public Table parent;
 
             public string FullName { get { return parent.FullName + "." + this.name; } }
+
+            public string NextID
+            {
+                get
+                {
+                    Debug.Assert( this.purpose == Purpose.ID );
+                    return this.sequence != null ? String.Format( "{0}.{1}.NEXTVAL", this.parent.schema, this.sequence )
+                      : String.Format( "( SELECT NVL( MAX( {0} ), 0 ) + 1 FROM {1} )", this.FullName, this.parent.FullName );
+                }
+            }
 
             /// <summary>
             /// Used to prevent <dataType xsi:nil="true" /> from appearing in the XML

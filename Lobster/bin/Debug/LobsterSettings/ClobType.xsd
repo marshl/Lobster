@@ -31,10 +31,10 @@
   <xs:complexType name="column">
     <xs:sequence>
       <xs:element minOccurs="1" maxOccurs="1" name="name" type="xs:string" />
-      <xs:element minOccurs="0" maxOccurs="1" name="sequence" type="xs:string" />
       <xs:element minOccurs="1" maxOccurs="1" name="purpose" type="Purpose" />
       <xs:element minOccurs="0" maxOccurs="1" name="dataType" nillable="true" type="Datatype" />
       <xs:element minOccurs="0" maxOccurs="1" name="mimeTypes" type="ArrayOfString" />
+      <xs:element minOccurs="0" maxOccurs="1" name="sequence" type="xs:string" />
     </xs:sequence>
   </xs:complexType>
   <xs:simpleType name="Purpose">
