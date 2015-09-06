@@ -52,7 +52,7 @@ namespace Lobster
             {
                 if ( _e is FileNotFoundException || _e is InvalidOperationException || _e is XmlException || _e is XmlSchemaValidationException )
                 {
-                    MessageBox.Show( "The ClobType {0} failed to load. Check the log for more information.", "ClobType Load Failed",
+                    MessageBox.Show( "The DBConfig file {0} failed to load. Check the log for more information.", "ClobType Load Failed",
                            MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1 );
                     MessageLog.LogError( "An error occurred when loading the ClobType {0}: {1}", _fullpath, _e.Message );
                     return null;
