@@ -57,7 +57,7 @@ namespace Lobster
                         MessageBox.Show( "The ClobType " + file.Name + " failed to load. Check the log for more information.", "ClobType Load Failed",
                             MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1 );
                         MessageLog.LogError( "An error occurred when loading the ClobType {0}: {1}", file.Name, _e.Message );
-                        return;
+                        continue;
                     }
                     throw;
                 }
