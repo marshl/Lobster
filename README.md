@@ -116,7 +116,7 @@ This directory is only an example, but it does contain some good examples for ho
 **Tables**: This element contains one or more table definitions to use. Most ClobTypes will only use a single table, but you can define more. If you do, then you will be prompted which table you want to insert new files into.
 
 ### Table
-**Schema**: The schema (or user) that the table is owned by. Usually ***mgr for most FOX tables.
+**Schema**: The schema (or user) that owns the table.
 Name: The name of the table
 **Columns**: Every ClobType needs multiple columns to describe the table. Each one has a specific purpose for Lobster, and they are stored as a list in this element.
 
