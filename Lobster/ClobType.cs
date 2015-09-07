@@ -280,7 +280,6 @@ namespace Lobster
                 ID,
                 CLOB_DATA,
                 MNEMONIC,
-                SEQUENCE,
                 DATETIME,
                 FOREIGN_KEY,
                 MIME_TYPE,

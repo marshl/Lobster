@@ -42,7 +42,6 @@
       <xs:enumeration value="ID" />
       <xs:enumeration value="CLOB_DATA" />
       <xs:enumeration value="MNEMONIC" />
-      <xs:enumeration value="SEQUENCE" />
       <xs:enumeration value="DATETIME" />
       <xs:enumeration value="FOREIGN_KEY" />
       <xs:enumeration value="MIME_TYPE" />
