@@ -35,13 +35,21 @@ Inside the DatabaseConnections directory you should put all of the connection fi
     </DatabaseConfig>
 
 **Name**: This is the name of the database, and has no impact on the interals of Lobster, but this string is displayed in the list of DatabaseConnections in Lobster.
+
 **Host**: The host location of the database server, in this case it is on the local machine. Entries in the hostnames file can also be used.
+
 **Port**: The port that the server listens on. This will usually be the Oracle default of 1521.
+
 **SID**: The Oracle System ID of the database to connect to
-Username: The name of the user to connect as. It is important to connect as a user with the privileges to access every table that could be modifed by Lobster.
+
+**Username**: The name of the user to connect as. It is important to connect as a user with the privileges to access every table that could be modifed by Lobster.
+
 **Password**: The password of the user to connect as. This is stored as free text, and is why DatabaseConnection files should be stored securely.
+
 **CodeSource**: This is the location of the CodeSource directory that is used for this database. If it is invalid, Lobster will prompt you as it starts up.
+
 **UsePooling**: If pooling is enabled, when Lobster connects to the Oracle database Oracle will remember the connection for a time, and reuse it if the same computer connects using the same connection string. This can improve Lobster connection performance slightly, but will decrease server performance if the maximum number of connections is low.
+
 **ClobTypeDir**: ClobTypes are Lobster specific Xml files for describing the different tables located on the database and the rules that govern them (further description below). These files should be stored in a single directory alongside the CodeSource directory and can be version controlled as they contain no security information.
 
 DatabaseConnection files are automatically validated using the DatabaseConnection.xsd schema. If your file fails to load, check the schema for detailed information about how a DatabaseConnection file should be formatted, check the logs for the exact validation error, or look at one of the example files provided.
@@ -98,9 +106,13 @@ This directory is only an example, but it does contain some good examples for ho
     </clobtype>
 
 **Name**: The name of the ClobType. Like the name of the DatabaseConnection, this has no functional bearing, but is used for display purposes.
+
 **Enabled** [true/false]: If this field is set to false, then this ClobType file will be skipped.
+
 **Directory**: The directory name in the CodeSource that this ClobType will govern. Note that this can contain path separators, so the directory does not have to be a top level CodeSource directory ( e.g. ApplicationMetadata/WorkRequestTypes )
+
 **IncludeSubDirectories** [true/false]: If set to true, then Lobster will recursively dig through all directories in this directory for files to use.
+
 **Tables**: This element contains one or more table definitions to use. Most ClobTypes will only use a single table, but you can define more. If you do, then you will be prompted which table you want to insert new files into.
 
 ### Table
@@ -111,7 +123,9 @@ Name: The name of the table
 ### Column:
 
 **Name**: The name of the column.
+
 **Purpose**: Every column must have a purpose, which include:
+
 
  - **ID**: The ID field of the table. This ID column can have an optional sequence element defined, which will be incremented and used to insert new IDs in the column. Otherwise the MAX+1 of the column will be used.
  - **CLOB_DATA**: The column where the data for the file will be stored. CLOB_DATA columns must also have the dataType element, which determines thee Oracle data type that will be used to insert the file into the database (CLOB, BLOB, or XMLTYPE). A table can have multiple CLOB_DATA fields, but each must have a different DataType.
