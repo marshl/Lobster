@@ -139,8 +139,8 @@ Name: The name of the table
  - **ID**: The ID field of the table. This ID column can have an optional sequence element defined, which will be incremented and used to insert new IDs in the column. Otherwise the MAX+1 of the column will be used.
  - **CLOB_DATA**: The column where the data for the file will be stored. CLOB_DATA columns must also have the dataType element, which determines thee Oracle data type that will be used to insert the file into the database (CLOB, BLOB, or XMLTYPE). A table can have multiple CLOB_DATA fields, but they must each have a different DataType.
  - **MNEMONIC**: The mnemonic column is what is used by Lobster to tie the database file to the local file, and is usually the name of the local file with no file extension.
- - **DATETIME:** Date time columns are automatically set to SYSDATE when the file is created or updated.
- - **FOREIGN_KEY:** The foreign key column is used by Lobster when using a table that has a parent able defined. The foreign key column will map to the ID column of the parent table.
+ - **DATETIME**: Date time columns are automatically set to SYSDATE when the file is created or updated.
+ - **FOREIGN_KEY**: The foreign key column is used by Lobster when using a table that has a parent able defined. The foreign key column will map to the ID column of the parent table.
  - **MIME_TYPE**: The mime type column stores the type of the file that is clobbed. When you insert a new file through Lobster, it will prompt you for the mime type to use if the table has a mime type field. THe mime types in the database are converted to file extensions before being mapped to local files using the MimeTypes.xml file (discussed further below)
  - **FULL_NAME**: The full name column is a special case that will be rarely used. It is a column in the WorkRequestTypes table that is stored as an init-capped copy of the mnemonic.
 
@@ -164,18 +164,18 @@ If the connection is successful, you will be moved to the second tab. Here you w
 
 If you select one of the folders, the right hand pane will then display all files associated with that folder. There are 3 categories of files:
 
-* Synchronised: A synchronised file is one that is both on the local computer and on the database, and has successfully been connected by Lobster. Saving any changes to a synchronised file will automatically push those changes to the database.
-* Local Only: Local only files are files that do not have a counterpart on the database. These files can be inserted using the Insert button. Once a local-only file has been inserted, it will become synchronised.
-* Database Only: A database only file is one that does not have a local counterpart. These files may have been deleted your folder, from the repository itself, or they may have been automatically created by FOX.
+ - **Synchronised**: A synchronised file is one that is both on the local computer and on the database, and has successfully been connected by Lobster. Saving any changes to a synchronised file will automatically push those changes to the database.
+ - **Local Only**: Local only files are files that do not have a counterpart on the database. These files can be inserted using the Insert button. Once a local-only file has been inserted, it will become synchronised.
+ - **Database Only**: A database only file is one that does not have a local counterpart. These files may have been deleted your folder, from the repository itself, or they may have been automatically created by FOX.
 
 The third tab is the Working File List. Any files that are not marked as read-only will appear here. This includes files that are synchronised, as well as files that are local-only.
 
 Both the Tree View tab and the Working Files tab have the same set of actions in the action ribbon. Those  actions are:
 
-* Refresh: This button re-queries the database and re-parses the local file system for files. This is automatically called when the local directory structure changes, but it can be manually used if there are new files on the database.
-* Insert: This button is only enabled when a local-only file is selected. It creates a new row in the table for that file's ClobType and inserts the file data. If the ClobType has more than one table, Lobster will ask which table you want to insert into. If the ClobType uses mime-types, then Lobster will ask which mime-type this file should be inserted as.
-* Reclob: This button is only enabled when a synchronised file is selected. It updates the file data in the row that corresponds to that file with the data stored locally. This action is called automatically whenever the file is modified, but this action can force and update if the file is locked, although you will be prompted.
-* Explore: This button is only enabled for files that are located locally (local-only or synchronised). It opens a new instance of Windows Explorer in the directory of the folder, with the file selected.
-* Diff: This button is only enabled when a synchronised file is selected. It opens a new instance of TortoiseMerge with the local version and database versions of the file displayed. If the file has been last updated by Clobber or Lobster, there will be a comment at the end of the file specifying when and by who.
-* Pull: This button is only enabled for files that are database-only. It pulls down a copy of the file into a temporary location and executes it with the default application.
+ - **Refresh**: This button re-queries the database and re-parses the local file system for files. This is automatically called when the local directory structure changes, but it can be manually used if there are new files on the database.
+ - **Insert**: This button is only enabled when a local-only file is selected. It creates a new row in the table for that file's ClobType and inserts the file data. If the ClobType has more than one table, Lobster will ask which table you want to insert into. If the ClobType uses mime-types, then Lobster will ask which mime-type this file should be inserted as.
+ - **Reclob**: This button is only enabled when a synchronised file is selected. It updates the file data in the row that corresponds to that file with the data stored locally. This action is called automatically whenever the file is modified, but this action can force and update if the file is locked, although you will be prompted.
+ - **Explore**: This button is only enabled for files that are located locally (local-only or synchronised). It opens a new instance of Windows Explorer in the directory of the folder, with the file selected.
+ - **Diff**: This button is only enabled when a synchronised file is selected. It opens a new instance of TortoiseMerge with the local version and database versions of the file displayed. If the file has been last updated by Clobber or Lobster, there will be a comment at the end of the file specifying when and by who.
+ - **Pull**: This button is only enabled for files that are database-only. It pulls down a copy of the file into a temporary location and executes it with the default application.
 
