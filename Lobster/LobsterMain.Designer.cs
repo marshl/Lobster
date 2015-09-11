@@ -42,6 +42,9 @@ namespace Lobster
             this.statusColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.MainTabControl = new System.Windows.Forms.TabControl();
             this.connectionTabPage = new System.Windows.Forms.TabPage();
+            this.editConnectionButton = new System.Windows.Forms.Button();
+            this.removeConnectionButton = new System.Windows.Forms.Button();
+            this.newConnectionButton = new System.Windows.Forms.Button();
             this.connectionListView = new System.Windows.Forms.ListView();
             this.connectionNameColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.connectionHostColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -87,14 +90,16 @@ namespace Lobster
             this.treeViewTab.Location = new System.Drawing.Point(4, 29);
             this.treeViewTab.Name = "treeViewTab";
             this.treeViewTab.Padding = new System.Windows.Forms.Padding(3);
-            this.treeViewTab.Size = new System.Drawing.Size(1138, 575);
+            this.treeViewTab.Size = new System.Drawing.Size(1138, 567);
             this.treeViewTab.TabIndex = 0;
             this.treeViewTab.Text = "Tree View";
             this.treeViewTab.UseVisualStyleBackColor = true;
             // 
             // treeViewSplitContainer
             // 
-            this.treeViewSplitContainer.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.treeViewSplitContainer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.treeViewSplitContainer.Location = new System.Drawing.Point(3, 3);
             this.treeViewSplitContainer.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.treeViewSplitContainer.Name = "treeViewSplitContainer";
@@ -106,14 +111,16 @@ namespace Lobster
             // treeViewSplitContainer.Panel2
             // 
             this.treeViewSplitContainer.Panel2.Controls.Add(this.fileListView);
-            this.treeViewSplitContainer.Size = new System.Drawing.Size(1132, 569);
-            this.treeViewSplitContainer.SplitterDistance = 286;
+            this.treeViewSplitContainer.Size = new System.Drawing.Size(1132, 561);
+            this.treeViewSplitContainer.SplitterDistance = 313;
             this.treeViewSplitContainer.SplitterWidth = 6;
             this.treeViewSplitContainer.TabIndex = 0;
             // 
             // fileTreeView
             // 
-            this.fileTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.fileTreeView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.fileTreeView.FullRowSelect = true;
             this.fileTreeView.HideSelection = false;
             this.fileTreeView.ImageIndex = 0;
@@ -123,7 +130,7 @@ namespace Lobster
             this.fileTreeView.Name = "fileTreeView";
             this.fileTreeView.SelectedImageIndex = 0;
             this.fileTreeView.ShowNodeToolTips = true;
-            this.fileTreeView.Size = new System.Drawing.Size(286, 569);
+            this.fileTreeView.Size = new System.Drawing.Size(309, 556);
             this.fileTreeView.TabIndex = 0;
             this.fileTreeView.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.fileTreeView_NodeMouseClick);
             // 
@@ -138,18 +145,20 @@ namespace Lobster
             // 
             // fileListView
             // 
+            this.fileListView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.fileListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.nameColumn,
             this.lastModifiedColumn,
             this.statusColumn});
-            this.fileListView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.fileListView.FullRowSelect = true;
             this.fileListView.HideSelection = false;
-            this.fileListView.Location = new System.Drawing.Point(0, 0);
+            this.fileListView.Location = new System.Drawing.Point(2, 0);
             this.fileListView.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.fileListView.MultiSelect = false;
             this.fileListView.Name = "fileListView";
-            this.fileListView.Size = new System.Drawing.Size(840, 569);
+            this.fileListView.Size = new System.Drawing.Size(797, 556);
             this.fileListView.SmallImageList = this.fileViewImageList;
             this.fileListView.TabIndex = 0;
             this.fileListView.UseCompatibleStateImageBehavior = false;
@@ -180,23 +189,64 @@ namespace Lobster
             this.MainTabControl.Location = new System.Drawing.Point(0, 100);
             this.MainTabControl.Name = "MainTabControl";
             this.MainTabControl.SelectedIndex = 0;
-            this.MainTabControl.Size = new System.Drawing.Size(1146, 608);
+            this.MainTabControl.Size = new System.Drawing.Size(1146, 600);
             this.MainTabControl.TabIndex = 1;
             this.MainTabControl.Selecting += new System.Windows.Forms.TabControlCancelEventHandler(this.MainTabControl_Selecting);
             // 
             // connectionTabPage
             // 
+            this.connectionTabPage.Controls.Add(this.editConnectionButton);
+            this.connectionTabPage.Controls.Add(this.removeConnectionButton);
+            this.connectionTabPage.Controls.Add(this.newConnectionButton);
             this.connectionTabPage.Controls.Add(this.connectionListView);
             this.connectionTabPage.Location = new System.Drawing.Point(4, 29);
             this.connectionTabPage.Name = "connectionTabPage";
             this.connectionTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.connectionTabPage.Size = new System.Drawing.Size(1138, 575);
+            this.connectionTabPage.Size = new System.Drawing.Size(1138, 567);
             this.connectionTabPage.TabIndex = 2;
             this.connectionTabPage.Text = "Connections";
             this.connectionTabPage.UseVisualStyleBackColor = true;
             // 
+            // editConnectionButton
+            // 
+            this.editConnectionButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.editConnectionButton.Enabled = false;
+            this.editConnectionButton.Location = new System.Drawing.Point(830, 529);
+            this.editConnectionButton.Name = "editConnectionButton";
+            this.editConnectionButton.Size = new System.Drawing.Size(96, 32);
+            this.editConnectionButton.TabIndex = 18;
+            this.editConnectionButton.Text = "Edit";
+            this.editConnectionButton.UseVisualStyleBackColor = true;
+            this.editConnectionButton.Click += new System.EventHandler(this.editConnectionButton_Click);
+            // 
+            // removeConnectionButton
+            // 
+            this.removeConnectionButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.removeConnectionButton.Enabled = false;
+            this.removeConnectionButton.Location = new System.Drawing.Point(1034, 529);
+            this.removeConnectionButton.Name = "removeConnectionButton";
+            this.removeConnectionButton.Size = new System.Drawing.Size(96, 32);
+            this.removeConnectionButton.TabIndex = 17;
+            this.removeConnectionButton.Text = "Remove";
+            this.removeConnectionButton.UseVisualStyleBackColor = true;
+            this.removeConnectionButton.Click += new System.EventHandler(this.removeConnectionButton_Click);
+            // 
+            // newConnectionButton
+            // 
+            this.newConnectionButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.newConnectionButton.Location = new System.Drawing.Point(932, 529);
+            this.newConnectionButton.Name = "newConnectionButton";
+            this.newConnectionButton.Size = new System.Drawing.Size(96, 32);
+            this.newConnectionButton.TabIndex = 16;
+            this.newConnectionButton.Text = "New";
+            this.newConnectionButton.UseVisualStyleBackColor = true;
+            this.newConnectionButton.Click += new System.EventHandler(this.newConnectionButton_Click);
+            // 
             // connectionListView
             // 
+            this.connectionListView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.connectionListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.connectionNameColumn,
             this.connectionHostColumn,
@@ -204,13 +254,12 @@ namespace Lobster
             this.connectionSIDColumn,
             this.connectionCodeSourceColumn,
             this.connectionPoolingColumn});
-            this.connectionListView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.connectionListView.FullRowSelect = true;
             this.connectionListView.HideSelection = false;
-            this.connectionListView.Location = new System.Drawing.Point(3, 3);
+            this.connectionListView.Location = new System.Drawing.Point(8, 6);
             this.connectionListView.MultiSelect = false;
             this.connectionListView.Name = "connectionListView";
-            this.connectionListView.Size = new System.Drawing.Size(1132, 569);
+            this.connectionListView.Size = new System.Drawing.Size(1122, 519);
             this.connectionListView.TabIndex = 0;
             this.connectionListView.UseCompatibleStateImageBehavior = false;
             this.connectionListView.View = System.Windows.Forms.View.Details;
@@ -219,10 +268,12 @@ namespace Lobster
             // connectionNameColumn
             // 
             this.connectionNameColumn.Text = "Name";
+            this.connectionNameColumn.Width = 78;
             // 
             // connectionHostColumn
             // 
             this.connectionHostColumn.Text = "Host";
+            this.connectionHostColumn.Width = 81;
             // 
             // connectionPortColumn
             // 
@@ -235,10 +286,12 @@ namespace Lobster
             // connectionCodeSourceColumn
             // 
             this.connectionCodeSourceColumn.Text = "Codesource Directory";
+            this.connectionCodeSourceColumn.Width = 181;
             // 
             // connectionPoolingColumn
             // 
             this.connectionPoolingColumn.Text = "Pooling";
+            this.connectionPoolingColumn.Width = 83;
             // 
             // workingFileTab
             // 
@@ -246,7 +299,7 @@ namespace Lobster
             this.workingFileTab.Location = new System.Drawing.Point(4, 29);
             this.workingFileTab.Name = "workingFileTab";
             this.workingFileTab.Padding = new System.Windows.Forms.Padding(3);
-            this.workingFileTab.Size = new System.Drawing.Size(1138, 575);
+            this.workingFileTab.Size = new System.Drawing.Size(1138, 567);
             this.workingFileTab.TabIndex = 1;
             this.workingFileTab.Text = "Working Files";
             this.workingFileTab.UseVisualStyleBackColor = true;
@@ -257,7 +310,6 @@ namespace Lobster
             this.columnHeader1,
             this.columnHeader2,
             this.columnHeader3});
-            this.workingFileList.Dock = System.Windows.Forms.DockStyle.Fill;
             this.workingFileList.FullRowSelect = true;
             this.workingFileList.Location = new System.Drawing.Point(3, 3);
             this.workingFileList.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
@@ -531,6 +583,9 @@ namespace Lobster
         private NativeTreeView fileTreeView;
         private NativeListView fileListView;
         private NativeListView workingFileList;
+        private System.Windows.Forms.Button editConnectionButton;
+        private System.Windows.Forms.Button removeConnectionButton;
+        private System.Windows.Forms.Button newConnectionButton;
     }
 }
 

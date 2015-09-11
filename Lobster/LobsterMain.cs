@@ -37,8 +37,9 @@ namespace Lobster
         private void PopulateConnectionList( List<DatabaseConfig> _dbConfigList )
         {
             this.connectionListView.Items.Clear();
-            foreach ( DatabaseConfig config in _dbConfigList )
+            for ( int i = 0; i < _dbConfigList.Count; ++i )
             {
+                DatabaseConfig config = _dbConfigList[i];
                 ListViewItem item = new ListViewItem( config.name );
                 string ipAddress = config.host;
 
@@ -51,7 +52,7 @@ namespace Lobster
                     new ListViewItem.ListViewSubItem( item, config.usePooling.ToString() ),
                 };
                 item.SubItems.AddRange( subItems );
-                item.Tag = config;
+                item.Tag = i;
                 this.connectionListView.Items.Add( item );
             }
 
@@ -442,7 +443,8 @@ namespace Lobster
             LoadingForm loadingForm = new LoadingForm();
             loadingForm.Show();
 
-            DatabaseConfig config = (DatabaseConfig)this.connectionListView.SelectedItems[0].Tag;
+            int configIndex = (int)this.connectionListView.SelectedItems[0].Tag;
+            DatabaseConfig config = this.lobsterModel.dbConfigList[configIndex];
             bool result = this.lobsterModel.SetDatabaseConnection( config );
             if ( result )
             {
@@ -463,9 +465,16 @@ namespace Lobster
             }
         }
 
-        private void connectionListView_SelectedIndexChanged( object sender, EventArgs e )
+        private void connectionListView_SelectedIndexChanged( object _sender, EventArgs _e )
         {
             this.UpdateRibbonButtons();
+            this.UpdateConnectionButtons();
+        }
+
+        private void UpdateConnectionButtons()
+        {
+            this.removeConnectionButton.Enabled = this.editConnectionButton.Enabled
+                = ( this.connectionListView.SelectedItems.Count > 0 );
         }
 
         private void fileListView_SelectedIndexChanged( object sender, EventArgs e )
@@ -642,6 +651,60 @@ namespace Lobster
             }
 
             return selectedFile;
+        }
+
+        private void editConnectionButton_Click( object sender, EventArgs e )
+        {
+            Debug.Assert( this.connectionListView.SelectedItems.Count <= 1 );
+            if ( this.connectionListView.SelectedItems.Count == 0 )
+            {
+                MessageBox.Show( "You must first select a connection." );
+                return;
+            }
+
+            int configIndex = (int)this.connectionListView.SelectedItems[0].Tag;
+            DatabaseConfig configRef = this.lobsterModel.dbConfigList[configIndex];
+
+            EditDatabaseConnection editForm = new EditDatabaseConnection( ref configRef );
+            DialogResult result = editForm.ShowDialog();
+            this.lobsterModel.dbConfigList[configIndex] = editForm.originalConfig;
+            this.PopulateConnectionList( this.lobsterModel.dbConfigList );
+        }
+
+        private void newConnectionButton_Click( object sender, EventArgs e )
+        {
+            DatabaseConfig newConfig = new DatabaseConfig();
+            EditDatabaseConnection editForm = new EditDatabaseConnection( ref newConfig );
+            DialogResult result = editForm.ShowDialog();
+            if ( result == DialogResult.OK )
+            {
+                this.lobsterModel.dbConfigList.Add( editForm.originalConfig );
+                this.PopulateConnectionList( this.lobsterModel.dbConfigList );
+            }
+        }
+
+        private void removeConnectionButton_Click( object sender, EventArgs e )
+        {
+            Debug.Assert( this.connectionListView.SelectedItems.Count <= 1 );
+            if ( this.connectionListView.SelectedItems.Count == 0 )
+            {
+                MessageBox.Show( "You must first select a connection." );
+                return;
+            }
+
+            int configIndex = (int)this.connectionListView.SelectedItems[0].Tag;
+            DatabaseConfig configRef = this.lobsterModel.dbConfigList[configIndex];
+
+            DialogResult result = MessageBox.Show( 
+                String.Format( "Are you sure you want to permanently delete the connection {0}?", configRef.name ?? "New Connection" ),
+                "Remove Connection", MessageBoxButtons.OKCancel );
+
+            if ( result == DialogResult.OK )
+            {
+                File.Delete( configRef.fileLocation );
+                this.lobsterModel.dbConfigList.RemoveAt( configIndex );
+                this.PopulateConnectionList( this.lobsterModel.dbConfigList );
+            }
         }
     }
 }
