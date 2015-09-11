@@ -358,7 +358,7 @@ namespace Lobster
             if ( this.lobsterModel.currentConnection == null )
             {
                 e.Cancel = true;
-                MessageBox.Show( "Not connected. You must select a connection and then press the Connect button." );
+                MessageBox.Show( "You must first connect to a database. To make connect, first select a connection from the list, then press the Connect button." );
                 return;
             }
 
