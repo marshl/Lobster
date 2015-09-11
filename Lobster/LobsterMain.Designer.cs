@@ -33,13 +33,7 @@ namespace Lobster
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LobsterMain));
             this.treeViewTab = new System.Windows.Forms.TabPage();
-            this.treeViewSplitContainer = new System.Windows.Forms.SplitContainer();
-            this.fileTreeView = new Lobster.NativeTreeView();
             this.fileViewImageList = new System.Windows.Forms.ImageList(this.components);
-            this.fileListView = new Lobster.NativeListView();
-            this.nameColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.lastModifiedColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.statusColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.MainTabControl = new System.Windows.Forms.TabControl();
             this.connectionTabPage = new System.Windows.Forms.TabPage();
             this.editConnectionButton = new System.Windows.Forms.Button();
@@ -53,10 +47,6 @@ namespace Lobster
             this.connectionCodeSourceColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.connectionPoolingColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.workingFileTab = new System.Windows.Forms.TabPage();
-            this.workingFileList = new Lobster.NativeListView();
-            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.connectButton = new System.Windows.Forms.Button();
             this.ribbonImageList = new System.Windows.Forms.ImageList(this.components);
             this.clobFileContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -73,15 +63,25 @@ namespace Lobster
             this.exploreButton = new System.Windows.Forms.Button();
             this.diffWithDBButton = new System.Windows.Forms.Button();
             this.pullDBFileButton = new System.Windows.Forms.Button();
+            this.treeViewSplitContainer = new System.Windows.Forms.SplitContainer();
+            this.fileTreeView = new Lobster.NativeTreeView();
+            this.fileListView = new Lobster.NativeListView();
+            this.nameColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.lastModifiedColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.statusColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.workingFileList = new Lobster.NativeListView();
+            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.treeViewTab.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.treeViewSplitContainer)).BeginInit();
-            this.treeViewSplitContainer.Panel1.SuspendLayout();
-            this.treeViewSplitContainer.Panel2.SuspendLayout();
-            this.treeViewSplitContainer.SuspendLayout();
             this.MainTabControl.SuspendLayout();
             this.connectionTabPage.SuspendLayout();
             this.workingFileTab.SuspendLayout();
             this.clobFileContextMenuStrip.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.treeViewSplitContainer)).BeginInit();
+            this.treeViewSplitContainer.Panel1.SuspendLayout();
+            this.treeViewSplitContainer.Panel2.SuspendLayout();
+            this.treeViewSplitContainer.SuspendLayout();
             this.SuspendLayout();
             // 
             // treeViewTab
@@ -95,45 +95,6 @@ namespace Lobster
             this.treeViewTab.Text = "Tree View";
             this.treeViewTab.UseVisualStyleBackColor = true;
             // 
-            // treeViewSplitContainer
-            // 
-            this.treeViewSplitContainer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.treeViewSplitContainer.Location = new System.Drawing.Point(3, 3);
-            this.treeViewSplitContainer.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.treeViewSplitContainer.Name = "treeViewSplitContainer";
-            // 
-            // treeViewSplitContainer.Panel1
-            // 
-            this.treeViewSplitContainer.Panel1.Controls.Add(this.fileTreeView);
-            // 
-            // treeViewSplitContainer.Panel2
-            // 
-            this.treeViewSplitContainer.Panel2.Controls.Add(this.fileListView);
-            this.treeViewSplitContainer.Size = new System.Drawing.Size(1132, 561);
-            this.treeViewSplitContainer.SplitterDistance = 313;
-            this.treeViewSplitContainer.SplitterWidth = 6;
-            this.treeViewSplitContainer.TabIndex = 0;
-            // 
-            // fileTreeView
-            // 
-            this.fileTreeView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.fileTreeView.FullRowSelect = true;
-            this.fileTreeView.HideSelection = false;
-            this.fileTreeView.ImageIndex = 0;
-            this.fileTreeView.ImageList = this.fileViewImageList;
-            this.fileTreeView.Location = new System.Drawing.Point(0, 0);
-            this.fileTreeView.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.fileTreeView.Name = "fileTreeView";
-            this.fileTreeView.SelectedImageIndex = 0;
-            this.fileTreeView.ShowNodeToolTips = true;
-            this.fileTreeView.Size = new System.Drawing.Size(309, 556);
-            this.fileTreeView.TabIndex = 0;
-            this.fileTreeView.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.fileTreeView_NodeMouseClick);
-            // 
             // fileViewImageList
             // 
             this.fileViewImageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("fileViewImageList.ImageStream")));
@@ -142,41 +103,6 @@ namespace Lobster
             this.fileViewImageList.Images.SetKeyName(1, "Page.png");
             this.fileViewImageList.Images.SetKeyName(2, "lock");
             this.fileViewImageList.Images.SetKeyName(3, "attach_file");
-            // 
-            // fileListView
-            // 
-            this.fileListView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.fileListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.nameColumn,
-            this.lastModifiedColumn,
-            this.statusColumn});
-            this.fileListView.FullRowSelect = true;
-            this.fileListView.HideSelection = false;
-            this.fileListView.Location = new System.Drawing.Point(2, 0);
-            this.fileListView.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.fileListView.MultiSelect = false;
-            this.fileListView.Name = "fileListView";
-            this.fileListView.Size = new System.Drawing.Size(797, 556);
-            this.fileListView.SmallImageList = this.fileViewImageList;
-            this.fileListView.TabIndex = 0;
-            this.fileListView.UseCompatibleStateImageBehavior = false;
-            this.fileListView.View = System.Windows.Forms.View.Details;
-            this.fileListView.SelectedIndexChanged += new System.EventHandler(this.fileListView_SelectedIndexChanged);
-            this.fileListView.MouseClick += new System.Windows.Forms.MouseEventHandler(this.fileListView_MouseClick);
-            // 
-            // nameColumn
-            // 
-            this.nameColumn.Text = "Name";
-            // 
-            // lastModifiedColumn
-            // 
-            this.lastModifiedColumn.Text = "Last Modified";
-            // 
-            // statusColumn
-            // 
-            this.statusColumn.Text = "Status";
             // 
             // MainTabControl
             // 
@@ -303,37 +229,6 @@ namespace Lobster
             this.workingFileTab.TabIndex = 1;
             this.workingFileTab.Text = "Working Files";
             this.workingFileTab.UseVisualStyleBackColor = true;
-            // 
-            // workingFileList
-            // 
-            this.workingFileList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader1,
-            this.columnHeader2,
-            this.columnHeader3});
-            this.workingFileList.FullRowSelect = true;
-            this.workingFileList.Location = new System.Drawing.Point(3, 3);
-            this.workingFileList.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.workingFileList.MultiSelect = false;
-            this.workingFileList.Name = "workingFileList";
-            this.workingFileList.Size = new System.Drawing.Size(1132, 569);
-            this.workingFileList.SmallImageList = this.fileViewImageList;
-            this.workingFileList.TabIndex = 1;
-            this.workingFileList.UseCompatibleStateImageBehavior = false;
-            this.workingFileList.View = System.Windows.Forms.View.Details;
-            this.workingFileList.SelectedIndexChanged += new System.EventHandler(this.workingFileList_SelectedIndexChanged);
-            this.workingFileList.MouseClick += new System.Windows.Forms.MouseEventHandler(this.workingFileList_MouseClick);
-            // 
-            // columnHeader1
-            // 
-            this.columnHeader1.Text = "Name";
-            // 
-            // columnHeader2
-            // 
-            this.columnHeader2.Text = "Last Modified";
-            // 
-            // columnHeader3
-            // 
-            this.columnHeader3.Text = "Status";
             // 
             // connectButton
             // 
@@ -511,6 +406,108 @@ namespace Lobster
             this.pullDBFileButton.UseVisualStyleBackColor = true;
             this.pullDBFileButton.Click += new System.EventHandler(this.pullDBFileButton_Click);
             // 
+            // treeViewSplitContainer
+            // 
+            this.treeViewSplitContainer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.treeViewSplitContainer.Location = new System.Drawing.Point(3, 3);
+            this.treeViewSplitContainer.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.treeViewSplitContainer.Name = "treeViewSplitContainer";
+            // 
+            // treeViewSplitContainer.Panel1
+            // 
+            this.treeViewSplitContainer.Panel1.Controls.Add(this.fileTreeView);
+            // 
+            // treeViewSplitContainer.Panel2
+            // 
+            this.treeViewSplitContainer.Panel2.Controls.Add(this.fileListView);
+            this.treeViewSplitContainer.Size = new System.Drawing.Size(1132, 561);
+            this.treeViewSplitContainer.SplitterDistance = 313;
+            this.treeViewSplitContainer.SplitterWidth = 6;
+            this.treeViewSplitContainer.TabIndex = 0;
+            // 
+            // fileTreeView
+            // 
+            this.fileTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.fileTreeView.FullRowSelect = true;
+            this.fileTreeView.HideSelection = false;
+            this.fileTreeView.ImageIndex = 0;
+            this.fileTreeView.ImageList = this.fileViewImageList;
+            this.fileTreeView.Location = new System.Drawing.Point(0, 0);
+            this.fileTreeView.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.fileTreeView.Name = "fileTreeView";
+            this.fileTreeView.SelectedImageIndex = 0;
+            this.fileTreeView.ShowNodeToolTips = true;
+            this.fileTreeView.Size = new System.Drawing.Size(313, 561);
+            this.fileTreeView.TabIndex = 0;
+            this.fileTreeView.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.fileTreeView_NodeMouseClick);
+            // 
+            // fileListView
+            // 
+            this.fileListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.nameColumn,
+            this.lastModifiedColumn,
+            this.statusColumn});
+            this.fileListView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.fileListView.FullRowSelect = true;
+            this.fileListView.HideSelection = false;
+            this.fileListView.Location = new System.Drawing.Point(0, 0);
+            this.fileListView.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.fileListView.MultiSelect = false;
+            this.fileListView.Name = "fileListView";
+            this.fileListView.Size = new System.Drawing.Size(813, 561);
+            this.fileListView.SmallImageList = this.fileViewImageList;
+            this.fileListView.TabIndex = 0;
+            this.fileListView.UseCompatibleStateImageBehavior = false;
+            this.fileListView.View = System.Windows.Forms.View.Details;
+            this.fileListView.SelectedIndexChanged += new System.EventHandler(this.fileListView_SelectedIndexChanged);
+            this.fileListView.MouseClick += new System.Windows.Forms.MouseEventHandler(this.fileListView_MouseClick);
+            // 
+            // nameColumn
+            // 
+            this.nameColumn.Text = "Name";
+            // 
+            // lastModifiedColumn
+            // 
+            this.lastModifiedColumn.Text = "Last Modified";
+            // 
+            // statusColumn
+            // 
+            this.statusColumn.Text = "Status";
+            // 
+            // workingFileList
+            // 
+            this.workingFileList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader1,
+            this.columnHeader2,
+            this.columnHeader3});
+            this.workingFileList.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.workingFileList.FullRowSelect = true;
+            this.workingFileList.Location = new System.Drawing.Point(3, 3);
+            this.workingFileList.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.workingFileList.MultiSelect = false;
+            this.workingFileList.Name = "workingFileList";
+            this.workingFileList.Size = new System.Drawing.Size(1132, 561);
+            this.workingFileList.SmallImageList = this.fileViewImageList;
+            this.workingFileList.TabIndex = 1;
+            this.workingFileList.UseCompatibleStateImageBehavior = false;
+            this.workingFileList.View = System.Windows.Forms.View.Details;
+            this.workingFileList.SelectedIndexChanged += new System.EventHandler(this.workingFileList_SelectedIndexChanged);
+            this.workingFileList.MouseClick += new System.Windows.Forms.MouseEventHandler(this.workingFileList_MouseClick);
+            // 
+            // columnHeader1
+            // 
+            this.columnHeader1.Text = "Name";
+            // 
+            // columnHeader2
+            // 
+            this.columnHeader2.Text = "Last Modified";
+            // 
+            // columnHeader3
+            // 
+            this.columnHeader3.Text = "Status";
+            // 
             // LobsterMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -530,14 +527,14 @@ namespace Lobster
             this.Text = "Lobster";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.LobsterMain_FormClosed);
             this.treeViewTab.ResumeLayout(false);
-            this.treeViewSplitContainer.Panel1.ResumeLayout(false);
-            this.treeViewSplitContainer.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.treeViewSplitContainer)).EndInit();
-            this.treeViewSplitContainer.ResumeLayout(false);
             this.MainTabControl.ResumeLayout(false);
             this.connectionTabPage.ResumeLayout(false);
             this.workingFileTab.ResumeLayout(false);
             this.clobFileContextMenuStrip.ResumeLayout(false);
+            this.treeViewSplitContainer.Panel1.ResumeLayout(false);
+            this.treeViewSplitContainer.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.treeViewSplitContainer)).EndInit();
+            this.treeViewSplitContainer.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -581,11 +578,11 @@ namespace Lobster
         private System.Windows.Forms.Button diffWithDBButton;
         private System.Windows.Forms.Button pullDBFileButton;
         private NativeTreeView fileTreeView;
-        private NativeListView fileListView;
         private NativeListView workingFileList;
         private System.Windows.Forms.Button editConnectionButton;
         private System.Windows.Forms.Button removeConnectionButton;
         private System.Windows.Forms.Button newConnectionButton;
+        private NativeListView fileListView;
     }
 }
 
