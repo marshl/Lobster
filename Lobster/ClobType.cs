@@ -248,8 +248,8 @@ namespace Lobster
                 get
                 {
                     Debug.Assert( this.purpose == Purpose.ID );
-                    return this.sequence != null ? String.Format( "{0}.{1}.NEXTVAL", this.parent.schema, this.sequence )
-                      : String.Format( "( SELECT NVL( MAX( {0} ), 0 ) + 1 FROM {1} )", this.FullName, this.parent.FullName );
+                    return this.sequence != null ? this.parent.schema + "." + this.sequence + ".NEXTVAL"
+                      : "( SELECT NVL( MAX( " + this.FullName + " ), 0 ) + 1 FROM " + this.parent.FullName + " )";
                 }
             }
 

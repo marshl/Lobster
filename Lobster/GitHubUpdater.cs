@@ -13,11 +13,11 @@ namespace Lobster
         public static bool RunUpdateCheck( string _user, string _repo )
         { 
             RestClient restClient = new RestClient( "https://api.github.com" );
-            var restRequest = new RestRequest( String.Format( "/repos/{0}/{1}/releases/latest", _user, _repo ), Method.GET );
+            var restRequest = new RestRequest( "/repos/" + _user + "/" + _repo +"/releases/latest", Method.GET );
             IRestResponse response = restClient.Execute( restRequest );
             if ( response.StatusCode != HttpStatusCode.OK )
             {
-                MessageLog.LogWarning( "An error occured when attempting to query GitHub: Http Status Code {0}", response.StatusCode );
+                MessageLog.LogWarning( "An error occured when attempting to query GitHub: Http Status Code " + response.StatusCode );
                 return false;
             }
 
@@ -35,10 +35,9 @@ namespace Lobster
             
             if ( latestRelease > linkerDate )
             {
-                MessageBox.Show( String.Format( "A newer version of Lobster is available. Please download it from https://www.github.com/marshl/lobster\n" +
-                    "Your release: {0}\n" +
-                    "Latest release: {1}",
-                    linkerDate.ToShortDateString(), latestRelease.ToShortDateString() ) );
+                MessageBox.Show( "A newer version of Lobster is available. Please download it from https://www.github.com/marshl/lobster\n"
+                    + "Your release: " + linkerDate.ToShortDateString() + "\n"
+                    + "Latest release: " + latestRelease.ToShortDateString() );
             }
             return true;
         }

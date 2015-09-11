@@ -42,7 +42,7 @@ namespace Lobster
 
         private static DatabaseConfig LoadDatabaseConfigFile( string _fullpath )
         {
-            MessageLog.LogInfo( "Loading Database Config File {0}", _fullpath );
+            MessageLog.LogInfo( "Loading Database Config File " + _fullpath );
             DatabaseConfig dbConfig;
             try
             {
@@ -52,9 +52,9 @@ namespace Lobster
             {
                 if ( _e is FileNotFoundException || _e is InvalidOperationException || _e is XmlException || _e is XmlSchemaValidationException )
                 {
-                    MessageBox.Show( "The DBConfig file {0} failed to load. Check the log for more information.", "ClobType Load Failed",
+                    MessageBox.Show( "The DBConfig file " + _fullpath + " failed to load. Check the log for more information.", "ClobType Load Failed",
                            MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1 );
-                    MessageLog.LogError( "An error occurred when loading the ClobType {0}: {1}", _fullpath, _e.Message );
+                    MessageLog.LogError( "An error occurred when loading the ClobType " + _fullpath + ": " + _e );
                     return null;
                 }
                 throw;
@@ -65,7 +65,7 @@ namespace Lobster
             // If the CodeSource folder cannot be found, prompt the user for it
             if ( dbConfig.codeSource == null || !Directory.Exists( dbConfig.codeSource ) )
             {
-                string codeSourceDir = PromptForDirectory( String.Format( "Please select your CodeSource directory for {0}", dbConfig.name ), null );
+                string codeSourceDir = PromptForDirectory( "Please select your CodeSource directory for "+ dbConfig.name, null );
                 if ( codeSourceDir != null )
                 {
                     dbConfig.codeSource = codeSourceDir;
@@ -107,7 +107,7 @@ namespace Lobster
                 + ";Pooling=" + ( _config.usePooling ? "true" : "false" );
             try
             {
-                MessageLog.LogInfo( "Connecting to database {0} using connection string {1}", _config.name, con.ConnectionString );
+                MessageLog.LogInfo( "Connecting to database " + _config.name + " using connection string " + con.ConnectionString );
                 con.Open();
             }
             catch ( Exception _e )
@@ -115,7 +115,7 @@ namespace Lobster
                 if ( _e is InvalidOperationException || _e is OracleException )
                 {
                     LobsterMain.OnErrorMessage( "Database Connection Failure", "Cannot open connection to database: " + _e.Message );
-                    MessageLog.LogError( "Connection to Oracle failed: {0}", _e.Message );
+                    MessageLog.LogError( "Connection to Oracle failed: " + _e.Message );
                     return null;
                 }
                 throw;
@@ -200,7 +200,7 @@ namespace Lobster
             int rowsAffected;
             try
             {
-                MessageLog.LogInfo( "Executing Update query: {0}", command.CommandText );
+                MessageLog.LogInfo( "Executing Update query: " + command.CommandText );
                 rowsAffected = command.ExecuteNonQuery();
             }
             catch ( Exception _e )
@@ -219,7 +219,7 @@ namespace Lobster
             {
                 trans.Rollback();
                 LobsterMain.OnErrorMessage( "Clob Update Failed", rowsAffected + " rows were affected during the update (expected only 1). The transaction has been rolled back." );
-                MessageLog.LogError( "In invalid number of rows ({0}) were updated for command: {1}", rowsAffected, command.CommandText );
+                MessageLog.LogError( "In invalid number of rows (" + rowsAffected + ") were updated for command: " + command.CommandText );
                 return false;
             }
 
@@ -284,7 +284,7 @@ namespace Lobster
 
                 try
                 {
-                    MessageLog.LogInfo( "Executing Insert query on parent table: {0}", command.CommandText );
+                    MessageLog.LogInfo( "Executing Insert query on parent table: " + command.CommandText );
                     command.ExecuteNonQuery();
                 }
                 catch ( Exception _e )
@@ -308,7 +308,7 @@ namespace Lobster
 
             try
             {
-                MessageLog.LogInfo( "Executing Insert query: {0}", command.CommandText );
+                MessageLog.LogInfo( "Executing Insert query: " + command.CommandText );
                 command.ExecuteNonQuery();
             }
             catch ( Exception _e )
@@ -348,7 +348,7 @@ namespace Lobster
 
             if ( _config.clobTypeDir == null || !Directory.Exists( _config.clobTypeDir ) )
             {
-                _config.clobTypeDir = PromptForDirectory( String.Format( "Please select your Clob Type directory for {0}.", _config.name ), _config.codeSource );
+                _config.clobTypeDir = PromptForDirectory( "Please select your Clob Type directory for " + _config.name, _config.codeSource );
                 if ( _config.clobTypeDir != null )
                 {
                     DatabaseConfig.Serialise( _config.fileLocation, _config );
@@ -442,7 +442,7 @@ namespace Lobster
                         reader.Close();
                         LobsterMain.OnErrorMessage( "Clob Data Fetch Error",
                        "Too many rows were found for " + _clobFile.dbClobFile.mnemonic );
-                        MessageLog.LogError( "Too many rows found on clob retrieval of {0}", _clobFile.dbClobFile.mnemonic );
+                        MessageLog.LogError( "Too many rows found on clob retrieval of " + _clobFile.dbClobFile.mnemonic );
                         return null;
                     }
                 }
@@ -504,13 +504,12 @@ namespace Lobster
 
         private string GetClobFooterMessage( string _mimeType )
         {
-            return String.Format( "{0} Last clobbed by user {1} on machine {2} at {3} (Lobster build {4}) {5}",
-                _mimeType == "text/javascript" ? "/*" : "<!--",
-                Environment.UserName,
-                Environment.MachineName,
-                DateTime.Now,
-                Common.RetrieveLinkerTimestamp().ToShortDateString(),
-                _mimeType == "text/javascript" ? "*/" : "-->");
+            return (_mimeType == "text/javascript" ? "/*" : "<!--")
+                + " Last clobbed by user " + Environment.UserName
+                + " on machine " + Environment.MachineName
+                + " at " + DateTime.Now
+                + " (Lobster build " + Common.RetrieveLinkerTimestamp().ToShortDateString() + ")"
+                + (_mimeType == "text/javascript" ? "*/" : "-->");
         }
 
         public string ConvertFilenameToMnemonic( ClobFile _clobFile, ClobType.Table _table, string _mimeType )

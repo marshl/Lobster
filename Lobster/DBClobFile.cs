@@ -32,7 +32,6 @@ namespace Lobster
     public class ClobColumnNotFoundException : Exception
     {
         public ClobColumnNotFoundException( DBClobFile _dbClobFile )
-            : base ( String.Format( "The clob column for file {0} of mimetype {1} could not be found the table {2}",
-                _dbClobFile.filename, _dbClobFile.mimeType, _dbClobFile.table.FullName ) ) { }
+            : base ( "The clob column for file " + _dbClobFile.filename + " of mimetype " + _dbClobFile.mimeType + " could not be found the table " + _dbClobFile.table.FullName ) { }
     }
 }

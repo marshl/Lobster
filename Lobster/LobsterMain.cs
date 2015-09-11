@@ -344,11 +344,11 @@ namespace Lobster
                 try
                 {
                     File.Delete( tempFile.FullName );
-                    MessageLog.LogInfo( "Temporary file deleted {0}", tempFile.FullName );
+                    MessageLog.LogInfo( "Temporary file deleted " + tempFile.FullName );
                 }
                 catch ( IOException _e )
                 {
-                    MessageLog.LogWarning( "Failed to delete temporary file {0}: {1}", tempFile.FullName, _e );
+                    MessageLog.LogWarning( "Failed to delete temporary file " + tempFile.FullName + " " + _e );
                 }
             }
         }
@@ -541,8 +541,7 @@ namespace Lobster
             Debug.Assert( _clobFile.IsSynced );
             if ( _clobFile.localClobFile.fileInfo.IsReadOnly )
             {
-                DialogResult result = MessageBox.Show(
-                    String.Format( "{0} is locked. Are you sure you want to clob it?", _clobFile.localClobFile.fileInfo.Name ),
+                DialogResult result = MessageBox.Show( _clobFile.localClobFile.fileInfo.Name + " is locked. Are you sure you want to clob it?",
                     "File is Locked",
                     MessageBoxButtons.OKCancel );
                 if ( result != DialogResult.OK )
@@ -696,7 +695,7 @@ namespace Lobster
             DatabaseConfig configRef = this.lobsterModel.dbConfigList[configIndex];
 
             DialogResult result = MessageBox.Show( 
-                String.Format( "Are you sure you want to permanently delete the connection {0}?", configRef.name ?? "New Connection" ),
+                "Are you sure you want to permanently delete the connection " + configRef.name ?? "New Connection" + "?",
                 "Remove Connection", MessageBoxButtons.OKCancel );
 
             if ( result == DialogResult.OK )

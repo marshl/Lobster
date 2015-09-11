@@ -28,8 +28,8 @@ namespace Lobster
             DirectoryInfo clobTypeDir = new DirectoryInfo( this.dbConfig.clobTypeDir );
             if ( !clobTypeDir.Exists )
             {
-                MessageBox.Show( String.Format( "{0} could not be found.", clobTypeDir ), "ClobType Load Failed", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1 );
-                MessageLog.LogWarning( String.Format( "The directory {0} could not be found when loading {1}.", clobTypeDir, this.dbConfig.name ) );
+                MessageBox.Show( clobTypeDir + " could not be found.", "ClobType Load Failed", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1 );
+                MessageLog.LogWarning( "The directory " + clobTypeDir + " could not be found when loading " + this.dbConfig.name );
                 return;
             }
 
@@ -37,12 +37,12 @@ namespace Lobster
             {
                 try
                 {
-                    MessageLog.LogInfo( "Loading ClobType file {0}", file.FullName );
+                    MessageLog.LogInfo( "Loading ClobType file " + file.FullName );
                     ClobType clobType = Common.DeserialiseXmlFileUsingSchema<ClobType>( file.FullName, "LobsterSettings/ClobType.xsd" );
                     
                     if ( !clobType.enabled )
                     {
-                        MessageLog.LogWarning( "The ClobType file {0} was not loaded as it was marked as disabled.", file.FullName );
+                        MessageLog.LogWarning( "The ClobType file " + file.FullName + " was not loaded as it was marked as disabled." );
                         continue;
                     }
 
@@ -56,7 +56,7 @@ namespace Lobster
                     {
                         MessageBox.Show( "The ClobType " + file.Name + " failed to load. Check the log for more information.", "ClobType Load Failed",
                             MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1 );
-                        MessageLog.LogError( "An error occurred when loading the ClobType {0}: {1}", file.Name, _e.Message );
+                        MessageLog.LogError( "An error occurred when loading the ClobType " + file.Name + " " + _e );
                         continue;
                     }
                     throw;
@@ -85,7 +85,7 @@ namespace Lobster
             DirectoryInfo info = new DirectoryInfo( Path.Combine( this.dbConfig.codeSource, _clobDirectory.clobType.directory ) );
             if ( !info.Exists )
             {
-                MessageLog.LogWarning( "{0} could not be found.", info.FullName );
+                MessageLog.LogWarning( info.FullName + " could not be found." );
                 LobsterMain.OnErrorMessage( "Folder not found", "Folder \"" + info.FullName + "\" could not be found for ClobType " + _clobDirectory.clobType.name );
                 return false;
             }

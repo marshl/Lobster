@@ -21,7 +21,7 @@ namespace Lobster
 
             public override string ToString()
             {
-                return String.Format( "{0} [{1}]: {2}", this.date, this.type, this.text );
+                return this.date + " [" + this.type + "]: " + this.text;
             }
         }
         public List<Message> messageList;
@@ -37,7 +37,7 @@ namespace Lobster
             MessageLog.instance = this;
             this.stream = new StreamWriter( Program.LOG_FILE, true );
             this.stream.Write( "\n\n" );
-            LogInfo( "Starting Lobster (build {0})", Common.RetrieveLinkerTimestamp() );
+            LogInfo( "Starting Lobster (build " + Common.RetrieveLinkerTimestamp()  + ")" );
         }
 
         public void Close()
@@ -46,28 +46,27 @@ namespace Lobster
             this.stream.Close();
         }
 
-        private void InternalLog( Message.TYPE _type, string _message, params object[] _args )
+        private void InternalLog( Message.TYPE _type, string _message )
         {
-            string str = String.Format( _message, _args );
-            Message msg = new Message() { text = str, type = _type, date = DateTime.Now };
+            Message msg = new Message() { text = _message, type = _type, date = DateTime.Now };
             this.messageList.Add( msg );
             this.stream.WriteLine( msg.ToString() );
             this.stream.Flush();
         }
 
-        public static void LogWarning( string _message, params object[] _args )
+        public static void LogWarning( string _message )
         {
-            MessageLog.instance.InternalLog( Message.TYPE.WARNING, _message, _args );
+            MessageLog.instance.InternalLog( Message.TYPE.WARNING, _message );
         }
 
-        public static void LogError( string _message, params object[] _args )
+        public static void LogError( string _message )
         {
-            MessageLog.instance.InternalLog( Message.TYPE.ERROR, _message, _args );
+            MessageLog.instance.InternalLog( Message.TYPE.ERROR, _message );
         }
 
-        public static void LogInfo( string _message, params object[] _args )
+        public static void LogInfo( string _message )
         {
-            MessageLog.instance.InternalLog( Message.TYPE.INFO, _message, _args );
+            MessageLog.instance.InternalLog( Message.TYPE.INFO, _message );
         }
 
         public void Dispose()
