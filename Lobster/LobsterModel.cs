@@ -15,7 +15,7 @@ namespace Lobster
 {
     public class LobsterModel
     {
-        public List<DatabaseConfig> dbConfigList;
+        public List<DatabaseConnection> dbConnectionList;
         public DatabaseConnection currentConnection;
 
         public List<FileInfo> tempFileList = new List<FileInfo>();
@@ -29,24 +29,24 @@ namespace Lobster
 
         public void LoadDatabaseConfig()
         {
-            this.dbConfigList = new List<DatabaseConfig>();
+            this.dbConnectionList = new List<DatabaseConnection>();
             foreach ( string filename in Directory.GetFiles( Program.DB_CONFIG_DIR ) )
             {
-                DatabaseConfig dbConfig = LoadDatabaseConfigFile( filename );
+                DatabaseConnection dbConfig = LoadDatabaseConfigFile( filename );
                 if ( dbConfig != null )
                 {
-                    this.dbConfigList.Add( dbConfig );
+                    this.dbConnectionList.Add( dbConfig );
                 }
             }
         }
 
-        private static DatabaseConfig LoadDatabaseConfigFile( string _fullpath )
+        private static DatabaseConnection LoadDatabaseConfigFile( string _fullpath )
         {
             MessageLog.LogInfo( "Loading Database Config File " + _fullpath );
-            DatabaseConfig dbConfig;
+            DatabaseConnection dbConnection;
             try
             {
-                dbConfig = Common.DeserialiseXmlFileUsingSchema<DatabaseConfig>( _fullpath, "LobsterSettings/DatabaseConfig.xsd" );
+                dbConnection = Common.DeserialiseXmlFileUsingSchema<DatabaseConnection>( _fullpath, "LobsterSettings/DatabaseConfig.xsd" );
             }
             catch ( Exception _e )
             {
@@ -60,23 +60,26 @@ namespace Lobster
                 throw;
             }
 
-            dbConfig.fileLocation = _fullpath;
+            dbConnection.fileLocation = _fullpath;
 
             // If the CodeSource folder cannot be found, prompt the user for it
-            if ( dbConfig.codeSource == null || !Directory.Exists( dbConfig.codeSource ) )
+            if ( dbConnection.codeSource == null || !Directory.Exists( dbConnection.codeSource ) )
             {
-                string codeSourceDir = PromptForDirectory( "Please select your CodeSource directory for "+ dbConfig.name, null );
+                string codeSourceDir = PromptForDirectory( "Please select your CodeSource directory for "+ dbConnection.name, null );
                 if ( codeSourceDir != null )
                 {
-                    dbConfig.codeSource = codeSourceDir;
-                    DatabaseConfig.Serialise( _fullpath, dbConfig );
+                    dbConnection.codeSource = codeSourceDir;
+                    DatabaseConnection.Serialise( _fullpath, dbConnection );
                 }
                 else // Ignore config files that don't have a valid CodeSource folder
                 {
                     return null;
                 }
             }
-            return dbConfig;
+
+
+            dbConnection.LoadClobTypes();
+            return dbConnection;
         }
 
         private static string PromptForDirectory( string _description, string _startingPath )
@@ -95,7 +98,7 @@ namespace Lobster
             return fbd.SelectedPath;
         }
 
-        private static OracleConnection OpenConnection( DatabaseConfig _config )
+        private static OracleConnection OpenConnection( DatabaseConnection _config )
         {
             OracleConnection con = new OracleConnection();
             con.ConnectionString = "User Id=" + _config.username
@@ -112,7 +115,7 @@ namespace Lobster
             }
             catch ( Exception _e )
             {
-                if ( _e is InvalidOperationException || _e is OracleException )
+                if ( _e is InvalidOperationException || _e is OracleException || _e is FormatException )
                 {
                     LobsterMain.OnErrorMessage( "Database Connection Failure", "Cannot open connection to database: " + _e.Message );
                     MessageLog.LogError( "Connection to Oracle failed: " + _e.Message );
@@ -125,7 +128,7 @@ namespace Lobster
 
         public void GetDatabaseFileLists()
         { 
-            OracleConnection con = OpenConnection( this.currentConnection.dbConfig );
+            OracleConnection con = OpenConnection( this.currentConnection );
             if ( con == null )
             {
                 MessageLog.LogError( "Connection failed, cannot diff files with database." );
@@ -141,7 +144,7 @@ namespace Lobster
 
         public void SendUpdateClobMessage( ClobFile _clobFile )
         {
-            OracleConnection con = OpenConnection( this.currentConnection.dbConfig );
+            OracleConnection con = OpenConnection( this.currentConnection );
             bool result;
             if ( con == null )
             {
@@ -157,7 +160,7 @@ namespace Lobster
 
         public bool SendInsertClobMessage( ClobFile _clobFile, ClobType.Table _table, string _mimeType )
         {
-            OracleConnection con = OpenConnection( this.currentConnection.dbConfig );
+            OracleConnection con = OpenConnection( this.currentConnection );
             if ( con == null )
             {
                 return false;
@@ -231,7 +234,7 @@ namespace Lobster
 
         public FileInfo SendDownloadClobDataToFileMessage( ClobFile _clobFile )
         {
-            OracleConnection con = OpenConnection( this.currentConnection.dbConfig );
+            OracleConnection con = OpenConnection( this.currentConnection );
             if ( con == null )
             {
                 return null;
@@ -337,21 +340,21 @@ namespace Lobster
             return true;
         }
 
-        public bool SetDatabaseConnection( DatabaseConfig _config )
+        public bool SetDatabaseConnection( DatabaseConnection _connection )
         {
-            OracleConnection con = OpenConnection( _config );
+            OracleConnection con = OpenConnection( _connection );
             if ( con == null )
             {
                 return false;
             }
             con.Close();
 
-            if ( _config.clobTypeDir == null || !Directory.Exists( _config.clobTypeDir ) )
+            if ( _connection.clobTypeDir == null || !Directory.Exists( _connection.clobTypeDir ) )
             {
-                _config.clobTypeDir = PromptForDirectory( "Please select your Clob Type directory for " + _config.name, _config.codeSource );
-                if ( _config.clobTypeDir != null )
+                _connection.clobTypeDir = PromptForDirectory( "Please select your Clob Type directory for " + _connection.name, _connection.codeSource );
+                if ( _connection.clobTypeDir != null )
                 {
-                    DatabaseConfig.Serialise( _config.fileLocation, _config );
+                    DatabaseConnection.Serialise( _connection.fileLocation, _connection );
                 }
                 else // Ignore config files that don't have a valid CodeSource folder
                 {
@@ -359,8 +362,7 @@ namespace Lobster
                 }
             }
 
-            this.currentConnection = new DatabaseConnection( _config );
-            this.currentConnection.LoadClobTypes();
+            this.currentConnection = _connection;
             this.currentConnection.PopulateClobDirectories( this );
             this.RequeryDatabase();
 

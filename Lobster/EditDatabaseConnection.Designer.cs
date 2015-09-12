@@ -138,6 +138,7 @@
             this.editClobTypeButton.TabIndex = 15;
             this.editClobTypeButton.Text = "Edit";
             this.editClobTypeButton.UseVisualStyleBackColor = true;
+            this.editClobTypeButton.Click += new System.EventHandler(this.editClobTypeButton_Click);
             // 
             // removeClobTypeButton
             // 
@@ -148,6 +149,7 @@
             this.removeClobTypeButton.TabIndex = 14;
             this.removeClobTypeButton.Text = "Remove";
             this.removeClobTypeButton.UseVisualStyleBackColor = true;
+            this.removeClobTypeButton.Click += new System.EventHandler(this.removeClobTypeButton_Click);
             // 
             // addClobTypeButton
             // 
@@ -158,6 +160,7 @@
             this.addClobTypeButton.TabIndex = 13;
             this.addClobTypeButton.Text = "Add";
             this.addClobTypeButton.UseVisualStyleBackColor = true;
+            this.addClobTypeButton.Click += new System.EventHandler(this.addClobTypeButton_Click);
             // 
             // clobTypeListView
             // 

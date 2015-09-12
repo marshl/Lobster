@@ -28,28 +28,28 @@ namespace Lobster
             
             this.lobsterModel.LoadDatabaseConfig();
 
-            this.PopulateConnectionList( this.lobsterModel.dbConfigList );
+            this.PopulateConnectionList( this.lobsterModel.dbConnectionList );
 
             this.successSoundPlayer = new SoundPlayer( Program.SETTINGS_DIR + "/media/success.wav" );
             this.failureSoundPlayer = new SoundPlayer( Program.SETTINGS_DIR + "/media/failure.wav" );
         }
 
-        private void PopulateConnectionList( List<DatabaseConfig> _dbConfigList )
+        private void PopulateConnectionList( List<DatabaseConnection> connectionList )
         {
             this.connectionListView.Items.Clear();
-            for ( int i = 0; i < _dbConfigList.Count; ++i )
+            for ( int i = 0; i < connectionList.Count; ++i )
             {
-                DatabaseConfig config = _dbConfigList[i];
-                ListViewItem item = new ListViewItem( config.name );
-                string ipAddress = config.host;
+                DatabaseConnection connection = connectionList[i];
+                ListViewItem item = new ListViewItem( connection.name );
+                string ipAddress = connection.host;
 
                 ListViewItem.ListViewSubItem[] subItems = new ListViewItem.ListViewSubItem[]
                 {
                     new ListViewItem.ListViewSubItem( item, ipAddress ),
-                    new ListViewItem.ListViewSubItem( item, config.port ),
-                    new ListViewItem.ListViewSubItem( item, config.sid ),
-                    new ListViewItem.ListViewSubItem( item, config.codeSource ),
-                    new ListViewItem.ListViewSubItem( item, config.usePooling.ToString() ),
+                    new ListViewItem.ListViewSubItem( item, connection.port ),
+                    new ListViewItem.ListViewSubItem( item, connection.sid ),
+                    new ListViewItem.ListViewSubItem( item, connection.codeSource ),
+                    new ListViewItem.ListViewSubItem( item, connection.usePooling.ToString() ),
                 };
                 item.SubItems.AddRange( subItems );
                 item.Tag = i;
@@ -69,7 +69,7 @@ namespace Lobster
             this.fileTreeView.Nodes.Clear();
             // Use the folder name as the root element
             DatabaseConnection dbc = this.lobsterModel.currentConnection;
-            TreeNode rootNode = new TreeNode( Path.GetFileName( dbc.dbConfig.codeSource ) ?? "CodeSource", 0, 0 );
+            TreeNode rootNode = new TreeNode( Path.GetFileName( dbc.codeSource ) ?? "CodeSource", 0, 0 );
             foreach ( KeyValuePair<ClobType, ClobDirectory> pair in dbc.clobTypeToDirectoryMap )
             {
                 ClobDirectory clobDir = pair.Value;
@@ -444,8 +444,8 @@ namespace Lobster
             loadingForm.Show();
 
             int configIndex = (int)this.connectionListView.SelectedItems[0].Tag;
-            DatabaseConfig config = this.lobsterModel.dbConfigList[configIndex];
-            bool result = this.lobsterModel.SetDatabaseConnection( config );
+            DatabaseConnection connection = this.lobsterModel.dbConnectionList[configIndex];
+            bool result = this.lobsterModel.SetDatabaseConnection( connection );
             if ( result )
             {
                 this.PopulateDirectoryTreeView();
@@ -662,23 +662,24 @@ namespace Lobster
             }
 
             int configIndex = (int)this.connectionListView.SelectedItems[0].Tag;
-            DatabaseConfig configRef = this.lobsterModel.dbConfigList[configIndex];
+            DatabaseConnection connectionRef = this.lobsterModel.dbConnectionList[configIndex];
 
-            EditDatabaseConnection editForm = new EditDatabaseConnection( ref configRef );
+            EditDatabaseConnection editForm = new EditDatabaseConnection( ref connectionRef, false );
             DialogResult result = editForm.ShowDialog();
-            this.lobsterModel.dbConfigList[configIndex] = editForm.originalConfig;
-            this.PopulateConnectionList( this.lobsterModel.dbConfigList );
+            this.lobsterModel.dbConnectionList[configIndex] = editForm.originalConnection;
+            this.PopulateConnectionList( this.lobsterModel.dbConnectionList );
         }
 
         private void newConnectionButton_Click( object sender, EventArgs e )
         {
-            DatabaseConfig newConfig = new DatabaseConfig();
-            EditDatabaseConnection editForm = new EditDatabaseConnection( ref newConfig );
+            DatabaseConnection newConnection = new DatabaseConnection();
+            newConnection.fileLocation = Path.Combine( Program.DB_CONFIG_DIR, "NewConnection.xml" ) ;
+            EditDatabaseConnection editForm = new EditDatabaseConnection( ref newConnection, true );
             DialogResult result = editForm.ShowDialog();
             if ( result == DialogResult.OK )
             {
-                this.lobsterModel.dbConfigList.Add( editForm.originalConfig );
-                this.PopulateConnectionList( this.lobsterModel.dbConfigList );
+                this.lobsterModel.dbConnectionList.Add( editForm.originalConnection );
+                this.PopulateConnectionList( this.lobsterModel.dbConnectionList );
             }
         }
 
@@ -692,17 +693,17 @@ namespace Lobster
             }
 
             int configIndex = (int)this.connectionListView.SelectedItems[0].Tag;
-            DatabaseConfig configRef = this.lobsterModel.dbConfigList[configIndex];
+            DatabaseConnection databaseConnection = this.lobsterModel.dbConnectionList[configIndex];
 
             DialogResult result = MessageBox.Show( 
-                "Are you sure you want to permanently delete the connection " + configRef.name ?? "New Connection" + "?",
+                "Are you sure you want to permanently delete the connection " + databaseConnection.name ?? "New Connection" + "?",
                 "Remove Connection", MessageBoxButtons.OKCancel );
 
             if ( result == DialogResult.OK )
             {
-                File.Delete( configRef.fileLocation );
-                this.lobsterModel.dbConfigList.RemoveAt( configIndex );
-                this.PopulateConnectionList( this.lobsterModel.dbConfigList );
+                File.Delete( databaseConnection.fileLocation );
+                this.lobsterModel.dbConnectionList.RemoveAt( configIndex );
+                this.PopulateConnectionList( this.lobsterModel.dbConnectionList );
             }
         }
     }
