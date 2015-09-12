@@ -87,6 +87,12 @@ namespace Lobster
             this.usePooling = _other.usePooling;
             this.clobTypeDir = _other.clobTypeDir;
             this.fileLocation = _other.fileLocation;
+
+            this.clobTypeList = new List<ClobType>();
+            foreach ( ClobType clobType in _other.clobTypeList )
+            {
+                this.clobTypeList.Add( new ClobType( clobType ) );
+            }
         }
 
         public static void Serialise( string _fullpath, DatabaseConnection _connection )

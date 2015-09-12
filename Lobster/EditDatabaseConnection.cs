@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Windows.Forms;
 
 namespace Lobster
@@ -22,7 +23,22 @@ namespace Lobster
 
             this.workingConnection = new DatabaseConnection( this.originalConnection );
             this.InitializeComponent();
-            this.databaseConnectionPropertyGrid.SelectedObject = this.workingConnection.clobTypeList;
+            this.databaseConnectionPropertyGrid.SelectedObject = this.workingConnection;
+
+            this.PopulateClobTypeList();
+        }
+
+        private void PopulateClobTypeList()
+        {
+            this.clobTypeListView.Clear();
+
+            foreach ( ClobType clobType in this.workingConnection.clobTypeList )
+            {
+                ListViewItem item = new ListViewItem( clobType.name );
+                
+                this.clobTypeListView.Items.Add( item );
+
+            }
         }
 
         private bool ValidateChanges()

@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Drawing.Design;
 using System.Globalization;
+using System.Windows.Forms.Design;
 using System.Xml.Serialization;
 
 namespace Lobster
@@ -9,25 +12,49 @@ namespace Lobster
     [XmlType( TypeName = "clobtype" )]
     public class ClobType
     {
+        [DisplayName( "Name" )]
+        [Description( "The display name" )]
         [XmlElement( ElementName = "name" )]
-        public string name;
-        [XmlElement( ElementName = "directory" )]
-        public string directory;
+        public string name { get; set; }
 
+        [DisplayName( "Directory" )]
+        [Description( "The name of the directory in CodeSource to be used for this ClobType. Directory separators can be used." )]
+        [XmlElement( ElementName = "directory" )]
+        public string directory { get; set; }
+
+        [DisplayName( "Include Subdirectories" )]
+        [Description( "Whether or not all subdirectories under the specified folder should also be used." )]
         [XmlElement( ElementName = "includeSubDirectories")]
-        public bool includeSubDirectories;
+        public bool includeSubDirectories { get; set; }
 
         [XmlElement( ElementName = "enabled" )]
         public bool enabled = true;
 
         public List<Table> tables;
 
+        public ClobType()
+        {
+
+        }
+
+        public ClobType( ClobType _other )
+        {
+            this.name = _other.name;
+            this.directory = _other.directory;
+            this.includeSubDirectories = _other.includeSubDirectories;
+            this.enabled = _other.enabled;
+
+            this.tables = new List<Table>();
+            foreach ( Table table in _other.tables )
+            {
+                this.tables.Add( new Table( table ) );
+            }
+            this.tables.ForEach( x => x.LinkColumns() );
+        }
+
         public void Initialise()
         {
-            foreach ( ClobType.Table t in this.tables )
-            {
-                t.LinkColumns();
-            }
+            this.tables.ForEach( x => x.LinkColumns() );
         }
 
         [XmlType( TypeName = "table" )]
@@ -38,6 +65,28 @@ namespace Lobster
             public List<Column> columns;
 
             public Table parentTable;
+
+            public Table()
+            {
+
+            }
+
+            public Table( Table _other )
+            {
+                this.schema = _other.schema;
+                this.name = _other.name;
+
+                if ( _other.parentTable != null )
+                {
+                    this.parentTable = new Table( _other.parentTable );
+                }
+
+                this.columns = new List<Column>();
+                foreach ( Column column in _other.columns )
+                {
+                    this.columns.Add( new Column( column ) );
+                }
+            }
 
             public string FullName { get { return this.schema + "." + this.name; } }
 
@@ -240,6 +289,20 @@ namespace Lobster
 
             [XmlIgnore]
             public Table parent;
+
+            public Column()
+            {
+
+            }
+
+            public Column( Column _other )
+            {
+                this.name = _other.name;
+                this.sequence = _other.sequence;
+                this.purpose = _other.purpose;
+                this.dataType = _other.dataType;
+                this.mimeTypes = new List<string>( _other.mimeTypes );
+            }
 
             public string FullName { get { return parent.FullName + "." + this.name; } }
 
