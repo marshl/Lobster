@@ -18,7 +18,6 @@ namespace Lobster
         [STAThread]
         static void Main()
         {
-            GitHubUpdater.RunUpdateCheck( "marshl", "lobster" );
             MessageLog log;
             try
             {
@@ -29,6 +28,8 @@ namespace Lobster
                 DialogResult result = MessageBox.Show( "An unhandled " + _e.GetType().ToString() + " occurred when attempting to create the log file.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1 );
                 return;
             }
+
+            GitHubUpdater.RunUpdateCheck( "marshl", "lobster" );
 
             if ( !Directory.Exists( SETTINGS_DIR ) )
             {
