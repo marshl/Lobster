@@ -99,11 +99,17 @@
       <DependentUpon>DatatypePicker.cs</DependentUpon>
     </Compile>
     <Compile Include="DBClobFile.cs" />
-    <Compile Include="EditDatabaseConnection.cs">
+    <Compile Include="EditCompositeObjectForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="EditDatabaseConnection.Designer.cs">
-      <DependentUpon>EditDatabaseConnection.cs</DependentUpon>
+    <Compile Include="EditCompositeObjectForm.Designer.cs">
+      <DependentUpon>EditCompositeObjectForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EditClobType.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EditDatabaseConnection.cs">
+      <SubType>Form</SubType>
     </Compile>
     <Compile Include="GitHubUpdater.cs" />
     <Compile Include="Images.Designer.cs">
@@ -144,8 +150,8 @@
     <EmbeddedResource Include="DatatypePicker.resx">
       <DependentUpon>DatatypePicker.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="EditDatabaseConnection.resx">
-      <DependentUpon>EditDatabaseConnection.cs</DependentUpon>
+    <EmbeddedResource Include="EditCompositeObjectForm.resx">
+      <DependentUpon>EditCompositeObjectForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Images.resx">
       <Generator>ResXFileCodeGenerator</Generator>

@@ -4,97 +4,74 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing.Design;
 using System.Globalization;
+using System.IO;
 using System.Windows.Forms.Design;
 using System.Xml.Serialization;
 
 namespace Lobster
 {
     [XmlType( TypeName = "clobtype" )]
-    public class ClobType
+    public class ClobType : ICloneable
     {
         [DisplayName( "Name" )]
         [Description( "The display name" )]
-        [XmlElement( ElementName = "name" )]
         public string name { get; set; }
 
         [DisplayName( "Directory" )]
         [Description( "The name of the directory in CodeSource to be used for this ClobType. Directory separators can be used." )]
-        [XmlElement( ElementName = "directory" )]
         public string directory { get; set; }
 
         [DisplayName( "Include Subdirectories" )]
         [Description( "Whether or not all subdirectories under the specified folder should also be used." )]
-        [XmlElement( ElementName = "includeSubDirectories")]
         public bool includeSubDirectories { get; set; }
 
-        [XmlElement( ElementName = "enabled" )]
-        public bool enabled = true;
+        [XmlIgnore]
+        public string fileLocation;
 
-        public List<Table> tables;
-
-        public ClobType()
-        {
-
-        }
-
-        public ClobType( ClobType _other )
-        {
-            this.name = _other.name;
-            this.directory = _other.directory;
-            this.includeSubDirectories = _other.includeSubDirectories;
-            this.enabled = _other.enabled;
-
-            this.tables = new List<Table>();
-            foreach ( Table table in _other.tables )
-            {
-                this.tables.Add( new Table( table ) );
-            }
-            this.tables.ForEach( x => x.LinkColumns() );
-        }
+        [DisplayName( "Table List" )]
+        [Description( "The tables used by this ClobType" )]
+        public List<Table> tables { get; set; }
 
         public void Initialise()
         {
             this.tables.ForEach( x => x.LinkColumns() );
         }
 
+        [DisplayName( "Table" )]
         [XmlType( TypeName = "table" )]
-        public class Table
+        public class Table : ICloneable
         {
-            public string schema;
-            public string name;
-            public List<Column> columns;
+            [DisplayName( "Schema/Owner Name" )]
+            [Description( "The schema/owner of this table" )]
+            public string schema { get; set; }
 
-            public Table parentTable;
+            [DisplayName( "Name" )]
+            [Description( "The name of this table" )]
+            public string name { get; set; }
 
-            public Table()
-            {
+            [DisplayName( "Column List" )]
+            [Description( "The columns in this table" )]
+            public List<Column> columns { get; set; }
 
-            }
-
-            public Table( Table _other )
-            {
-                this.schema = _other.schema;
-                this.name = _other.name;
-
-                if ( _other.parentTable != null )
-                {
-                    this.parentTable = new Table( _other.parentTable );
-                }
-
-                this.columns = new List<Column>();
-                foreach ( Column column in _other.columns )
-                {
-                    this.columns.Add( new Column( column ) );
-                }
-            }
+            [DisplayName( "Parent Table" )]
+            [Description( "The parent table if this table is in a parent/child relationship." )]
+            public Table parentTable { get; set; }
 
             public string FullName { get { return this.schema + "." + this.name; } }
 
+            public override string ToString()
+            {
+                return this.FullName;
+            }
+
             public void LinkColumns()
             {
-                foreach ( Column c in this.columns )
+                if ( this.columns != null )
                 {
-                    c.parent = this;
+                    foreach ( Column c in this.columns )
+                    {
+                        c.parent = this;
+                    }
                 }
 
                 if ( this.parentTable != null )
@@ -271,41 +248,112 @@ namespace Lobster
                         + " FROM " + this.FullName;
                 }
             }
+
+            public object Clone()
+            {
+                Table copy = new Table();
+                copy.schema = this.schema;
+                copy.name = this.name;
+
+                if ( this.parentTable != null )
+                {
+                    copy.parentTable = (Table)this.parentTable.Clone();
+                }
+
+                if ( this.columns != null )
+                {
+                    copy.columns = new List<Column>();
+                    foreach ( Column column in this.columns )
+                    {
+                        copy.columns.Add( (Column)column.Clone() );
+                    }
+                }
+                return copy;
+            }
+        }
+
+        public static void Serialise( string _fullpath, ClobType _clobType )
+        {
+            XmlSerializer xmls = new XmlSerializer( typeof( ClobType ) );
+            using ( StreamWriter streamWriter = new StreamWriter( _fullpath ) )
+            {
+                xmls.Serialize( streamWriter, _clobType );
+            }
+        }
+
+        public object Clone()
+        {
+            ClobType copy = new ClobType();
+            copy.name = this.name;
+            copy.directory = this.directory;
+            copy.includeSubDirectories = this.includeSubDirectories;
+
+            copy.tables = new List<Table>();
+            if ( this.tables != null )
+            {
+                foreach ( Table table in this.tables )
+                {
+                    copy.tables.Add( (Table)table.Clone() );
+                }
+            }
+            copy.tables.ForEach( x => x.LinkColumns() );
+            copy.fileLocation = this.fileLocation;
+
+            return copy;
         }
 
         [XmlType( TypeName ="column")]
-        public class Column
+        public class Column : ICloneable
         {
-            [XmlElement( ElementName = "name" )]
-            public string name;
-            [XmlElement( ElementName = "sequence" )]
-            public string sequence;
-            [XmlElement( ElementName = "purpose" )]
-            public Purpose purpose;
-            [XmlElement( ElementName = "dataType" )]
-            public Datatype? dataType = null;
-            
-            public List<string> mimeTypes;
+            [DisplayName( "Name" )]
+            [Description( "The name of this column" )]
+            //[XmlElement( ElementName = "name" )]
+            public string name { get; set; }
+
+            [DisplayName( "Sequence" )]
+            [Description( "The name of the sequence for this column, if it exists." )]
+            //[XmlElement( ElementName = "sequence" )]
+            public string sequence { get; set; }
+
+            [DisplayName( "Purpose" )]
+            [Description( "How Lobster will use this column." )]
+            //[XmlElement( ElementName = "purpose" )]
+            public Purpose purpose { get; set; }
+
+            [DisplayName( "Data Type" )]
+            [Description( "The data type of this column if it has the Clob_Data purpose." )]
+            //[XmlElement( ElementName = "dataType" )]
+            public Datatype? dataType { get; set; }
+
+            [DisplayName( "Mime Types" )]
+            [Description( "The mime types that will be put into this column if it is a Clob_Data column" )]
+            [Editor( @"System.Windows.Forms.Design.StringCollectionEditor," +
+                "System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
+               typeof( System.Drawing.Design.UITypeEditor ) )]
+            public List<string> mimeTypes { get; set; }
 
             [XmlIgnore]
             public Table parent;
 
-            public Column()
+            public override string ToString()
             {
-
+                return this.FullName;
             }
 
-            public Column( Column _other )
+            public object Clone()
             {
-                this.name = _other.name;
-                this.sequence = _other.sequence;
-                this.purpose = _other.purpose;
-                this.dataType = _other.dataType;
-                this.mimeTypes = new List<string>( _other.mimeTypes );
+                Column copy = new Column();
+                copy.name = this.name;
+                copy.sequence = this.sequence;
+                copy.purpose = this.purpose;
+                copy.dataType = this.dataType;
+                copy.mimeTypes = new List<string>( this.mimeTypes );
+                return copy;
             }
 
             public string FullName { get { return parent.FullName + "." + this.name; } }
 
+            [Browsable( false )]
             public string NextID
             {
                 get
@@ -328,7 +376,7 @@ namespace Lobster
 
             public bool ShouldSerializemimeTypes()
             {
-                return this.mimeTypes != null;
+                return this.mimeTypes != null && this.mimeTypes.Count > 0;
             }
 
             public enum Datatype

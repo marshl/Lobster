@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing.Design;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
 using System.Xml;
@@ -14,7 +12,7 @@ using System.Xml.Serialization;
 namespace Lobster
 {
     [XmlType("DatabaseConfig")]
-    public class DatabaseConnection
+    public class DatabaseConnection : ICloneable
     {
         [DisplayName( "Name" )]
         [Description( "The name of the connection. This is for display purposes only." )]
@@ -65,35 +63,10 @@ namespace Lobster
         public string fileLocation;
 
         [XmlIgnore]
-        public List<ClobType> clobTypeList { get; set; }
+        public List<ClobType> clobTypeList;
 
         [XmlIgnore]
         public Dictionary<ClobType, ClobDirectory> clobTypeToDirectoryMap;
-
-        public DatabaseConnection()
-        {
-
-        }
-
-        public DatabaseConnection( DatabaseConnection _other )
-        {
-            this.name = _other.name;
-            this.host = _other.host;
-            this.sid = _other.sid;
-            this.port = _other.port;
-            this.username = _other.username;
-            this.password = _other.password;
-            this.codeSource = _other.codeSource;
-            this.usePooling = _other.usePooling;
-            this.clobTypeDir = _other.clobTypeDir;
-            this.fileLocation = _other.fileLocation;
-
-            this.clobTypeList = new List<ClobType>();
-            foreach ( ClobType clobType in _other.clobTypeList )
-            {
-                this.clobTypeList.Add( new ClobType( clobType ) );
-            }
-        }
 
         public static void Serialise( string _fullpath, DatabaseConnection _connection )
         {
@@ -122,21 +95,15 @@ namespace Lobster
                     MessageLog.LogInfo( "Loading ClobType file " + file.FullName );
                     ClobType clobType = Common.DeserialiseXmlFileUsingSchema<ClobType>( file.FullName, "LobsterSettings/ClobType.xsd" );
                     
-                    if ( !clobType.enabled )
-                    {
-                        MessageLog.LogWarning( "The ClobType file " + file.FullName + " was not loaded as it was marked as disabled." );
-                        continue;
-                    }
-
                     clobType.Initialise();
-
+                    clobType.fileLocation = file.FullName;
                     this.clobTypeList.Add( clobType );
                 }
                 catch ( Exception _e )
                 {
                     if ( _e is InvalidOperationException || _e is XmlException || _e is XmlSchemaValidationException || _e is IOException )
                     {
-                        MessageBox.Show( "The ClobType " + file.Name + " failed to load. Check the log for more information.", "ClobType Load Failed",
+                        MessageBox.Show( "The ClobType " + file.FullName + " failed to load. Check the log for more information.", "ClobType Load Failed",
                             MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1 );
                         MessageLog.LogError( "An error occurred when loading the ClobType " + file.Name + " " + _e );
                         continue;
@@ -201,6 +168,33 @@ namespace Lobster
             {
                 pair.Value.GetWorkingFiles( ref _workingFiles );
             }
+        }
+
+        public object Clone()
+        {
+            DatabaseConnection other = new DatabaseConnection();
+            other.name = this.name;
+            other.host = this.host;
+            other.sid = this.sid;
+            other.port = this.port;
+            other.username = this.username;
+            other.password = this.password;
+            other.codeSource = this.codeSource;
+            other.usePooling = this.usePooling;
+            other.clobTypeDir = this.clobTypeDir;
+            other.fileLocation = this.fileLocation;
+
+            other.clobTypeList = new List<ClobType>();
+            if ( this.clobTypeList == null )
+            {
+                this.clobTypeList = new List<ClobType>();
+            }
+
+            foreach ( ClobType clobType in this.clobTypeList )
+            {
+                other.clobTypeList.Add( (ClobType)clobType.Clone() );
+            }
+            return other;
         }
     }
 }

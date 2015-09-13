@@ -75,15 +75,14 @@ namespace Lobster
                 ClobDirectory clobDir = pair.Value;
                 TreeNode dirNode = new TreeNode( clobDir.rootClobNode.dirInfo.Name, 0, 0 );
                 dirNode.Tag = clobDir.rootClobNode;
-                bool recurse = clobDir.clobType.includeSubDirectories;
-                this.PopulateTreeNode_r( clobDir.rootClobNode, dirNode, recurse );
+                this.PopulateTreeNode_r( clobDir.rootClobNode, dirNode );
                 rootNode.Nodes.Add( dirNode );
             }
             this.fileTreeView.Nodes.Add( rootNode );
             rootNode.Expand();
         }
 
-        private void PopulateTreeNode_r( ClobNode _clobNode, TreeNode _treeNode, bool _recurse )
+        private void PopulateTreeNode_r( ClobNode _clobNode, TreeNode _treeNode )
         {
             foreach ( ClobNode child in _clobNode.childNodes )
             {
@@ -91,11 +90,8 @@ namespace Lobster
                 aNode.Tag = child;
                 aNode.ImageKey = "folder";
 
-                if ( _recurse )
-                {
-                    PopulateTreeNode_r( child, aNode, true );
-                }
-                    _treeNode.Nodes.Add( aNode );
+                PopulateTreeNode_r( child, aNode );
+                _treeNode.Nodes.Add( aNode );
             }
         }
         
@@ -664,9 +660,9 @@ namespace Lobster
             int configIndex = (int)this.connectionListView.SelectedItems[0].Tag;
             DatabaseConnection connectionRef = this.lobsterModel.dbConnectionList[configIndex];
 
-            EditDatabaseConnection editForm = new EditDatabaseConnection( ref connectionRef, false );
+            EditDatabaseConnection editForm = new EditDatabaseConnection( connectionRef, false );
             DialogResult result = editForm.ShowDialog();
-            this.lobsterModel.dbConnectionList[configIndex] = editForm.originalConnection;
+            this.lobsterModel.dbConnectionList[configIndex] = editForm.originalObject;
             this.PopulateConnectionList( this.lobsterModel.dbConnectionList );
         }
 
@@ -674,11 +670,11 @@ namespace Lobster
         {
             DatabaseConnection newConnection = new DatabaseConnection();
             newConnection.fileLocation = Path.Combine( Program.DB_CONFIG_DIR, "NewConnection.xml" ) ;
-            EditDatabaseConnection editForm = new EditDatabaseConnection( ref newConnection, true );
+            EditDatabaseConnection editForm = new EditDatabaseConnection( newConnection, true );
             DialogResult result = editForm.ShowDialog();
             if ( result == DialogResult.OK )
             {
-                this.lobsterModel.dbConnectionList.Add( editForm.originalConnection );
+                this.lobsterModel.dbConnectionList.Add( editForm.originalObject );
                 this.PopulateConnectionList( this.lobsterModel.dbConnectionList );
             }
         }
@@ -705,6 +701,11 @@ namespace Lobster
                 this.lobsterModel.dbConnectionList.RemoveAt( configIndex );
                 this.PopulateConnectionList( this.lobsterModel.dbConnectionList );
             }
+        }
+
+        private void openFileDialog1_FileOk( object sender, System.ComponentModel.CancelEventArgs e )
+        {
+
         }
     }
 }

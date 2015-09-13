@@ -4,59 +4,52 @@ using System.Windows.Forms;
 
 namespace Lobster
 {
-    public partial class EditDatabaseConnection : Form
+    public class EditDatabaseConnection : EditCompositeObjectForm<DatabaseConnection>
     {
-        public DatabaseConnection originalConnection;
-        public DatabaseConnection workingConnection;
-
-        private bool isNewConnection;
-
-        public EditDatabaseConnection()
+        public EditDatabaseConnection( DatabaseConnection _original, bool _newConnection ) : base( _original, _newConnection )
         {
-            InitializeComponent();
+
         }
 
-        public EditDatabaseConnection( ref DatabaseConnection _orignalConfig, bool _newConnection )
+        protected override void InitializeComponent()
         {
-            this.originalConnection = _orignalConfig;
-            this.isNewConnection = _newConnection;
+            base.InitializeComponent();
+            this.editObjectTabPage.Text = "Database Connection";
+            this.subItemTabPage.Text = "Clob Types";
 
-            this.workingConnection = new DatabaseConnection( this.originalConnection );
-            this.InitializeComponent();
-            this.databaseConnectionPropertyGrid.SelectedObject = this.workingConnection;
-
-            this.PopulateClobTypeList();
+            this.applyButton.Enabled = !this.isNewObject;
         }
 
-        private void PopulateClobTypeList()
+        protected override void PopulateSubItemList()
         {
-            this.clobTypeListView.Clear();
+            this.subItemListView.Clear();
 
-            foreach ( ClobType clobType in this.workingConnection.clobTypeList )
+            for ( int i = 0; i < this.workingObject.clobTypeList.Count; ++i )
             {
+                ClobType clobType = this.workingObject.clobTypeList[i];
                 ListViewItem item = new ListViewItem( clobType.name );
-                
-                this.clobTypeListView.Items.Add( item );
 
+                this.subItemListView.Items.Add( item );
+                item.Tag = i;
             }
         }
 
-        private bool ValidateChanges()
+        protected override bool ValidateChanges()
         {
-            if ( this.workingConnection.codeSource == null
-                || this.workingConnection.clobTypeDir == null
-                || this.workingConnection.host == null
-                || this.workingConnection.name == null
-                || this.workingConnection.password == null
-                || this.workingConnection.port == null
-                || this.workingConnection.sid == null 
-                || this.workingConnection.username == null )
+            if ( this.workingObject.codeSource == null
+                || this.workingObject.clobTypeDir == null
+                || this.workingObject.host == null
+                || this.workingObject.name == null
+                || this.workingObject.password == null
+                || this.workingObject.port == null
+                || this.workingObject.sid == null
+                || this.workingObject.username == null )
             {
                 MessageBox.Show( "All fields must be completed before saving.", "Validation Errors" );
                 return false;
             }
 
-            if ( this.isNewConnection )
+            if ( this.isNewObject )
             {
                 SaveFileDialog sfd = new SaveFileDialog();
                 sfd.InitialDirectory = Path.Combine( Directory.GetCurrentDirectory(), Program.DB_CONFIG_DIR );
@@ -68,58 +61,71 @@ namespace Lobster
                 {
                     return false;
                 }
-                this.workingConnection.fileLocation = sfd.FileName;
+                this.workingObject.fileLocation = sfd.FileName;
             }
             return true;
         }
 
-        private void ApplyChanges()
+        protected override bool ApplyChanges()
         {
-            this.originalConnection = this.workingConnection;
-            this.workingConnection = new DatabaseConnection( this.originalConnection );
-            DatabaseConnection.Serialise( this.originalConnection.fileLocation, this.originalConnection );
-            this.isNewConnection = false;
+            try
+            {
+                DatabaseConnection.Serialise( this.originalObject.fileLocation, this.originalObject );
+            }
+            catch ( UnauthorizedAccessException )
+            {
+                MessageBox.Show( "Cannot save DatabaseConnection. " + this.originalObject.fileLocation + " is locked." );
+                return false;
+            }
+
+            this.originalObject = this.workingObject;
+            this.workingObject = (DatabaseConnection)this.originalObject.Clone();
+            
+            this.isNewObject = false;
+            return true;
         }
 
-        private void okButton_Click( object sender, System.EventArgs e )
+        protected override void addSubItemButton_click( object sender, EventArgs e )
         {
-            if ( !this.ValidateChanges() )
+            ClobType clobType = new ClobType();
+            clobType.fileLocation = this.workingObject.clobTypeDir;
+            EditClobType editForm = new EditClobType( clobType, true );
+            DialogResult result = editForm.ShowDialog();
+           
+            if ( result == DialogResult.OK )
             {
+                this.workingObject.clobTypeList.Add( editForm.originalObject );
+                this.PopulateSubItemList();
+            }
+        }
+
+        protected override void removeSubItemButton_Click( object sender, EventArgs e )
+        {
+            if ( this.subItemListView.SelectedItems.Count == 0 )
+            {
+                MessageBox.Show( "Select a Database Connection first." );
                 return;
             }
-            this.ApplyChanges();
-            this.DialogResult = DialogResult.OK;
-            this.Close();
+            int clobTypeIndex = (int)this.subItemListView.SelectedItems[0].Tag;
+            ClobType clobType = this.workingObject.clobTypeList[clobTypeIndex];
+            this.workingObject.clobTypeList.Remove( clobType );
+            this.PopulateSubItemList();
         }
 
-        private void applyButton_Click( object sender, System.EventArgs e )
+        protected override void editSubItemButton_Click( object sender, EventArgs e )
         {
-            if ( !this.ValidateChanges() )
+            if ( this.subItemListView.SelectedItems.Count == 0 )
             {
+                MessageBox.Show( "Select a Database Connection first." );
                 return;
             }
-            this.ApplyChanges();
-        }
+            int clobTypeIndex = (int)this.subItemListView.SelectedItems[0].Tag;
+            ClobType clobType = this.workingObject.clobTypeList[clobTypeIndex];
 
-        private void cancelButton_Click( object sender, System.EventArgs e )
-        {
-            this.DialogResult = DialogResult.Cancel;
-            this.Close();
-        }
-
-        private void addClobTypeButton_Click( object sender, System.EventArgs e )
-        {
-
-        }
-
-        private void removeClobTypeButton_Click( object sender, System.EventArgs e )
-        {
-
-        }
-
-        private void editClobTypeButton_Click( object sender, System.EventArgs e )
-        {
-
+            EditClobType editForm = new EditClobType( clobType, false );
+            DialogResult ctResult = editForm.ShowDialog();
+            this.workingObject.clobTypeList[clobTypeIndex] = editForm.originalObject;
+            this.PopulateSubItemList();
         }
     }
 }

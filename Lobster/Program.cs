@@ -55,7 +55,7 @@ namespace Lobster
 #if !DEBUG
             catch ( Exception _e )
             {
-                MessageLog.LogError( "UNHANDLED EXCEPTION: {0}", _e.ToString() );
+                MessageLog.LogError( "UNHANDLED EXCEPTION: " + _e.ToString() );
                 DialogResult result = MessageBox.Show( "An unhandled " + _e.GetType().ToString() + " was thrown. Check " + LOG_FILE + " for more information, and please create an error issue at https://github.com/marshl/lobster.",
                     "Error", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1 );
             }
