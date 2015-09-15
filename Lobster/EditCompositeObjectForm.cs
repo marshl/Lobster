@@ -1,10 +1,16 @@
 ﻿using System;
-using System.IO;
-using System.Runtime.Serialization;
 using System.Windows.Forms;
 
 namespace Lobster
 {
+    /// <summary>
+    /// 
+    /// 'There is a change in him, but just what
+    /// kind of a change and how deep, I'm not sure yet.' 
+    ///     -- Frodo
+    /// 
+    /// [ _The Lord of the Rings_, IV/ii: "The Passage of the Marshes"]
+    /// </summary>
     public abstract partial class EditCompositeObjectForm<T> : Form where T : ICloneable
     {
         public T originalObject;

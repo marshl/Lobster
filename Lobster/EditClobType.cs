@@ -4,6 +4,15 @@ using System.Windows.Forms;
 
 namespace Lobster
 {
+
+    /// <summary>
+    /// 
+    /// 'Now things begin to look more hopeful. This news alters them much for-the
+    ///  better.So far we have had no clear idea what to do.'
+    ///     -- Thorin
+    /// 
+    /// [ _The Hobbits_, i: "An Unexpected Party"]
+    /// </summary>
     public class EditClobType : EditCompositeObjectForm<ClobType>
     {
         public EditClobType( ClobType _original, bool _newClobType ) : base( _original, _newClobType )

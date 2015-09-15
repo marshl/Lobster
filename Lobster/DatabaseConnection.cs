@@ -11,6 +11,13 @@ using System.Xml.Serialization;
 
 namespace Lobster
 {
+    /// <summary>
+    /// 'What did the Men of old use them for?' asked Pippin, ...
+    /// 'To see far off, and to converse in thought with one another,' said Gandalf
+    /// 
+    /// [ _The Lord of the Rings_, III/xi: "The Palantir"]
+    /// 
+    /// </summary>
     [XmlType("DatabaseConfig")]
     public class DatabaseConnection : ICloneable
     {

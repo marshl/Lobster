@@ -1,9 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 
 namespace Lobster
 {
+    /// <summary>
+    /// All about them as they lay hung the darkness, hollow and immense,
+    /// and they were oppressed by the loneliness and vastness of the dolven halls and
+    /// endlessly branching stairs and passages.
+    /// 
+    /// [ _The Lord of the Rings_, II/iv: "A Journey in the Dark"]
+    /// </summary>
     public class ClobNode
     {
         public ClobNode( DirectoryInfo _dirInfo, ClobDirectory _baseDirectory )

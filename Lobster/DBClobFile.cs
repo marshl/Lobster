@@ -2,6 +2,12 @@
 
 namespace Lobster
 {
+    /// <summary>
+    /// But most of the folk of the old Shire regarded the Bucklanders as peculiar,
+    /// half foreigners as it were.
+    /// 
+    /// [ _The Lord of the Rings_, I/v: "A Conspiracy Unmasked"]
+    /// </summary>
     public class DBClobFile
     {
         public string mnemonic;

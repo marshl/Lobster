@@ -4,6 +4,13 @@ using System.Windows.Forms;
 
 namespace Lobster
 {
+    /// <summary>
+    /// '"It's a dangerous business, Frodo, going out of your door," he used to say. 
+    /// "You step into the Road, and if you don't keep your feet, there is no knowing 
+    ///  where you might be swept off to."'
+    ///     -- Frodo
+    /// [ _The Lord of the Rings_, I/iii: "Three is Company"]
+    /// </summary>
     static class Program
     {
         public static string SETTINGS_DIR = "LobsterSettings";
@@ -12,9 +19,6 @@ namespace Lobster
 
         public static int BALLOON_TOOLTIP_DURATION_MS = 2000;
 
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
         [STAThread]
         static void Main()
         {

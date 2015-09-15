@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Xml;
-using System.Xml.Serialization;
 using Oracle.ManagedDataAccess.Client;
 using Oracle.ManagedDataAccess.Types;
 using System.Diagnostics;
@@ -13,6 +12,14 @@ using System.Xml.Schema;
 
 namespace Lobster
 {
+    /// <summary>
+    /// 'Long ago they fell under the dominion of the One, and they became Ringwraiths,
+    ///  shadows under his great Shadow, his most terrible servants.'
+    ///     -- Gandalf
+    /// 
+    /// [ _The Lord of the Rings_, I/ii: "The Shadow of the Past"]
+    /// 
+    /// </summary>
     public class LobsterModel
     {
         public List<DatabaseConnection> dbConnectionList;

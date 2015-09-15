@@ -5,6 +5,15 @@ using System.Windows.Forms;
 
 namespace Lobster
 {
+    /// <summary>
+    /// 'Mercy!' cried Gandalf. 'If the giving of information is to be the cure
+    ///     of your inquisitiveness, I shall spend all the rest of my days in answering you.
+    ///     What more do you want to know?'
+    /// 'The names of all the stars, and of all living things, and the whole
+    ///     history of Middle-earth and Over-heaven and of the Sundering Seas ' laughed Pippin
+    /// 
+    /// [ _The Lord of the Rings_, III/xi: "The Palantir"] 
+    /// </summary>
     public class MessageLog : IDisposable
     {
         public class Message

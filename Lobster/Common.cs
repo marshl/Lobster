@@ -3,16 +3,19 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Schema;
 
 namespace Lobster
 {
+    /// <summary>
+    /// 'Very useful, no doubt, that was to Saruman; yet it seems that he was not content.'
+    ///     -- Gandalf
+    /// [ _The Lord of the Rings_, III/xi: "The Palantir"]
+    /// </summary>
     class Common
     {
         /// <summary>
-        /// 
         /// http://stackoverflow.com/questions/50744/wait-until-file-is-unlocked-in-net?lq=1
         /// </summary>
         /// <param name="fullPath"></param>

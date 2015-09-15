@@ -2,14 +2,17 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Drawing.Design;
 using System.Globalization;
 using System.IO;
-using System.Windows.Forms.Design;
 using System.Xml.Serialization;
 
 namespace Lobster
 {
+    /// <summary>
+    /// They were on ponies, and each pony was slung about with all kinds of baggages, packages,
+    /// parcels, and paraphernalia.
+    /// [ _The Hobbit_, II "Roast Mutton" ] 
+    /// </summary>
     [XmlType( TypeName = "clobtype" )]
     public class ClobType : ICloneable
     {

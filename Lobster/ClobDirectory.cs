@@ -4,6 +4,12 @@ using System.Windows.Forms;
 
 namespace Lobster
 {
+    /// <summary>
+    /// A box without hinges, key, or lid,
+    /// Yet golden treasure inside is hid,
+    /// 
+    /// [ _The Hobbit_, V: "Riddles in the Dark"]
+    /// </summary>
     public class ClobDirectory
     {
         public ClobType clobType;

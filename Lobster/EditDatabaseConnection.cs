@@ -4,6 +4,13 @@ using System.Windows.Forms;
 
 namespace Lobster
 {
+
+    /// <summary>
+    /// 
+    /// 'So!' said the Messenger. 'Then thou art the spokesman, old greybeard?'
+    /// [ _The Lord of the Rings_, V/x: "The Black Gate Opens"]
+    /// 
+    /// </summary>
     public class EditDatabaseConnection : EditCompositeObjectForm<DatabaseConnection>
     {
         public EditDatabaseConnection( DatabaseConnection _original, bool _newConnection ) : base( _original, _newConnection )

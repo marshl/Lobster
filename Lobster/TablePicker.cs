@@ -1,15 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 
 namespace Lobster
 {
+    /// <summary>
+    /// 'Èxactly! And who are they to be? That seems to me what this Council
+    /// has to decide, and all that it has to decide.'
+    ///     - Bilbo Baggins
+    /// 
+    /// [ _The Lord of the Rings_, II/ii: "The Council of Elrond"]
+    /// </summary>
     public partial class TablePicker : Form
     {
         public TablePicker( ClobType _clobType )

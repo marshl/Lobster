@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Lobster
 {
+    /// <summary>
+    /// "Who are you and what do you want?" he asked gruffly, standing in front of them and towering
+    /// tall above Gandalf.
+    /// </summary>
     public partial class DatatypePicker : Form
     {
         public DatatypePicker( ClobType.Column _column )

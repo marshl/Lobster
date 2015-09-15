@@ -1,8 +1,11 @@
-﻿using System.IO;
-using System.Threading;
-
-namespace Lobster
+﻿namespace Lobster
 {
+    /// <summary>
+    /// 'Men multiply and the Firstborn decrease, and the two kindreds are estranged.'
+    ///     -- Elrond
+    /// 
+    /// [ _The Lord of the Rings_, II/ii: "The Council of Elrond"]
+    /// </summary>
     public class ClobFile
     {
         public ClobFile( ClobDirectory _parentClobDirectory )

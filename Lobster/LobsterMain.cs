@@ -8,6 +8,16 @@ using System.Windows.Forms;
 
 namespace Lobster
 {
+    /// <summary>
+    /// 
+    /// One Ring to rule them all,
+    /// One Ring to find them,
+    /// One Ring to bring them all
+    /// and in the Darkness bind them.
+    ///     -- Enscription on the Ring of Power
+    /// 
+    /// [ _The Lord of the Rings_, I/ii: "The Shadow of the Past"]
+    /// </summary>
     public partial class LobsterMain : Form
     {
         private LobsterModel lobsterModel;

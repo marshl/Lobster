@@ -8,6 +8,12 @@ using System.Windows.Forms;
 
 namespace Lobster
 {
+    /// <summary>
+    /// Rumours of strange events had by now spread all over the field, but Frodo would
+    /// only say no doubt everything will be cleared up in the morning.
+    /// 
+    /// [ _The Lord of the Rings_, I/i: "A Long-expected Party"]
+    /// </summary>
     class GitHubUpdater
     {
         public static bool RunUpdateCheck( string _user, string _repo )
