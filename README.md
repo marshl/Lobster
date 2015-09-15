@@ -1,3 +1,8 @@
+> *"Sh! sh!" they hissed, when they heard his voice ...*
+> *But in the end, when Bilbo actually began to stamp in the floor,* 
+> *and screamed out light!' at the top of his thrill voice, Thorin gave*
+> *way*
+> [ _The Hobbit_, XIII: "Not At Home"]
 
 Lobster - The FOX File Pusher
 =============
