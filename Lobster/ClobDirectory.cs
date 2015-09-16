@@ -2,7 +2,7 @@
 {
     using System.Collections.Generic;
     using System.IO;
-    using System.Windows.Forms;
+
     /// <summary>
     /// A box without hinges, key, or lid,
     /// Yet golden treasure inside is hid,
@@ -15,16 +15,14 @@
         /// </summary>
         public ClobType ClobType { get; private set; }
 
-        public DatabaseConnection ParentConnection { get; private set; }
         public List<ClobFile> FileList { get; private set; }
         public List<DBClobFile> DatabaseFileList { get; set; }
         public List<ClobFile> DatabaseOnlyFiles { get; private set; }
         public ClobNode RootClobNode { get; set; }
 
-        public ClobDirectory(ClobType clobType, DatabaseConnection dbConnection)
+        public ClobDirectory(ClobType clobType)
         {
             this.ClobType = clobType;
-            this.ParentConnection = dbConnection;
         }
 
         /// <summary>
@@ -32,9 +30,9 @@
         /// </summary>
         /// <param name="codeSourceDirectory"></param>
         /// <returns></returns>
-        public bool Populate(string codeSourceDirectory)
+        public bool BuildDirectoryTree()
         {
-            DirectoryInfo info = new DirectoryInfo(Path.Combine(codeSourceDirectory, this.ClobType.directory));
+            DirectoryInfo info = new DirectoryInfo(Path.Combine(this.ClobType.ParentConnection.codeSource, this.ClobType.directory));
             if (!info.Exists)
             {
                 MessageLog.LogWarning(info.FullName + " could not be found.");

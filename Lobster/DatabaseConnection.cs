@@ -147,7 +147,7 @@ namespace Lobster
                     MessageLog.LogInfo( "Loading ClobType file " + file.FullName );
                     ClobType clobType = Common.DeserialiseXmlFileUsingSchema<ClobType>( file.FullName, "LobsterSettings/ClobType.xsd" );
                     
-                    clobType.Initialise();
+                    clobType.Initialise(this);
                     clobType.fileLocation = file.FullName;
                     this.clobTypeList.Add( clobType );
                 }
@@ -174,8 +174,8 @@ namespace Lobster
             this.clobTypeToDirectoryMap = new Dictionary<ClobType, ClobDirectory>();
             foreach (ClobType clobType in this.clobTypeList)
             {
-                ClobDirectory clobDir = new ClobDirectory(clobType, this);
-                bool success = clobDir.Populate( this.codeSource );
+                ClobDirectory clobDir = new ClobDirectory(clobType);
+                bool success = clobDir.BuildDirectoryTree();
                 if ( success )
                 {
                     this.clobTypeToDirectoryMap.Add( clobType, clobDir );

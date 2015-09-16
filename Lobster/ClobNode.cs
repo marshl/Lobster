@@ -89,7 +89,7 @@ namespace Lobster
             { 
                 if ( clobFile.IsSynced && clobFile.IsEditable )
                 {
-                    this.baseDirectory.ParentConnection.ParentModel.SendUpdateClobMessage( clobFile );
+                    this.baseDirectory.ClobType.ParentConnection.ParentModel.SendUpdateClobMessage( clobFile );
                 }
             }
             this.SetFileWatchersEnabled( true );

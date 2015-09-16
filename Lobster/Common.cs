@@ -16,13 +16,13 @@ namespace Lobster
     class Common
     {
         /// <summary>
-        /// http://stackoverflow.com/questions/50744/wait-until-file-is-unlocked-in-net?lq=1
+        /// Found here http://stackoverflow.com/questions/50744/wait-until-file-is-unlocked-in-net?lq=1
         /// </summary>
-        /// <param name="fullPath"></param>
-        /// <param name="mode"></param>
-        /// <param name="access"></param>
-        /// <param name="share"></param>
-        /// <returns></returns>
+        /// <param name="fullPath">The location of the file.</param>
+        /// <param name="mode">The FileMode the file should be opened with.</param>
+        /// <param name="access">The File Access rules the file should be opened with.</param>
+        /// <param name="share"> The FileShare rules the file should be opened with.</param>
+        /// <returns>A FileStream of the given file, if it could be opened.</returns>
         public static FileStream WaitForFile( string fullPath, FileMode mode, FileAccess access, FileShare share )
         {
             for ( int numTries = 0; numTries < 10; numTries++ )
@@ -45,7 +45,12 @@ namespace Lobster
             return null;
         }
 
-        //http://stackoverflow.com/questions/1600962/displaying-the-build-date
+
+
+        /// <summary>
+        /// From http://stackoverflow.com/questions/1600962/displaying-the-build-date
+        /// </summary>
+        /// <returns>The DateTime taht the assembly was linked</returns>
         public static DateTime RetrieveLinkerTimestamp()
         {
             string filePath = System.Reflection.Assembly.GetCallingAssembly().Location;
@@ -106,12 +111,12 @@ namespace Lobster
             error = false;
             T obj = new T();
             System.Xml.Serialization.XmlSerializer xmls = new System.Xml.Serialization.XmlSerializer( typeof( T ) );
-            StreamReader streamReader = new StreamReader( _xmlPath );
-            XmlReader xmlReader = XmlReader.Create( streamReader, readerSettings );
-
-            obj = (T)xmls.Deserialize( xmlReader );
-            xmlReader.Close();
-            streamReader.Close();
+            using ( StreamReader streamReader = new StreamReader( _xmlPath ) )
+            {
+                XmlReader xmlReader = XmlReader.Create( streamReader, readerSettings );
+                obj = (T)xmls.Deserialize( xmlReader );
+                xmlReader.Close();
+            }
 
             if ( error )
             {

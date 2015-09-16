@@ -31,13 +31,17 @@ namespace Lobster
         [XmlIgnore]
         public string fileLocation;
 
+        [XmlIgnore]
+        public DatabaseConnection ParentConnection { get; private set; }
+
         [DisplayName( "Table List" )]
         [Description( "The tables used by this ClobType" )]
         public List<Table> tables { get; set; }
 
-        public void Initialise()
+        public void Initialise( DatabaseConnection databaseConnection)
         {
             this.tables.ForEach( x => x.LinkColumns() );
+            this.ParentConnection = databaseConnection;
         }
 
         [DisplayName( "Table" )]
@@ -305,29 +309,28 @@ namespace Lobster
             return copy;
         }
 
-        [XmlType( TypeName ="column")]
+        [XmlType( TypeName = "column")]
         public class Column : ICloneable
         {
             [DisplayName( "Name" )]
             [Description( "The name of this column" )]
-            //[XmlElement( ElementName = "name" )]
             public string name { get; set; }
 
             [DisplayName( "Sequence" )]
             [Description( "The name of the sequence for this column, if it exists." )]
-            //[XmlElement( ElementName = "sequence" )]
             public string sequence { get; set; }
 
             [DisplayName( "Purpose" )]
             [Description( "How Lobster will use this column." )]
-            //[XmlElement( ElementName = "purpose" )]
             public Purpose purpose { get; set; }
 
             [DisplayName( "Data Type" )]
             [Description( "The data type of this column if it has the Clob_Data purpose." )]
-            //[XmlElement( ElementName = "dataType" )]
             public Datatype? dataType { get; set; }
 
+            /// <summary>
+            /// Found here http://stackoverflow.com/questions/6307006/how-can-i-use-a-winforms-propertygrid-to-edit-a-list-of-strings
+            /// </summary>
             [DisplayName( "Mime Types" )]
             [Description( "The mime types that will be put into this column if it is a Clob_Data column" )]
             [Editor( @"System.Windows.Forms.Design.StringCollectionEditor," +
