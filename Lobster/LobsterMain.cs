@@ -246,7 +246,7 @@ namespace Lobster
 
         private void InsertClobFile( ClobFile _clobFile )
         {
-            ClobType.Table table;
+            Table table;
             ClobDirectory clobDir = _clobFile.ParentClobNode.BaseClobDirectory;
             // If there is > 1 tables in this ClobType, ask the user for which one to use
             if (clobDir.ClobType.tables.Count > 1 )
@@ -257,7 +257,7 @@ namespace Lobster
                 {
                     return;
                 }
-                table = tablePicker.tableCombo.SelectedItem as ClobType.Table;
+                table = tablePicker.tableCombo.SelectedItem as Table;
             }
             else
             {
@@ -266,7 +266,7 @@ namespace Lobster
 
             // If the table has a MimeType column, ask the user for the type to use
             string mimeType = null;
-            ClobType.Column mimeTypeColumn = table.columns.Find( x => x.purpose == ClobType.Column.Purpose.MIME_TYPE );
+            Column mimeTypeColumn = table.columns.Find( x => x.purpose == Column.Purpose.MIME_TYPE );
             if ( mimeTypeColumn != null )
             {
                 DatatypePicker typePicker = new DatatypePicker( mimeTypeColumn );

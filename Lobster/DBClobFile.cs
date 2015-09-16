@@ -14,13 +14,13 @@ namespace Lobster
         public string mimeType;
         public string filename;
 
-        public ClobType.Table table;
+        public Table table;
 
-        public ClobType.Column GetColumn()
+        public Column GetColumn()
         {
             // Find the column that is used for storing the clob data that can store the mime type of this file
-            ClobType.Column col = this.table.columns.Find(
-                x => x.purpose == ClobType.Column.Purpose.CLOB_DATA
+            Column col = this.table.columns.Find(
+                x => x.purpose == Column.Purpose.CLOB_DATA
                     && ( this.mimeType == null || x.mimeTypes.Contains( this.mimeType ) ) );
 
             if ( col == null )

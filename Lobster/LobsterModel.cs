@@ -166,7 +166,7 @@ namespace Lobster
             LobsterMain.instance.OnFileUpdateComplete( _clobFile, result );
         }
 
-        public bool SendInsertClobMessage( ClobFile _clobFile, ClobType.Table _table, string _mimeType )
+        public bool SendInsertClobMessage( ClobFile _clobFile, Table _table, string _mimeType )
         {
             OracleConnection con = OpenConnection( this.currentConnection );
             if ( con == null )
@@ -184,7 +184,7 @@ namespace Lobster
 
             OracleTransaction trans = _con.BeginTransaction();
             OracleCommand command = _con.CreateCommand();
-            ClobType.Table table = _clobFile.DatabaseFile.table;
+            Table table = _clobFile.DatabaseFile.table;
 
             try
             {
@@ -252,17 +252,17 @@ namespace Lobster
             return result;
         }
 
-        private void AddFileDataParameter( OracleCommand _command, ClobFile _clobFile, ClobType.Table _table, string _mimeType )
+        private void AddFileDataParameter( OracleCommand _command, ClobFile _clobFile, Table _table, string _mimeType )
         {
             Debug.Assert( _clobFile.LocalFile != null );
             // Wait for the file to unlock
             using ( FileStream fs = Common.WaitForFile( _clobFile.LocalFile.FileInfo.FullName,
                 FileMode.Open, FileAccess.Read, FileShare.ReadWrite ) )
             {
-                ClobType.Column column = _table.columns.Find( x => x.purpose == ClobType.Column.Purpose.CLOB_DATA
+                Column column = _table.columns.Find( x => x.purpose == Column.Purpose.CLOB_DATA
                     && ( _mimeType == null || x.mimeTypes.Contains( _mimeType ) ) );
                 // Binary mode
-                if ( column.dataType == ClobType.Column.Datatype.BLOB )
+                if ( column.dataType == Column.Datatype.BLOB )
                 {
                     byte[] fileData = new byte[fs.Length];
                     fs.Read( fileData, 0, Convert.ToInt32( fs.Length ) );
@@ -274,13 +274,13 @@ namespace Lobster
                     StreamReader sr = new StreamReader( fs );
                     string contents = sr.ReadToEnd();
                     contents += this.GetClobFooterMessage( _mimeType );
-                    OracleDbType insertType = column.dataType == ClobType.Column.Datatype.CLOB ? OracleDbType.Clob : OracleDbType.XmlType;
+                    OracleDbType insertType = column.dataType == Column.Datatype.CLOB ? OracleDbType.Clob : OracleDbType.XmlType;
                     _command.Parameters.Add( "data", insertType, contents, ParameterDirection.Input );
                 }
             }
         }
 
-        private bool InsertDatabaseClob( ClobFile _clobFile, ClobType.Table _table, string _mimeType, OracleConnection _con )
+        private bool InsertDatabaseClob( ClobFile _clobFile, Table _table, string _mimeType, OracleConnection _con )
         {
             Debug.Assert( _clobFile.IsLocalOnly );
 
@@ -393,8 +393,8 @@ namespace Lobster
             Debug.Assert( _clobFile.DatabaseFile != null );
             OracleCommand command = _con.CreateCommand();
 
-            ClobType.Table table = _clobFile.DatabaseFile.table;
-            ClobType.Column column;
+            Table table = _clobFile.DatabaseFile.table;
+            Column column;
             try
             {
                 column = _clobFile.DatabaseFile.GetColumn();
@@ -418,7 +418,7 @@ namespace Lobster
                 
                 if ( reader.Read() )
                 {
-                    if ( column.dataType == ClobType.Column.Datatype.BLOB )
+                    if ( column.dataType == Column.Datatype.BLOB )
                     {
                         OracleBlob blob = reader.GetOracleBlob( 0 );
                         File.WriteAllBytes( tempName, blob.Value );
@@ -426,8 +426,8 @@ namespace Lobster
                     else
                     {
                         string result;
-                        ClobType.Column clobColumn =_clobFile.DatabaseFile.table.columns.Find( x => x.purpose == ClobType.Column.Purpose.CLOB_DATA );
-                        if ( clobColumn.dataType == ClobType.Column.Datatype.CLOB )
+                        Column clobColumn =_clobFile.DatabaseFile.table.columns.Find( x => x.purpose == Column.Purpose.CLOB_DATA );
+                        if ( clobColumn.dataType == Column.Datatype.CLOB )
                         {
                             OracleClob clob = reader.GetOracleClob( 0 );
                             result = clob.Value;
@@ -480,7 +480,7 @@ namespace Lobster
             
             ClobType ct = _clobDir.ClobType;
 
-            foreach ( ClobType.Table table in ct.tables )
+            foreach ( Table table in ct.tables )
             {
                 OracleCommand command = _con.CreateCommand();
                 command.CommandText = table.GetFileListCommand();
@@ -502,7 +502,7 @@ namespace Lobster
                 {
                     DBClobFile dbClobFile = new DBClobFile();
                     dbClobFile.mnemonic = reader.GetString( 0 );
-                    dbClobFile.mimeType = table.columns.Find( x => x.purpose == ClobType.Column.Purpose.MIME_TYPE ) != null ? reader.GetString( 1 ) : null;
+                    dbClobFile.mimeType = table.columns.Find( x => x.purpose == Column.Purpose.MIME_TYPE ) != null ? reader.GetString( 1 ) : null;
                     dbClobFile.filename = this.ConvertMnemonicToFilename( dbClobFile.mnemonic, table, dbClobFile.mimeType );
                     dbClobFile.table = table;
                     _clobDir.DatabaseFileList.Add( dbClobFile );
@@ -522,11 +522,11 @@ namespace Lobster
                 + (_mimeType == "text/javascript" ? "*/" : "-->");
         }
 
-        public string ConvertFilenameToMnemonic( ClobFile _clobFile, ClobType.Table _table, string _mimeType )
+        public string ConvertFilenameToMnemonic( ClobFile _clobFile, Table _table, string _mimeType )
         {
             Debug.Assert( _clobFile.LocalFile != null );
             string mnemonic = Path.GetFileNameWithoutExtension( _clobFile.LocalFile.FileInfo.Name );
-            if ( _table.columns.Find( x => x.purpose == ClobType.Column.Purpose.MIME_TYPE ) != null )
+            if ( _table.columns.Find( x => x.purpose == Column.Purpose.MIME_TYPE ) != null )
             {
                 MimeTypeList.MimeType mt = this.mimeTypeList.mimeTypes.Find( x => x.name == _mimeType );
                 if ( mt == null )
@@ -543,7 +543,7 @@ namespace Lobster
             return mnemonic;
         }
 
-        public string ConvertMnemonicToFilename( string _mnemonic, ClobType.Table _table, string _mimeType )
+        public string ConvertMnemonicToFilename( string _mnemonic, Table _table, string _mimeType )
         {
             string filename = _mnemonic;
             
@@ -555,7 +555,7 @@ namespace Lobster
             }
 
             // Assume xml data types for tables without a datatype column
-            if ( _table.columns.Find( x => x.purpose == ClobType.Column.Purpose.MIME_TYPE ) == null || prefix == null )
+            if ( _table.columns.Find( x => x.purpose == Column.Purpose.MIME_TYPE ) == null || prefix == null )
             {
                 filename += ".xml";
             }

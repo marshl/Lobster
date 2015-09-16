@@ -10,7 +10,7 @@ namespace Lobster
     /// </summary>
     public partial class DatatypePicker : Form
     {
-        public DatatypePicker( ClobType.Column _column )
+        public DatatypePicker( Column _column )
         {
             InitializeComponent();
             Debug.Assert( _column.mimeTypes.Count > 0 );

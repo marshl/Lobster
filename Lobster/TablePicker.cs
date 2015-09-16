@@ -17,7 +17,7 @@ namespace Lobster
         {
             InitializeComponent();
             Debug.Assert( _clobType.tables.Count > 0 );
-            foreach ( ClobType.Table table in _clobType.tables )
+            foreach ( Table table in _clobType.tables )
             {
                 this.tableCombo.Items.Add( table );
             }
