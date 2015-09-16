@@ -136,6 +136,7 @@
     <Compile Include="NativeListView.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="NativeMethods.cs" />
     <Compile Include="NativeTreeView.cs">
       <SubType>Component</SubType>
     </Compile>

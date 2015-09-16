@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Lobster
@@ -7,10 +8,9 @@ namespace Lobster
     /// All about them as they lay hung the darkness, hollow and immense,
     /// and they were oppressed by the loneliness and vastness of the dolven halls and
     /// endlessly branching stairs and passages.
-    /// 
     /// [ _The Lord of the Rings_, II/iv: "A Journey in the Dark"]
     /// </summary>
-    public class ClobNode
+    public class ClobNode : IDisposable
     {
         public ClobNode( DirectoryInfo _dirInfo, ClobDirectory _baseDirectory )
         {
@@ -49,7 +49,7 @@ namespace Lobster
         {
             this.fileWatcher = new FileSystemWatcher();
             this.fileWatcher.Path = this.dirInfo.FullName;
-            this.fileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.CreationTime;// | NotifyFilters.Attributes;
+            this.fileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.CreationTime;
             this.fileWatcher.Changed += new FileSystemEventHandler( OnFileChanged );
             this.fileWatcher.Created += new FileSystemEventHandler( OnFileCreated );
             this.fileWatcher.Deleted += new FileSystemEventHandler( OnFileDeleted );
@@ -71,7 +71,7 @@ namespace Lobster
         private void OnFileAttributeChange( object sender, FileSystemEventArgs e )
         {
             this.SetFileWatchersEnabled( false );
-            this.baseDirectory.RefreshFileLists();
+            this.baseDirectory.GetLocalFiles();
             this.SetFileWatchersEnabled( true );
         }
 
@@ -79,7 +79,7 @@ namespace Lobster
         {
             this.SetFileWatchersEnabled( false );
             // Ensure that the file changed exists and is not a directory
-            if ( !File.Exists( _e.FullPath ) )
+            if (!File.Exists( _e.FullPath ))
             {
                 return;
             }
@@ -89,7 +89,7 @@ namespace Lobster
             { 
                 if ( clobFile.IsSynced && clobFile.IsEditable )
                 {
-                    this.baseDirectory.parentModel.SendUpdateClobMessage( clobFile );
+                    this.baseDirectory.ParentConnection.ParentModel.SendUpdateClobMessage( clobFile );
                 }
             }
             this.SetFileWatchersEnabled( true );
@@ -98,21 +98,21 @@ namespace Lobster
         public void OnFileCreated( object _source, FileSystemEventArgs _e )
         {
             this.SetFileWatchersEnabled( false );
-            this.baseDirectory.RefreshFileLists();
+            this.baseDirectory.GetLocalFiles();
             this.SetFileWatchersEnabled( true );
         }
 
         private void OnFileDeleted( object _sender, FileSystemEventArgs _e )
         {
             this.SetFileWatchersEnabled( false );
-            this.baseDirectory.RefreshFileLists();
+            this.baseDirectory.GetLocalFiles();
             this.SetFileWatchersEnabled( true );
         }
 
         private void OnFileRenamed( object _sender, FileSystemEventArgs _e )
         {
             this.SetFileWatchersEnabled( false );
-            this.baseDirectory.RefreshFileLists();
+            this.baseDirectory.GetLocalFiles();
             this.SetFileWatchersEnabled( true );
         }
 
@@ -125,7 +125,7 @@ namespace Lobster
             clobFile.localClobFile.fileInfo = _fileInfo;
 
             this.clobFileMap.Add( _fileInfo.Name.ToLower(), clobFile );
-            this.baseDirectory.clobFileList.Add( clobFile );
+            this.baseDirectory.FileList.Add( clobFile );
         }
 
         public void RepopulateFileLists_r()
@@ -140,6 +140,12 @@ namespace Lobster
             {
                 child.RepopulateFileLists_r();
             }
+        }
+
+        public void Dispose()
+        {
+            this.fileAttributeWatcher.Dispose();
+            this.fileWatcher.Dispose();
         }
     }
 }

@@ -39,7 +39,7 @@ namespace Lobster
             this.dbConnectionList = new List<DatabaseConnection>();
             foreach ( string filename in Directory.GetFiles( Program.DB_CONFIG_DIR ) )
             {
-                DatabaseConnection dbConfig = LoadDatabaseConfigFile( filename );
+                DatabaseConnection dbConfig = this.LoadDatabaseConnection( filename );
                 if ( dbConfig != null )
                 {
                     this.dbConnectionList.Add( dbConfig );
@@ -47,13 +47,14 @@ namespace Lobster
             }
         }
 
-        private static DatabaseConnection LoadDatabaseConfigFile( string _fullpath )
+        private DatabaseConnection LoadDatabaseConnection( string _fullpath )
         {
             MessageLog.LogInfo( "Loading Database Config File " + _fullpath );
             DatabaseConnection dbConnection;
             try
             {
                 dbConnection = Common.DeserialiseXmlFileUsingSchema<DatabaseConnection>( _fullpath, "LobsterSettings/DatabaseConfig.xsd" );
+                dbConnection.ParentModel = this;
             }
             catch ( Exception _e )
             {
@@ -289,13 +290,12 @@ namespace Lobster
 
             if ( _table.parentTable != null )
             {
-                // Parent Table
-                command.CommandText = _table.BuildInsertParentStatement( mnemonic );
-
                 try
                 {
+                    command.CommandText = _table.BuildInsertParentStatement( mnemonic );
                     MessageLog.LogInfo( "Executing Insert query on parent table: " + command.CommandText );
                     command.ExecuteNonQuery();
+                    command.Dispose();
                 }
                 catch ( Exception _e )
                 {
@@ -308,7 +308,6 @@ namespace Lobster
                     }
                     throw;
                 }
-                command.Dispose();
             }
 
             command = _con.CreateCommand();
@@ -337,11 +336,13 @@ namespace Lobster
             command.Dispose();
             trans.Commit();
 
-            _clobFile.dbClobFile = new DBClobFile();
-            _clobFile.dbClobFile.mnemonic = mnemonic;
-            _clobFile.dbClobFile.filename = _clobFile.localClobFile.fileInfo.Name;
-            _clobFile.dbClobFile.table = _table;
-            _clobFile.dbClobFile.mimeType = _mimeType;
+            _clobFile.dbClobFile = new DBClobFile()
+            {
+                mnemonic = mnemonic,
+                filename = _clobFile.localClobFile.fileInfo.Name,
+                table = _table,
+                mimeType = _mimeType
+            };
 
             MessageLog.LogInfo( "Clob file creation successful: " + _clobFile.localClobFile.fileInfo.Name );
             return true;
@@ -383,7 +384,7 @@ namespace Lobster
 
             foreach ( KeyValuePair<ClobType, ClobDirectory> pair in this.currentConnection.clobTypeToDirectoryMap )
             {
-                pair.Value.RefreshFileLists();
+                pair.Value.GetLocalFiles();
             }
         }
 
@@ -475,9 +476,9 @@ namespace Lobster
 
         private void GetDatabaseFileListForDirectory( ClobDirectory _clobDir, OracleConnection _con )
         {
-            _clobDir.dbClobFileList = new List<DBClobFile>();
+            _clobDir.DatabaseFileList = new List<DBClobFile>();
             
-            ClobType ct = _clobDir.clobType;
+            ClobType ct = _clobDir.ClobType;
 
             foreach ( ClobType.Table table in ct.tables )
             {
@@ -504,7 +505,7 @@ namespace Lobster
                     dbClobFile.mimeType = table.columns.Find( x => x.purpose == ClobType.Column.Purpose.MIME_TYPE ) != null ? reader.GetString( 1 ) : null;
                     dbClobFile.filename = this.ConvertMnemonicToFilename( dbClobFile.mnemonic, table, dbClobFile.mimeType );
                     dbClobFile.table = table;
-                    _clobDir.dbClobFileList.Add( dbClobFile );
+                    _clobDir.DatabaseFileList.Add( dbClobFile );
                 }
                 reader.Close();
                 command.Dispose();

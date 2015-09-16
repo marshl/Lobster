@@ -83,9 +83,9 @@ namespace Lobster
             foreach ( KeyValuePair<ClobType, ClobDirectory> pair in dbc.clobTypeToDirectoryMap )
             {
                 ClobDirectory clobDir = pair.Value;
-                TreeNode dirNode = new TreeNode( clobDir.rootClobNode.dirInfo.Name, 0, 0 );
-                dirNode.Tag = clobDir.rootClobNode;
-                this.PopulateTreeNode_r( clobDir.rootClobNode, dirNode );
+                TreeNode dirNode = new TreeNode( clobDir.RootClobNode.dirInfo.Name, 0, 0 );
+                dirNode.Tag = clobDir.RootClobNode;
+                this.PopulateTreeNode_r( clobDir.RootClobNode, dirNode );
                 rootNode.Nodes.Add( dirNode );
             }
             this.fileTreeView.Nodes.Add( rootNode );
@@ -139,9 +139,9 @@ namespace Lobster
                 this.fileListView.Items.Add( item );
             }
             // If it is the root node, also display any database only files
-            if ( _clobNode.baseDirectory.rootClobNode == _clobNode )
+            if ( _clobNode.baseDirectory.RootClobNode == _clobNode )
             {
-                foreach ( ClobFile dbClobFIle in _clobNode.baseDirectory.databaseOnlyFiles )
+                foreach ( ClobFile dbClobFIle in _clobNode.baseDirectory.DatabaseOnlyFiles )
                 {
                     ListViewItem item = this.GetListViewRowForClobFile( dbClobFIle );
                     this.fileListView.Items.Add( item );
@@ -248,9 +248,9 @@ namespace Lobster
         {
             ClobType.Table table;
             // If there is > 1 tables in this ClobType, ask the user for which one to use
-            if ( _clobFile.parentClobDirectory.clobType.tables.Count > 1 )
+            if ( _clobFile.parentClobDirectory.ClobType.tables.Count > 1 )
             {
-                TablePicker tablePicker = new TablePicker( _clobFile.parentClobDirectory.clobType );
+                TablePicker tablePicker = new TablePicker( _clobFile.parentClobDirectory.ClobType );
                 DialogResult dialogResult = tablePicker.ShowDialog();
                 if ( dialogResult != DialogResult.OK )
                 {
@@ -260,7 +260,7 @@ namespace Lobster
             }
             else
             {
-                table = _clobFile.parentClobDirectory.clobType.tables[0];
+                table = _clobFile.parentClobDirectory.ClobType.tables[0];
             }
 
             // If the table has a MimeType column, ask the user for the type to use
@@ -679,6 +679,7 @@ namespace Lobster
         private void newConnectionButton_Click( object sender, EventArgs e )
         {
             DatabaseConnection newConnection = new DatabaseConnection();
+            newConnection.ParentModel = this.lobsterModel;
             newConnection.fileLocation = Path.Combine( Program.DB_CONFIG_DIR, "NewConnection.xml" ) ;
             EditDatabaseConnection editForm = new EditDatabaseConnection( newConnection, true );
             DialogResult result = editForm.ShowDialog();
