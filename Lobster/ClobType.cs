@@ -89,7 +89,7 @@ namespace Lobster
 
             public string BuildUpdateStatement( ClobFile _clobFile )
             {
-                Column clobCol = _clobFile.dbClobFile.GetColumn();
+                Column clobCol = _clobFile.DatabaseFile.GetColumn();
                 Debug.Assert( clobCol != null );
                 
                 string command =
@@ -112,12 +112,12 @@ namespace Lobster
                     command += " WHERE " + fkCol.FullName + " = ("
                             + " SELECT " + parentIDCol.FullName
                             + " FROM " + pt.FullName
-                            + " WHERE " + parentMnemCol.FullName + " = '" + _clobFile.dbClobFile.mnemonic + "')";
+                            + " WHERE " + parentMnemCol.FullName + " = '" + _clobFile.DatabaseFile.mnemonic + "')";
                 }
                 else
                 {
                     Column mnemCol = this.columns.Find( x => x.purpose == Column.Purpose.MNEMONIC );
-                    command += " WHERE " + mnemCol.FullName + " = '" + _clobFile.dbClobFile.mnemonic + "'";
+                    command += " WHERE " + mnemCol.FullName + " = '" + _clobFile.DatabaseFile.mnemonic + "'";
                 }
                 return command;
             }
@@ -206,7 +206,7 @@ namespace Lobster
 
             public string BuildGetDataCommand( ClobFile _clobFile )
             {
-                Column clobCol = _clobFile.dbClobFile.GetColumn();
+                Column clobCol = _clobFile.DatabaseFile.GetColumn();
                 if ( this.parentTable != null )
                 {
                     Table pt = this.parentTable;

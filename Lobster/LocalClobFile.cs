@@ -10,6 +10,11 @@ namespace Lobster
     /// </summary>
     public class LocalClobFile
     {
-        public FileInfo fileInfo;
+        public LocalClobFile(FileInfo fileInfo)
+        {
+            this.FileInfo = fileInfo;
+        }
+
+        public FileInfo FileInfo { get; private set; }
     }
 }

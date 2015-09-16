@@ -129,10 +129,10 @@ namespace Lobster
             foreach ( KeyValuePair<string, ClobFile> pair in _clobNode.clobFileMap )
             {
                 ClobFile clobFile = pair.Value;
-                Debug.Assert( clobFile.localClobFile != null );
-                if ( clobFile.localClobFile != null )
+                Debug.Assert( clobFile.LocalFile != null );
+                if ( clobFile.LocalFile != null )
                 {
-                    clobFile.localClobFile.fileInfo.Refresh();
+                    clobFile.LocalFile.FileInfo.Refresh();
                 }
                 
                 ListViewItem item = this.GetListViewRowForClobFile( clobFile );
@@ -152,7 +152,7 @@ namespace Lobster
 
         public ListViewItem GetListViewRowForClobFile( ClobFile _clobFile )
         {
-            string filename = _clobFile.localClobFile != null ? _clobFile.localClobFile.fileInfo.Name : _clobFile.dbClobFile.filename;
+            string filename = _clobFile.LocalFile != null ? _clobFile.LocalFile.FileInfo.Name : _clobFile.DatabaseFile.filename;
             int imageHandle;
             string dateValue = "";
             string status;
@@ -167,7 +167,7 @@ namespace Lobster
             else
             {
                 imageHandle = _clobFile.IsEditable ? 1 : 2;
-                dateValue = _clobFile.localClobFile.fileInfo.LastAccessTime.ToShortDateString();
+                dateValue = _clobFile.LocalFile.FileInfo.LastAccessTime.ToShortDateString();
                 if ( _clobFile.IsSynced )
                 {
                     status = "Synchronised";
@@ -228,10 +228,10 @@ namespace Lobster
             insertToolStripMenuItem.Enabled = _clobFile.IsLocalOnly;
             clobToolStripMenuItem.Enabled = _clobFile.IsSynced;
             diffWithDatabaseToolStripMenuItem.Enabled = _clobFile.IsSynced
-                && !new List<string> { ".png", ".gif", ".bmp" }.Contains( Path.GetExtension( _clobFile.localClobFile.fileInfo.Name ) );
+                && !new List<string> { ".png", ".gif", ".bmp" }.Contains( Path.GetExtension( _clobFile.LocalFile.FileInfo.Name ) );
             
-            showInExplorerToolStripMenuItem.Enabled = _clobFile.localClobFile != null;
-            openDatabaseToolStripMenuItem.Enabled = _clobFile.dbClobFile != null;
+            showInExplorerToolStripMenuItem.Enabled = _clobFile.LocalFile != null;
+            openDatabaseToolStripMenuItem.Enabled = _clobFile.DatabaseFile != null;
         }
 
         private void insertToolStripMenuItem_Click( object sender, EventArgs e )
@@ -247,10 +247,11 @@ namespace Lobster
         private void InsertClobFile( ClobFile _clobFile )
         {
             ClobType.Table table;
+            ClobDirectory clobDir = _clobFile.ParentClobNode.baseDirectory;
             // If there is > 1 tables in this ClobType, ask the user for which one to use
-            if ( _clobFile.parentClobDirectory.ClobType.tables.Count > 1 )
+            if (clobDir.ClobType.tables.Count > 1 )
             {
-                TablePicker tablePicker = new TablePicker( _clobFile.parentClobDirectory.ClobType );
+                TablePicker tablePicker = new TablePicker(clobDir.ClobType );
                 DialogResult dialogResult = tablePicker.ShowDialog();
                 if ( dialogResult != DialogResult.OK )
                 {
@@ -260,7 +261,7 @@ namespace Lobster
             }
             else
             {
-                table = _clobFile.parentClobDirectory.ClobType.tables[0];
+                table = clobDir.ClobType.tables[0];
             }
 
             // If the table has a MimeType column, ask the user for the type to use
@@ -318,10 +319,10 @@ namespace Lobster
 
         public void OnFileInsertComplete( ClobFile _clobFile, bool _result )
         {
-            Debug.Assert( _clobFile.localClobFile != null );
+            Debug.Assert( _clobFile.LocalFile != null );
             this.lobsterNotificationIcon.ShowBalloonTip( Program.BALLOON_TOOLTIP_DURATION_MS,
                 _result ? "File Inserted" : "File Insert Failed",
-                _clobFile.localClobFile.fileInfo.Name,
+                _clobFile.LocalFile.FileInfo.Name,
                 _result ? ToolTipIcon.Info : ToolTipIcon.Error );
             
             ( _result ? this.successSoundPlayer : this.failureSoundPlayer ).Play();
@@ -329,10 +330,10 @@ namespace Lobster
 
         public void OnFileUpdateComplete( ClobFile _clobFile, bool _result )
         {
-            Debug.Assert( _clobFile.localClobFile != null );
+            Debug.Assert( _clobFile.LocalFile != null );
             this.lobsterNotificationIcon.ShowBalloonTip( Program.BALLOON_TOOLTIP_DURATION_MS,
                 _result ? "Database Updated" : "Database Update Failed",
-                _clobFile.localClobFile.fileInfo.Name,
+                _clobFile.LocalFile.FileInfo.Name,
                 _result ? ToolTipIcon.Info : ToolTipIcon.Error );
 
             ( _result ? this.successSoundPlayer : this.failureSoundPlayer ).Play();
@@ -502,10 +503,10 @@ namespace Lobster
             this.reclobButton.Enabled = this.diffWithDBButton.Enabled = selectedFile != null && selectedFile.IsSynced;
 
             // Only enable the Explore To button if the file exists locally
-            this.exploreButton.Enabled = selectedFile != null && selectedFile.localClobFile != null;
+            this.exploreButton.Enabled = selectedFile != null && selectedFile.LocalFile != null;
 
             // Only enable the Pull button if the file exists on the database
-            this.pullDBFileButton.Enabled = selectedFile != null && selectedFile.dbClobFile != null;
+            this.pullDBFileButton.Enabled = selectedFile != null && selectedFile.DatabaseFile != null;
 
             // Only enable the connection button if on the connection page
             this.connectButton.Enabled = this.MainTabControl.SelectedTab == this.connectionTabPage && this.connectionListView.SelectedItems.Count > 0;
@@ -545,9 +546,9 @@ namespace Lobster
         private void ReclobFile( ClobFile _clobFile )
         {
             Debug.Assert( _clobFile.IsSynced );
-            if ( _clobFile.localClobFile.fileInfo.IsReadOnly )
+            if ( _clobFile.LocalFile.FileInfo.IsReadOnly )
             {
-                DialogResult result = MessageBox.Show( _clobFile.localClobFile.fileInfo.Name + " is locked. Are you sure you want to clob it?",
+                DialogResult result = MessageBox.Show( _clobFile.LocalFile.FileInfo.Name + " is locked. Are you sure you want to clob it?",
                     "File is Locked",
                     MessageBoxButtons.OKCancel );
                 if ( result != DialogResult.OK )
@@ -574,8 +575,8 @@ namespace Lobster
 
         private void ExploreToClobFile( ClobFile _clobFile )
         {
-            Debug.Assert( _clobFile.localClobFile != null );
-            Process.Start( "explorer", "/select," + _clobFile.localClobFile.fileInfo.FullName );
+            Debug.Assert( _clobFile.LocalFile != null );
+            Process.Start( "explorer", "/select," + _clobFile.LocalFile.FileInfo.FullName );
         }
 
         private void workingFileList_SelectedIndexChanged( object sender, EventArgs e )
@@ -610,7 +611,7 @@ namespace Lobster
             MessageLog.LogInfo( "Temporary file created: " + tempFile.FullName );
             this.lobsterModel.tempFileList.Add( tempFile );
 
-            Process.Start( "tortoisemerge", "/mine:" + tempFile.FullName + " /theirs:" + _clobFile.localClobFile.fileInfo.FullName );
+            Process.Start( "tortoisemerge", "/mine:" + tempFile.FullName + " /theirs:" + _clobFile.LocalFile.FileInfo.FullName );
         }
 
         private void pullDBFileButton_Click( object sender, EventArgs e )
@@ -628,7 +629,7 @@ namespace Lobster
 
         private void PullDatabaseFile( ClobFile _clobFile )
         {
-            Debug.Assert( _clobFile.dbClobFile != null );
+            Debug.Assert( _clobFile.DatabaseFile != null );
             FileInfo tempFile = this.lobsterModel.SendDownloadClobDataToFileMessage( _clobFile );
             if ( tempFile == null )
             {

@@ -1,6 +1,6 @@
 ﻿//-----------------------------------------------------------------------
 // <copyright file="ClobDirectory.cs" company="marshl">
-// Copyright [yyyy], Liam Marshall, marshl.
+// Copyright 2015, Liam Marshall, marshl.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,6 +12,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// A box without hinges, key, or lid,
+// Yet golden treasure inside is hid,
+// [ _The Hobbit_, V: "Riddles in the Dark"]
 // </copyright>
 //-----------------------------------------------------------------------
 namespace Lobster
@@ -20,9 +24,7 @@ namespace Lobster
     using System.IO;
 
     /// <summary>
-    /// A box without hinges, key, or lid,
-    /// Yet golden treasure inside is hid,
-    /// [ _The Hobbit_, V: "Riddles in the Dark"]
+    /// A ClobDirectory maps to a single ClobType, and represents the directory on the file system where the files for that ClobType are found.
     /// </summary>
     public class ClobDirectory
     {
@@ -56,7 +58,7 @@ namespace Lobster
         public List<ClobFile> DatabaseOnlyFiles { get; private set; }
 
         /// <summary>
-        /// The ClobNOde that represents this directory on the file system.
+        /// The ClobNOde that represents this directory on the file system. The root node can have any number of child nodes, representing subfolders under the main directory.
         /// </summary>
         public ClobNode RootClobNode { get; set; }
 
@@ -131,28 +133,28 @@ namespace Lobster
             this.DatabaseOnlyFiles = new List<ClobFile>();
 
             // Break any existing connections to clob files
-            this.FileList.ForEach(x => x.dbClobFile = null);
+            this.FileList.ForEach(x => x.DatabaseFile = null);
 
             foreach (DBClobFile file in this.DatabaseFileList)
             {
-                List<ClobFile> matchingFiles = this.FileList.FindAll(x => x.localClobFile.fileInfo.Name.ToLower() == file.filename.ToLower());
+                List<ClobFile> matchingFiles = this.FileList.FindAll(x => x.LocalFile.FileInfo.Name.ToLower() == file.filename.ToLower());
 
                 // Link all matching local files to that database file
                 if (matchingFiles.Count > 0)
                 {
-                    matchingFiles.ForEach(x => x.dbClobFile = file);
+                    matchingFiles.ForEach(x => x.DatabaseFile = file);
                     if (matchingFiles.Count > 1)
                     {
                         MessageLog.LogWarning("Multiple local files have been found for the database file " + file.filename + " from the table " + file.table.FullName);
-                        matchingFiles.ForEach(x => MessageLog.LogWarning(x.localClobFile.fileInfo.FullName));
+                        matchingFiles.ForEach(x => MessageLog.LogWarning(x.LocalFile.FileInfo.FullName));
                         MessageLog.LogWarning("Updating any of those files will update the same database file.");
                     }
                 }
                 else
                 {
                     // If it has no local file to link it, then add it to the database only list
-                    ClobFile databaseOnlyFile = new ClobFile(this);
-                    databaseOnlyFile.dbClobFile = file;
+                    ClobFile databaseOnlyFile = new ClobFile(this.RootClobNode);
+                    databaseOnlyFile.DatabaseFile = file;
                     this.DatabaseOnlyFiles.Add(databaseOnlyFile);
                 }
             }

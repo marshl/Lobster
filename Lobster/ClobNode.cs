@@ -33,7 +33,7 @@ namespace Lobster
             foreach ( KeyValuePair<string, ClobFile> pair in this.clobFileMap )
             {
                 ClobFile clobFile = pair.Value;
-                if ( clobFile.localClobFile != null && !clobFile.localClobFile.fileInfo.IsReadOnly )
+                if ( clobFile.LocalFile != null && !clobFile.LocalFile.FileInfo.IsReadOnly )
                 {
                     _workingFiles.Add( pair.Value );
                 }
@@ -118,11 +118,9 @@ namespace Lobster
 
         public void AddLocalClobFile( FileInfo _fileInfo )
         {
-            ClobFile clobFile = new ClobFile( this.baseDirectory );
-            clobFile.parentClobDirectory = this.baseDirectory;
+            ClobFile clobFile = new ClobFile( this );
 
-            clobFile.localClobFile = new LocalClobFile();
-            clobFile.localClobFile.fileInfo = _fileInfo;
+            clobFile.LocalFile = new LocalClobFile( _fileInfo );
 
             this.clobFileMap.Add( _fileInfo.Name.ToLower(), clobFile );
             this.baseDirectory.FileList.Add( clobFile );

@@ -184,7 +184,7 @@ namespace Lobster
 
             OracleTransaction trans = _con.BeginTransaction();
             OracleCommand command = _con.CreateCommand();
-            ClobType.Table table = _clobFile.dbClobFile.table;
+            ClobType.Table table = _clobFile.DatabaseFile.table;
 
             try
             {
@@ -198,7 +198,7 @@ namespace Lobster
             }
             try
             {
-                this.AddFileDataParameter( command, _clobFile, _clobFile.dbClobFile.table, _clobFile.dbClobFile.mimeType );
+                this.AddFileDataParameter( command, _clobFile, _clobFile.DatabaseFile.table, _clobFile.DatabaseFile.mimeType );
             }
             catch ( IOException _e )
             {
@@ -236,7 +236,7 @@ namespace Lobster
 
             trans.Commit();
             command.Dispose();
-            MessageLog.LogInfo( "Clob file update successful: " + _clobFile.localClobFile.fileInfo.Name );
+            MessageLog.LogInfo( "Clob file update successful: " + _clobFile.LocalFile.FileInfo.Name );
             return true;
         }
 
@@ -254,9 +254,9 @@ namespace Lobster
 
         private void AddFileDataParameter( OracleCommand _command, ClobFile _clobFile, ClobType.Table _table, string _mimeType )
         {
-            Debug.Assert( _clobFile.localClobFile != null );
+            Debug.Assert( _clobFile.LocalFile != null );
             // Wait for the file to unlock
-            using ( FileStream fs = Common.WaitForFile( _clobFile.localClobFile.fileInfo.FullName,
+            using ( FileStream fs = Common.WaitForFile( _clobFile.LocalFile.FileInfo.FullName,
                 FileMode.Open, FileAccess.Read, FileShare.ReadWrite ) )
             {
                 ClobType.Column column = _table.columns.Find( x => x.purpose == ClobType.Column.Purpose.CLOB_DATA
@@ -302,7 +302,7 @@ namespace Lobster
                     if ( _e is InvalidOperationException || _e is OracleException )
                     {
                         LobsterMain.OnErrorMessage( "Clob Insert Error",
-                        "An invalid operation occurred when inserting into the parent table of " + _clobFile.localClobFile.fileInfo.Name + ": " + _e.Message );
+                        "An invalid operation occurred when inserting into the parent table of " + _clobFile.LocalFile.FileInfo.Name + ": " + _e.Message );
                         MessageLog.LogError( "Error creating new clob: " + _e.Message + " when executing command: " + command.CommandText );
                         return false;
                     }
@@ -327,7 +327,7 @@ namespace Lobster
                     // Discard the insert amde into the parent table
                     trans.Rollback();
                     LobsterMain.OnErrorMessage( "Clob Insert Error",
-                            "An invalid operation occurred when inserting " + _clobFile.localClobFile.fileInfo.Name + ": " + _e.Message );
+                            "An invalid operation occurred when inserting " + _clobFile.LocalFile.FileInfo.Name + ": " + _e.Message );
                     MessageLog.LogError( "Error creating new clob: " + _e.Message + " when executing command: " + command.CommandText );
                     return false;
                 }
@@ -336,15 +336,15 @@ namespace Lobster
             command.Dispose();
             trans.Commit();
 
-            _clobFile.dbClobFile = new DBClobFile()
+            _clobFile.DatabaseFile = new DBClobFile()
             {
                 mnemonic = mnemonic,
-                filename = _clobFile.localClobFile.fileInfo.Name,
+                filename = _clobFile.LocalFile.FileInfo.Name,
                 table = _table,
                 mimeType = _mimeType
             };
 
-            MessageLog.LogInfo( "Clob file creation successful: " + _clobFile.localClobFile.fileInfo.Name );
+            MessageLog.LogInfo( "Clob file creation successful: " + _clobFile.LocalFile.FileInfo.Name );
             return true;
         }
 
@@ -390,14 +390,14 @@ namespace Lobster
 
         private FileInfo DownloadClobDataToFile( ClobFile _clobFile, OracleConnection _con )
         {
-            Debug.Assert( _clobFile.dbClobFile != null );
+            Debug.Assert( _clobFile.DatabaseFile != null );
             OracleCommand command = _con.CreateCommand();
 
-            ClobType.Table table = _clobFile.dbClobFile.table;
+            ClobType.Table table = _clobFile.DatabaseFile.table;
             ClobType.Column column;
             try
             {
-                column = _clobFile.dbClobFile.GetColumn();
+                column = _clobFile.DatabaseFile.GetColumn();
                 command.CommandText = table.BuildGetDataCommand( _clobFile );
             }
             catch ( ClobColumnNotFoundException _e )
@@ -407,13 +407,13 @@ namespace Lobster
                 return null;
             }
             
-            command.Parameters.Add( new OracleParameter( "mnemonic", OracleDbType.Varchar2, _clobFile.dbClobFile.mnemonic, ParameterDirection.Input ) );
+            command.Parameters.Add( new OracleParameter( "mnemonic", OracleDbType.Varchar2, _clobFile.DatabaseFile.mnemonic, ParameterDirection.Input ) );
             try
             {
                 OracleDataReader reader = command.ExecuteReader();
                 string tempPath = Path.GetTempFileName();
                 new FileInfo( tempPath ).Delete();
-                string tempName = tempPath.Replace( ".tmp", "." ) + _clobFile.dbClobFile.filename;
+                string tempName = tempPath.Replace( ".tmp", "." ) + _clobFile.DatabaseFile.filename;
                 FileInfo tempFile = new FileInfo( tempName );
                 
                 if ( reader.Read() )
@@ -426,7 +426,7 @@ namespace Lobster
                     else
                     {
                         string result;
-                        ClobType.Column clobColumn =_clobFile.dbClobFile.table.columns.Find( x => x.purpose == ClobType.Column.Purpose.CLOB_DATA );
+                        ClobType.Column clobColumn =_clobFile.DatabaseFile.table.columns.Find( x => x.purpose == ClobType.Column.Purpose.CLOB_DATA );
                         if ( clobColumn.dataType == ClobType.Column.Datatype.CLOB )
                         {
                             OracleClob clob = reader.GetOracleClob( 0 );
@@ -451,8 +451,8 @@ namespace Lobster
                     {
                         reader.Close();
                         LobsterMain.OnErrorMessage( "Clob Data Fetch Error",
-                       "Too many rows were found for " + _clobFile.dbClobFile.mnemonic );
-                        MessageLog.LogError( "Too many rows found on clob retrieval of " + _clobFile.dbClobFile.mnemonic );
+                       "Too many rows were found for " + _clobFile.DatabaseFile.mnemonic );
+                        MessageLog.LogError( "Too many rows found on clob retrieval of " + _clobFile.DatabaseFile.mnemonic );
                         return null;
                     }
                 }
@@ -462,15 +462,15 @@ namespace Lobster
                 if ( _e is InvalidOperationException || _e is OracleNullValueException )
                 {
                     LobsterMain.OnErrorMessage( "Clob Data Fetch Error",
-                            "An invalid operation occurred when retreiving the data of " + _clobFile.dbClobFile.mnemonic + ": " + _e.Message );
+                            "An invalid operation occurred when retreiving the data of " + _clobFile.DatabaseFile.mnemonic + ": " + _e.Message );
                     MessageLog.LogError( "Error retrieving data: " + _e.Message + " when executing command " + command.CommandText );
                     return null;
                 }
                 throw;
             }
             LobsterMain.OnErrorMessage( "Clob Data Fetch Error",
-                        "No data was found for " + _clobFile.dbClobFile.mnemonic );
-            MessageLog.LogError( "No data found on clob retrieval of " + _clobFile.dbClobFile.mnemonic + " when executing command: " + command.CommandText );
+                        "No data was found for " + _clobFile.DatabaseFile.mnemonic );
+            MessageLog.LogError( "No data found on clob retrieval of " + _clobFile.DatabaseFile.mnemonic + " when executing command: " + command.CommandText );
             return null;
         }
 
@@ -524,8 +524,8 @@ namespace Lobster
 
         public string ConvertFilenameToMnemonic( ClobFile _clobFile, ClobType.Table _table, string _mimeType )
         {
-            Debug.Assert( _clobFile.localClobFile != null );
-            string mnemonic = Path.GetFileNameWithoutExtension( _clobFile.localClobFile.fileInfo.Name );
+            Debug.Assert( _clobFile.LocalFile != null );
+            string mnemonic = Path.GetFileNameWithoutExtension( _clobFile.LocalFile.FileInfo.Name );
             if ( _table.columns.Find( x => x.purpose == ClobType.Column.Purpose.MIME_TYPE ) != null )
             {
                 MimeTypeList.MimeType mt = this.mimeTypeList.mimeTypes.Find( x => x.name == _mimeType );
