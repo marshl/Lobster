@@ -83,7 +83,7 @@ namespace Lobster
             foreach ( KeyValuePair<ClobType, ClobDirectory> pair in dbc.clobTypeToDirectoryMap )
             {
                 ClobDirectory clobDir = pair.Value;
-                TreeNode dirNode = new TreeNode( clobDir.RootClobNode.dirInfo.Name, 0, 0 );
+                TreeNode dirNode = new TreeNode( clobDir.RootClobNode.DirInfo.Name, 0, 0 );
                 dirNode.Tag = clobDir.RootClobNode;
                 this.PopulateTreeNode_r( clobDir.RootClobNode, dirNode );
                 rootNode.Nodes.Add( dirNode );
@@ -94,9 +94,9 @@ namespace Lobster
 
         private void PopulateTreeNode_r( ClobNode _clobNode, TreeNode _treeNode )
         {
-            foreach ( ClobNode child in _clobNode.childNodes )
+            foreach ( ClobNode child in _clobNode.ChildNodes )
             {
-                TreeNode aNode = new TreeNode( child.dirInfo.Name );
+                TreeNode aNode = new TreeNode( child.DirInfo.Name );
                 aNode.Tag = child;
                 aNode.ImageKey = "folder";
 
@@ -124,9 +124,9 @@ namespace Lobster
         {
             Debug.Assert( _clobNode != null );
             this.fileListView.Items.Clear();
-            DirectoryInfo nodeDirInfo = _clobNode.dirInfo;
+            DirectoryInfo nodeDirInfo = _clobNode.DirInfo;
 
-            foreach ( KeyValuePair<string, ClobFile> pair in _clobNode.clobFileMap )
+            foreach ( KeyValuePair<string, ClobFile> pair in _clobNode.ClobFileMap )
             {
                 ClobFile clobFile = pair.Value;
                 Debug.Assert( clobFile.LocalFile != null );
@@ -139,9 +139,9 @@ namespace Lobster
                 this.fileListView.Items.Add( item );
             }
             // If it is the root node, also display any database only files
-            if ( _clobNode.baseDirectory.RootClobNode == _clobNode )
+            if ( _clobNode.BaseClobDirectory.RootClobNode == _clobNode )
             {
-                foreach ( ClobFile dbClobFIle in _clobNode.baseDirectory.DatabaseOnlyFiles )
+                foreach ( ClobFile dbClobFIle in _clobNode.BaseClobDirectory.DatabaseOnlyFiles )
                 {
                     ListViewItem item = this.GetListViewRowForClobFile( dbClobFIle );
                     this.fileListView.Items.Add( item );
@@ -247,7 +247,7 @@ namespace Lobster
         private void InsertClobFile( ClobFile _clobFile )
         {
             ClobType.Table table;
-            ClobDirectory clobDir = _clobFile.ParentClobNode.baseDirectory;
+            ClobDirectory clobDir = _clobFile.ParentClobNode.BaseClobDirectory;
             // If there is > 1 tables in this ClobType, ask the user for which one to use
             if (clobDir.ClobType.tables.Count > 1 )
             {

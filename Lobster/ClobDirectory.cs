@@ -114,12 +114,12 @@ namespace Lobster
         /// <param name="clobNode">The ClobNode to operate on.</param>
         private void PopulateClobNodeDirectories_r(ClobNode clobNode)
         {
-            DirectoryInfo[] subDirs = clobNode.dirInfo.GetDirectories();
+            DirectoryInfo[] subDirs = clobNode.DirInfo.GetDirectories();
             foreach (DirectoryInfo subDir in subDirs)
             {
                 ClobNode childNode = new ClobNode(subDir, this);
                 this.PopulateClobNodeDirectories_r(childNode);
-                clobNode.childNodes.Add(childNode);
+                clobNode.ChildNodes.Add(childNode);
             }
         }
 

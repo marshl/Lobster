@@ -1,149 +1,248 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-
+﻿//-----------------------------------------------------------------------
+// <copyright file="ClobNode.cs" company="marshl">
+// Copyright 2015, Liam Marshall, marshl.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+//      All about them as they lay hung the darkness, hollow and immense,
+//      and they were oppressed by the loneliness and vastness of the dolven halls and
+//      endlessly branching stairs and passages.
+//          [ _The Lord of the Rings_, II/iv: "A Journey in the Dark"]
+//
+// </copyright>
+//-----------------------------------------------------------------------
 namespace Lobster
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
     /// <summary>
-    /// All about them as they lay hung the darkness, hollow and immense,
-    /// and they were oppressed by the loneliness and vastness of the dolven halls and
-    /// endlessly branching stairs and passages.
-    /// [ _The Lord of the Rings_, II/iv: "A Journey in the Dark"]
+    /// A ClobNode is a single directory in the file system that is controlled by a ClobType.
+    /// The root ClobNode of a ClobType is stored in the corresponding ClobDirectory.
+    /// Sub directories are stored in the ClobNode as additional ClobNodes.
     /// </summary>
     public class ClobNode : IDisposable
     {
-        public ClobNode( DirectoryInfo _dirInfo, ClobDirectory _baseDirectory )
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ClobNode"/> class.
+        /// </summary>
+        /// <param name="dirInfo">The directory this node connects to.</param>
+        /// <param name="baseDirectory">The directory object that contains this ClobNode.</param>
+        public ClobNode(DirectoryInfo dirInfo, ClobDirectory baseDirectory)
         {
-            this.dirInfo = _dirInfo;
-            this.baseDirectory = _baseDirectory;
+            this.DirInfo = dirInfo;
+            this.BaseClobDirectory = baseDirectory;
+
             this.CreateFileWatchers();
         }
 
-        public DirectoryInfo dirInfo;
-        public ClobDirectory baseDirectory;
+        /// <summary>
+        /// The file system DirectoryInfo that corresponds to this node.
+        /// </summary>
+        public DirectoryInfo DirInfo { get; private set; }
 
-        public List<ClobNode> childNodes = new List<ClobNode>();
-        public Dictionary<string, ClobFile> clobFileMap;
+        /// <summary>
+        /// The root directory of this node. All nodes under a directory will point back to that same directory.
+        /// </summary>
+        public ClobDirectory BaseClobDirectory { get; private set; }
 
-        private FileSystemWatcher fileWatcher;
-        private FileSystemWatcher fileAttributeWatcher;
+        /// <summary>
+        /// A list of children under this node. Each one corresponds to a subdirectory under this node's directory.
+        /// </summary>
+        public List<ClobNode> ChildNodes { get; private set; } = new List<ClobNode>();
 
-        public void GetWorkingFiles( ref List<ClobFile> _workingFiles )
+        /// <summary>
+        /// A mapping of the names of the files in the file system directory to the internal ClobFile that represents it.
+        /// The name of the file is converted to lower case before being used as the key.
+        /// </summary>
+        public Dictionary<string, ClobFile> ClobFileMap { get; set; }
+
+        /// <summary>
+        /// The watcher that tracks all change/create/delete/rename events for this folder (not including subdirectories). 
+        /// </summary>
+        private FileSystemWatcher FileWatcher { get; set; }
+
+        /// <summary>
+        /// The watcher that tracks all attribute change events (such as file locks) for this folder (not including subdirectories).
+        /// </summary>
+        private FileSystemWatcher FileAttributeWatcher { get; set; }
+
+        /// <summary>
+        /// This adds a file on the file system to the file dictionary on this node.
+        /// </summary>
+        /// <param name="fileInfo">The file to add.</param>
+        public void AddLocalClobFile(FileInfo fileInfo)
         {
-            foreach ( KeyValuePair<string, ClobFile> pair in this.clobFileMap )
-            {
-                ClobFile clobFile = pair.Value;
-                if ( clobFile.LocalFile != null && !clobFile.LocalFile.FileInfo.IsReadOnly )
-                {
-                    _workingFiles.Add( pair.Value );
-                }
-            }
+            ClobFile clobFile = new ClobFile(this);
+            clobFile.LocalFile = new LocalClobFile(fileInfo);
 
-            foreach ( ClobNode node in this.childNodes )
-            {
-                node.GetWorkingFiles( ref _workingFiles );
-            }
-        }
-        
-        public void CreateFileWatchers()
-        {
-            this.fileWatcher = new FileSystemWatcher();
-            this.fileWatcher.Path = this.dirInfo.FullName;
-            this.fileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.CreationTime;
-            this.fileWatcher.Changed += new FileSystemEventHandler( OnFileChanged );
-            this.fileWatcher.Created += new FileSystemEventHandler( OnFileCreated );
-            this.fileWatcher.Deleted += new FileSystemEventHandler( OnFileDeleted );
-            this.fileWatcher.Renamed += new RenamedEventHandler( OnFileRenamed );
-            this.fileWatcher.EnableRaisingEvents = true;
-
-            this.fileAttributeWatcher = new FileSystemWatcher();
-            this.fileAttributeWatcher.Path = this.dirInfo.FullName;
-            this.fileAttributeWatcher.NotifyFilter = NotifyFilters.Attributes;
-            this.fileAttributeWatcher.Changed += new FileSystemEventHandler( OnFileAttributeChange );
-            this.fileAttributeWatcher.EnableRaisingEvents = true;
-        }
-
-        public void SetFileWatchersEnabled( bool _enabled )
-        {
-            this.fileAttributeWatcher.EnableRaisingEvents = this.fileWatcher.EnableRaisingEvents = _enabled;
+            this.ClobFileMap.Add(fileInfo.Name.ToLower(), clobFile);
+            this.BaseClobDirectory.FileList.Add(clobFile);
         }
 
-        private void OnFileAttributeChange( object sender, FileSystemEventArgs e )
-        {
-            this.SetFileWatchersEnabled( false );
-            this.baseDirectory.GetLocalFiles();
-            this.SetFileWatchersEnabled( true );
-        }
-
-        public void OnFileChanged( object _source, FileSystemEventArgs _e )
-        {
-            this.SetFileWatchersEnabled( false );
-            // Ensure that the file changed exists and is not a directory
-            if (!File.Exists( _e.FullPath ))
-            {
-                return;
-            }
-
-            ClobFile clobFile;
-            if ( this.clobFileMap.TryGetValue( _e.Name.ToLower(), out clobFile ) )
-            { 
-                if ( clobFile.IsSynced && clobFile.IsEditable )
-                {
-                    this.baseDirectory.ClobType.ParentConnection.ParentModel.SendUpdateClobMessage( clobFile );
-                }
-            }
-            this.SetFileWatchersEnabled( true );
-        }
-
-        public void OnFileCreated( object _source, FileSystemEventArgs _e )
-        {
-            this.SetFileWatchersEnabled( false );
-            this.baseDirectory.GetLocalFiles();
-            this.SetFileWatchersEnabled( true );
-        }
-
-        private void OnFileDeleted( object _sender, FileSystemEventArgs _e )
-        {
-            this.SetFileWatchersEnabled( false );
-            this.baseDirectory.GetLocalFiles();
-            this.SetFileWatchersEnabled( true );
-        }
-
-        private void OnFileRenamed( object _sender, FileSystemEventArgs _e )
-        {
-            this.SetFileWatchersEnabled( false );
-            this.baseDirectory.GetLocalFiles();
-            this.SetFileWatchersEnabled( true );
-        }
-
-        public void AddLocalClobFile( FileInfo _fileInfo )
-        {
-            ClobFile clobFile = new ClobFile( this );
-
-            clobFile.LocalFile = new LocalClobFile( _fileInfo );
-
-            this.clobFileMap.Add( _fileInfo.Name.ToLower(), clobFile );
-            this.baseDirectory.FileList.Add( clobFile );
-        }
-
+        /// <summary>
+        /// Adds all files in the directory for this node to the file list, then does the same for any child nodes.
+        /// </summary>
         public void RepopulateFileLists_r()
         {
-            this.clobFileMap = new Dictionary<string, ClobFile>();
-            foreach ( FileInfo fileInfo in this.dirInfo.GetFiles() )
+            this.ClobFileMap = new Dictionary<string, ClobFile>();
+            foreach (FileInfo fileInfo in this.DirInfo.GetFiles())
             {
-                this.AddLocalClobFile( fileInfo );
+                this.AddLocalClobFile(fileInfo);
             }
 
-            foreach ( ClobNode child in this.childNodes )
+            foreach (ClobNode child in this.ChildNodes)
             {
                 child.RepopulateFileLists_r();
             }
         }
 
+        /// <summary>
+        /// Populates a list of all files in this directory, and all files under this directory, that are unlocked.
+        /// </summary>
+        /// <param name="fileList">The file list to populate</param>
+        public void GetWorkingFiles(ref List<ClobFile> fileList)
+        {
+            foreach (KeyValuePair<string, ClobFile> pair in this.ClobFileMap)
+            {
+                ClobFile clobFile = pair.Value;
+                if (clobFile.IsEditable)
+                {
+                    fileList.Add(pair.Value);
+                }
+            }
+
+            foreach (ClobNode node in this.ChildNodes)
+            {
+                node.GetWorkingFiles(ref fileList);
+            }
+        }
+
+        /// <summary>
+        /// Toggles the file watchers on or off.
+        /// </summary>
+        /// <param name="enabled">Whether to enable the file watchers.</param>
+        public void SetFileWatchersEnabled(bool enabled)
+        {
+            this.FileAttributeWatcher.EnableRaisingEvents = this.FileWatcher.EnableRaisingEvents = enabled;
+        }
+
+        /// <summary>
+        /// The IDisposable Dispose method.
+        /// </summary>
         public void Dispose()
         {
-            this.fileAttributeWatcher.Dispose();
-            this.fileWatcher.Dispose();
+            this.FileAttributeWatcher.Dispose();
+            this.FileWatcher.Dispose();
+        }
+
+        /// <summary>
+        /// Creates the FileWatcher and FileAttribute watcher that wait for file changes by the user.
+        /// </summary>
+        private void CreateFileWatchers()
+        {
+            this.FileWatcher = new FileSystemWatcher();
+            this.FileWatcher.Path = this.DirInfo.FullName;
+            this.FileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.CreationTime;
+            this.FileWatcher.Changed += new FileSystemEventHandler(this.OnFileChanged);
+            this.FileWatcher.Created += new FileSystemEventHandler(this.OnFileCreated);
+            this.FileWatcher.Deleted += new FileSystemEventHandler(this.OnFileDeleted);
+            this.FileWatcher.Renamed += new RenamedEventHandler(this.OnFileRenamed);
+
+            this.FileAttributeWatcher = new FileSystemWatcher();
+            this.FileAttributeWatcher.Path = this.DirInfo.FullName;
+            this.FileAttributeWatcher.NotifyFilter = NotifyFilters.Attributes;
+            this.FileAttributeWatcher.Changed += new FileSystemEventHandler(this.OnFileAttributeChange);
+
+            this.SetFileWatchersEnabled(true);
+        }
+
+        /// <summary>
+        /// The callback for when a file has its attributes changed. This refreshes the UI.
+        /// </summary>
+        /// <param name="sender">The sender of the message.</param>
+        /// <param name="e">The arguments for the event.</param>
+        private void OnFileAttributeChange(object sender, FileSystemEventArgs e)
+        {
+            this.SetFileWatchersEnabled(false);
+            this.BaseClobDirectory.GetLocalFiles();
+            this.SetFileWatchersEnabled(true);
+        }
+
+        /// <summary>
+        /// The callback for when a file has its content changed.
+        /// This pushes the file to the database if it is synchronised and editable.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The arguments for the event.</param>
+        private void OnFileChanged(object sender, FileSystemEventArgs e)
+        {
+            // Ensure that the file changed exists and is not a directory
+            if (!File.Exists(e.FullPath))
+            {
+                return;
+            }
+
+            ClobFile clobFile;
+            if (this.ClobFileMap.TryGetValue(e.Name.ToLower(), out clobFile))
+            {
+                if (clobFile.IsSynced && clobFile.IsEditable)
+                {
+                    // This is a long operation, so the file watchers need to be disabled to prevent multiple change hits.
+                    this.SetFileWatchersEnabled(false);
+                    this.BaseClobDirectory.ClobType.ParentConnection.ParentModel.SendUpdateClobMessage(clobFile);
+                    this.SetFileWatchersEnabled(true);
+                }
+            }
+        }
+
+        /// <summary>
+        /// The callback for when a file is created.
+        /// This clears out the Lobster file lists and traverses the directory tree again.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The arguments for the event.</param>
+        private void OnFileCreated(object sender, FileSystemEventArgs e)
+        {
+            this.SetFileWatchersEnabled(false);
+            this.BaseClobDirectory.GetLocalFiles();
+            this.SetFileWatchersEnabled(true);
+        }
+
+        /// <summary>
+        /// The callback for when a file is deleted
+        /// This clears out the Lobster file lists and traverses the directory tree again.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The arguments for the event.</param>
+        private void OnFileDeleted(object sender, FileSystemEventArgs e)
+        {
+            this.SetFileWatchersEnabled(false);
+            this.BaseClobDirectory.GetLocalFiles();
+            this.SetFileWatchersEnabled(true);
+        }
+
+        /// <summary>
+        /// The callback for when a file is renamed.
+        /// This clears out the Lobster file lists and traverses the directory tree again.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The arguments for the event.</param>
+        private void OnFileRenamed(object sender, FileSystemEventArgs e)
+        {
+            this.SetFileWatchersEnabled(false);
+            this.BaseClobDirectory.GetLocalFiles();
+            this.SetFileWatchersEnabled(true);
         }
     }
 }
