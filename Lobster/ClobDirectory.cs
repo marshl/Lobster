@@ -1,4 +1,20 @@
-﻿namespace Lobster
+﻿//-----------------------------------------------------------------------
+// <copyright file="ClobDirectory.cs" company="marshl">
+// Copyright [yyyy], Liam Marshall, marshl.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
+namespace Lobster
 {
     using System.Collections.Generic;
     using System.IO;
@@ -11,25 +27,44 @@
     public class ClobDirectory
     {
         /// <summary>
-        /// The ClobType that controls this directory
+        /// Initializes a new instance of the <see cref="ClobDirectory"/> class
         /// </summary>
-        public ClobType ClobType { get; private set; }
-
-        public List<ClobFile> FileList { get; private set; }
-        public List<DBClobFile> DatabaseFileList { get; set; }
-        public List<ClobFile> DatabaseOnlyFiles { get; private set; }
-        public ClobNode RootClobNode { get; set; }
-
+        /// <param name="clobType">The ClobType that points to this directory.</param>
         public ClobDirectory(ClobType clobType)
         {
             this.ClobType = clobType;
         }
 
         /// <summary>
-        /// 
+        /// The ClobType that controls this directory
         /// </summary>
-        /// <param name="codeSourceDirectory"></param>
-        /// <returns></returns>
+        public ClobType ClobType { get; private set; }
+
+        /// <summary>
+        /// The list all of the files in every node under this directory
+        /// </summary>
+        public List<ClobFile> FileList { get; private set; }
+
+        /// <summary>
+        /// The list of files that Lobster has found on the database for this directory
+        /// </summary>
+        public List<DBClobFile> DatabaseFileList { get; set; }
+
+        /// <summary>
+        /// The list of files that don't have a local file connection. These files are not found in FileList.
+        /// </summary>
+        public List<ClobFile> DatabaseOnlyFiles { get; private set; }
+
+        /// <summary>
+        /// The ClobNOde that represents this directory on the file system.
+        /// </summary>
+        public ClobNode RootClobNode { get; set; }
+
+        /// <summary>
+        /// Recursively traverses the directory specified by the ClobType for all subdirectories.
+        /// Files are found using the GetLocalFiles function.
+        /// </summary>
+        /// <returns>False if the directory in the ClobType could not be found, otherwise true.</returns>
         public bool BuildDirectoryTree()
         {
             DirectoryInfo info = new DirectoryInfo(Path.Combine(this.ClobType.ParentConnection.codeSource, this.ClobType.directory));
@@ -39,28 +74,14 @@
                 LobsterMain.OnErrorMessage("Folder not found", "Folder \"" + info.FullName + "\" could not be found for ClobType " + this.ClobType.name);
                 return false;
             }
+
             this.RootClobNode = new ClobNode(info, this);
             if (this.ClobType.includeSubDirectories)
             {
                 this.PopulateClobNodeDirectories_r(this.RootClobNode);
             }
-            return true;
-        }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="clobNode"></param>
-        /// <param name="clobDirectory"></param>
-        private void PopulateClobNodeDirectories_r(ClobNode clobNode)
-        {
-            DirectoryInfo[] subDirs = clobNode.dirInfo.GetDirectories();
-            foreach (DirectoryInfo subDir in subDirs)
-            {
-                ClobNode childNode = new ClobNode(subDir, this);
-                PopulateClobNodeDirectories_r(childNode);
-                clobNode.childNodes.Add(childNode);
-            }
+            return true;
         }
 
         /// <summary>
@@ -86,6 +107,21 @@
         }
 
         /// <summary>
+        /// Recursively finds all directories under the given ClobNode and adds them to that node.
+        /// </summary>
+        /// <param name="clobNode">The ClobNode to operate on.</param>
+        private void PopulateClobNodeDirectories_r(ClobNode clobNode)
+        {
+            DirectoryInfo[] subDirs = clobNode.dirInfo.GetDirectories();
+            foreach (DirectoryInfo subDir in subDirs)
+            {
+                ClobNode childNode = new ClobNode(subDir, this);
+                this.PopulateClobNodeDirectories_r(childNode);
+                clobNode.childNodes.Add(childNode);
+            }
+        }
+
+        /// <summary>
         /// Links all database files to their corresponding local files.
         /// Files that are not found locally are stored as "database-only".
         /// </summary>
@@ -97,26 +133,27 @@
             // Break any existing connections to clob files
             this.FileList.ForEach(x => x.dbClobFile = null);
 
-            foreach (DBClobFile dbClobFile in this.DatabaseFileList)
+            foreach (DBClobFile file in this.DatabaseFileList)
             {
-                List<ClobFile> matchingFiles = this.FileList.FindAll(x => x.localClobFile.fileInfo.Name.ToLower() == dbClobFile.filename.ToLower());
+                List<ClobFile> matchingFiles = this.FileList.FindAll(x => x.localClobFile.fileInfo.Name.ToLower() == file.filename.ToLower());
 
                 // Link all matching local files to that database file
                 if (matchingFiles.Count > 0)
                 {
-                    matchingFiles.ForEach(x => x.dbClobFile = dbClobFile);
+                    matchingFiles.ForEach(x => x.dbClobFile = file);
                     if (matchingFiles.Count > 1)
                     {
-                        MessageLog.LogWarning("Multiple local files have been found for the database file " + dbClobFile.filename + " from the table " + dbClobFile.table.FullName);
+                        MessageLog.LogWarning("Multiple local files have been found for the database file " + file.filename + " from the table " + file.table.FullName);
                         matchingFiles.ForEach(x => MessageLog.LogWarning(x.localClobFile.fileInfo.FullName));
                         MessageLog.LogWarning("Updating any of those files will update the same database file.");
                     }
                 }
-                else // If it has no local file to link it, then add it to the database only list
+                else
                 {
-                    ClobFile dbOnlyClob = new ClobFile(this);
-                    dbOnlyClob.dbClobFile = dbClobFile;
-                    this.DatabaseOnlyFiles.Add(dbOnlyClob);
+                    // If it has no local file to link it, then add it to the database only list
+                    ClobFile databaseOnlyFile = new ClobFile(this);
+                    databaseOnlyFile.dbClobFile = file;
+                    this.DatabaseOnlyFiles.Add(databaseOnlyFile);
                 }
             }
         }
