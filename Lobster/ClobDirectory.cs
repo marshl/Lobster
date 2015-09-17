@@ -69,16 +69,16 @@ namespace Lobster
         /// <returns>False if the directory in the ClobType could not be found, otherwise true.</returns>
         public bool BuildDirectoryTree()
         {
-            DirectoryInfo info = new DirectoryInfo(Path.Combine(this.ClobType.ParentConnection.codeSource, this.ClobType.directory));
+            DirectoryInfo info = new DirectoryInfo(Path.Combine(this.ClobType.ParentConnection.codeSource, this.ClobType.Directory));
             if (!info.Exists)
             {
                 MessageLog.LogWarning(info.FullName + " could not be found.");
-                LobsterMain.OnErrorMessage("Folder not found", "Folder \"" + info.FullName + "\" could not be found for ClobType " + this.ClobType.name);
+                LobsterMain.OnErrorMessage("Folder not found", "Folder \"" + info.FullName + "\" could not be found for ClobType " + this.ClobType.Name);
                 return false;
             }
 
             this.RootClobNode = new ClobNode(info, this);
-            if (this.ClobType.includeSubDirectories)
+            if (this.ClobType.IncludeSubDirectories)
             {
                 this.PopulateClobNodeDirectories_r(this.RootClobNode);
             }

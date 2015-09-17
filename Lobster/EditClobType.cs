@@ -4,18 +4,19 @@ using System.Windows.Forms;
 
 namespace Lobster
 {
-
     /// <summary>
     /// 'Now things begin to look more hopeful. This news alters them much for-the
-    ///  better.So far we have had no clear idea what to do.'
+    ///  better. So far we have had no clear idea what to do.'
     ///     -- Thorin
     /// [ _The Hobbits_, i: "An Unexpected Party"]
     /// </summary>
     public class EditClobType : EditCompositeObjectForm<ClobType>
     {
-        public EditClobType( ClobType _original, bool _newClobType ) : base( _original, _newClobType )
-        {
+        private DatabaseConnection parentConnection;
 
+        public EditClobType( ClobType _original, bool _newClobType, DatabaseConnection parentConnection ) : base( _original, _newClobType )
+        {
+            this.parentConnection = parentConnection;
         }
 
         protected override void InitializeComponent()
@@ -36,19 +37,19 @@ namespace Lobster
             if ( this.isNewObject )
             {
                 SaveFileDialog sfd = new SaveFileDialog();
-                if ( this.originalObject.fileLocation != null )
+                if ( this.parentConnection != null )
                 {
-                    sfd.InitialDirectory = new FileInfo( this.originalObject.fileLocation ).Directory.FullName;
+                    sfd.InitialDirectory = this.parentConnection.clobTypeDir;
                 }
                 sfd.AddExtension = true;
                 sfd.Filter = "eXtensible Markup Language File (*.xml)|*.xml";
-                sfd.FileName = "NewConnection.xml";
+                sfd.FileName = "NewClobType.xml";
                 DialogResult result = sfd.ShowDialog();
                 if ( result != DialogResult.OK )
                 {
                     return false;
                 }
-                this.workingObject.fileLocation = sfd.FileName;
+                this.workingObject.File = new FileInfo( sfd.FileName );
             }
             return true;
         }
@@ -57,11 +58,11 @@ namespace Lobster
         {
             try
             {
-                ClobType.Serialise( this.workingObject.fileLocation, this.workingObject );
+                ClobType.Serialise( this.workingObject.File.FullName, this.workingObject );
             }
             catch ( UnauthorizedAccessException )
             {
-                MessageBox.Show( "Cannot save ClobType. " + this.workingObject.fileLocation + " is currently in use by another program." );
+                MessageBox.Show( "Cannot save ClobType. " + this.workingObject.File + " is currently in use by another program." );
                 return false;
             }
             this.originalObject = this.workingObject;

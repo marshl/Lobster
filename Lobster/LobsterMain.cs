@@ -249,7 +249,7 @@ namespace Lobster
             Table table;
             ClobDirectory clobDir = _clobFile.ParentClobNode.BaseClobDirectory;
             // If there is > 1 tables in this ClobType, ask the user for which one to use
-            if (clobDir.ClobType.tables.Count > 1 )
+            if (clobDir.ClobType.Tables.Count > 1 )
             {
                 TablePicker tablePicker = new TablePicker(clobDir.ClobType );
                 DialogResult dialogResult = tablePicker.ShowDialog();
@@ -261,7 +261,7 @@ namespace Lobster
             }
             else
             {
-                table = clobDir.ClobType.tables[0];
+                table = clobDir.ClobType.Tables[0];
             }
 
             // If the table has a MimeType column, ask the user for the type to use

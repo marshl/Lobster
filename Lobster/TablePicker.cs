@@ -16,8 +16,8 @@ namespace Lobster
         public TablePicker( ClobType _clobType )
         {
             InitializeComponent();
-            Debug.Assert( _clobType.tables.Count > 0 );
-            foreach ( Table table in _clobType.tables )
+            Debug.Assert( _clobType.Tables.Count > 0 );
+            foreach ( Table table in _clobType.Tables )
             {
                 this.tableCombo.Items.Add( table );
             }

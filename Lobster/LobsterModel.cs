@@ -480,7 +480,7 @@ namespace Lobster
             
             ClobType ct = _clobDir.ClobType;
 
-            foreach ( Table table in ct.tables )
+            foreach ( Table table in ct.Tables )
             {
                 OracleCommand command = _con.CreateCommand();
                 command.CommandText = table.GetFileListCommand();
@@ -493,7 +493,7 @@ namespace Lobster
                 {
                     command.Dispose();
                     LobsterMain.OnErrorMessage( "Directory Comparison Error",
-                            "An invalid operation occurred when retriving the file list for  " + ct.name + ". Check the logs for more information." );
+                            "An invalid operation occurred when retriving the file list for  " + ct.Name + ". Check the logs for more information." );
                     MessageLog.LogError( "Error comparing to database: " + _e.Message + " when executing command " + command.CommandText );
                     return;
                 }

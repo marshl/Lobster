@@ -19,75 +19,119 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-
 namespace Lobster
 {
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
-    using System.Diagnostics;
-    using System.Globalization;
     using System.IO;
     using System.Xml.Serialization;
 
-    [XmlType( TypeName = "clobtype" )]
+    /// <summary>
+    /// A ClobType defines a particular usage of the database. In its most common form, A ClobType contains a single table that maps to a single directory on the file system.
+    /// ClobTypes are stored as Xml files which are deserialized into this structure.
+    /// </summary>
+    [XmlType("clobtype")]
     public class ClobType : ICloneable
     {
-        [DisplayName( "Name" )]
-        [Description( "The display name" )]
-        public string name { get; set; }
+        /// <summary>
+        /// The display name for this ClobType. This value has no functional impact, 
+        /// and is used for display purposes only.
+        /// </summary>
+        [DisplayName("Name")]
+        [Description("The display name")]
+        [XmlElement("name")]
+        public string Name { get; set; }
 
-        [DisplayName( "Directory" )]
-        [Description( "The name of the directory in CodeSource to be used for this ClobType. Directory separators can be used." )]
-        public string directory { get; set; }
+        /// <summary>
+        /// The name of the directory in CodeSource to be used for this ClobType. Directory separators can be used.
+        /// </summary>
+        [DisplayName("Directory")]
+        [Description("The name of the directory in CodeSource to be used for this ClobType. Directory separators can be used.")]
+        [XmlElement("directory")]
+        public string Directory { get; set; }
 
-        [DisplayName( "Include Subdirectories" )]
-        [Description( "Whether or not all subdirectories under the specified folder should also be used." )]
-        public bool includeSubDirectories { get; set; }
+        /// <summary>
+        /// Whether or not all subdirectories under the specified folder should also be used.
+        /// </summary>
+        [DisplayName("Include Subdirectories")]
+        [Description("Whether or not all subdirectories under the specified folder should also be used.")]
+        [XmlElement("includeSubDirectories")]
+        public bool IncludeSubDirectories { get; set; }
 
+        /// <summary>
+        /// Most ClobTypes use only a single table, but if there is more than one, then the user will be asked which to use when inserting a new file.
+        /// </summary>
+        [DisplayName("Table List")]
+        [Description("The tables used by this ClobType")]
+        [XmlArray("tables")]
+        public List<Table> Tables { get; set; }
+
+        /// <summary>
+        /// The file that stored this ClobType.
+        /// </summary>
         [XmlIgnore]
-        public string fileLocation;
+        [Browsable(false)]
+        public FileInfo File { get; set; }
 
+        /// <summary>
+        /// The <see cref="DatabaseConnection"/> object that stores this ClobType.
+        /// </summary>
         [XmlIgnore]
+        [Browsable(false)]
         public DatabaseConnection ParentConnection { get; private set; }
 
-        [DisplayName( "Table List" )]
-        [Description( "The tables used by this ClobType" )]
-        public List<Table> tables { get; set; }
-
-        public void Initialise( DatabaseConnection databaseConnection)
+        /// <summary>
+        /// Serializes a ClobType and writes it out to the given filename.
+        /// </summary>
+        /// <param name="filename">The name of the file to write to.</param>
+        /// <param name="clobType">The ClobType to serialize.</param>
+        public static void Serialise(string filename, ClobType clobType)
         {
-            this.tables.ForEach( x => x.LinkColumns() );
-            this.ParentConnection = databaseConnection;
-        }
-
-        public static void Serialise( string _fullpath, ClobType _clobType )
-        {
-            XmlSerializer xmls = new XmlSerializer( typeof( ClobType ) );
-            using ( StreamWriter streamWriter = new StreamWriter( _fullpath ) )
+            XmlSerializer xmls = new XmlSerializer(typeof(ClobType));
+            using (StreamWriter streamWriter = new StreamWriter(filename))
             {
-                xmls.Serialize( streamWriter, _clobType );
+                xmls.Serialize(streamWriter, clobType);
             }
         }
 
+        /// <summary>
+        /// Initializes values that cannot be set during deserialisation.
+        /// </summary>
+        /// <param name="parentConnection">The DatabaseConnection to set as this ClobType's parent.</param>
+        public void Initialise(DatabaseConnection parentConnection)
+        {
+            this.Tables.ForEach(x => x.LinkColumns());
+            this.ParentConnection = parentConnection;
+        }
+        
+        /// <summary>
+        /// Creates and returns a deep copy of this ClobType.
+        /// </summary>
+        /// <returns>A boxed copy of this ClobType.</returns>
         public object Clone()
         {
             ClobType copy = new ClobType();
-            copy.name = this.name;
-            copy.directory = this.directory;
-            copy.includeSubDirectories = this.includeSubDirectories;
+            copy.Name = this.Name;
+            copy.Directory = this.Directory;
+            copy.IncludeSubDirectories = this.IncludeSubDirectories;
+            copy.ParentConnection = this.ParentConnection;
 
-            copy.tables = new List<Table>();
-            if ( this.tables != null )
+            if (this.File != null)
             {
-                foreach ( Table table in this.tables )
+                copy.File = new FileInfo(this.File.FullName);
+            }
+
+            copy.Tables = new List<Table>();
+            if (this.Tables != null)
+            {
+                foreach (Table table in this.Tables)
                 {
-                    copy.tables.Add( (Table)table.Clone() );
+                    copy.Tables.Add((Table)table.Clone());
                 }
             }
-            copy.tables.ForEach( x => x.LinkColumns() );
-            copy.fileLocation = this.fileLocation;
 
+            copy.Initialise(this.ParentConnection);
             return copy;
         }
     }

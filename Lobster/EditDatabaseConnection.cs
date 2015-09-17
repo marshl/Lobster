@@ -42,7 +42,7 @@
             for (int i = 0; i < this.workingObject.clobTypeList.Count; ++i)
             {
                 ClobType clobType = this.workingObject.clobTypeList[i];
-                ListViewItem item = new ListViewItem(clobType.name);
+                ListViewItem item = new ListViewItem(clobType.Name);
 
                 this.subItemListView.Items.Add(item);
                 item.Tag = i;
@@ -118,8 +118,7 @@
         protected override void addSubItemButton_click(object sender, EventArgs e)
         {
             ClobType clobType = new ClobType();
-            clobType.fileLocation = this.workingObject.clobTypeDir;
-            EditClobType editForm = new EditClobType(clobType, true);
+            EditClobType editForm = new EditClobType(clobType, true, this.workingObject);
             DialogResult result = editForm.ShowDialog();
 
             if (result == DialogResult.OK)
@@ -164,7 +163,7 @@
             int clobTypeIndex = (int)this.subItemListView.SelectedItems[0].Tag;
             ClobType clobType = this.workingObject.clobTypeList[clobTypeIndex];
 
-            EditClobType editForm = new EditClobType(clobType, false);
+            EditClobType editForm = new EditClobType(clobType, false, this.workingObject);
             DialogResult ctResult = editForm.ShowDialog();
             this.workingObject.clobTypeList[clobTypeIndex] = editForm.originalObject;
             this.PopulateSubItemList();
