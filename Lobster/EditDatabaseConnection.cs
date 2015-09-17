@@ -95,11 +95,11 @@
         {
             try
             {
-                DatabaseConnection.Serialise(this.originalObject.fileLocation, this.originalObject);
+                DatabaseConnection.Serialise(this.workingObject.fileLocation, this.workingObject);
             }
             catch (UnauthorizedAccessException)
             {
-                MessageBox.Show("Cannot save DatabaseConnection. " + this.originalObject.fileLocation + " is locked.");
+                MessageBox.Show("Cannot save DatabaseConnection. " + this.workingObject.fileLocation + " is locked.");
                 return false;
             }
 
