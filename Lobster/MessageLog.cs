@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Windows.Forms;
 
@@ -30,7 +31,7 @@ namespace Lobster
 
             public override string ToString()
             {
-                return this.date + " [" + this.type + "]: " + this.text;
+                return this.date.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture) + " [" + this.type + "]: " + this.text;
             }
         }
         public List<Message> messageList;
