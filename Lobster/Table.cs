@@ -1,16 +1,38 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Xml.Serialization;
-
+﻿//-----------------------------------------------------------------------
+// <copyright file="filename.cs" company="marshl">
+// Copyright 2015, Liam Marshall, marshl.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+//
+//      And Mr. Drogo was staying at Brandy Hall with his father-in-law, old Master Gorbadoc, as he
+//      often did after his marriage (him being partial to his vittles, and old Gorbadoc keeping a mighty
+//      generous table);
+//          -- The Old Gaffer
+//      [ _The Lord of the Rings_, I/i: "A Long Expected Party"]
+//
+// </copyright>
+//-----------------------------------------------------------------------
 namespace Lobster
 {
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.Diagnostics;
+    using System.Globalization;
+    using System.Xml.Serialization;
+
     [DisplayName("Table")]
-    [XmlType(TypeName = "table")]
+    [XmlType("table")]
     public class Table : ICloneable
     {
         [DisplayName("Schema/Owner Name")]
@@ -42,7 +64,7 @@ namespace Lobster
             {
                 foreach (Column c in this.columns)
                 {
-                    c.parent = this;
+                    c.ParentTable = this;
                 }
             }
 
@@ -61,7 +83,7 @@ namespace Lobster
                    "UPDATE " + this.FullName
                  + " SET " + clobCol.FullName + " = :data";
 
-            Column dateCol = this.columns.Find(x => x.purpose == Column.Purpose.DATETIME);
+            Column dateCol = this.columns.Find(x => x.ColumnPurpose == Column.Purpose.DATETIME);
             if (dateCol != null)
             {
                 command += ", " + dateCol.FullName + " = SYSDATE";
@@ -70,9 +92,9 @@ namespace Lobster
             if (this.parentTable != null)
             {
                 Table pt = this.parentTable;
-                Column fkCol = this.columns.Find(x => x.purpose == Column.Purpose.FOREIGN_KEY);
-                Column parentIDCol = pt.columns.Find(x => x.purpose == Column.Purpose.ID);
-                Column parentMnemCol = pt.columns.Find(x => x.purpose == Column.Purpose.MNEMONIC);
+                Column fkCol = this.columns.Find(x => x.ColumnPurpose == Column.Purpose.FOREIGN_KEY);
+                Column parentIDCol = pt.columns.Find(x => x.ColumnPurpose == Column.Purpose.ID);
+                Column parentMnemCol = pt.columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
 
                 command += " WHERE " + fkCol.FullName + " = ("
                         + " SELECT " + parentIDCol.FullName
@@ -81,7 +103,7 @@ namespace Lobster
             }
             else
             {
-                Column mnemCol = this.columns.Find(x => x.purpose == Column.Purpose.MNEMONIC);
+                Column mnemCol = this.columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
                 command += " WHERE " + mnemCol.FullName + " = '" + _clobFile.DatabaseFile.mnemonic + "'";
             }
             return command;
@@ -91,8 +113,8 @@ namespace Lobster
         {
             Debug.Assert(this.parentTable != null);
             Table pt = this.parentTable;
-            Column idCol = pt.columns.Find(x => x.purpose == Column.Purpose.ID);
-            Column mnemCol = pt.columns.Find(x => x.purpose == Column.Purpose.MNEMONIC);
+            Column idCol = pt.columns.Find(x => x.ColumnPurpose == Column.Purpose.ID);
+            Column mnemCol = pt.columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
             Debug.Assert(idCol != null);
             Debug.Assert(mnemCol != null);
 
@@ -105,13 +127,13 @@ namespace Lobster
 
         public string BuildInsertChildStatement(string _mnemonic, string _mimeType)
         {
-            Column mnemCol = this.columns.Find(x => x.purpose == Column.Purpose.MNEMONIC);
+            Column mnemCol = this.columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
             Debug.Assert(mnemCol != null);
-            Column dateCol = this.columns.Find(x => x.purpose == Column.Purpose.DATETIME);
-            Column idCol = this.columns.Find(x => x.purpose == Column.Purpose.ID);
-            Column dataCol = this.columns.Find(x => x.purpose == Column.Purpose.CLOB_DATA
-               && (_mimeType == null || x.mimeTypes.Contains(_mimeType)));
-            Column fullNameCol = this.columns.Find(x => x.purpose == Column.Purpose.FULL_NAME);
+            Column dateCol = this.columns.Find(x => x.ColumnPurpose == Column.Purpose.DATETIME);
+            Column idCol = this.columns.Find(x => x.ColumnPurpose == Column.Purpose.ID);
+            Column dataCol = this.columns.Find(x => x.ColumnPurpose == Column.Purpose.CLOB_DATA
+               && (_mimeType == null || x.MimeTypeList.Contains(_mimeType)));
+            Column fullNameCol = this.columns.Find(x => x.ColumnPurpose == Column.Purpose.FULL_NAME);
 
             // Make a string for the column names...
             string insertCommand = "INSERT INTO " + this.FullName + " ( "
@@ -123,9 +145,9 @@ namespace Lobster
             if (this.parentTable != null)
             {
                 Table pt = this.parentTable;
-                Column fkCol = this.columns.Find(x => x.purpose == Column.Purpose.FOREIGN_KEY);
-                Column parentIDCol = pt.columns.Find(x => x.purpose == Column.Purpose.ID);
-                Column parentMnemCol = pt.columns.Find(x => x.purpose == Column.Purpose.MNEMONIC);
+                Column fkCol = this.columns.Find(x => x.ColumnPurpose == Column.Purpose.FOREIGN_KEY);
+                Column parentIDCol = pt.columns.Find(x => x.ColumnPurpose == Column.Purpose.ID);
+                Column parentMnemCol = pt.columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
 
                 insertCommand += ", " + fkCol.FullName;
 
@@ -143,7 +165,7 @@ namespace Lobster
 
                 if (_mimeType != null)
                 {
-                    Column mimeCol = this.columns.Find(x => x.purpose == Column.Purpose.MIME_TYPE);
+                    Column mimeCol = this.columns.Find(x => x.ColumnPurpose == Column.Purpose.MIME_TYPE);
                     Debug.Assert(mimeCol != null);
                     insertCommand += ", " + mimeCol.FullName;
                     valueCommand += ", " + _mimeType;
@@ -175,9 +197,9 @@ namespace Lobster
             if (this.parentTable != null)
             {
                 Table pt = this.parentTable;
-                Column fkCol = this.columns.Find(x => x.purpose == Column.Purpose.FOREIGN_KEY);
-                Column parentIDCol = pt.columns.Find(x => x.purpose == Column.Purpose.ID);
-                Column parentMnemCol = pt.columns.Find(x => x.purpose == Column.Purpose.MNEMONIC);
+                Column fkCol = this.columns.Find(x => x.ColumnPurpose == Column.Purpose.FOREIGN_KEY);
+                Column parentIDCol = pt.columns.Find(x => x.ColumnPurpose == Column.Purpose.ID);
+                Column parentMnemCol = pt.columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
                 return
                     "SELECT " + clobCol.FullName
                     + " FROM " + pt.FullName
@@ -187,7 +209,7 @@ namespace Lobster
             }
             else
             {
-                Column mnemCol = this.columns.Find(x => x.purpose == Column.Purpose.MNEMONIC);
+                Column mnemCol = this.columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
                 return
                     "SELECT " + clobCol.FullName
                     + " FROM " + this.FullName
@@ -197,14 +219,14 @@ namespace Lobster
 
         public string GetFileListCommand()
         {
-            Column mimeCol = this.columns.Find(x => x.purpose == Column.Purpose.MIME_TYPE);
+            Column mimeCol = this.columns.Find(x => x.ColumnPurpose == Column.Purpose.MIME_TYPE);
 
             if (this.parentTable != null)
             {
                 Table pt = this.parentTable;
-                Column fkCol = this.columns.Find(x => x.purpose == Column.Purpose.FOREIGN_KEY);
-                Column parentIDCol = pt.columns.Find(x => x.purpose == Column.Purpose.ID);
-                Column parentMnemCol = pt.columns.Find(x => x.purpose == Column.Purpose.MNEMONIC);
+                Column fkCol = this.columns.Find(x => x.ColumnPurpose == Column.Purpose.FOREIGN_KEY);
+                Column parentIDCol = pt.columns.Find(x => x.ColumnPurpose == Column.Purpose.ID);
+                Column parentMnemCol = pt.columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
 
                 return "SELECT " + parentMnemCol.FullName
                     + (mimeCol != null ? ", " + mimeCol.FullName : null)
@@ -214,7 +236,7 @@ namespace Lobster
             }
             else
             {
-                Column mnemCol = this.columns.Find(x => x.purpose == Column.Purpose.MNEMONIC);
+                Column mnemCol = this.columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
                 return "SELECT " + mnemCol.FullName
                     + (mimeCol != null ? ", " + mimeCol.FullName : null)
                     + " FROM " + this.FullName;

@@ -13,8 +13,8 @@ namespace Lobster
         public DatatypePicker( Column _column )
         {
             InitializeComponent();
-            Debug.Assert( _column.mimeTypes.Count > 0 );
-            foreach ( string str in _column.mimeTypes )
+            Debug.Assert( _column.MimeTypeList.Count > 0 );
+            foreach ( string str in _column.MimeTypeList )
             {
                 this.datatypeComboBox.Items.Add( str );
             }

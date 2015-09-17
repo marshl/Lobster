@@ -259,10 +259,10 @@ namespace Lobster
             using ( FileStream fs = Common.WaitForFile( _clobFile.LocalFile.FileInfo.FullName,
                 FileMode.Open, FileAccess.Read, FileShare.ReadWrite ) )
             {
-                Column column = _table.columns.Find( x => x.purpose == Column.Purpose.CLOB_DATA
-                    && ( _mimeType == null || x.mimeTypes.Contains( _mimeType ) ) );
+                Column column = _table.columns.Find( x => x.ColumnPurpose == Column.Purpose.CLOB_DATA
+                    && ( _mimeType == null || x.MimeTypeList.Contains( _mimeType ) ) );
                 // Binary mode
-                if ( column.dataType == Column.Datatype.BLOB )
+                if ( column.DataType == Column.Datatype.BLOB )
                 {
                     byte[] fileData = new byte[fs.Length];
                     fs.Read( fileData, 0, Convert.ToInt32( fs.Length ) );
@@ -274,7 +274,7 @@ namespace Lobster
                     StreamReader sr = new StreamReader( fs );
                     string contents = sr.ReadToEnd();
                     contents += this.GetClobFooterMessage( _mimeType );
-                    OracleDbType insertType = column.dataType == Column.Datatype.CLOB ? OracleDbType.Clob : OracleDbType.XmlType;
+                    OracleDbType insertType = column.DataType == Column.Datatype.CLOB ? OracleDbType.Clob : OracleDbType.XmlType;
                     _command.Parameters.Add( "data", insertType, contents, ParameterDirection.Input );
                 }
             }
@@ -418,7 +418,7 @@ namespace Lobster
                 
                 if ( reader.Read() )
                 {
-                    if ( column.dataType == Column.Datatype.BLOB )
+                    if ( column.DataType == Column.Datatype.BLOB )
                     {
                         OracleBlob blob = reader.GetOracleBlob( 0 );
                         File.WriteAllBytes( tempName, blob.Value );
@@ -426,8 +426,8 @@ namespace Lobster
                     else
                     {
                         string result;
-                        Column clobColumn =_clobFile.DatabaseFile.table.columns.Find( x => x.purpose == Column.Purpose.CLOB_DATA );
-                        if ( clobColumn.dataType == Column.Datatype.CLOB )
+                        Column clobColumn =_clobFile.DatabaseFile.table.columns.Find( x => x.ColumnPurpose == Column.Purpose.CLOB_DATA );
+                        if ( clobColumn.DataType == Column.Datatype.CLOB )
                         {
                             OracleClob clob = reader.GetOracleClob( 0 );
                             result = clob.Value;
@@ -502,7 +502,7 @@ namespace Lobster
                 {
                     DBClobFile dbClobFile = new DBClobFile();
                     dbClobFile.mnemonic = reader.GetString( 0 );
-                    dbClobFile.mimeType = table.columns.Find( x => x.purpose == Column.Purpose.MIME_TYPE ) != null ? reader.GetString( 1 ) : null;
+                    dbClobFile.mimeType = table.columns.Find( x => x.ColumnPurpose == Column.Purpose.MIME_TYPE ) != null ? reader.GetString( 1 ) : null;
                     dbClobFile.filename = this.ConvertMnemonicToFilename( dbClobFile.mnemonic, table, dbClobFile.mimeType );
                     dbClobFile.table = table;
                     _clobDir.DatabaseFileList.Add( dbClobFile );
@@ -526,7 +526,7 @@ namespace Lobster
         {
             Debug.Assert( _clobFile.LocalFile != null );
             string mnemonic = Path.GetFileNameWithoutExtension( _clobFile.LocalFile.FileInfo.Name );
-            if ( _table.columns.Find( x => x.purpose == Column.Purpose.MIME_TYPE ) != null )
+            if ( _table.columns.Find( x => x.ColumnPurpose == Column.Purpose.MIME_TYPE ) != null )
             {
                 MimeTypeList.MimeType mt = this.mimeTypeList.mimeTypes.Find( x => x.name == _mimeType );
                 if ( mt == null )
@@ -555,7 +555,7 @@ namespace Lobster
             }
 
             // Assume xml data types for tables without a datatype column
-            if ( _table.columns.Find( x => x.purpose == Column.Purpose.MIME_TYPE ) == null || prefix == null )
+            if ( _table.columns.Find( x => x.ColumnPurpose == Column.Purpose.MIME_TYPE ) == null || prefix == null )
             {
                 filename += ".xml";
             }

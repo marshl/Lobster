@@ -266,7 +266,7 @@ namespace Lobster
 
             // If the table has a MimeType column, ask the user for the type to use
             string mimeType = null;
-            Column mimeTypeColumn = table.columns.Find( x => x.purpose == Column.Purpose.MIME_TYPE );
+            Column mimeTypeColumn = table.columns.Find( x => x.ColumnPurpose == Column.Purpose.MIME_TYPE );
             if ( mimeTypeColumn != null )
             {
                 DatatypePicker typePicker = new DatatypePicker( mimeTypeColumn );
