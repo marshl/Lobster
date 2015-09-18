@@ -20,8 +20,8 @@ namespace Lobster
         {
             // Find the column that is used for storing the clob data that can store the mime type of this file
             Column col = this.table.columns.Find(
-                x => x.purpose == Column.Purpose.CLOB_DATA
-                    && ( this.mimeType == null || x.mimeTypes.Contains( this.mimeType ) ) );
+                x => x.ColumnPurpose == Column.Purpose.CLOB_DATA
+                    && ( this.mimeType == null || x.MimeTypeList.Contains( this.mimeType ) ) );
 
             if ( col == null )
             {
