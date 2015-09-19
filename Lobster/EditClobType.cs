@@ -39,7 +39,7 @@ namespace Lobster
                 SaveFileDialog sfd = new SaveFileDialog();
                 if ( this.parentConnection != null )
                 {
-                    sfd.InitialDirectory = this.parentConnection.clobTypeDir;
+                    sfd.InitialDirectory = this.parentConnection.ClobTypeDir;
                 }
                 sfd.AddExtension = true;
                 sfd.Filter = "eXtensible Markup Language File (*.xml)|*.xml";

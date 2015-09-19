@@ -39,9 +39,9 @@
         {
             this.subItemListView.Clear();
 
-            for (int i = 0; i < this.workingObject.clobTypeList.Count; ++i)
+            for (int i = 0; i < this.workingObject.ClobTypeList.Count; ++i)
             {
-                ClobType clobType = this.workingObject.clobTypeList[i];
+                ClobType clobType = this.workingObject.ClobTypeList[i];
                 ListViewItem item = new ListViewItem(clobType.Name);
 
                 this.subItemListView.Items.Add(item);
@@ -55,14 +55,14 @@
         /// <returns></returns>
         protected override bool ValidateChanges()
         {
-            if (this.workingObject.codeSource == null
-             || this.workingObject.clobTypeDir == null
-             || this.workingObject.host == null
-             || this.workingObject.name == null
-             || this.workingObject.password == null
-             || this.workingObject.port == null
-             || this.workingObject.sid == null
-             || this.workingObject.username == null)
+            if (this.workingObject.CodeSource == null
+             || this.workingObject.ClobTypeDir == null
+             || this.workingObject.Host == null
+             || this.workingObject.Name == null
+             || this.workingObject.Password == null
+             || this.workingObject.Port == null
+             || this.workingObject.SID == null
+             || this.workingObject.Username == null)
             {
                 MessageBox.Show("All fields must be completed before saving.", "Validation Errors");
                 return false;
@@ -81,7 +81,7 @@
                     return false;
                 }
 
-                this.workingObject.fileLocation = sfd.FileName;
+                this.workingObject.FileLocation = sfd.FileName;
             }
 
             return true;
@@ -95,11 +95,11 @@
         {
             try
             {
-                DatabaseConnection.Serialise(this.workingObject.fileLocation, this.workingObject);
+                DatabaseConnection.SerialiseToFile(this.workingObject.FileLocation, this.workingObject);
             }
             catch (UnauthorizedAccessException)
             {
-                MessageBox.Show("Cannot save DatabaseConnection. " + this.workingObject.fileLocation + " is locked.");
+                MessageBox.Show("Cannot save DatabaseConnection. " + this.workingObject.FileLocation + " is locked.");
                 return false;
             }
 
@@ -123,7 +123,7 @@
 
             if (result == DialogResult.OK)
             {
-                this.workingObject.clobTypeList.Add(editForm.originalObject);
+                this.workingObject.ClobTypeList.Add(editForm.originalObject);
                 this.PopulateSubItemList();
             }
         }
@@ -142,8 +142,8 @@
             }
 
             int clobTypeIndex = (int)this.subItemListView.SelectedItems[0].Tag;
-            ClobType clobType = this.workingObject.clobTypeList[clobTypeIndex];
-            this.workingObject.clobTypeList.Remove(clobType);
+            ClobType clobType = this.workingObject.ClobTypeList[clobTypeIndex];
+            this.workingObject.ClobTypeList.Remove(clobType);
             this.PopulateSubItemList();
         }
 
@@ -161,11 +161,11 @@
             }
 
             int clobTypeIndex = (int)this.subItemListView.SelectedItems[0].Tag;
-            ClobType clobType = this.workingObject.clobTypeList[clobTypeIndex];
+            ClobType clobType = this.workingObject.ClobTypeList[clobTypeIndex];
 
             EditClobType editForm = new EditClobType(clobType, false, this.workingObject);
             DialogResult ctResult = editForm.ShowDialog();
-            this.workingObject.clobTypeList[clobTypeIndex] = editForm.originalObject;
+            this.workingObject.ClobTypeList[clobTypeIndex] = editForm.originalObject;
             this.PopulateSubItemList();
         }
     }

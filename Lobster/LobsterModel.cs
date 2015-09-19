@@ -68,16 +68,16 @@ namespace Lobster
                 throw;
             }
 
-            dbConnection.fileLocation = _fullpath;
+            dbConnection.FileLocation = _fullpath;
 
             // If the CodeSource folder cannot be found, prompt the user for it
-            if ( dbConnection.codeSource == null || !Directory.Exists( dbConnection.codeSource ) )
+            if ( dbConnection.CodeSource == null || !Directory.Exists( dbConnection.CodeSource ) )
             {
-                string codeSourceDir = PromptForDirectory( "Please select your CodeSource directory for "+ dbConnection.name, null );
+                string codeSourceDir = PromptForDirectory( "Please select your CodeSource directory for "+ dbConnection.Name, null );
                 if ( codeSourceDir != null )
                 {
-                    dbConnection.codeSource = codeSourceDir;
-                    DatabaseConnection.Serialise( _fullpath, dbConnection );
+                    dbConnection.CodeSource = codeSourceDir;
+                    DatabaseConnection.SerialiseToFile( _fullpath, dbConnection );
                 }
                 else // Ignore config files that don't have a valid CodeSource folder
                 {
@@ -109,16 +109,16 @@ namespace Lobster
         private static OracleConnection OpenConnection( DatabaseConnection _config )
         {
             OracleConnection con = new OracleConnection();
-            con.ConnectionString = "User Id=" + _config.username
-                + ";Password=" + _config.password
+            con.ConnectionString = "User Id=" + _config.Username
+                + ";Password=" + _config.Password
                 + ";Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)("
-                + "HOST=" + _config.host + ")"
-                + "(PORT=" + _config.port + ")))(CONNECT_DATA="
-                + "(SID=" + _config.sid + ")(SERVER=DEDICATED)))"
-                + ";Pooling=" + ( _config.usePooling ? "true" : "false" );
+                + "HOST=" + _config.Host + ")"
+                + "(PORT=" + _config.Port + ")))(CONNECT_DATA="
+                + "(SID=" + _config.SID + ")(SERVER=DEDICATED)))"
+                + ";Pooling=" + ( _config.UsePooling ? "true" : "false" );
             try
             {
-                MessageLog.LogInfo( "Connecting to database " + _config.name + " using connection string " + con.ConnectionString );
+                MessageLog.LogInfo( "Connecting to database " + _config.Name + " using connection string " + con.ConnectionString );
                 con.Open();
             }
             catch ( Exception _e )
@@ -143,7 +143,7 @@ namespace Lobster
                 return;
             }
             
-            foreach ( KeyValuePair<ClobType, ClobDirectory> pair in this.currentConnection.clobTypeToDirectoryMap )
+            foreach ( KeyValuePair<ClobType, ClobDirectory> pair in this.currentConnection.ClobTypeToDirectoryMap )
             {
                 this.GetDatabaseFileListForDirectory( pair.Value, con );
             }
@@ -357,12 +357,12 @@ namespace Lobster
             }
             con.Close();
 
-            if ( _connection.clobTypeDir == null || !Directory.Exists( _connection.clobTypeDir ) )
+            if ( _connection.ClobTypeDir == null || !Directory.Exists( _connection.ClobTypeDir ) )
             {
-                _connection.clobTypeDir = PromptForDirectory( "Please select your Clob Type directory for " + _connection.name, _connection.codeSource );
-                if ( _connection.clobTypeDir != null )
+                _connection.ClobTypeDir = PromptForDirectory( "Please select your Clob Type directory for " + _connection.Name, _connection.CodeSource );
+                if ( _connection.ClobTypeDir != null )
                 {
-                    DatabaseConnection.Serialise( _connection.fileLocation, _connection );
+                    DatabaseConnection.SerialiseToFile( _connection.FileLocation, _connection );
                 }
                 else // Ignore config files that don't have a valid CodeSource folder
                 {
@@ -371,7 +371,7 @@ namespace Lobster
             }
 
             this.currentConnection = _connection;
-            this.currentConnection.PopulateClobDirectories( this );
+            this.currentConnection.PopulateClobDirectories();
             this.RequeryDatabase();
 
             return true;
@@ -382,7 +382,7 @@ namespace Lobster
             Debug.Assert( this.currentConnection != null );
             this.GetDatabaseFileLists();
 
-            foreach ( KeyValuePair<ClobType, ClobDirectory> pair in this.currentConnection.clobTypeToDirectoryMap )
+            foreach ( KeyValuePair<ClobType, ClobDirectory> pair in this.currentConnection.ClobTypeToDirectoryMap )
             {
                 pair.Value.GetLocalFiles();
             }

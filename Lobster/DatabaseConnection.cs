@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="filename.cs" company="marshl">
+// <copyright file="DatabaseConnection.cs" company="marshl">
 // Copyright 2015, Liam Marshall, marshl.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 //      'What did the Men of old use them for?' asked Pippin, ...
 //      'To see far off, and to converse in thought with one another,' said Gandalf
 //          [ _The Lord of the Rings_, III/xi: "The Palantir"]
-/// 
+// 
 // </copyright>
 //-----------------------------------------------------------------------
 namespace Lobster
@@ -33,142 +33,145 @@ namespace Lobster
     using System.Xml.Serialization;
 
     /// <summary>
-
+    /// Used to define how a database should be connected to, and where the ClobTypes are stored for it.
     /// </summary>
     [XmlType("DatabaseConfig")]
     public class DatabaseConnection : ICloneable
     {
         /// <summary>
-        /// 
+        /// The name of the connection. This is for display purposes only.
         /// </summary>
         [DisplayName("Name")]
         [Description("The name of the connection. This is for display purposes only.")]
         [XmlElement("name")]
-        public string name { get; set; }
+        public string Name { get; set; }
 
         /// <summary>
-        /// 
+        /// The host of the database.
         /// </summary>
         [DisplayName("Host")]
         [Description("The host of the database.")]
         [Category("Database")]
         [XmlElement("host")]
-        public string host { get; set; }
+        public string Host { get; set; }
 
         /// <summary>
-        /// 
+        /// The port the database is listening on. Usually 1521 for Oracle.
         /// </summary>
         [DisplayName("Port")]
         [Description("The port the database is listening on. Usually 1521 for Oracle.")]
         [Category("Database")]
         [XmlElement("port")]
-        public string port { get; set; }
+        public string Port { get; set; }
 
         /// <summary>
-        /// 
+        /// The Oracle System ID of the database.
         /// </summary>
         [DisplayName("SID")]
         [Description("The Oracle System ID of the database.")]
         [Category("Database")]
         [XmlElement("sid")]
-        public string sid { get; set; }
+        public string SID { get; set; }
 
         /// <summary>
-        /// 
+        /// The name of the user/schema to connect as.
         /// </summary>
         [DisplayName("User Name")]
         [Description("The name of the user/schema to connect as. It is important to connect as a user with the privileges to access every table that could be modified by Lobster.")]
         [Category("Database")]
         [XmlElement("username")]
-        public string username { get; set; }
+        public string Username { get; set; }
 
         /// <summary>
-        /// 
+        /// The password to connect with.
         /// </summary>
         [DisplayName("Password")]
         [Description("The password to connect with.")]
         [Category("Database")]
         [XmlElement("password")]
-        public string password { get; set; }
+        public string Password { get; set; }
 
         /// <summary>
-        /// 
+        /// This is the location of the CodeSource directory that is used for this database.
         /// </summary>
         [DisplayName("CodeSource Directory")]
         [Description("This is the location of the CodeSource directory that is used for this database. If it is invalid, Lobster will prompt you as it starts up.")]
         [Editor(typeof(FolderNameEditor), typeof(UITypeEditor))]
         [Category("Directories")]
         [XmlElement("codeSource")]
-        public string codeSource { get; set; }
+        public string CodeSource { get; set; }
 
         /// <summary>
-        /// 
+        /// If pooling is enabled, when Lobster connects to the Oracle database Oracle will remember the connection for a time, and reuse it if the same computer connects using the same connection string.
         /// </summary>
         [DisplayName("Pooling")]
         [Description("If pooling is enabled, when Lobster connects to the Oracle database Oracle will remember the connection for a time, and reuse it if the same computer connects using the same connection string.")]
         [XmlElement("usePooling")]
-        public bool usePooling { get; set; }
+        public bool UsePooling { get; set; }
 
         /// <summary>
-        /// 
+        /// The directory name where ClobTypes are stored.
         /// </summary>
         [DisplayName("ClobType Directory")]
         [Description("ClobTypes are Lobster specific Xml files for describing the different tables located on the database and the rules that govern them.")]
         [Editor(typeof(FolderNameEditor), typeof(UITypeEditor))]
         [Category("Directories")]
         [XmlElement("clobTypeDir")]
-        public string clobTypeDir { get; set; }
+        public string ClobTypeDir { get; set; }
 
+        /// <summary>
+        /// The Lobster model that is the parent of this connection.
+        /// </summary>
         [XmlIgnore]
         [Browsable(false)]
         public LobsterModel ParentModel { get; set; }
 
         /// <summary>
-        /// 
+        /// The name of the file where this was loaded from.
         /// </summary>
         [XmlIgnore]
         [Browsable(false)]
-        public string fileLocation;
+        public string FileLocation { get; set; }
 
         /// <summary>
-        /// 
+        /// The list of Clob Types that are loaded from the files location in the directory defined by ClobTypeDir.
         /// </summary>
         [XmlIgnore]
         [Browsable(false)]
-        public List<ClobType> clobTypeList;
+        public List<ClobType> ClobTypeList { get; set; }
 
         /// <summary>
-        /// 
+        /// A mapping of the ClobTypes to the ClobDirectories that are created when the database is connected to.
         /// </summary>
         [XmlIgnore]
         [Browsable(false)]
-        public Dictionary<ClobType, ClobDirectory> clobTypeToDirectoryMap;
+        public Dictionary<ClobType, ClobDirectory> ClobTypeToDirectoryMap { get; set; }
 
         /// <summary>
-        /// 
+        /// Writes a DatabaseConnection out to file.
         /// </summary>
-        /// <param name="_fullpath"></param>
-        /// <param name="_connection"></param>
-        public static void Serialise(string _fullpath, DatabaseConnection _connection)
+        /// <param name="filename">The file to write to.</param>
+        /// <param name="connection">The DatabaseConnection to serialise.</param>
+        public static void SerialiseToFile(string filename, DatabaseConnection connection)
         {
             XmlSerializer xmls = new XmlSerializer(typeof(DatabaseConnection));
-            using (StreamWriter streamWriter = new StreamWriter(_fullpath))
+            using (StreamWriter streamWriter = new StreamWriter(filename))
             {
-                xmls.Serialize(streamWriter, _connection);
+                xmls.Serialize(streamWriter, connection);
             }
         }
 
         /// <summary>
-        /// 
+        /// Loads each of the xml files in the ClobTypeDir (if they are valid).
         /// </summary>
         public void LoadClobTypes()
         {
-            this.clobTypeList = new List<ClobType>();
-            DirectoryInfo dirInfo = new DirectoryInfo(this.clobTypeDir);
+            this.ClobTypeList = new List<ClobType>();
+            DirectoryInfo dirInfo = new DirectoryInfo(this.ClobTypeDir);
             if (!dirInfo.Exists)
             {
-                MessageBox.Show(this.clobTypeDir + " could not be found.", "ClobType Load Failed", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
-                MessageLog.LogWarning("The directory " + dirInfo + " could not be found when loading " + this.clobTypeDir);
+                MessageBox.Show(this.ClobTypeDir + " could not be found.", "ClobType Load Failed", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
+                MessageLog.LogWarning("The directory " + dirInfo + " could not be found when loading connection " + this.Name);
                 return;
             }
 
@@ -181,15 +184,19 @@ namespace Lobster
 
                     clobType.Initialise(this);
                     clobType.File = file;
-                    this.clobTypeList.Add(clobType);
+                    this.ClobTypeList.Add(clobType);
                 }
-                catch (Exception _e)
+                catch (Exception e)
                 {
-                    if (_e is InvalidOperationException || _e is XmlException || _e is XmlSchemaValidationException || _e is IOException)
+                    if (e is InvalidOperationException || e is XmlException || e is XmlSchemaValidationException || e is IOException)
                     {
-                        MessageBox.Show("The ClobType " + file.FullName + " failed to load. Check the log for more information.", "ClobType Load Failed",
-                            MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
-                        MessageLog.LogError("An error occurred when loading the ClobType " + file.Name + " " + _e);
+                        MessageBox.Show(
+                            "The ClobType " + file.FullName + " failed to load. Check the log for more information.", 
+                            "ClobType Load Failed",
+                            MessageBoxButtons.OK, 
+                            MessageBoxIcon.Error, 
+                            MessageBoxDefaultButton.Button1);
+                        MessageLog.LogError("An error occurred when loading the ClobType " + file.Name + " " + e);
                         continue;
                     }
 
@@ -199,19 +206,18 @@ namespace Lobster
         }
 
         /// <summary>
-        /// 
+        /// Creates the ClobDirectories for each of the ClobTypes in this connection.
         /// </summary>
-        /// <param name="_model"></param>
-        public void PopulateClobDirectories(LobsterModel _model)
+        public void PopulateClobDirectories()
         {
-            this.clobTypeToDirectoryMap = new Dictionary<ClobType, ClobDirectory>();
-            foreach (ClobType clobType in this.clobTypeList)
+            this.ClobTypeToDirectoryMap = new Dictionary<ClobType, ClobDirectory>();
+            foreach (ClobType clobType in this.ClobTypeList)
             {
                 ClobDirectory clobDir = new ClobDirectory(clobType);
                 bool success = clobDir.BuildDirectoryTree();
                 if (success)
                 {
-                    this.clobTypeToDirectoryMap.Add(clobType, clobDir);
+                    this.ClobTypeToDirectoryMap.Add(clobType, clobDir);
                 }
             }
         }
@@ -222,12 +228,12 @@ namespace Lobster
         /// <param name="workingFileList">The file list to populate.</param>
         public void GetWorkingFiles(ref List<ClobFile> workingFileList)
         {
-            if (this.clobTypeToDirectoryMap == null)
+            if (this.ClobTypeToDirectoryMap == null)
             {
                 return;
             }
 
-            foreach (KeyValuePair<ClobType, ClobDirectory> pair in this.clobTypeToDirectoryMap)
+            foreach (KeyValuePair<ClobType, ClobDirectory> pair in this.ClobTypeToDirectoryMap)
             {
                 pair.Value.GetWorkingFiles(ref workingFileList);
             }
@@ -240,27 +246,27 @@ namespace Lobster
         public object Clone()
         {
             DatabaseConnection other = new DatabaseConnection();
-            other.name = this.name;
-            other.host = this.host;
-            other.sid = this.sid;
-            other.port = this.port;
-            other.username = this.username;
-            other.password = this.password;
-            other.codeSource = this.codeSource;
-            other.usePooling = this.usePooling;
-            other.clobTypeDir = this.clobTypeDir;
-            other.fileLocation = this.fileLocation;
+            other.Name = this.Name;
+            other.Host = this.Host;
+            other.SID = this.SID;
+            other.Port = this.Port;
+            other.Username = this.Username;
+            other.Password = this.Password;
+            other.CodeSource = this.CodeSource;
+            other.UsePooling = this.UsePooling;
+            other.ClobTypeDir = this.ClobTypeDir;
+            other.FileLocation = this.FileLocation;
             other.ParentModel = this.ParentModel;
 
-            other.clobTypeList = new List<ClobType>();
-            if (this.clobTypeList == null)
+            other.ClobTypeList = new List<ClobType>();
+            if (this.ClobTypeList == null)
             {
-                this.clobTypeList = new List<ClobType>();
+                this.ClobTypeList = new List<ClobType>();
             }
 
-            foreach (ClobType clobType in this.clobTypeList)
+            foreach (ClobType clobType in this.ClobTypeList)
             {
-                other.clobTypeList.Add((ClobType)clobType.Clone());
+                other.ClobTypeList.Add((ClobType)clobType.Clone());
             }
 
             return other;

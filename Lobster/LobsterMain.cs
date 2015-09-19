@@ -50,16 +50,16 @@ namespace Lobster
             for ( int i = 0; i < connectionList.Count; ++i )
             {
                 DatabaseConnection connection = connectionList[i];
-                ListViewItem item = new ListViewItem( connection.name );
-                string ipAddress = connection.host;
+                ListViewItem item = new ListViewItem( connection.Name );
+                string ipAddress = connection.Host;
 
                 ListViewItem.ListViewSubItem[] subItems = new ListViewItem.ListViewSubItem[]
                 {
                     new ListViewItem.ListViewSubItem( item, ipAddress ),
-                    new ListViewItem.ListViewSubItem( item, connection.port ),
-                    new ListViewItem.ListViewSubItem( item, connection.sid ),
-                    new ListViewItem.ListViewSubItem( item, connection.codeSource ),
-                    new ListViewItem.ListViewSubItem( item, connection.usePooling.ToString() ),
+                    new ListViewItem.ListViewSubItem( item, connection.Port ),
+                    new ListViewItem.ListViewSubItem( item, connection.SID ),
+                    new ListViewItem.ListViewSubItem( item, connection.CodeSource ),
+                    new ListViewItem.ListViewSubItem( item, connection.UsePooling.ToString() ),
                 };
                 item.SubItems.AddRange( subItems );
                 item.Tag = i;
@@ -79,8 +79,8 @@ namespace Lobster
             this.fileTreeView.Nodes.Clear();
             // Use the folder name as the root element
             DatabaseConnection dbc = this.lobsterModel.currentConnection;
-            TreeNode rootNode = new TreeNode( Path.GetFileName( dbc.codeSource ) ?? "CodeSource", 0, 0 );
-            foreach ( KeyValuePair<ClobType, ClobDirectory> pair in dbc.clobTypeToDirectoryMap )
+            TreeNode rootNode = new TreeNode( Path.GetFileName( dbc.CodeSource ) ?? "CodeSource", 0, 0 );
+            foreach ( KeyValuePair<ClobType, ClobDirectory> pair in dbc.ClobTypeToDirectoryMap )
             {
                 ClobDirectory clobDir = pair.Value;
                 TreeNode dirNode = new TreeNode( clobDir.RootClobNode.DirInfo.Name, 0, 0 );
@@ -681,7 +681,7 @@ namespace Lobster
         {
             DatabaseConnection newConnection = new DatabaseConnection();
             newConnection.ParentModel = this.lobsterModel;
-            newConnection.fileLocation = Path.Combine( Program.DB_CONFIG_DIR, "NewConnection.xml" ) ;
+            newConnection.FileLocation = Path.Combine( Program.DB_CONFIG_DIR, "NewConnection.xml" ) ;
             EditDatabaseConnection editForm = new EditDatabaseConnection( newConnection, true );
             DialogResult result = editForm.ShowDialog();
             if ( result == DialogResult.OK )
@@ -704,12 +704,12 @@ namespace Lobster
             DatabaseConnection databaseConnection = this.lobsterModel.dbConnectionList[configIndex];
 
             DialogResult result = MessageBox.Show( 
-                "Are you sure you want to permanently delete the connection " + databaseConnection.name ?? "New Connection" + "?",
+                "Are you sure you want to permanently delete the connection " + databaseConnection.Name ?? "New Connection" + "?",
                 "Remove Connection", MessageBoxButtons.OKCancel );
 
             if ( result == DialogResult.OK )
             {
-                File.Delete( databaseConnection.fileLocation );
+                File.Delete( databaseConnection.FileLocation );
                 this.lobsterModel.dbConnectionList.RemoveAt( configIndex );
                 this.PopulateConnectionList( this.lobsterModel.dbConnectionList );
             }
