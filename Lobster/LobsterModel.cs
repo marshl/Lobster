@@ -557,7 +557,7 @@ namespace Lobster
             // Assume xml data types for tables without a datatype column
             if ( _table.columns.Find( x => x.ColumnPurpose == Column.Purpose.MIME_TYPE ) == null || prefix == null )
             {
-                filename += ".xml";
+                filename += _table.DefaultExtension ?? ".xml";
             }
             else
             {

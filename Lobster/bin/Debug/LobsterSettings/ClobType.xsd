@@ -19,6 +19,7 @@
     <xs:sequence>
       <xs:element minOccurs="1" maxOccurs="1" name="schema" type="xs:string" />
       <xs:element minOccurs="1" maxOccurs="1" name="name" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="defaultExtension" type="xs:string"/>
       <xs:element minOccurs="1" maxOccurs="1" name="columns" type="ArrayOfColumn" />
       <xs:element minOccurs="0" maxOccurs="1" name="parentTable" type="table" />
     </xs:sequence>

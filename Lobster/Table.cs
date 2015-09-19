@@ -43,6 +43,11 @@ namespace Lobster
         [Description("The name of this table")]
         public string name { get; set; }
 
+        [DisplayName("Default Extension")]
+        [Description("The file extension that will be used to compare mnemonics on the database to local files. The default is '.xml'")]
+        [XmlElement("defaultExtension")]
+        public string DefaultExtension { get; set; }
+
         [DisplayName("Column List")]
         [Description("The columns in this table")]
         public List<Column> columns { get; set; }
@@ -72,6 +77,11 @@ namespace Lobster
             {
                 this.parentTable.LinkColumns();
             }
+        }
+
+        public bool ShouldSerializeDefaultExtension()
+        {
+            return this.DefaultExtension != null;
         }
 
         public string BuildUpdateStatement(ClobFile _clobFile)
