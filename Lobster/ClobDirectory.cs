@@ -137,7 +137,7 @@ namespace Lobster
 
             foreach (DBClobFile file in this.DatabaseFileList)
             {
-                List<ClobFile> matchingFiles = this.FileList.FindAll(x => x.LocalFile.FileInfo.Name.ToLower() == file.filename.ToLower());
+                List<ClobFile> matchingFiles = this.FileList.FindAll(x => x.LocalFile.FileInfo.Name.ToLower() == file.Filename.ToLower());
 
                 // Link all matching local files to that database file
                 if (matchingFiles.Count > 0)
@@ -145,7 +145,7 @@ namespace Lobster
                     matchingFiles.ForEach(x => x.DatabaseFile = file);
                     if (matchingFiles.Count > 1)
                     {
-                        MessageLog.LogWarning("Multiple local files have been found for the database file " + file.filename + " from the table " + file.table.FullName);
+                        MessageLog.LogWarning("Multiple local files have been found for the database file " + file.Filename + " from the table " + file.ParentTable.FullName);
                         matchingFiles.ForEach(x => MessageLog.LogWarning(x.LocalFile.FileInfo.FullName));
                         MessageLog.LogWarning("Updating any of those files will update the same database file.");
                     }

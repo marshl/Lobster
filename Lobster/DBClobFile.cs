@@ -1,40 +1,90 @@
-﻿using System;
+﻿//-----------------------------------------------------------------------
+// <copyright file="DBClobFile.cs" company="marshl">
+// Copyright 2015, Liam Marshall, marshl.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+//      But most of the folk of the old Shire regarded the Bucklanders as peculiar,
+//      half foreigners as it were.
+// 
+//      [ _The Lord of the Rings_, I/v: "A Conspiracy Unmasked"]
+//
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace Lobster
 {
+    using System;
+
     /// <summary>
-    /// But most of the folk of the old Shire regarded the Bucklanders as peculiar,
-    /// half foreigners as it were.
-    /// 
-    /// [ _The Lord of the Rings_, I/v: "A Conspiracy Unmasked"]
+    /// A DBClobFile describes a row in a table on the database used by a ClobType.
     /// </summary>
     public class DBClobFile
     {
-        public string mnemonic;
-        public string mimeType;
-        public string filename;
+        /// <summary>
+        /// The mnemonic that came from the mnemonic column. 
+        /// </summary>
+        public string Mnemonic { get; set; }
 
-        public Table table;
+        /// <summary>
+        /// The mime type stored against this file, if it exists.
+        /// </summary>
+        public string MimeType { get; set; }
 
+        /// <summary>
+        /// The name of file this DBClobFile should match to.
+        /// The mnemonic and mimetype is processed to get this value.
+        /// </summary>
+        public string Filename { get; set; }
+
+        /// <summary>
+        /// The table that this file was pulled from.
+        /// </summary>
+        public Table ParentTable { get; set; }
+
+        /// <summary>
+        /// Returns the column that data from this row should be pulled from, depending on the mnemonic.
+        /// </summary>
+        /// <returns>The column, if it exists</returns>
+        /// <exception cref="ClobColumnNotFoundException">Thrown when a column that matches the mime type isn't found.</exception>
         public Column GetColumn()
         {
             // Find the column that is used for storing the clob data that can store the mime type of this file
-            Column col = this.table.columns.Find(
+            Column col = this.ParentTable.columns.Find(
                 x => x.ColumnPurpose == Column.Purpose.CLOB_DATA
-                    && ( this.mimeType == null || x.MimeTypeList.Contains( this.mimeType ) ) );
+                    && (this.MimeType == null || x.MimeTypeList.Contains(this.MimeType)));
 
-            if ( col == null )
+            if (col == null)
             {
-                throw new ClobColumnNotFoundException( this );
+                throw new ClobColumnNotFoundException(this);
             }
 
             return col;
         }
     }
 
+    /// <summary>
+    /// An exception thrown when a column isn't found that matches the given mime type
+    /// </summary>
     public class ClobColumnNotFoundException : Exception
     {
-        public ClobColumnNotFoundException( DBClobFile _dbClobFile )
-            : base ( "The clob column for file " + _dbClobFile.filename + " of mimetype " + _dbClobFile.mimeType + " could not be found the table " + _dbClobFile.table.FullName ) { }
+        /// <summary>
+        /// Default constructor for <see cref="ColumnNotFoundException"/>
+        /// </summary>
+        /// <param name="dbClobFile"></param>
+        public ClobColumnNotFoundException(DBClobFile dbClobFile)
+            : base("The clob column for file " + dbClobFile.Filename + " of mimetype " + dbClobFile.MimeType + " could not be found the table " + dbClobFile.ParentTable.FullName)
+        {
+
+        }
     }
 }

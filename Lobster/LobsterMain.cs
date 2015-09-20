@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Lobster.Properties;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -36,7 +37,7 @@ namespace Lobster
             this.InitializeComponent();
             this.lobsterModel = new LobsterModel();
             
-            this.lobsterModel.LoadDatabaseConfig();
+            this.lobsterModel.LoadDatabaseConnections();
 
             this.PopulateConnectionList( this.lobsterModel.dbConnectionList );
 
@@ -152,7 +153,7 @@ namespace Lobster
 
         public ListViewItem GetListViewRowForClobFile( ClobFile _clobFile )
         {
-            string filename = _clobFile.LocalFile != null ? _clobFile.LocalFile.FileInfo.Name : _clobFile.DatabaseFile.filename;
+            string filename = _clobFile.LocalFile != null ? _clobFile.LocalFile.FileInfo.Name : _clobFile.DatabaseFile.Filename;
             int imageHandle;
             string dateValue = "";
             string status;
@@ -681,7 +682,7 @@ namespace Lobster
         {
             DatabaseConnection newConnection = new DatabaseConnection();
             newConnection.ParentModel = this.lobsterModel;
-            newConnection.FileLocation = Path.Combine( Program.DB_CONFIG_DIR, "NewConnection.xml" ) ;
+            newConnection.FileLocation = Path.Combine(Settings.Default.ConnectionDir, "NewConnection.xml" ) ;
             EditDatabaseConnection editForm = new EditDatabaseConnection( newConnection, true );
             DialogResult result = editForm.ShowDialog();
             if ( result == DialogResult.OK )

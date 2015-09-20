@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Lobster.Properties;
+using System;
 using System.IO;
 using System.Windows.Forms;
 
@@ -13,11 +14,10 @@ namespace Lobster
     /// </summary>
     static class Program
     {
-        public static string SETTINGS_DIR = "LobsterSettings";
-        public static string DB_CONFIG_DIR = SETTINGS_DIR + "\\DatabaseConnections";
-        public static string LOG_FILE = "lobster.log";
+        public const string SETTINGS_DIR = "LobsterSettings";
+        public const string LOG_FILE = "lobster.log";
 
-        public static int BALLOON_TOOLTIP_DURATION_MS = 2000;
+        public const int BALLOON_TOOLTIP_DURATION_MS = 2000;
 
         [STAThread]
         static void Main()
@@ -41,18 +41,26 @@ namespace Lobster
                 return;
             }
 
-            if ( !Directory.Exists( DB_CONFIG_DIR ) )
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+
+            if (Settings.Default.ConnectionDir == null || !Directory.Exists(Settings.Default.ConnectionDir) )
             {
-                DialogResult result = MessageBox.Show( "The Database Connections directory " + DB_CONFIG_DIR + " could not be found.", "Directory Not Found", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1 );
-                return;
+                string connectionDir = LobsterModel.PromptForDirectory("Please select your DatabaseConnections folder", null);
+                
+                if (connectionDir == null)
+                {
+                    return;
+                }
+
+                Settings.Default.ConnectionDir = connectionDir;
+                Settings.Default.Save();
             }
 
 #if !DEBUG
             try
 #endif
             {
-                Application.EnableVisualStyles();
-                Application.SetCompatibleTextRenderingDefault( false );
                 LobsterMain lobsterMain = new LobsterMain();
                 Application.Run( lobsterMain );
             }

@@ -21,8 +21,10 @@
 //-----------------------------------------------------------------------
 namespace Lobster
 {
+    using Properties;
     using System;
     using System.Collections.Generic;
+    using System.Configuration;
     using System.IO;
     using System.Linq;
     using System.Threading;
@@ -184,6 +186,11 @@ namespace Lobster
             }
 
             reader.Close();
+        }
+
+        public static bool DoesSettingExist(string settingName)
+        {
+            return Settings.Default.Properties.Cast<SettingsProperty>().Any(prop => prop.Name == settingName);
         }
     }
 }

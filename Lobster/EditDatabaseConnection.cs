@@ -1,5 +1,6 @@
 ﻿namespace Lobster
 {
+    using Properties;
     using System;
     using System.IO;
     using System.Windows.Forms;
@@ -71,7 +72,7 @@
             if (this.isNewObject)
             {
                 SaveFileDialog sfd = new SaveFileDialog();
-                sfd.InitialDirectory = Path.Combine(Directory.GetCurrentDirectory(), Program.DB_CONFIG_DIR);
+                sfd.InitialDirectory = Path.Combine(Directory.GetCurrentDirectory(), Settings.Default.ConnectionDir);
                 sfd.AddExtension = true;
                 sfd.Filter = "eXtensible Markup Language File (*.xml)|*.xml";
                 sfd.FileName = "NewConnection.xml";

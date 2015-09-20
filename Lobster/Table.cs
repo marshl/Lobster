@@ -109,12 +109,12 @@ namespace Lobster
                 command += " WHERE " + fkCol.FullName + " = ("
                         + " SELECT " + parentIDCol.FullName
                         + " FROM " + pt.FullName
-                        + " WHERE " + parentMnemCol.FullName + " = '" + _clobFile.DatabaseFile.mnemonic + "')";
+                        + " WHERE " + parentMnemCol.FullName + " = '" + _clobFile.DatabaseFile.Mnemonic + "')";
             }
             else
             {
                 Column mnemCol = this.columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
-                command += " WHERE " + mnemCol.FullName + " = '" + _clobFile.DatabaseFile.mnemonic + "'";
+                command += " WHERE " + mnemCol.FullName + " = '" + _clobFile.DatabaseFile.Mnemonic + "'";
             }
             return command;
         }
