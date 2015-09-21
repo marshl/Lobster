@@ -45,7 +45,7 @@ namespace Lobster
             this.editConnectionButton = new System.Windows.Forms.Button();
             this.removeConnectionButton = new System.Windows.Forms.Button();
             this.newConnectionButton = new System.Windows.Forms.Button();
-            this.connectionListView = new System.Windows.Forms.ListView();
+            this.connectionListView = new Lobster.NativeListView();
             this.connectionNameColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.connectionHostColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.connectionPortColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));

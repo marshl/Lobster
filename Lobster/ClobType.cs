@@ -79,7 +79,7 @@ namespace Lobster
         /// </summary>
         [XmlIgnore]
         [Browsable(false)]
-        public DatabaseConnection ParentConnection { get; private set; }
+        public DatabaseConnection ParentConnection { get; set; }
 
         /// <summary>
         /// Serializes a ClobType and writes it out to the given filename.

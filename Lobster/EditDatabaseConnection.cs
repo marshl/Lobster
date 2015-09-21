@@ -27,6 +27,7 @@
         protected override void InitializeComponent()
         {
             base.InitializeComponent();
+            this.Text = "Edit Database Connection";
             this.editObjectTabPage.Text = "Database Connection";
             this.subItemTabPage.Text = "Clob Types";
 
@@ -119,7 +120,8 @@
         protected override void addSubItemButton_click(object sender, EventArgs e)
         {
             ClobType clobType = new ClobType();
-            EditClobType editForm = new EditClobType(clobType, true, this.workingObject);
+            clobType.ParentConnection = this.workingObject;
+            EditClobType editForm = new EditClobType(clobType, true);
             DialogResult result = editForm.ShowDialog();
 
             if (result == DialogResult.OK)
@@ -164,7 +166,7 @@
             int clobTypeIndex = (int)this.subItemListView.SelectedItems[0].Tag;
             ClobType clobType = this.workingObject.ClobTypeList[clobTypeIndex];
 
-            EditClobType editForm = new EditClobType(clobType, false, this.workingObject);
+            EditClobType editForm = new EditClobType(clobType, false);
             DialogResult ctResult = editForm.ShowDialog();
             this.workingObject.ClobTypeList[clobTypeIndex] = editForm.originalObject;
             this.PopulateSubItemList();

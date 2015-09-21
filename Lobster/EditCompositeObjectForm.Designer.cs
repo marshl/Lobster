@@ -38,7 +38,7 @@
             this.editSubItemButton = new System.Windows.Forms.Button();
             this.removeSubItemButton = new System.Windows.Forms.Button();
             this.addSubItemButton = new System.Windows.Forms.Button();
-            this.subItemListView = new System.Windows.Forms.ListView();
+            this.subItemListView = new Lobster.NativeListView();
             this.editObjectTabControl.SuspendLayout();
             this.editObjectTabPage.SuspendLayout();
             this.subItemTabPage.SuspendLayout();
@@ -166,6 +166,7 @@
             // 
             this.subItemListView.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
+            this.subItemListView.FullRowSelect = true;
             this.subItemListView.Location = new System.Drawing.Point(6, 6);
             this.subItemListView.Name = "subItemListView";
             this.subItemListView.Size = new System.Drawing.Size(368, 399);
