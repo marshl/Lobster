@@ -32,17 +32,18 @@ namespace Lobster
     public partial class DatatypePicker : Form
     {
         /// <summary>
-        /// The default constructor for <see cref="DatatypePicker"/>.
+        /// Initializes a new instance of the <see cref="DatatypePicker"/> class.
         /// </summary>
         /// <param name="column">The mime type column that definees the mime types that can be chosen from.</param>
         public DatatypePicker(Column column)
         {
             this.InitializeComponent();
-            Debug.Assert(column.MimeTypeList.Count > 0);
+            Debug.Assert(column.MimeTypeList.Count > 0, "The column must have at least one mime type.");
             foreach (string str in column.MimeTypeList)
             {
                 this.datatypeComboBox.Items.Add(str);
             }
+
             this.datatypeComboBox.SelectedIndex = 0;
         }
 
@@ -53,7 +54,7 @@ namespace Lobster
         /// <param name="e">The event arguments.</param>
         private void datatypeAccept_Click_1(object sender, EventArgs e)
         {
-            if (datatypeComboBox.Text != "")
+            if (datatypeComboBox.Text != string.Empty)
             {
                 this.DialogResult = DialogResult.OK;
                 this.Close();
