@@ -71,20 +71,4 @@ namespace Lobster
             return col;
         }
     }
-
-    /// <summary>
-    /// An exception thrown when a column isn't found that matches the given mime type
-    /// </summary>
-    public class ClobColumnNotFoundException : Exception
-    {
-        /// <summary>
-        /// Default constructor for <see cref="ColumnNotFoundException"/>
-        /// </summary>
-        /// <param name="dbClobFile"></param>
-        public ClobColumnNotFoundException(DBClobFile dbClobFile)
-            : base("The clob column for file " + dbClobFile.Filename + " of mimetype " + dbClobFile.MimeType + " could not be found the table " + dbClobFile.ParentTable.FullName)
-        {
-
-        }
-    }
 }

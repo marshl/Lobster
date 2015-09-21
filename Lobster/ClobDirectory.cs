@@ -13,9 +13,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// A box without hinges, key, or lid,
-// Yet golden treasure inside is hid,
-// [ _The Hobbit_, V: "Riddles in the Dark"]
+//      A box without hinges, key, or lid,
+//      Yet golden treasure inside is hid,
+//
+//      [ _The Hobbit_, V: "Riddles in the Dark"]
+//
 // </copyright>
 //-----------------------------------------------------------------------
 namespace Lobster
