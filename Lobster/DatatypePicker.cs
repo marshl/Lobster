@@ -12,13 +12,15 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 //
 //      "Who are you and what do you want?" he asked gruffly, standing in front of them and towering
 //      tall above Gandalf.
 //          --Beorn
+//
 //      [ _The Hobbit_, VII: "Queer Lodgings"]
 //
-// </copyright>
 //-----------------------------------------------------------------------
 namespace Lobster
 {

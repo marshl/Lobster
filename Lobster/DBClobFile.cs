@@ -12,13 +12,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 //
 //      But most of the folk of the old Shire regarded the Bucklanders as peculiar,
 //      half foreigners as it were.
 // 
 //      [ _The Lord of the Rings_, I/v: "A Conspiracy Unmasked"]
 //
-// </copyright>
 //-----------------------------------------------------------------------
 
 namespace Lobster

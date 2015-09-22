@@ -674,7 +674,7 @@ namespace Lobster
 
             EditDatabaseConnection editForm = new EditDatabaseConnection( connectionRef, false );
             DialogResult result = editForm.ShowDialog();
-            this.lobsterModel.dbConnectionList[configIndex] = editForm.originalObject;
+            this.lobsterModel.dbConnectionList[configIndex] = editForm.OriginalObject;
             this.PopulateConnectionList( this.lobsterModel.dbConnectionList );
         }
 
@@ -687,7 +687,7 @@ namespace Lobster
             DialogResult result = editForm.ShowDialog();
             if ( result == DialogResult.OK )
             {
-                this.lobsterModel.dbConnectionList.Add( editForm.originalObject );
+                this.lobsterModel.dbConnectionList.Add( editForm.OriginalObject );
                 this.PopulateConnectionList( this.lobsterModel.dbConnectionList );
             }
         }

@@ -31,7 +31,7 @@
             this.editObjectTabPage.Text = "Database Connection";
             this.subItemTabPage.Text = "Clob Types";
 
-            this.applyButton.Enabled = !this.isNewObject;
+            this.applyButton.Enabled = !this.IsNewObject;
         }
 
         /// <summary>
@@ -41,9 +41,9 @@
         {
             this.subItemListView.Clear();
 
-            for (int i = 0; i < this.workingObject.ClobTypeList.Count; ++i)
+            for (int i = 0; i < this.WorkingObject.ClobTypeList.Count; ++i)
             {
-                ClobType clobType = this.workingObject.ClobTypeList[i];
+                ClobType clobType = this.WorkingObject.ClobTypeList[i];
                 ListViewItem item = new ListViewItem(clobType.Name);
 
                 this.subItemListView.Items.Add(item);
@@ -57,20 +57,20 @@
         /// <returns></returns>
         protected override bool ValidateChanges()
         {
-            if (this.workingObject.CodeSource == null
-             || this.workingObject.ClobTypeDir == null
-             || this.workingObject.Host == null
-             || this.workingObject.Name == null
-             || this.workingObject.Password == null
-             || this.workingObject.Port == null
-             || this.workingObject.SID == null
-             || this.workingObject.Username == null)
+            if (this.WorkingObject.CodeSource == null
+             || this.WorkingObject.ClobTypeDir == null
+             || this.WorkingObject.Host == null
+             || this.WorkingObject.Name == null
+             || this.WorkingObject.Password == null
+             || this.WorkingObject.Port == null
+             || this.WorkingObject.SID == null
+             || this.WorkingObject.Username == null)
             {
                 MessageBox.Show("All fields must be completed before saving.", "Validation Errors");
                 return false;
             }
 
-            if (this.isNewObject)
+            if (this.IsNewObject)
             {
                 SaveFileDialog sfd = new SaveFileDialog();
                 sfd.InitialDirectory = Path.Combine(Directory.GetCurrentDirectory(), Settings.Default.ConnectionDir);
@@ -83,7 +83,7 @@
                     return false;
                 }
 
-                this.workingObject.FileLocation = sfd.FileName;
+                this.WorkingObject.FileLocation = sfd.FileName;
             }
 
             return true;
@@ -97,18 +97,18 @@
         {
             try
             {
-                DatabaseConnection.SerialiseToFile(this.workingObject.FileLocation, this.workingObject);
+                DatabaseConnection.SerialiseToFile(this.WorkingObject.FileLocation, this.WorkingObject);
             }
             catch (UnauthorizedAccessException)
             {
-                MessageBox.Show("Cannot save DatabaseConnection. " + this.workingObject.FileLocation + " is locked.");
+                MessageBox.Show("Cannot save DatabaseConnection. " + this.WorkingObject.FileLocation + " is locked.");
                 return false;
             }
 
-            this.originalObject = this.workingObject;
-            this.workingObject = (DatabaseConnection)this.originalObject.Clone();
+            this.OriginalObject = this.WorkingObject;
+            this.WorkingObject = (DatabaseConnection)this.OriginalObject.Clone();
 
-            this.isNewObject = false;
+            this.IsNewObject = false;
             return true;
         }
 
@@ -120,13 +120,13 @@
         protected override void addSubItemButton_click(object sender, EventArgs e)
         {
             ClobType clobType = new ClobType();
-            clobType.ParentConnection = this.workingObject;
+            clobType.ParentConnection = this.WorkingObject;
             EditClobType editForm = new EditClobType(clobType, true);
             DialogResult result = editForm.ShowDialog();
 
             if (result == DialogResult.OK)
             {
-                this.workingObject.ClobTypeList.Add(editForm.originalObject);
+                this.WorkingObject.ClobTypeList.Add(editForm.OriginalObject);
                 this.PopulateSubItemList();
             }
         }
@@ -145,8 +145,8 @@
             }
 
             int clobTypeIndex = (int)this.subItemListView.SelectedItems[0].Tag;
-            ClobType clobType = this.workingObject.ClobTypeList[clobTypeIndex];
-            this.workingObject.ClobTypeList.Remove(clobType);
+            ClobType clobType = this.WorkingObject.ClobTypeList[clobTypeIndex];
+            this.WorkingObject.ClobTypeList.Remove(clobType);
             this.PopulateSubItemList();
         }
 
@@ -164,11 +164,11 @@
             }
 
             int clobTypeIndex = (int)this.subItemListView.SelectedItems[0].Tag;
-            ClobType clobType = this.workingObject.ClobTypeList[clobTypeIndex];
+            ClobType clobType = this.WorkingObject.ClobTypeList[clobTypeIndex];
 
             EditClobType editForm = new EditClobType(clobType, false);
             DialogResult ctResult = editForm.ShowDialog();
-            this.workingObject.ClobTypeList[clobTypeIndex] = editForm.originalObject;
+            this.WorkingObject.ClobTypeList[clobTypeIndex] = editForm.OriginalObject;
             this.PopulateSubItemList();
         }
     }

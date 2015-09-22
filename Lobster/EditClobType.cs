@@ -12,14 +12,15 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 //
 //      'Now things begin to look more hopeful. This news alters them much for-the
 //      better. So far we have had no clear idea what to do.'
-//      -- Thorin
+//          -- Thorin
 //
 //      [ _The Hobbits_, i: "An Unexpected Party"]
 //
-// </copyright>
 //-----------------------------------------------------------------------
 namespace Lobster
 {
@@ -52,7 +53,7 @@ namespace Lobster
             this.editObjectTabPage.Text = "ClobType";
             this.subItemTabPage.Text = "Clob Types";
             this.editObjectTabControl.TabPages.Remove(this.subItemTabPage);
-            this.applyButton.Enabled = !this.isNewObject;
+            this.applyButton.Enabled = !this.IsNewObject;
         }
 
         /// <summary>
@@ -69,12 +70,12 @@ namespace Lobster
         /// <returns>True if the form content was validated successfully, otherwise false.</returns>
         protected override bool ValidateChanges()
         {
-            if (this.isNewObject)
+            if (this.IsNewObject)
             {
                 SaveFileDialog sfd = new SaveFileDialog();
-                if (this.workingObject.ParentConnection != null)
+                if (this.WorkingObject.ParentConnection != null)
                 {
-                    sfd.InitialDirectory = this.workingObject.ParentConnection.ClobTypeDir;
+                    sfd.InitialDirectory = this.WorkingObject.ParentConnection.ClobTypeDir;
                 }
 
                 sfd.AddExtension = true;
@@ -86,7 +87,7 @@ namespace Lobster
                     return false;
                 }
 
-                this.workingObject.File = new FileInfo(sfd.FileName);
+                this.WorkingObject.File = new FileInfo(sfd.FileName);
             }
 
             return true;
@@ -100,18 +101,18 @@ namespace Lobster
         {
             try
             {
-                ClobType.Serialise(this.workingObject.File.FullName, this.workingObject);
-                MessageLog.LogInfo("ClobType " + this.workingObject.Name + " was saved to " + this.workingObject.File.FullName);
+                ClobType.Serialise(this.WorkingObject.File.FullName, this.WorkingObject);
+                MessageLog.LogInfo("ClobType " + this.WorkingObject.Name + " was saved to " + this.WorkingObject.File.FullName);
             }
             catch (UnauthorizedAccessException)
             {
-                MessageBox.Show("Cannot save ClobType. " + this.workingObject.File + " is currently in use by another program.");
+                MessageBox.Show("Cannot save ClobType. " + this.WorkingObject.File + " is currently in use by another program.");
                 return false;
             }
 
-            this.originalObject = this.workingObject;
-            this.workingObject = (ClobType)this.originalObject.Clone();
-            this.isNewObject = false;
+            this.OriginalObject = this.WorkingObject;
+            this.WorkingObject = (ClobType)this.OriginalObject.Clone();
+            this.IsNewObject = false;
 
             return true;
         }

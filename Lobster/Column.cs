@@ -12,13 +12,15 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 //
-//          ... where the walls were nearest could
+//       ... where the walls were nearest could
 //      dimly be seen coats of mail, helms and axes, swords and spears hanging; and there in rows
 //      stood great jars and vessels filled with a wealth that could not be guessed.
-//          [ _The Hobbit_, XII "Inside Information" ] 
+//      
+//      [ _The Hobbit_, XII "Inside Information" ] 
 //
-// </copyright>
 //-----------------------------------------------------------------------
 namespace Lobster
 {

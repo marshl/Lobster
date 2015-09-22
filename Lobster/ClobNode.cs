@@ -12,13 +12,15 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 //
 //      All about them as they lay hung the darkness, hollow and immense,
 //      and they were oppressed by the loneliness and vastness of the dolven halls and
 //      endlessly branching stairs and passages.
-//          [ _The Lord of the Rings_, II/iv: "A Journey in the Dark"]
 //
-// </copyright>
+//      [ _The Lord of the Rings_, II/iv: "A Journey in the Dark"]
+//
 //-----------------------------------------------------------------------
 namespace Lobster
 {

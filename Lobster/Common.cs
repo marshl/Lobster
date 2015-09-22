@@ -12,12 +12,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 //
 //      'Very useful, no doubt, that was to Saruman; yet it seems that he was not content.'
 //          -- Gandalf
+//
 //      [ _The Lord of the Rings_, III/xi: "The Palantir"]
 //
-// </copyright>
 //-----------------------------------------------------------------------
 namespace Lobster
 {

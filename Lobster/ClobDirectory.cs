@@ -12,13 +12,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 //
 //      A box without hinges, key, or lid,
 //      Yet golden treasure inside is hid,
 //
 //      [ _The Hobbit_, V: "Riddles in the Dark"]
 //
-// </copyright>
 //-----------------------------------------------------------------------
 namespace Lobster
 {

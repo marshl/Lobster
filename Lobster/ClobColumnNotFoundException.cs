@@ -12,13 +12,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 //
 //      "Where is it? Where iss it?" Bilbo heard him crying. "Losst it is, my precious, lost, lost! 
 //      Curse us and crush us, my precious is lost!"
 //  
 //      [ _The Hobbit_, V: "Riddles in the Dark"]
 //
-// </copyright>
 //-----------------------------------------------------------------------
 namespace Lobster
 {

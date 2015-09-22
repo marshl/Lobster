@@ -12,12 +12,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 //
 //      'What did the Men of old use them for?' asked Pippin, ...
 //      'To see far off, and to converse in thought with one another,' said Gandalf
-//          [ _The Lord of the Rings_, III/xi: "The Palantir"]
+//
+//      [ _The Lord of the Rings_, III/xi: "The Palantir"]
 // 
-// </copyright>
 //-----------------------------------------------------------------------
 namespace Lobster
 {
