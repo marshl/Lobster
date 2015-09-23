@@ -128,7 +128,7 @@ namespace Lobster
             {
                 if ( _e is InvalidOperationException || _e is OracleException || _e is FormatException )
                 {
-                    LobsterMain.OnErrorMessage( "Database Connection Failure", "Cannot open connection to database: " + _e.Message );
+                    Common.ShowErrorMessage( "Database Connection Failure", "Cannot open connection to database: " + _e.Message );
                     MessageLog.LogError( "Connection to Oracle failed: " + _e.Message );
                     return null;
                 }
@@ -166,7 +166,7 @@ namespace Lobster
                 result = this.UpdateDatabaseClob( _clobFile, con );
                 con.Dispose();
             }
-            LobsterMain.instance.OnFileUpdateComplete( _clobFile, result );
+            LobsterMain.Instance.OnFileUpdateComplete( _clobFile, result );
         }
 
         public bool SendInsertClobMessage( ClobFile _clobFile, Table _table, string _mimeType )
@@ -195,7 +195,7 @@ namespace Lobster
             }
             catch ( ClobColumnNotFoundException _e )
             {
-                LobsterMain.OnErrorMessage( "Clob Data Fetch Error", _e.Message );
+                Common.ShowErrorMessage( "Clob Data Fetch Error", _e.Message );
                 MessageLog.LogError( _e.Message );
                 return false;
             }
@@ -206,7 +206,7 @@ namespace Lobster
             catch ( IOException _e )
             {
                 trans.Rollback();
-                LobsterMain.OnErrorMessage( "Clob Update Failed", "An IO Exception occurred when updating the database: " + _e.Message );
+                Common.ShowErrorMessage( "Clob Update Failed", "An IO Exception occurred when updating the database: " + _e.Message );
                 MessageLog.LogError( "Clob update failed with message \"" + _e.Message + "\" for command \"" + command.CommandText + "\"" );
                 return false;
             }
@@ -222,7 +222,7 @@ namespace Lobster
                 if ( _e is OracleException || _e is InvalidOperationException )
                 {
                     trans.Rollback();
-                    LobsterMain.OnErrorMessage( "Clob Update Failed", "An invalid operation occurred when updating the database: " + _e.Message );
+                    Common.ShowErrorMessage( "Clob Update Failed", "An invalid operation occurred when updating the database: " + _e.Message );
                     MessageLog.LogError( "Clob update failed: " + _e.Message + " for command: " + command.CommandText );
                     return false;
                 }
@@ -232,7 +232,7 @@ namespace Lobster
             if ( rowsAffected != 1 )
             {
                 trans.Rollback();
-                LobsterMain.OnErrorMessage( "Clob Update Failed", rowsAffected + " rows were affected during the update (expected only 1). The transaction has been rolled back." );
+                Common.ShowErrorMessage( "Clob Update Failed", rowsAffected + " rows were affected during the update (expected only 1). The transaction has been rolled back." );
                 MessageLog.LogError( "In invalid number of rows (" + rowsAffected + ") were updated for command: " + command.CommandText );
                 return false;
             }
@@ -304,7 +304,7 @@ namespace Lobster
                 {
                     if ( _e is InvalidOperationException || _e is OracleException )
                     {
-                        LobsterMain.OnErrorMessage( "Clob Insert Error",
+                        Common.ShowErrorMessage( "Clob Insert Error",
                         "An invalid operation occurred when inserting into the parent table of " + _clobFile.LocalFile.FileInfo.Name + ": " + _e.Message );
                         MessageLog.LogError( "Error creating new clob: " + _e.Message + " when executing command: " + command.CommandText );
                         return false;
@@ -329,7 +329,7 @@ namespace Lobster
                 {
                     // Discard the insert amde into the parent table
                     trans.Rollback();
-                    LobsterMain.OnErrorMessage( "Clob Insert Error",
+                    Common.ShowErrorMessage( "Clob Insert Error",
                             "An invalid operation occurred when inserting " + _clobFile.LocalFile.FileInfo.Name + ": " + _e.Message );
                     MessageLog.LogError( "Error creating new clob: " + _e.Message + " when executing command: " + command.CommandText );
                     return false;
@@ -405,7 +405,7 @@ namespace Lobster
             }
             catch ( ClobColumnNotFoundException _e )
             {
-                LobsterMain.OnErrorMessage( "Clob Data Fetch Error", _e.Message );
+                Common.ShowErrorMessage( "Clob Data Fetch Error", _e.Message );
                 MessageLog.LogError( _e.Message );
                 return null;
             }
@@ -453,8 +453,10 @@ namespace Lobster
                     else
                     {
                         reader.Close();
-                        LobsterMain.OnErrorMessage( "Clob Data Fetch Error",
-                       "Too many rows were found for " + _clobFile.DatabaseFile.Mnemonic );
+                        Common.ShowErrorMessage( 
+                            "Clob Data Fetch Error",
+                            "Too many rows were found for " + _clobFile.DatabaseFile.Mnemonic );
+
                         MessageLog.LogError( "Too many rows found on clob retrieval of " + _clobFile.DatabaseFile.Mnemonic );
                         return null;
                     }
@@ -464,14 +466,14 @@ namespace Lobster
             {
                 if ( _e is InvalidOperationException || _e is OracleNullValueException )
                 {
-                    LobsterMain.OnErrorMessage( "Clob Data Fetch Error",
+                    Common.ShowErrorMessage( "Clob Data Fetch Error",
                             "An invalid operation occurred when retreiving the data of " + _clobFile.DatabaseFile.Mnemonic + ": " + _e.Message );
                     MessageLog.LogError( "Error retrieving data: " + _e.Message + " when executing command " + command.CommandText );
                     return null;
                 }
                 throw;
             }
-            LobsterMain.OnErrorMessage( "Clob Data Fetch Error",
+            Common.ShowErrorMessage( "Clob Data Fetch Error",
                         "No data was found for " + _clobFile.DatabaseFile.Mnemonic );
             MessageLog.LogError( "No data found on clob retrieval of " + _clobFile.DatabaseFile.Mnemonic + " when executing command: " + command.CommandText );
             return null;
@@ -495,7 +497,7 @@ namespace Lobster
                 catch ( InvalidOperationException _e )
                 {
                     command.Dispose();
-                    LobsterMain.OnErrorMessage( "Directory Comparison Error",
+                    Common.ShowErrorMessage( "Directory Comparison Error",
                             "An invalid operation occurred when retriving the file list for  " + ct.Name + ". Check the logs for more information." );
                     MessageLog.LogError( "Error comparing to database: " + _e.Message + " when executing command " + command.CommandText );
                     return;

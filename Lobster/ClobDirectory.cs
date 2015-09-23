@@ -76,7 +76,7 @@ namespace Lobster
             if (!info.Exists)
             {
                 MessageLog.LogWarning(info.FullName + " could not be found.");
-                LobsterMain.OnErrorMessage("Folder not found", "Folder \"" + info.FullName + "\" could not be found for ClobType " + this.ClobType.Name);
+                Common.ShowErrorMessage("Folder not found", "Folder \"" + info.FullName + "\" could not be found for ClobType " + this.ClobType.Name);
                 return false;
             }
 
@@ -108,7 +108,7 @@ namespace Lobster
             this.LinkLocalAndDatabaseFiles();
 
             // The UI will have to be refreshed
-            LobsterMain.instance.UpdateUIThread();
+            LobsterMain.Instance.UpdateUIThread();
         }
 
         /// <summary>

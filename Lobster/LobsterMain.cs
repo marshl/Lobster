@@ -1,180 +1,239 @@
-﻿using Lobster.Properties;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
-using System.IO;
-using System.Media;
-using System.Windows.Forms;
-
+﻿//-----------------------------------------------------------------------
+// <copyright file="LobsterMain.cs" company="marshl">
+// Copyright 2015, Liam Marshall, marshl.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
+//
+//      One Ring to rule them all,
+//      One Ring to find them,
+//      One Ring to bring them all
+//      and in the Darkness bind them.
+//          -- Enscription on the Ring of Power
+//
+//      [ _The Lord of the Rings_, I/ii: "The Shadow of the Past"]
+//
+//-----------------------------------------------------------------------
 namespace Lobster
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Drawing;
+    using System.IO;
+    using System.Media;
+    using System.Windows.Forms;
+    using Properties;
+
     /// <summary>
-    /// 
-    /// One Ring to rule them all,
-    /// One Ring to find them,
-    /// One Ring to bring them all
-    /// and in the Darkness bind them.
-    ///     -- Enscription on the Ring of Power
-    /// 
-    /// [ _The Lord of the Rings_, I/ii: "The Shadow of the Past"]
+    /// The main Lobster form.
     /// </summary>
     public partial class LobsterMain : Form
     {
-        private LobsterModel lobsterModel;
+        /// <summary>
+        /// The model used by this form.
+        /// </summary>
+        private LobsterModel model;
 
-        // TODO: Die singleton, die!
-        public static LobsterMain instance;
-
-        private ClobNode currentNode;
-
+        /// <summary>
+        /// The sound that is played when an action is completed successfully.
+        /// </summary>
         private SoundPlayer successSoundPlayer;
+
+        /// <summary>
+        /// The sound that is played when an action fails.
+        /// </summary>
         private SoundPlayer failureSoundPlayer;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LobsterMain"/> class.
+        /// </summary>
         public LobsterMain()
         {
-            instance = this;
+            Instance = this;
             this.InitializeComponent();
-            this.lobsterModel = new LobsterModel();
-            
-            this.lobsterModel.LoadDatabaseConnections();
+            this.model = new LobsterModel();
 
-            this.PopulateConnectionList( this.lobsterModel.dbConnectionList );
+            this.model.LoadDatabaseConnections();
 
-            this.successSoundPlayer = new SoundPlayer( Program.SETTINGS_DIR + "/media/success.wav" );
-            this.failureSoundPlayer = new SoundPlayer( Program.SETTINGS_DIR + "/media/failure.wav" );
+            this.PopulateConnectionList(this.model.dbConnectionList);
+
+            this.successSoundPlayer = new SoundPlayer(Program.SETTINGS_DIR + "/media/success.wav");
+            this.failureSoundPlayer = new SoundPlayer(Program.SETTINGS_DIR + "/media/failure.wav");
         }
 
-        private void PopulateConnectionList( List<DatabaseConnection> connectionList )
+        /// <summary>
+        /// The single instance of this form.
+        /// </summary>
+        /// TODO: Die singleton, die!
+        public static LobsterMain Instance { get; set; }
+
+        /// <summary>
+        /// The callback for when a <see cref="ClobFile"/> insert command was completed (successfully or not).
+        /// </summary>
+        /// <param name="clobFile">The file that the command was run on.</param>
+        /// <param name="result">Whether the file was inserted into the database.</param>
+        /// TODO: Remove this
+        public void OnFileInsertComplete(ClobFile clobFile, bool result)
+        {
+            Debug.Assert(clobFile.LocalFile != null, "The local file must not be null.");
+
+            this.lobsterNotificationIcon.ShowBalloonTip(
+                Program.BALLOON_TOOLTIP_DURATION_MS,
+                result ? "File Inserted" : "File Insert Failed",
+                clobFile.LocalFile.FileInfo.Name,
+                result ? ToolTipIcon.Info : ToolTipIcon.Error);
+
+            (result ? this.successSoundPlayer : this.failureSoundPlayer).Play();
+        }
+
+        /// <summary>
+        /// The callback for when a <see cref="ClobFile"/> update command was completed (successfully or not).
+        /// </summary>
+        /// <param name="clobFile">The file that the command was run on.</param>
+        /// <param name="result">Whether the file was updated successfully.</param>
+        /// TODO: Remove this
+        public void OnFileUpdateComplete(ClobFile clobFile, bool result)
+        {
+            Debug.Assert(clobFile.LocalFile != null, "The local file must not be null");
+
+            this.lobsterNotificationIcon.ShowBalloonTip(
+                Program.BALLOON_TOOLTIP_DURATION_MS,
+                result ? "Database Updated" : "Database Update Failed",
+                clobFile.LocalFile.FileInfo.Name,
+                result ? ToolTipIcon.Info : ToolTipIcon.Error);
+
+            (result ? this.successSoundPlayer : this.failureSoundPlayer).Play();
+        }
+
+        /// <summary>
+        /// The callback to refresh the file listings when a change on the file system is made.
+        /// </summary>
+        /// TODO: Remove this
+        public void UpdateUIThread()
+        {
+            this.Invoke((MethodInvoker)delegate
+            {
+                this.RefreshClobLists();
+            });
+        }
+
+        /// <summary>
+        /// Fills the connectionListView with given list of <see cref="DatabaseConnection"/>s.
+        /// </summary>
+        /// <param name="connectionList">The list of connections the list should be populated with.</param>
+        private void PopulateConnectionList(List<DatabaseConnection> connectionList)
         {
             this.connectionListView.Items.Clear();
-            for ( int i = 0; i < connectionList.Count; ++i )
+            for (int i = 0; i < connectionList.Count; ++i)
             {
                 DatabaseConnection connection = connectionList[i];
-                ListViewItem item = new ListViewItem( connection.Name );
-                string ipAddress = connection.Host;
+                ListViewItem item = new ListViewItem(connection.Name);
+                string address = connection.Host;
 
                 ListViewItem.ListViewSubItem[] subItems = new ListViewItem.ListViewSubItem[]
                 {
-                    new ListViewItem.ListViewSubItem( item, ipAddress ),
-                    new ListViewItem.ListViewSubItem( item, connection.Port ),
-                    new ListViewItem.ListViewSubItem( item, connection.SID ),
-                    new ListViewItem.ListViewSubItem( item, connection.CodeSource ),
-                    new ListViewItem.ListViewSubItem( item, connection.UsePooling.ToString() ),
+                    new ListViewItem.ListViewSubItem(item, address),
+                    new ListViewItem.ListViewSubItem(item, connection.Port),
+                    new ListViewItem.ListViewSubItem(item, connection.SID),
+                    new ListViewItem.ListViewSubItem(item, connection.CodeSource),
+                    new ListViewItem.ListViewSubItem(item, connection.UsePooling.ToString()),
                 };
-                item.SubItems.AddRange( subItems );
+                item.SubItems.AddRange(subItems);
                 item.Tag = i;
-                this.connectionListView.Items.Add( item );
+                this.connectionListView.Items.Add(item);
             }
 
-            this.connectionListView.AutoResizeColumns( ColumnHeaderAutoResizeStyle.HeaderSize );
-            if ( this.connectionListView.Items.Count > 0 )
-            {
-                this.connectionListView.Items[0].Selected = true; 
-            }
+            this.connectionListView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
         }
 
+        /// <summary>
+        /// Populates the directory tree view with the directory structure in the model.
+        /// </summary>
         private void PopulateDirectoryTreeView()
         {
-            Debug.Assert( this.lobsterModel.currentConnection != null );
+            Debug.Assert(this.model.currentConnection != null, "The current connection must not be null");
             this.fileTreeView.Nodes.Clear();
+
             // Use the folder name as the root element
-            DatabaseConnection dbc = this.lobsterModel.currentConnection;
-            TreeNode rootNode = new TreeNode( Path.GetFileName( dbc.CodeSource ) ?? "CodeSource", 0, 0 );
-            foreach ( KeyValuePair<ClobType, ClobDirectory> pair in dbc.ClobTypeToDirectoryMap )
+            DatabaseConnection dbc = this.model.currentConnection;
+            TreeNode rootNode = new TreeNode(Path.GetFileName(dbc.CodeSource) ?? "CodeSource", 0, 0);
+            foreach (KeyValuePair<ClobType, ClobDirectory> pair in dbc.ClobTypeToDirectoryMap)
             {
                 ClobDirectory clobDir = pair.Value;
-                TreeNode dirNode = new TreeNode( clobDir.RootClobNode.DirInfo.Name, 0, 0 );
+                TreeNode dirNode = new TreeNode(clobDir.RootClobNode.DirInfo.Name, 0, 0);
                 dirNode.Tag = clobDir.RootClobNode;
-                this.PopulateTreeNode_r( clobDir.RootClobNode, dirNode );
-                rootNode.Nodes.Add( dirNode );
+                this.PopulateTreeNode_r(dirNode);
+                rootNode.Nodes.Add(dirNode);
             }
-            this.fileTreeView.Nodes.Add( rootNode );
+
+            this.fileTreeView.Nodes.Add(rootNode);
             rootNode.Expand();
         }
 
-        private void PopulateTreeNode_r( ClobNode _clobNode, TreeNode _treeNode )
+        /// <summary>
+        /// Recursively populates the given tree node from the fileTreeView.
+        /// </summary>
+        /// <param name="treeNode">The tree node to recursively populate.</param>
+        private void PopulateTreeNode_r(TreeNode treeNode)
         {
-            foreach ( ClobNode child in _clobNode.ChildNodes )
+            ClobNode clobNode = (ClobNode)treeNode.Tag;
+            foreach (ClobNode child in clobNode.ChildNodes)
             {
-                TreeNode aNode = new TreeNode( child.DirInfo.Name );
-                aNode.Tag = child;
-                aNode.ImageKey = "folder";
+                TreeNode node = new TreeNode(child.DirInfo.Name);
+                node.Tag = child;
+                node.ImageKey = "folder";
 
-                PopulateTreeNode_r( child, aNode );
-                _treeNode.Nodes.Add( aNode );
+                this.PopulateTreeNode_r(node);
+                treeNode.Nodes.Add(node);
             }
         }
-        
-        private void fileTreeView_NodeMouseClick( object sender, TreeNodeMouseClickEventArgs e )
+
+        /// <summary>
+        /// Creates a <see cref="ListViewItem"/> for the given <see cref="ClobFile"/>
+        /// with the columns: Filename / LastAccessTime / Status
+        /// </summary>
+        /// <param name="clobFile">The <see cref="ClobFile"/> to create a <see cref="ListViewItem"/> for.</param>
+        /// <returns>The <see cref="ListViewItem"/> for the </returns>
+        private ListViewItem GetListViewRowForClobFile(ClobFile clobFile)
         {
-            TreeNode newSelected = e.Node;
-            fileListView.Items.Clear();
-            ClobNode clobNode = (ClobNode)newSelected.Tag;
-            if ( clobNode == null )
-            {
-                return;
-            }
-
-            this.currentNode = clobNode;
-            this.PopulateFileListView( clobNode );
-            this.UpdateRibbonButtons();
-        }
-
-        private void PopulateFileListView( ClobNode _clobNode )
-        {
-            Debug.Assert( _clobNode != null );
-            this.fileListView.Items.Clear();
-            DirectoryInfo nodeDirInfo = _clobNode.DirInfo;
-
-            foreach ( KeyValuePair<string, ClobFile> pair in _clobNode.ClobFileMap )
-            {
-                ClobFile clobFile = pair.Value;
-                Debug.Assert( clobFile.LocalFile != null );
-                if ( clobFile.LocalFile != null )
-                {
-                    clobFile.LocalFile.FileInfo.Refresh();
-                }
-                
-                ListViewItem item = this.GetListViewRowForClobFile( clobFile );
-                this.fileListView.Items.Add( item );
-            }
-            // If it is the root node, also display any database only files
-            if ( _clobNode.BaseClobDirectory.RootClobNode == _clobNode )
-            {
-                foreach ( ClobFile dbClobFIle in _clobNode.BaseClobDirectory.DatabaseOnlyFiles )
-                {
-                    ListViewItem item = this.GetListViewRowForClobFile( dbClobFIle );
-                    this.fileListView.Items.Add( item );
-                }
-            }
-            this.fileListView.AutoResizeColumns( ColumnHeaderAutoResizeStyle.HeaderSize );
-        }
-
-        public ListViewItem GetListViewRowForClobFile( ClobFile _clobFile )
-        {
-            string filename = _clobFile.LocalFile != null ? _clobFile.LocalFile.FileInfo.Name : _clobFile.DatabaseFile.Filename;
+            Debug.Assert(
+                clobFile.LocalFile != null || clobFile.DatabaseFile != null,
+                "The file must be located locally or on the database");
+            string filename;
             int imageHandle;
-            string dateValue = "";
+            string dateValue = string.Empty;
             string status;
             Color foreColour;
 
-            if ( _clobFile.IsDbOnly )
+            if (clobFile.IsDbOnly)
             {
+                filename = clobFile.DatabaseFile.Filename;
                 imageHandle = 3;
                 status = "Database Only";
                 foreColour = Color.Gray;
             }
             else
             {
-                imageHandle = _clobFile.IsEditable ? 1 : 2;
-                dateValue = _clobFile.LocalFile.FileInfo.LastAccessTime.ToShortDateString();
-                if ( _clobFile.IsSynced )
+                filename = clobFile.LocalFile.FileInfo.Name;
+                imageHandle = clobFile.IsEditable ? 1 : 2;
+                dateValue = clobFile.LocalFile.FileInfo.LastAccessTime.ToShortDateString();
+                if (clobFile.IsSynced)
                 {
                     status = "Synchronised";
                     foreColour = Color.Black;
                 }
-                else if ( _clobFile.IsLocalOnly )
+                else if (clobFile.IsLocalOnly)
                 {
                     status = "Local Only";
                     foreColour = Color.Green;
@@ -185,79 +244,166 @@ namespace Lobster
                     foreColour = Color.Red;
                 }
             }
-            
-            ListViewItem item = new ListViewItem( filename, imageHandle );
+
+            ListViewItem item = new ListViewItem(filename, imageHandle);
             ListViewItem.ListViewSubItem[] subItems = new ListViewItem.ListViewSubItem[]
             {
-                new ListViewItem.ListViewSubItem( item, dateValue ),
-                new ListViewItem.ListViewSubItem( item, status ),
+                new ListViewItem.ListViewSubItem(item, dateValue),
+                new ListViewItem.ListViewSubItem(item, status),
             };
-            item.Tag = _clobFile;
+
+            item.Tag = clobFile;
             item.ForeColor = foreColour;
-            item.SubItems.AddRange( subItems );
+            item.SubItems.AddRange(subItems);
             return item;
         }
 
+        /// <summary>
+        /// The event callback for when a user clicks on a node in the file tree view.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void fileTreeView_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
+        {
+            TreeNode newSelected = e.Node;
+            fileListView.Items.Clear();
+            ClobNode clobNode = (ClobNode)newSelected.Tag;
+            if (clobNode == null)
+            {
+                return;
+            }
+
+            this.PopulateFileListView(clobNode);
+            this.UpdateRibbonButtons();
+        }
+
+        /// <summary>
+        /// Populates the file list view with the files that are located in the given <see cref="ClobNode"/>.
+        /// If the ClobNode is the root node of the tree, database only files are also added to list view.
+        /// </summary>
+        /// <param name="clobNode">The ClobNode whose child files will be displayed.</param>
+        private void PopulateFileListView(ClobNode clobNode)
+        {
+            Debug.Assert(clobNode != null, "The clob node must not be null");
+            this.fileListView.Items.Clear();
+            DirectoryInfo nodeDirInfo = clobNode.DirInfo;
+
+            foreach (KeyValuePair<string, ClobFile> pair in clobNode.ClobFileMap)
+            {
+                ClobFile clobFile = pair.Value;
+                Debug.Assert(clobFile.LocalFile != null, "The ClobFile must have a local file for it to be displayed in the file list view");
+                if (clobFile.LocalFile != null)
+                {
+                    clobFile.LocalFile.FileInfo.Refresh();
+                }
+
+                ListViewItem item = this.GetListViewRowForClobFile(clobFile);
+                this.fileListView.Items.Add(item);
+            }
+
+            // If it is the root node, also display any database only files
+            if (clobNode.BaseClobDirectory.RootClobNode == clobNode)
+            {
+                foreach (ClobFile databaseFile in clobNode.BaseClobDirectory.DatabaseOnlyFiles)
+                {
+                    ListViewItem item = this.GetListViewRowForClobFile(databaseFile);
+                    this.fileListView.Items.Add(item);
+                }
+            }
+
+            this.fileListView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+        }
+
+        /// <summary>
+        /// Populates the working file view with all unlocked files in the model.
+        /// </summary>
         private void PopulateWorkingFileView()
         {
             this.workingFileList.Items.Clear();
             List<ClobFile> workingFiles = new List<ClobFile>();
-            this.lobsterModel.currentConnection.GetWorkingFiles( ref workingFiles );
+            this.model.currentConnection.GetWorkingFiles(ref workingFiles);
 
-            foreach ( ClobFile clobFile in workingFiles )
+            foreach (ClobFile clobFile in workingFiles)
             {
-                ListViewItem item = this.GetListViewRowForClobFile( clobFile );
-                this.workingFileList.Items.Add( item );
+                ListViewItem item = this.GetListViewRowForClobFile(clobFile);
+                this.workingFileList.Items.Add(item);
             }
-            this.workingFileList.AutoResizeColumns( ColumnHeaderAutoResizeStyle.HeaderSize );
+
+            if (workingFiles.Count > 0)
+            {
+                this.workingFileList.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+            }
         }
 
-        private void fileListView_MouseClick( object sender, MouseEventArgs e )
+        /// <summary>
+        /// The callback for when a user clicks anywhere in the file list view.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void fileListView_MouseClick(object sender, MouseEventArgs e)
         {
-            if ( e.Button == MouseButtons.Right && fileListView.FocusedItem.Bounds.Contains( e.Location ) == true )
+            if (e.Button == MouseButtons.Right && fileListView.FocusedItem.Bounds.Contains(e.Location) == true)
             {
-                clobFileContextMenuStrip.Show( Cursor.Position );
+                this.clobFileContextMenuStrip.Show(Cursor.Position);
                 ClobFile clobFile = (ClobFile)fileListView.FocusedItem.Tag;
-                this.ShowClobFileContextMenu( clobFile, fileListView );
+                this.ShowClobFileContextMenu(clobFile, this.fileListView);
             }
         }
 
-        private void ShowClobFileContextMenu( ClobFile _clobFile, ListView _fileListView )
+        /// <summary>
+        /// OPens a context menu strip for the given <see cref="ClobFile"/>.
+        /// </summary>
+        /// <param name="clobFile">The ClobFile that is the context of the menu.</param>
+        /// <param name="fileListView">The list view that the context menu is opened for (tree or working tab list views)</param>
+        private void ShowClobFileContextMenu(ClobFile clobFile, ListView fileListView)
         {
-            clobFileContextMenuStrip.Tag = _fileListView.FocusedItem;
+            clobFileContextMenuStrip.Tag = this.fileListView.FocusedItem;
 
-            insertToolStripMenuItem.Enabled = _clobFile.IsLocalOnly;
-            clobToolStripMenuItem.Enabled = _clobFile.IsSynced;
-            diffWithDatabaseToolStripMenuItem.Enabled = _clobFile.IsSynced
-                && !new List<string> { ".png", ".gif", ".bmp" }.Contains( Path.GetExtension( _clobFile.LocalFile.FileInfo.Name ) );
-            
-            showInExplorerToolStripMenuItem.Enabled = _clobFile.LocalFile != null;
-            openDatabaseToolStripMenuItem.Enabled = _clobFile.DatabaseFile != null;
+            insertToolStripMenuItem.Enabled = clobFile.IsLocalOnly;
+            clobToolStripMenuItem.Enabled = clobFile.IsSynced;
+
+            // Only enable diffing if the file extension is within the diffable list
+            string extension = Path.GetExtension(clobFile.LocalFile.FileInfo.Name);
+            diffWithDatabaseToolStripMenuItem.Enabled = clobFile.IsSynced
+                && Settings.Default.DiffableExtensions.Contains(extension);
+
+            this.showInExplorerToolStripMenuItem.Enabled = clobFile.LocalFile != null;
+            this.openDatabaseToolStripMenuItem.Enabled = clobFile.DatabaseFile != null;
         }
 
-        private void insertToolStripMenuItem_Click( object sender, EventArgs e )
+        /// <summary>
+        /// The callback for when the insert file ribbon button is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments.</param>
+        private void insertToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ToolStripItem item = (ToolStripItem)sender;
             ListViewItem listItem = (ListViewItem)item.GetCurrentParent().Tag;
             ClobFile clobFile = (ClobFile)listItem.Tag;
-            Debug.Assert( clobFile != null );
-
-            this.InsertClobFile( clobFile );
+            this.InsertClobFile(clobFile);
         }
 
-        private void InsertClobFile( ClobFile _clobFile )
+        /// <summary>
+        /// Inserts the given ClobFile into the database and updates the UI.
+        /// </summary>
+        /// <param name="clobFile">The ClobFile to insert into the database.</param>
+        private void InsertClobFile(ClobFile clobFile)
         {
+            Debug.Assert(clobFile.IsLocalOnly, "A ClobFile that is already on the database cannot be inserted again.");
             Table table;
-            ClobDirectory clobDir = _clobFile.ParentClobNode.BaseClobDirectory;
+            ClobDirectory clobDir = clobFile.ParentClobNode.BaseClobDirectory;
+
             // If there is > 1 tables in this ClobType, ask the user for which one to use
-            if (clobDir.ClobType.Tables.Count > 1 )
+            if (clobDir.ClobType.Tables.Count > 1)
             {
-                TablePicker tablePicker = new TablePicker(clobDir.ClobType );
+                TablePicker tablePicker = new TablePicker(clobDir.ClobType);
                 DialogResult dialogResult = tablePicker.ShowDialog();
-                if ( dialogResult != DialogResult.OK )
+                if (dialogResult != DialogResult.OK)
                 {
                     return;
                 }
+
                 table = tablePicker.tableCombo.SelectedItem as Table;
             }
             else
@@ -267,225 +413,251 @@ namespace Lobster
 
             // If the table has a MimeType column, ask the user for the type to use
             string mimeType = null;
-            Column mimeTypeColumn = table.columns.Find( x => x.ColumnPurpose == Column.Purpose.MIME_TYPE );
-            if ( mimeTypeColumn != null )
+            Column mimeTypeColumn = table.columns.Find(x => x.ColumnPurpose == Column.Purpose.MIME_TYPE);
+            if (mimeTypeColumn != null)
             {
-                DatatypePicker typePicker = new DatatypePicker( mimeTypeColumn );
+                DatatypePicker typePicker = new DatatypePicker(mimeTypeColumn);
                 DialogResult dialogResult = typePicker.ShowDialog();
-                if ( dialogResult != DialogResult.OK )
+                if (dialogResult != DialogResult.OK)
                 {
                     return;
                 }
+
                 mimeType = typePicker.datatypeComboBox.Text;
             }
 
-            bool success = this.lobsterModel.SendInsertClobMessage( _clobFile, table, mimeType );
-            if ( success )
+            bool result = this.model.SendInsertClobMessage(clobFile, table, mimeType);
+            if (result)
             {
                 this.RefreshClobLists();
             }
-            this.OnFileInsertComplete( _clobFile, success );
+
+            this.OnFileInsertComplete(clobFile, result);
         }
 
-        private void showInExplorerToolStripMenuItem_Click( object sender, EventArgs e )
+        /// <summary>
+        /// The callback for when the show in explorer button is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void showInExplorerToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ToolStripItem item = (ToolStripItem)sender;
             ListViewItem listItem = (ListViewItem)item.GetCurrentParent().Tag;
             ClobFile clobFile = (ClobFile)listItem.Tag;
-            this.ExploreToClobFile( clobFile );
+            this.ExploreToClobFile(clobFile);
         }
 
-        private void diffWithDatabaseToolStripMenuItem_Click( object sender, EventArgs e )
+        /// <summary>
+        /// The callback for when the diff with database tool strip item is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void diffWithDatabaseToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ToolStripItem item = (ToolStripItem)sender;
             ListViewItem listItem = (ListViewItem)item.GetCurrentParent().Tag;
             ClobFile clobFile = (ClobFile)listItem.Tag;
-            this.DiffClobFileWithDatabase( clobFile );
+            this.DiffClobFileWithDatabase(clobFile);
         }
 
-        private void clobToolStripMenuItem_Click( object sender, EventArgs e )
+        /// <summary>
+        /// The callback for when the clob to database tool strip item is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void clobToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ToolStripItem item = (ToolStripItem)sender;
             ListViewItem listItem = (ListViewItem)item.GetCurrentParent().Tag;
             ClobFile clobFile = (ClobFile)listItem.Tag;
-            this.ReclobFile( clobFile );
+            this.ReclobFile(clobFile);
         }
-        
-        private void lobsterNotificationIcon_MouseClick( object sender, MouseEventArgs e )
+
+        /// <summary>
+        /// The callback for when the notification icon is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void lobsterNotificationIcon_MouseClick(object sender, MouseEventArgs e)
         {
             this.Show();
             this.BringToFront();
             this.WindowState = FormWindowState.Normal;
         }
 
-        public void OnFileInsertComplete( ClobFile _clobFile, bool _result )
+        /// <summary>
+        /// The callback for when the form is closed, performing one last clean up.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="args">The event arguments.</param>
+        private void LobsterMain_FormClosed(object sender, FormClosedEventArgs args)
         {
-            Debug.Assert( _clobFile.LocalFile != null );
-            this.lobsterNotificationIcon.ShowBalloonTip( Program.BALLOON_TOOLTIP_DURATION_MS,
-                _result ? "File Inserted" : "File Insert Failed",
-                _clobFile.LocalFile.FileInfo.Name,
-                _result ? ToolTipIcon.Info : ToolTipIcon.Error );
-            
-            ( _result ? this.successSoundPlayer : this.failureSoundPlayer ).Play();
-        }
-
-        public void OnFileUpdateComplete( ClobFile _clobFile, bool _result )
-        {
-            Debug.Assert( _clobFile.LocalFile != null );
-            this.lobsterNotificationIcon.ShowBalloonTip( Program.BALLOON_TOOLTIP_DURATION_MS,
-                _result ? "Database Updated" : "Database Update Failed",
-                _clobFile.LocalFile.FileInfo.Name,
-                _result ? ToolTipIcon.Info : ToolTipIcon.Error );
-
-            ( _result ? this.successSoundPlayer : this.failureSoundPlayer ).Play();
-        }
-
-        public static void OnErrorMessage( string _caption, string _text )
-        {
-            DialogResult result = MessageBox.Show( _text, _caption, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1 );
-        }
-
-        private void LobsterMain_FormClosed( object sender, FormClosedEventArgs e )
-        {
-            foreach ( FileInfo tempFile in this.lobsterModel.tempFileList )
+            foreach (FileInfo tempFile in this.model.tempFileList)
             {
                 try
                 {
-                    File.Delete( tempFile.FullName );
-                    MessageLog.LogInfo( "Temporary file deleted " + tempFile.FullName );
+                    File.Delete(tempFile.FullName);
+                    MessageLog.LogInfo("Temporary file deleted " + tempFile.FullName);
                 }
-                catch ( IOException _e )
+                catch (IOException e)
                 {
-                    MessageLog.LogWarning( "Failed to delete temporary file " + tempFile.FullName + " " + _e );
+                    MessageLog.LogWarning("Failed to delete temporary file " + tempFile.FullName + " " + e);
                 }
             }
         }
 
-        private void MainTabControl_Selecting( object sender, TabControlCancelEventArgs e )
+        /// <summary>
+        /// The callack for when the tab is changed.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void MainTabControl_Selecting(object sender, TabControlCancelEventArgs e)
         {
-            if ( this.lobsterModel.currentConnection == null )
+            if (this.model.currentConnection == null)
             {
                 e.Cancel = true;
-                MessageBox.Show( "You must first connect to a database. To make connect, first select a connection from the list, then press the Connect button." );
+                MessageBox.Show("You must first connect to a database. To make connect, first select a connection from the list, then press the Connect button.");
                 return;
             }
 
-            if ( this.MainTabControl.SelectedTab == this.connectionTabPage )
-            {
-               
-            }
-            else if ( this.MainTabControl.SelectedTab == this.treeViewTab )
+            if (this.MainTabControl.SelectedTab == this.treeViewTab)
             {
                 this.RefreshClobLists();
             }
-            else if ( this.MainTabControl.SelectedTab == this.workingFileTab )
+            else if (this.MainTabControl.SelectedTab == this.workingFileTab)
             {
                 this.RefreshClobLists();
             }
             else
             {
-                throw new ArgumentException( "Unknown tab " + this.MainTabControl.SelectedTab.Name );
+                throw new ArgumentException("Unknown tab " + this.MainTabControl.SelectedTab.Name);
             }
 
             this.refreshButton.Enabled = this.MainTabControl.SelectedTab == this.treeViewTab || this.MainTabControl.SelectedTab == this.workingFileTab;
         }
 
-        private void workingFileList_MouseClick( object sender, MouseEventArgs e )
+        /// <summary>
+        /// The callback for when a user right clicks anywhere within the working file ListView.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void workingFileList_MouseClick(object sender, MouseEventArgs e)
         {
-            if ( e.Button == MouseButtons.Right )
+            if (e.Button == MouseButtons.Right)
             {
-                if ( workingFileList.FocusedItem.Bounds.Contains( e.Location ) == true )
+                if (workingFileList.FocusedItem.Bounds.Contains(e.Location) == true)
                 {
-                    clobFileContextMenuStrip.Show( Cursor.Position );
-                    ClobFile clobFile = (ClobFile)workingFileList.FocusedItem.Tag;
-                    this.ShowClobFileContextMenu( clobFile, workingFileList);
+                    clobFileContextMenuStrip.Show(Cursor.Position);
+                    ClobFile clobFile = (ClobFile)this.workingFileList.FocusedItem.Tag;
+                    this.ShowClobFileContextMenu(clobFile, this.workingFileList);
                 }
             }
         }
 
-        private void openDatabaseToolStripMenuItem_Click( object sender, EventArgs e )
+        /// <summary>
+        /// The callback for when a user clicks the "Open Database Version" option in the file list context menu.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void openDatabaseToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ToolStripItem item = (ToolStripItem)sender;
             ListViewItem listItem = (ListViewItem)item.GetCurrentParent().Tag;
             ClobFile clobFile = (ClobFile)listItem.Tag;
-            this.PullDatabaseFile( clobFile );           
+            this.PullDatabaseFile(clobFile);
         }
 
+        /// <summary>
+        /// Updates the file lists and action ribbon, depending on which tab is open.
+        /// </summary>
         private void RefreshClobLists()
         {
-            if ( this.MainTabControl.SelectedTab == this.workingFileTab )
+            if (this.MainTabControl.SelectedTab == this.workingFileTab)
             {
                 this.PopulateWorkingFileView();
             }
-            else if ( this.MainTabControl.SelectedTab == this.treeViewTab )
+            else if (this.MainTabControl.SelectedTab == this.treeViewTab)
             {
-                if ( this.currentNode != null )
+                if (this.fileTreeView.SelectedNode != null)
                 {
-                    this.PopulateFileListView( this.currentNode );
+                    this.PopulateFileListView((ClobNode)this.fileTreeView.SelectedNode.Tag);
                 }
             }
+
             this.UpdateRibbonButtons();
         }
 
-        public void UpdateUIThread()
+        /// <summary>
+        /// The callback for when the user presses the connect button.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void connectButton_Click(object sender, EventArgs e)
         {
-            this.Invoke( (MethodInvoker)delegate
+            Debug.Assert(this.connectionListView.SelectedItems.Count <= 1, "Multiple connections must not be selected");
+            if (this.connectionListView.SelectedItems.Count == 0)
             {
-                RefreshClobLists();
-            } );
-        }
-
-        private void connectButton_Click( object sender, EventArgs e )
-        {
-            if ( this.connectionListView.SelectedItems.Count == 0 )
-            {
-                MessageBox.Show( "You must first select a connection." );
+                MessageBox.Show("You must first select a connection.");
                 return;
-            }
-
-            if ( this.connectionListView.SelectedItems.Count > 1 )
-            {
-                throw new ArgumentException( "Cannot connect to more than one database at a time." );
             }
 
             LoadingForm loadingForm = new LoadingForm();
             loadingForm.Show();
 
             int configIndex = (int)this.connectionListView.SelectedItems[0].Tag;
-            DatabaseConnection connection = this.lobsterModel.dbConnectionList[configIndex];
-            bool result = this.lobsterModel.SetDatabaseConnection( connection );
-            if ( result )
+            DatabaseConnection connection = this.model.dbConnectionList[configIndex];
+            bool result = this.model.SetDatabaseConnection(connection);
+            if (result)
             {
                 this.PopulateDirectoryTreeView();
-                this.MainTabControl.SelectTab( 1 );
+                this.MainTabControl.SelectTab(1);
                 this.refreshButton.Enabled = true;
             }
+
             loadingForm.Close();
-            
         }
 
-        private void refreshButtonClick( object sender, EventArgs e )
+        /// <summary>
+        /// The callback for when the refresh files button is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void refreshButtonClick(object sender, EventArgs e)
         {
-            if ( this.lobsterModel.currentConnection != null )
+            if (this.model.currentConnection != null)
             {
-                this.lobsterModel.RequeryDatabase();
+                this.model.RequeryDatabase();
                 this.RefreshClobLists();
             }
         }
 
-        private void connectionListView_SelectedIndexChanged( object _sender, EventArgs _e )
+        /// <summary>
+        /// The callback for when the selected item of the connection list is changed.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void connectionListView_SelectedIndexChanged(object sender, EventArgs e)
         {
             this.UpdateRibbonButtons();
             this.UpdateConnectionButtons();
         }
 
+        /// <summary>
+        /// UPdates the enabledness of the connection editor buttons.
+        /// </summary>
         private void UpdateConnectionButtons()
         {
             this.removeConnectionButton.Enabled = this.editConnectionButton.Enabled
-                = ( this.connectionListView.SelectedItems.Count > 0 );
+                = this.connectionListView.SelectedItems.Count > 0;
         }
 
-        private void fileListView_SelectedIndexChanged( object sender, EventArgs e )
+        /// <summary>
+        /// The callback for when the selected file in the file list view changes.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void fileListView_SelectedIndexChanged(object sender, EventArgs e)
         {
             this.UpdateRibbonButtons();
         }
@@ -500,8 +672,15 @@ namespace Lobster
             // Only enable the Insert button if the file is local-only
             this.insertButton.Enabled = selectedFile != null && selectedFile.IsLocalOnly;
 
-            // Only enable the Reclob and Diff buttons if the file is synchronised
+            // Only enable the Reclob buttons if the file is synchronised
             this.reclobButton.Enabled = this.diffWithDBButton.Enabled = selectedFile != null && selectedFile.IsSynced;
+
+            // Only enable diffing if the file extension is within the diffable list
+            if (this.diffWithDBButton.Enabled)
+            {
+                string extension = Path.GetExtension(selectedFile.LocalFile.FileInfo.Name);
+                this.diffWithDBButton.Enabled = Settings.Default.DiffableExtensions.Contains(extension);
+            }
 
             // Only enable the Explore To button if the file exists locally
             this.exploreButton.Enabled = selectedFile != null && selectedFile.LocalFile != null;
@@ -513,12 +692,17 @@ namespace Lobster
             this.connectButton.Enabled = this.MainTabControl.SelectedTab == this.connectionTabPage && this.connectionListView.SelectedItems.Count > 0;
         }
 
-        private void insertButton_Click( object sender, EventArgs e )
+        /// <summary>
+        /// The callback for when the insert file is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void insertButton_Click(object sender, EventArgs e)
         {
             ClobFile clobFile = this.GetCurrentlySelectedClobFile();
-            if ( clobFile != null )
+            if (clobFile != null)
             {
-                this.InsertClobFile( clobFile );
+                this.InsertClobFile(clobFile);
             }
             else
             {
@@ -526,17 +710,30 @@ namespace Lobster
             }
         }
 
+        /// <summary>
+        /// Displays a generic warning message for when the user attempts to perform
+        /// a ClobFile action with no file selected
+        /// </summary>
         private void ShowNoFileSelectedMessage()
         {
-            MessageBox.Show( "No files selected", "You must select a file before you can perform this action.", MessageBoxButtons.OK, MessageBoxIcon.Warning );
+            MessageBox.Show(
+                "No files selected", 
+                "You must select a file before you can perform this action.", 
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
         }
 
-        private void reclobButton_Click( object sender, EventArgs e )
+        /// <summary>
+        /// The callback for when the reclob button is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void reclobButton_Click(object sender, EventArgs e)
         {
             ClobFile clobFile = this.GetCurrentlySelectedClobFile();
-            if ( clobFile != null )
+            if (clobFile != null)
             {
-                this.ReclobFile( clobFile );
+                this.ReclobFile(clobFile);
             }
             else
             {
@@ -544,29 +741,41 @@ namespace Lobster
             }
         }
 
-        private void ReclobFile( ClobFile _clobFile )
+        /// <summary>
+        /// Pushes the contents of the given ClobFile to the database.
+        /// </summary>
+        /// <param name="clobFile">The ClobFile to push to the database.</param>
+        private void ReclobFile(ClobFile clobFile)
         {
-            Debug.Assert( _clobFile.IsSynced );
-            if ( _clobFile.LocalFile.FileInfo.IsReadOnly )
+            Debug.Assert(clobFile.IsSynced, "The file must be synchronised to reclob it");
+            if (clobFile.LocalFile.FileInfo.IsReadOnly)
             {
-                DialogResult result = MessageBox.Show( _clobFile.LocalFile.FileInfo.Name + " is locked. Are you sure you want to clob it?",
+                DialogResult result = MessageBox.Show(
+                    clobFile.LocalFile.FileInfo.Name + " is locked. Are you sure you want to clob it?",
                     "File is Locked",
-                    MessageBoxButtons.OKCancel );
-                if ( result != DialogResult.OK )
+                    MessageBoxButtons.OKCancel);
+
+                if (result != DialogResult.OK)
                 {
                     return;
                 }
             }
 
-            this.lobsterModel.SendUpdateClobMessage( _clobFile );
+            this.model.SendUpdateClobMessage(clobFile);
         }
 
-        private void exploreButton_click( object sender, EventArgs e )
+        /// <summary>
+        /// The callback for when the user clicks the show in explorer button.
+        /// OPens the location of the file in a new instance of windows explorer.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void exploreButton_click(object sender, EventArgs e)
         {
             ClobFile clobFile = this.GetCurrentlySelectedClobFile();
-            if ( clobFile != null )
+            if (clobFile != null)
             {
-                this.ExploreToClobFile( clobFile );
+                this.ExploreToClobFile(clobFile);
             }
             else
             {
@@ -574,23 +783,39 @@ namespace Lobster
             }
         }
 
-        private void ExploreToClobFile( ClobFile _clobFile )
+        /// <summary>
+        /// Opens a new instance of windows explorer at the location of the given file.
+        /// </summary>
+        /// <param name="clobFIle">The file to explore to.</param>
+        private void ExploreToClobFile(ClobFile clobFIle)
         {
-            Debug.Assert( _clobFile.LocalFile != null );
-            Process.Start( "explorer", "/select," + _clobFile.LocalFile.FileInfo.FullName );
+            Debug.Assert(clobFIle.LocalFile != null, "The file must exist locally to be able to explore to it");
+
+            // Windows Explorer command line arguments: https://support.microsoft.com/en-us/kb/152457
+            Process.Start("explorer", "/select," + clobFIle.LocalFile.FileInfo.FullName);
         }
 
-        private void workingFileList_SelectedIndexChanged( object sender, EventArgs e )
+        /// <summary>
+        /// The callback for when the selected index of the working file list changes.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void workingFileList_SelectedIndexChanged(object sender, EventArgs e)
         {
             this.UpdateRibbonButtons();
         }
 
-        private void diffWithDBButton_Click( object sender, EventArgs e )
+        /// <summary>
+        /// The callback for when the diff ribbon button is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void diffWithDBButton_Click(object sender, EventArgs e)
         {
             ClobFile clobFile = this.GetCurrentlySelectedClobFile();
-            if ( clobFile != null )
+            if (clobFile != null)
             {
-                this.DiffClobFileWithDatabase( clobFile );
+                this.DiffClobFileWithDatabase(clobFile);
             }
             else
             {
@@ -598,29 +823,44 @@ namespace Lobster
             }
         }
 
-        private void DiffClobFileWithDatabase( ClobFile _clobFile )
+        /// <summary>
+        /// Diffs the local file of the given <see cref="ClobFIle"/> with its corresponding database version 
+        /// and opens the result in a user selected diffing program.
+        /// </summary>
+        /// <param name="clobFile">The file to diff.</param>
+        private void DiffClobFileWithDatabase(ClobFile clobFile)
         {
-            Debug.Assert( _clobFile.IsSynced );
+            Debug.Assert(clobFile.IsSynced, "The ClobFile must be synchronised to diff it.");
 
-            FileInfo tempFile = this.lobsterModel.SendDownloadClobDataToFileMessage( _clobFile );
-            if ( tempFile == null )
+            FileInfo tempFile = this.model.SendDownloadClobDataToFileMessage(clobFile);
+            if (tempFile == null)
             {
-                LobsterMain.OnErrorMessage( "Diff with Database", "An error ocurred when fetching the file data." );
+                Common.ShowErrorMessage("Diff with Database", "An error ocurred when fetching the file data.");
                 return;
             }
 
-            MessageLog.LogInfo( "Temporary file created: " + tempFile.FullName );
-            this.lobsterModel.tempFileList.Add( tempFile );
+            MessageLog.LogInfo("Temporary file created: " + tempFile.FullName);
+            this.model.tempFileList.Add(tempFile);
 
-            Process.Start( "tortoisemerge", "/mine:" + tempFile.FullName + " /theirs:" + _clobFile.LocalFile.FileInfo.FullName );
+            string args = string.Format(
+                Settings.Default.DiffProgramArguments,
+                tempFile.FullName,
+                clobFile.LocalFile.FileInfo.FullName);
+
+            Process.Start(Settings.Default.DiffProgramName, args);
         }
 
-        private void pullDBFileButton_Click( object sender, EventArgs e )
+        /// <summary>
+        /// The callback for when the pull file button is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void pullDBFileButton_Click(object sender, EventArgs e)
         {
             ClobFile clobFile = this.GetCurrentlySelectedClobFile();
-            if ( clobFile != null )
+            if (clobFile != null)
             {
-                this.PullDatabaseFile( clobFile );
+                this.PullDatabaseFile(clobFile);
             }
             else
             {
@@ -628,31 +868,42 @@ namespace Lobster
             }
         }
 
-        private void PullDatabaseFile( ClobFile _clobFile )
+        /// <summary>
+        /// Pulls the given ClobFile data from the database, stores it in a temp file and then executes that file.
+        /// </summary>
+        /// <param name="clobFile">The ClobFile to download.</param>
+        private void PullDatabaseFile(ClobFile clobFile)
         {
-            Debug.Assert( _clobFile.DatabaseFile != null );
-            FileInfo tempFile = this.lobsterModel.SendDownloadClobDataToFileMessage( _clobFile );
-            if ( tempFile == null )
+            Debug.Assert(clobFile.DatabaseFile != null, "The file must exist on the database");
+            FileInfo tempFile = this.model.SendDownloadClobDataToFileMessage(clobFile);
+            if (tempFile == null)
             {
-                LobsterMain.OnErrorMessage( "Open Database", "An error ocurred when fetching the file data." );
+                Common.ShowErrorMessage("Open Database", "An error ocurred when fetching the file data.");
                 return;
             }
 
-            MessageLog.LogInfo( "Temporary file created: " + tempFile.FullName );
-            this.lobsterModel.tempFileList.Add( tempFile );
+            MessageLog.LogInfo("Temporary file created: " + tempFile.FullName);
+            this.model.tempFileList.Add(tempFile);
 
-            Process.Start( tempFile.FullName );
+            Process.Start(tempFile.FullName);
         }
 
+        /// <summary>
+        /// Gets the ClobFile that is currently selected on the file list tab or the working file list tab 
+        /// (depending on which is currently open).
+        /// </summary>
+        /// <returns>The ClobFile that is selected if one is, otherwise null.</returns>
         private ClobFile GetCurrentlySelectedClobFile()
         {
             ClobFile selectedFile = null;
 
-            if ( this.MainTabControl.SelectedTab == this.treeViewTab && this.fileListView.SelectedItems.Count > 0 )
+            if (this.MainTabControl.SelectedTab == this.treeViewTab
+                && this.fileListView.SelectedItems.Count > 0)
             {
                 selectedFile = (ClobFile)this.fileListView.SelectedItems[0].Tag;
             }
-            else if ( this.MainTabControl.SelectedTab == this.workingFileTab && this.workingFileList.SelectedItems.Count > 0 )
+            else if (this.MainTabControl.SelectedTab == this.workingFileTab
+                && this.workingFileList.SelectedItems.Count > 0)
             {
                 selectedFile = (ClobFile)this.workingFileList.SelectedItems[0].Tag;
             }
@@ -660,65 +911,76 @@ namespace Lobster
             return selectedFile;
         }
 
-        private void editConnectionButton_Click( object sender, EventArgs e )
+        /// <summary>
+        /// The callback for when the edit connection button is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void editConnectionButton_Click(object sender, EventArgs e)
         {
-            Debug.Assert( this.connectionListView.SelectedItems.Count <= 1 );
-            if ( this.connectionListView.SelectedItems.Count == 0 )
+            Debug.Assert(this.connectionListView.SelectedItems.Count <= 1, "Only a single connection should be selected");
+            if (this.connectionListView.SelectedItems.Count == 0)
             {
-                MessageBox.Show( "You must first select a connection." );
+                MessageBox.Show("You must first select a connection.");
                 return;
             }
 
             int configIndex = (int)this.connectionListView.SelectedItems[0].Tag;
-            DatabaseConnection connectionRef = this.lobsterModel.dbConnectionList[configIndex];
+            DatabaseConnection connectionRef = this.model.dbConnectionList[configIndex];
 
-            EditDatabaseConnection editForm = new EditDatabaseConnection( connectionRef, false );
+            EditDatabaseConnection editForm = new EditDatabaseConnection(connectionRef, false);
             DialogResult result = editForm.ShowDialog();
-            this.lobsterModel.dbConnectionList[configIndex] = editForm.OriginalObject;
-            this.PopulateConnectionList( this.lobsterModel.dbConnectionList );
+            this.model.dbConnectionList[configIndex] = editForm.OriginalObject;
+            this.PopulateConnectionList(this.model.dbConnectionList);
         }
 
-        private void newConnectionButton_Click( object sender, EventArgs e )
+        /// <summary>
+        /// The callback for when the new connection button is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void newConnectionButton_Click(object sender, EventArgs e)
         {
             DatabaseConnection newConnection = new DatabaseConnection();
-            newConnection.ParentModel = this.lobsterModel;
-            newConnection.FileLocation = Path.Combine(Settings.Default.ConnectionDir, "NewConnection.xml" ) ;
-            EditDatabaseConnection editForm = new EditDatabaseConnection( newConnection, true );
+            newConnection.ParentModel = this.model;
+            newConnection.FileLocation = Path.Combine(Settings.Default.ConnectionDir, "NewConnection.xml");
+            EditDatabaseConnection editForm = new EditDatabaseConnection(newConnection, true);
             DialogResult result = editForm.ShowDialog();
-            if ( result == DialogResult.OK )
+            if (result == DialogResult.OK)
             {
-                this.lobsterModel.dbConnectionList.Add( editForm.OriginalObject );
-                this.PopulateConnectionList( this.lobsterModel.dbConnectionList );
+                this.model.dbConnectionList.Add(editForm.OriginalObject);
+                this.PopulateConnectionList(this.model.dbConnectionList);
             }
         }
 
-        private void removeConnectionButton_Click( object sender, EventArgs e )
+        /// <summary>
+        /// Callback for when the remove connection button is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void removeConnectionButton_Click(object sender, EventArgs e)
         {
-            Debug.Assert( this.connectionListView.SelectedItems.Count <= 1 );
-            if ( this.connectionListView.SelectedItems.Count == 0 )
+            Debug.Assert(this.connectionListView.SelectedItems.Count <= 1, "Only a single connection should be selected");
+            if (this.connectionListView.SelectedItems.Count == 0)
             {
-                MessageBox.Show( "You must first select a connection." );
+                MessageBox.Show("You must first select a connection.");
                 return;
             }
 
             int configIndex = (int)this.connectionListView.SelectedItems[0].Tag;
-            DatabaseConnection databaseConnection = this.lobsterModel.dbConnectionList[configIndex];
+            DatabaseConnection databaseConnection = this.model.dbConnectionList[configIndex];
 
-            DialogResult result = MessageBox.Show( 
+            DialogResult result = MessageBox.Show(
                 "Are you sure you want to permanently delete the connection " + databaseConnection.Name ?? "New Connection" + "?",
-                "Remove Connection", MessageBoxButtons.OKCancel );
+                "Remove Connection",
+                MessageBoxButtons.OKCancel);
 
-            if ( result == DialogResult.OK )
+            if (result == DialogResult.OK)
             {
-                File.Delete( databaseConnection.FileLocation );
-                this.lobsterModel.dbConnectionList.RemoveAt( configIndex );
-                this.PopulateConnectionList( this.lobsterModel.dbConnectionList );
+                File.Delete(databaseConnection.FileLocation);
+                this.model.dbConnectionList.RemoveAt(configIndex);
+                this.PopulateConnectionList(this.model.dbConnectionList);
             }
-        }
-
-        private void openFileDialog1_FileOk( object sender, System.ComponentModel.CancelEventArgs e )
-        {
-
         }
     }
 }

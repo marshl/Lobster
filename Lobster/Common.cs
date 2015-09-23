@@ -23,13 +23,12 @@
 //-----------------------------------------------------------------------
 namespace Lobster
 {
-    using Properties;
     using System;
     using System.Collections.Generic;
-    using System.Configuration;
     using System.IO;
     using System.Linq;
     using System.Threading;
+    using System.Windows.Forms;
     using System.Xml;
     using System.Xml.Schema;
 
@@ -190,9 +189,14 @@ namespace Lobster
             reader.Close();
         }
 
-        public static bool DoesSettingExist(string settingName)
+        /// <summary>
+        /// Displays a MessageBox with the given text and caption.
+        /// </summary>
+        /// <param name="caption">The MessageBox text.</param>
+        /// <param name="text">The MessageBox caption.</param>
+        public static void ShowErrorMessage(string caption, string text)
         {
-            return Settings.Default.Properties.Cast<SettingsProperty>().Any(prop => prop.Name == settingName);
+            DialogResult result = MessageBox.Show(text, caption, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
         }
     }
 }
