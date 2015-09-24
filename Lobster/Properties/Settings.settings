@@ -23,5 +23,26 @@
     <Setting Name="DiffProgramArguments" Type="System.String" Scope="User">
       <Value Profile="(Default)">/mine:{0} /theirs:{1}</Value>
     </Setting>
+    <Setting Name="BalloonPopupDurationMS" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">2000</Value>
+    </Setting>
+    <Setting Name="SettingsDirectoryName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">LobsterSettings</Value>
+    </Setting>
+    <Setting Name="MediaDirectoryName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">media</Value>
+    </Setting>
+    <Setting Name="SuccessSoundFilename" Type="System.String" Scope="User">
+      <Value Profile="(Default)">success.wav</Value>
+    </Setting>
+    <Setting Name="FailureSoundFilename" Type="System.String" Scope="User">
+      <Value Profile="(Default)">failure.wav</Value>
+    </Setting>
+    <Setting Name="LogFilename" Type="System.String" Scope="User">
+      <Value Profile="(Default)">lobster.log</Value>
+    </Setting>
+    <Setting Name="BackupEnabled" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

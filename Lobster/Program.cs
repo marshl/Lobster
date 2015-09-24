@@ -14,11 +14,6 @@ namespace Lobster
     /// </summary>
     static class Program
     {
-        public const string SETTINGS_DIR = "LobsterSettings";
-        public const string LOG_FILE = "lobster.log";
-
-        public const int BALLOON_TOOLTIP_DURATION_MS = 2000;
-
         [STAThread]
         static void Main()
         {
@@ -29,38 +24,26 @@ namespace Lobster
             }
             catch ( Exception _e )
             {
-                DialogResult result = MessageBox.Show( "An unhandled " + _e.GetType().ToString() + " occurred when attempting to create the log file.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1 );
+                Common.ShowErrorMessage("Error", "An unhandled " + _e.GetType().ToString() + " occurred when attempting to create the log file.");
                 return;
             }
 
             GitHubUpdater.RunUpdateCheck( "marshl", "lobster" );
 
-            if ( !Directory.Exists( SETTINGS_DIR ) )
+            if ( !Directory.Exists( Settings.Default.SettingsDirectoryName ) )
             {
-                DialogResult result = MessageBox.Show( "The settings directory " + SETTINGS_DIR + " could not be found.", "Directory Not Found", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1 );
+                Common.ShowErrorMessage("Directory Not Found", "The settings directory " + Settings.Default.SettingsDirectoryName + " could not be found.");
                 return;
             }
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            if (Settings.Default.ConnectionDir == null || !Directory.Exists(Settings.Default.ConnectionDir) )
-            {
-                string connectionDir = LobsterModel.PromptForDirectory("Please select your DatabaseConnections folder", null);
-                
-                if (connectionDir == null)
-                {
-                    return;
-                }
-
-                Settings.Default.ConnectionDir = connectionDir;
-                Settings.Default.Save();
-            }
-
 #if !DEBUG
             try
 #endif
             {
+                Application.ThreadException += Application_ThreadException;
                 LobsterMain lobsterMain = new LobsterMain();
                 Application.Run( lobsterMain );
             }
@@ -68,14 +51,26 @@ namespace Lobster
             catch ( Exception _e )
             {
                 MessageLog.LogError( "UNHANDLED EXCEPTION: " + _e.ToString() );
-                DialogResult result = MessageBox.Show( "An unhandled " + _e.GetType().ToString() + " was thrown. Check " + LOG_FILE + " for more information, and please create an error issue at https://github.com/marshl/lobster.",
-                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1 );
+                Common.ShowErrorMessage(
+                    "Error",
+                    "An unhandled " + _e.GetType().ToString() + " was thrown. Check " + Settings.Default.LogFilename
+                    + " for more information, and please create an error issue at https://github.com/marshl/lobster");
             }
             finally
 #endif
             {
                 log.Close();
             }
+        }
+
+        private static void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
+        {
+            MessageLog.LogError("UNHANDLED EXCEPTION: " + e.ToString());
+            Common.ShowErrorMessage(
+                "Error",
+                "An unhandled " + e.GetType().ToString() + " was thrown. Check " + Settings.Default.LogFilename
+                + " for more information, and please create an error issue at https://github.com/marshl/lobster");
+
         }
     }
 }

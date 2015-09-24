@@ -79,5 +79,89 @@ namespace Lobster.Properties {
                 this["DiffProgramArguments"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2000")]
+        public int BalloonPopupDurationMS {
+            get {
+                return ((int)(this["BalloonPopupDurationMS"]));
+            }
+            set {
+                this["BalloonPopupDurationMS"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("LobsterSettings")]
+        public string SettingsDirectoryName {
+            get {
+                return ((string)(this["SettingsDirectoryName"]));
+            }
+            set {
+                this["SettingsDirectoryName"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("media")]
+        public string MediaDirectoryName {
+            get {
+                return ((string)(this["MediaDirectoryName"]));
+            }
+            set {
+                this["MediaDirectoryName"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("success.wav")]
+        public string SuccessSoundFilename {
+            get {
+                return ((string)(this["SuccessSoundFilename"]));
+            }
+            set {
+                this["SuccessSoundFilename"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("failure.wav")]
+        public string FailureSoundFilename {
+            get {
+                return ((string)(this["FailureSoundFilename"]));
+            }
+            set {
+                this["FailureSoundFilename"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("lobster.log")]
+        public string LogFilename {
+            get {
+                return ((string)(this["LogFilename"]));
+            }
+            set {
+                this["LogFilename"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool BackupEnabled {
+            get {
+                return ((bool)(this["BackupEnabled"]));
+            }
+            set {
+                this["BackupEnabled"] = value;
+            }
+        }
     }
 }

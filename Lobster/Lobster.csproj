@@ -196,12 +196,9 @@
   <ItemGroup>
     <Content Include="cartoon-lobster.ico" />
     <None Include="img\refresh.png" />
-    <None Include="Resources\refresh.bmp" />
     <None Include="img\112_RefreshArrow_Blue.ico" />
     <None Include="img\popup_success.bmp" />
     <None Include="img\popup_failure.bmp" />
-    <None Include="img\popup.bmp" />
-    <None Include="Resources\popup.bmp.bmp" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
@@ -214,6 +211,9 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

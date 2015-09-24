@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Windows.Forms;
+using Lobster.Properties;
 
 namespace Lobster
 {
@@ -45,7 +46,7 @@ namespace Lobster
         {
             this.messageList = new List<Message>();
             MessageLog.instance = this;
-            this.stream = new StreamWriter( Program.LOG_FILE, true );
+            this.stream = new StreamWriter( Settings.Default.LogFilename, true );
             this.stream.Write( "\n\n" );
             LogInfo( "Starting Lobster (build " + Common.RetrieveLinkerTimestamp()  + ")" );
         }

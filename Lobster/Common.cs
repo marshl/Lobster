@@ -194,9 +194,30 @@ namespace Lobster
         /// </summary>
         /// <param name="caption">The MessageBox text.</param>
         /// <param name="text">The MessageBox caption.</param>
-        public static void ShowErrorMessage(string caption, string text)
+        public static DialogResult ShowErrorMessage(string caption, string text)
         {
-            DialogResult result = MessageBox.Show(text, caption, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
+            return MessageBox.Show(text, caption, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
+        }
+
+        /// <summary>
+        /// Displays a folder browser dialog and retuns the result.
+        /// </summary>
+        /// <param name="description">The description to be displayed on the dialog.</param>
+        /// <param name="startingPath">The path for the dialog explorer to start.</param>
+        /// <returns>The path of the directory that was selected, null if one wasn't selected.</returns>
+        public static string PromptForDirectory(string description, string startingPath)
+        {
+            FolderBrowserDialog fbd = new FolderBrowserDialog();
+            fbd.Description = description;
+            fbd.SelectedPath = startingPath;
+
+            DialogResult result = fbd.ShowDialog();
+            if (result != DialogResult.OK)
+            {
+                return null;
+            }
+
+            return fbd.SelectedPath;
         }
     }
 }

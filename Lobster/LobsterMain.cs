@@ -63,13 +63,20 @@ namespace Lobster
             Instance = this;
             this.InitializeComponent();
             this.model = new LobsterModel();
+            
+            this.PopulateConnectionList(this.model.ConnectionList);
 
-            this.model.LoadDatabaseConnections();
+            this.successSoundPlayer = new SoundPlayer(
+                Path.Combine( 
+                    Settings.Default.SettingsDirectoryName, 
+                    Settings.Default.MediaDirectoryName, 
+                    Settings.Default.SuccessSoundFilename));
 
-            this.PopulateConnectionList(this.model.dbConnectionList);
-
-            this.successSoundPlayer = new SoundPlayer(Program.SETTINGS_DIR + "/media/success.wav");
-            this.failureSoundPlayer = new SoundPlayer(Program.SETTINGS_DIR + "/media/failure.wav");
+            this.failureSoundPlayer = new SoundPlayer(
+                Path.Combine(
+                    Settings.Default.SettingsDirectoryName,
+                    Settings.Default.MediaDirectoryName,
+                    Settings.Default.FailureSoundFilename));
         }
 
         /// <summary>
@@ -89,7 +96,7 @@ namespace Lobster
             Debug.Assert(clobFile.LocalFile != null, "The local file must not be null.");
 
             this.lobsterNotificationIcon.ShowBalloonTip(
-                Program.BALLOON_TOOLTIP_DURATION_MS,
+                Settings.Default.BalloonPopupDurationMS,
                 result ? "File Inserted" : "File Insert Failed",
                 clobFile.LocalFile.FileInfo.Name,
                 result ? ToolTipIcon.Info : ToolTipIcon.Error);
@@ -108,7 +115,7 @@ namespace Lobster
             Debug.Assert(clobFile.LocalFile != null, "The local file must not be null");
 
             this.lobsterNotificationIcon.ShowBalloonTip(
-                Program.BALLOON_TOOLTIP_DURATION_MS,
+                Settings.Default.BalloonPopupDurationMS,
                 result ? "Database Updated" : "Database Update Failed",
                 clobFile.LocalFile.FileInfo.Name,
                 result ? ToolTipIcon.Info : ToolTipIcon.Error);
@@ -162,11 +169,11 @@ namespace Lobster
         /// </summary>
         private void PopulateDirectoryTreeView()
         {
-            Debug.Assert(this.model.currentConnection != null, "The current connection must not be null");
+            Debug.Assert(this.model.CurrentConnection != null, "The current connection must not be null");
             this.fileTreeView.Nodes.Clear();
 
             // Use the folder name as the root element
-            DatabaseConnection dbc = this.model.currentConnection;
+            DatabaseConnection dbc = this.model.CurrentConnection;
             TreeNode rootNode = new TreeNode(Path.GetFileName(dbc.CodeSource) ?? "CodeSource", 0, 0);
             foreach (KeyValuePair<ClobType, ClobDirectory> pair in dbc.ClobTypeToDirectoryMap)
             {
@@ -321,7 +328,7 @@ namespace Lobster
         {
             this.workingFileList.Items.Clear();
             List<ClobFile> workingFiles = new List<ClobFile>();
-            this.model.currentConnection.GetWorkingFiles(ref workingFiles);
+            this.model.CurrentConnection.GetWorkingFiles(ref workingFiles);
 
             foreach (ClobFile clobFile in workingFiles)
             {
@@ -493,7 +500,7 @@ namespace Lobster
         /// <param name="args">The event arguments.</param>
         private void LobsterMain_FormClosed(object sender, FormClosedEventArgs args)
         {
-            foreach (FileInfo tempFile in this.model.tempFileList)
+            foreach (FileInfo tempFile in this.model.TempFileList)
             {
                 try
                 {
@@ -514,7 +521,7 @@ namespace Lobster
         /// <param name="e">The event arguments.</param>
         private void MainTabControl_Selecting(object sender, TabControlCancelEventArgs e)
         {
-            if (this.model.currentConnection == null)
+            if (this.model.CurrentConnection == null)
             {
                 e.Cancel = true;
                 MessageBox.Show("You must first connect to a database. To make connect, first select a connection from the list, then press the Connect button.");
@@ -528,10 +535,6 @@ namespace Lobster
             else if (this.MainTabControl.SelectedTab == this.workingFileTab)
             {
                 this.RefreshClobLists();
-            }
-            else
-            {
-                throw new ArgumentException("Unknown tab " + this.MainTabControl.SelectedTab.Name);
             }
 
             this.refreshButton.Enabled = this.MainTabControl.SelectedTab == this.treeViewTab || this.MainTabControl.SelectedTab == this.workingFileTab;
@@ -579,7 +582,8 @@ namespace Lobster
             }
             else if (this.MainTabControl.SelectedTab == this.treeViewTab)
             {
-                if (this.fileTreeView.SelectedNode != null)
+                if (this.fileTreeView.SelectedNode != null
+                    && !this.fileTreeView.Nodes.Contains( this.fileTreeView.SelectedNode ) )
                 {
                     this.PopulateFileListView((ClobNode)this.fileTreeView.SelectedNode.Tag);
                 }
@@ -606,7 +610,7 @@ namespace Lobster
             loadingForm.Show();
 
             int configIndex = (int)this.connectionListView.SelectedItems[0].Tag;
-            DatabaseConnection connection = this.model.dbConnectionList[configIndex];
+            DatabaseConnection connection = this.model.ConnectionList[configIndex];
             bool result = this.model.SetDatabaseConnection(connection);
             if (result)
             {
@@ -625,7 +629,7 @@ namespace Lobster
         /// <param name="e">The event arguments.</param>
         private void refreshButtonClick(object sender, EventArgs e)
         {
-            if (this.model.currentConnection != null)
+            if (this.model.CurrentConnection != null)
             {
                 this.model.RequeryDatabase();
                 this.RefreshClobLists();
@@ -840,7 +844,7 @@ namespace Lobster
             }
 
             MessageLog.LogInfo("Temporary file created: " + tempFile.FullName);
-            this.model.tempFileList.Add(tempFile);
+            this.model.TempFileList.Add(tempFile);
 
             string args = string.Format(
                 Settings.Default.DiffProgramArguments,
@@ -883,7 +887,7 @@ namespace Lobster
             }
 
             MessageLog.LogInfo("Temporary file created: " + tempFile.FullName);
-            this.model.tempFileList.Add(tempFile);
+            this.model.TempFileList.Add(tempFile);
 
             Process.Start(tempFile.FullName);
         }
@@ -926,12 +930,12 @@ namespace Lobster
             }
 
             int configIndex = (int)this.connectionListView.SelectedItems[0].Tag;
-            DatabaseConnection connectionRef = this.model.dbConnectionList[configIndex];
+            DatabaseConnection connectionRef = this.model.ConnectionList[configIndex];
 
             EditDatabaseConnection editForm = new EditDatabaseConnection(connectionRef, false);
             DialogResult result = editForm.ShowDialog();
-            this.model.dbConnectionList[configIndex] = editForm.OriginalObject;
-            this.PopulateConnectionList(this.model.dbConnectionList);
+            this.model.ConnectionList[configIndex] = editForm.OriginalObject;
+            this.PopulateConnectionList(this.model.ConnectionList);
         }
 
         /// <summary>
@@ -948,8 +952,8 @@ namespace Lobster
             DialogResult result = editForm.ShowDialog();
             if (result == DialogResult.OK)
             {
-                this.model.dbConnectionList.Add(editForm.OriginalObject);
-                this.PopulateConnectionList(this.model.dbConnectionList);
+                this.model.ConnectionList.Add(editForm.OriginalObject);
+                this.PopulateConnectionList(this.model.ConnectionList);
             }
         }
 
@@ -968,7 +972,7 @@ namespace Lobster
             }
 
             int configIndex = (int)this.connectionListView.SelectedItems[0].Tag;
-            DatabaseConnection databaseConnection = this.model.dbConnectionList[configIndex];
+            DatabaseConnection databaseConnection = this.model.ConnectionList[configIndex];
 
             DialogResult result = MessageBox.Show(
                 "Are you sure you want to permanently delete the connection " + databaseConnection.Name ?? "New Connection" + "?",
@@ -978,8 +982,8 @@ namespace Lobster
             if (result == DialogResult.OK)
             {
                 File.Delete(databaseConnection.FileLocation);
-                this.model.dbConnectionList.RemoveAt(configIndex);
-                this.PopulateConnectionList(this.model.dbConnectionList);
+                this.model.ConnectionList.RemoveAt(configIndex);
+                this.PopulateConnectionList(this.model.ConnectionList);
             }
         }
     }
