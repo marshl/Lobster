@@ -17,6 +17,12 @@ namespace Lobster
         [STAThread]
         static void Main()
         {
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+
+            SplashScreen splash = new SplashScreen();
+            splash.Show();
+
             MessageLog log;
             try
             {
@@ -28,23 +34,24 @@ namespace Lobster
                 return;
             }
 
-            GitHubUpdater.RunUpdateCheck( "marshl", "lobster" );
-
             if ( !Directory.Exists( Settings.Default.SettingsDirectoryName ) )
             {
                 Common.ShowErrorMessage("Directory Not Found", "The settings directory " + Settings.Default.SettingsDirectoryName + " could not be found.");
                 return;
             }
 
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-
 #if !DEBUG
             try
 #endif
             {
-                Application.ThreadException += Application_ThreadException;
+                
+
+                GitHubUpdater.RunUpdateCheck("marshl", "lobster");
                 LobsterMain lobsterMain = new LobsterMain();
+
+                splash.Close();
+
+                Application.ThreadException += Application_ThreadException;
                 Application.Run( lobsterMain );
             }
 #if !DEBUG
