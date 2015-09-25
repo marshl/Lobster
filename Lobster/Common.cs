@@ -31,6 +31,7 @@ namespace Lobster
     using System.Windows.Forms;
     using System.Xml;
     using System.Xml.Schema;
+    using Properties;
 
     /// <summary>
     /// A storage place for helper functions
@@ -218,6 +219,19 @@ namespace Lobster
             }
 
             return fbd.SelectedPath;
+        }
+
+        public static FileInfo CreateTempFile(string original)
+        {
+            DirectoryInfo tempDir = new DirectoryInfo(Settings.Default.TempFileDirectory);
+            if (!tempDir.Exists)
+            {
+                tempDir.Create();
+            }
+
+            string tempName = Path.Combine(tempDir.FullName, Guid.NewGuid() + original);
+            FileInfo tempFile = new FileInfo(tempName);
+            return tempFile;
         }
     }
 }

@@ -163,5 +163,29 @@ namespace Lobster.Properties {
                 this["BackupEnabled"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("LobsterSettings/DatabaseConfig.xsd")]
+        public string DatabaseConfigSchemaFilename {
+            get {
+                return ((string)(this["DatabaseConfigSchemaFilename"]));
+            }
+            set {
+                this["DatabaseConfigSchemaFilename"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("temp")]
+        public string TempFileDirectory {
+            get {
+                return ((string)(this["TempFileDirectory"]));
+            }
+            set {
+                this["TempFileDirectory"] = value;
+            }
+        }
     }
 }

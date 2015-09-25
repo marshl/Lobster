@@ -62,14 +62,15 @@ namespace Lobster
         {
             Instance = this;
             this.InitializeComponent();
+
             this.model = new LobsterModel();
             
             this.PopulateConnectionList(this.model.ConnectionList);
 
             this.successSoundPlayer = new SoundPlayer(
-                Path.Combine( 
-                    Settings.Default.SettingsDirectoryName, 
-                    Settings.Default.MediaDirectoryName, 
+                Path.Combine(
+                    Settings.Default.SettingsDirectoryName,
+                    Settings.Default.MediaDirectoryName,
                     Settings.Default.SuccessSoundFilename));
 
             this.failureSoundPlayer = new SoundPlayer(
@@ -583,7 +584,7 @@ namespace Lobster
             else if (this.MainTabControl.SelectedTab == this.treeViewTab)
             {
                 if (this.fileTreeView.SelectedNode != null
-                    && !this.fileTreeView.Nodes.Contains( this.fileTreeView.SelectedNode ) )
+                    && !this.fileTreeView.Nodes.Contains(this.fileTreeView.SelectedNode))
                 {
                     this.PopulateFileListView((ClobNode)this.fileTreeView.SelectedNode.Tag);
                 }
@@ -631,7 +632,7 @@ namespace Lobster
         {
             if (this.model.CurrentConnection != null)
             {
-                this.model.RequeryDatabase();
+                this.model.RebuildLocalAndDatabaseFileLists();
                 this.RefreshClobLists();
             }
         }
@@ -721,8 +722,8 @@ namespace Lobster
         private void ShowNoFileSelectedMessage()
         {
             MessageBox.Show(
-                "No files selected", 
-                "You must select a file before you can perform this action.", 
+                "No files selected",
+                "You must select a file before you can perform this action.",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning);
         }

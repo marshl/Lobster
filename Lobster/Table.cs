@@ -215,7 +215,7 @@ namespace Lobster
                     + " FROM " + pt.FullName
                     + " JOIN " + this.FullName
                     + " ON " + fkCol.FullName + " = " + parentIDCol.FullName
-                    + " WHERE " + parentMnemCol.FullName + " = :mnemonic";
+                    + " WHERE " + parentMnemCol.FullName + " = '" + _clobFile.DatabaseFile.Mnemonic + "'";
             }
             else
             {
@@ -223,10 +223,14 @@ namespace Lobster
                 return
                     "SELECT " + clobCol.FullName
                     + " FROM " + this.FullName
-                    + " WHERE " + mnemCol.FullName + " = :mnemonic";
+                    + " WHERE " + mnemCol.FullName + " = '" + _clobFile.DatabaseFile.Mnemonic + "'";
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public string GetFileListCommand()
         {
             Column mimeCol = this.columns.Find(x => x.ColumnPurpose == Column.Purpose.MIME_TYPE);

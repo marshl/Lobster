@@ -40,12 +40,9 @@ namespace Lobster
                 return;
             }
 
-#if !DEBUG
             try
-#endif
-            {
-                
 
+            {
                 GitHubUpdater.RunUpdateCheck("marshl", "lobster");
                 LobsterMain lobsterMain = new LobsterMain();
 
@@ -53,6 +50,11 @@ namespace Lobster
 
                 Application.ThreadException += Application_ThreadException;
                 Application.Run( lobsterMain );
+            }
+
+            catch (LobsterModel.ConnectionDirNotFoundException)
+            {
+                Common.ShowErrorMessage("Error", "The database connection directory could not be found.");
             }
 #if !DEBUG
             catch ( Exception _e )
@@ -63,8 +65,9 @@ namespace Lobster
                     "An unhandled " + _e.GetType().ToString() + " was thrown. Check " + Settings.Default.LogFilename
                     + " for more information, and please create an error issue at https://github.com/marshl/lobster");
             }
-            finally
 #endif
+            finally
+
             {
                 log.Close();
             }

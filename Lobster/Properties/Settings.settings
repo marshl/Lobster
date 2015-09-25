@@ -44,5 +44,11 @@
     <Setting Name="BackupEnabled" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
+    <Setting Name="DatabaseConfigSchemaFilename" Type="System.String" Scope="User">
+      <Value Profile="(Default)">LobsterSettings/DatabaseConfig.xsd</Value>
+    </Setting>
+    <Setting Name="TempFileDirectory" Type="System.String" Scope="User">
+      <Value Profile="(Default)">temp</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

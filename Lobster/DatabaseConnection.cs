@@ -33,6 +33,7 @@ namespace Lobster
     using System.Xml;
     using System.Xml.Schema;
     using System.Xml.Serialization;
+    using Properties;
 
     /// <summary>
     /// Used to define how a database should be connected to, and where the ClobTypes are stored for it.
@@ -148,6 +149,57 @@ namespace Lobster
         [XmlIgnore]
         [Browsable(false)]
         public Dictionary<ClobType, ClobDirectory> ClobTypeToDirectoryMap { get; set; }
+
+        /// <summary>
+        /// Deserialises the given file into a new <see cref="DatabaseConnection"/>.
+        /// </summary>
+        /// <param name="fullpath">The location of the file to deserialise.</param>
+        /// <param name="parentModel">The model that will become the connection's parent.</param>
+        /// <returns>The new <see cref="DatabaseConnection"/>.</returns>
+        public static DatabaseConnection LoadDatabaseConnection(string fullpath, LobsterModel parentModel)
+        {
+            MessageLog.LogInfo("Loading Database Config File " + fullpath);
+            DatabaseConnection connection;
+            try
+            {
+                connection = Common.DeserialiseXmlFileUsingSchema<DatabaseConnection>(fullpath, Settings.Default.DatabaseConfigSchemaFilename);
+                connection.ParentModel = parentModel;
+            }
+            catch (Exception e)
+            {
+                if (e is FileNotFoundException || e is InvalidOperationException || e is XmlException || e is XmlSchemaValidationException)
+                {
+                    Common.ShowErrorMessage(
+                        "ClobType Load Failed",
+                        "The DBConfig file " + fullpath + " failed to load. Check the log for more information.");
+                    MessageLog.LogError("An error occurred when loading the ClobType " + fullpath + ": " + e);
+                    return null;
+                }
+
+                throw;
+            }
+
+            connection.FileLocation = fullpath;
+
+            // If the CodeSource folder cannot be found, prompt the user for it
+            if (connection.CodeSource == null || !Directory.Exists(connection.CodeSource))
+            {
+                string codeSourceDir = Common.PromptForDirectory("Please select your CodeSource directory for " + connection.Name, null);
+                if (codeSourceDir != null)
+                {
+                    connection.CodeSource = codeSourceDir;
+                    DatabaseConnection.SerialiseToFile(fullpath, connection);
+                }
+                else
+                {
+                    // Ignore config files that don't have a valid CodeSource folder
+                    return null;
+                }
+            }
+
+            connection.LoadClobTypes();
+            return connection;
+        }
 
         /// <summary>
         /// Writes a DatabaseConnection out to file.
