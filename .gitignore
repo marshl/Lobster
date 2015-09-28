@@ -14,3 +14,4 @@ Lobster/bin/Release/Lobster.vshost.exe.config
 Lobster/bin/Release/
 Lobster/bin/Debug/*.zip
 Lobster/obj/
+Lobster/bin/
