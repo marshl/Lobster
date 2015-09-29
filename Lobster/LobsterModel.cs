@@ -201,15 +201,15 @@ namespace Lobster
             // the prefix representation of the mime type prefixed to it.
             if (table.columns.Find(x => x.ColumnPurpose == Column.Purpose.MIME_TYPE) != null)
             {
-                MimeTypeList.MimeType mt = this.MimeList.mimeTypes.Find(x => x.name == mimeType);
+                MimeTypeList.MimeType mt = this.MimeList.MimeTypes.Find(x => x.Name == mimeType);
                 if (mt == null)
                 {
                     throw new ArgumentException("Unknown mime-to-prefix key " + mimeType);
                 }
 
-                if (mt.prefix.Length > 0)
+                if (mt.Prefix.Length > 0)
                 {
-                    mnemonic = mt.prefix + '/' + mnemonic;
+                    mnemonic = mt.Prefix + '/' + mnemonic;
                 }
             }
 
@@ -241,14 +241,14 @@ namespace Lobster
             }
             else
             {
-                MimeTypeList.MimeType mt = this.MimeList.mimeTypes.Find(x => x.name == mimeType);
+                MimeTypeList.MimeType mt = this.MimeList.MimeTypes.Find(x => x.Name == mimeType);
 
                 if (mt == null)
                 {
                     throw new ArgumentException("Unkown mime-to-extension key " + mimeType);
                 }
 
-                filename += mt.extension;
+                filename += mt.Extension;
             }
 
             return filename;
