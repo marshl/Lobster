@@ -237,7 +237,7 @@ namespace Lobster
                     ClobType clobType = Common.DeserialiseXmlFileUsingSchema<ClobType>(file.FullName, "LobsterSettings/ClobType.xsd");
 
                     clobType.Initialise(this);
-                    clobType.File = file;
+                    clobType.FilePath = file.FullName;
                     this.ClobTypeList.Add(clobType);
                 }
                 catch (Exception e)

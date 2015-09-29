@@ -72,7 +72,7 @@ namespace Lobster
         /// </summary>
         [XmlIgnore]
         [Browsable(false)]
-        public FileInfo File { get; set; }
+        public string FilePath { get; set; }
 
         /// <summary>
         /// The <see cref="DatabaseConnection"/> object that stores this ClobType.
@@ -116,11 +116,7 @@ namespace Lobster
             copy.Directory = this.Directory;
             copy.IncludeSubDirectories = this.IncludeSubDirectories;
             copy.ParentConnection = this.ParentConnection;
-
-            if (this.File != null)
-            {
-                copy.File = new FileInfo(this.File.FullName);
-            }
+            copy.FilePath = this.FilePath;
 
             copy.Tables = new List<Table>();
             if (this.Tables != null)

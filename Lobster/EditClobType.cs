@@ -87,7 +87,7 @@ namespace Lobster
                     return false;
                 }
 
-                this.WorkingObject.File = new FileInfo(sfd.FileName);
+                this.WorkingObject.FilePath = sfd.FileName;
             }
 
             return true;
@@ -101,12 +101,12 @@ namespace Lobster
         {
             try
             {
-                ClobType.Serialise(this.WorkingObject.File.FullName, this.WorkingObject);
-                MessageLog.LogInfo("ClobType " + this.WorkingObject.Name + " was saved to " + this.WorkingObject.File.FullName);
+                ClobType.Serialise(this.WorkingObject.FilePath, this.WorkingObject);
+                MessageLog.LogInfo("ClobType " + this.WorkingObject.Name + " was saved to " + this.WorkingObject.FilePath);
             }
             catch (UnauthorizedAccessException)
             {
-                MessageBox.Show("Cannot save ClobType. " + this.WorkingObject.File + " is currently in use by another program.");
+                MessageBox.Show("Cannot save ClobType. " + this.WorkingObject.FilePath + " is currently in use by another program.");
                 return false;
             }
 

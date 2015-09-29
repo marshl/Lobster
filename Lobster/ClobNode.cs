@@ -82,13 +82,13 @@ namespace Lobster
         /// <summary>
         /// This adds a file on the file system to the file dictionary on this node.
         /// </summary>
-        /// <param name="fileInfo">The file to add.</param>
-        public void AddLocalClobFile(FileInfo fileInfo)
+        /// <param name="filepath">The file to add.</param>
+        public void AddLocalClobFile(string filepath)
         {
             ClobFile clobFile = new ClobFile(this);
-            clobFile.LocalFile = new LocalClobFile(fileInfo.FullName);
+            clobFile.LocalFile = new LocalClobFile(filepath);
 
-            this.ClobFileMap.Add(fileInfo.Name.ToLower(), clobFile);
+            this.ClobFileMap.Add(Path.GetFileName(filepath), clobFile);
             this.BaseClobDirectory.FileList.Add(clobFile);
         }
 
@@ -100,7 +100,7 @@ namespace Lobster
             this.ClobFileMap = new Dictionary<string, ClobFile>();
             foreach (FileInfo fileInfo in this.DirInfo.GetFiles())
             {
-                this.AddLocalClobFile(fileInfo);
+                this.AddLocalClobFile(fileInfo.FullName);
             }
 
             foreach (ClobNode child in this.ChildNodes)

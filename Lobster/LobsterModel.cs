@@ -64,7 +64,7 @@ namespace Lobster
         /// The list of temporary files that have been downloaded so far.
         /// These files are deleted when the model is disposed.
         /// </summary>
-        public List<FileInfo> TempFileList { get; private set; } = new List<FileInfo>();
+        public List<string> TempFileList { get; private set; } = new List<string>();
 
         /// <summary>
         /// The list of mime types that are used to translate from file names to database mnemonics and vice-sersa.
@@ -116,8 +116,8 @@ namespace Lobster
         /// Public access for downloading database files.
         /// </summary>
         /// <param name="clobFile">The database file that will be downloaded.</param>
-        /// <returns>The <see cref="FileInfo"/> of the resulting file.</returns>
-        public FileInfo SendDownloadClobDataToFileMessage(ClobFile clobFile)
+        /// <returns>The path of the resulting file.</returns>
+        public string SendDownloadClobDataToFileMessage(ClobFile clobFile)
         {
             OracleConnection con = OpenConnection(this.CurrentConnection);
             if (con == null)
@@ -125,9 +125,9 @@ namespace Lobster
                 return null;
             }
 
-            FileInfo result = this.DownloadClobDataToFile(clobFile, con);
+            string filepath = this.DownloadClobDataToFile(clobFile, con);
             con.Dispose();
-            return result;
+            return filepath;
         }
 
         /// <summary>
@@ -543,8 +543,8 @@ namespace Lobster
         /// </summary>
         /// <param name="clobFile">The file to download.</param>
         /// <param name="con">The Oracle connection to use.</param>
-        /// <returns>The <see cref="FileInfo"/> of the temporary file, if it exists.</returns>
-        private FileInfo DownloadClobDataToFile(ClobFile clobFile, OracleConnection con)
+        /// <returns>The path of the temporary file, if it exists.</returns>
+        private string DownloadClobDataToFile(ClobFile clobFile, OracleConnection con)
         {
             Debug.Assert(clobFile.DatabaseFile != null, "The ClobFile must be on the database for it to be downloaded");
             OracleCommand command = con.CreateCommand();
@@ -566,14 +566,14 @@ namespace Lobster
             try
             {
                 OracleDataReader reader = command.ExecuteReader();
-                FileInfo tempFile = Common.CreateTempFile(clobFile.DatabaseFile.Filename);
+                string filepath = Common.CreateTempFile(clobFile.DatabaseFile.Filename);
 
                 if (reader.Read())
                 {
                     if (column.DataType == Column.Datatype.BLOB)
                     {
                         OracleBlob blob = reader.GetOracleBlob(0);
-                        File.WriteAllBytes(tempFile.FullName, blob.Value);
+                        File.WriteAllBytes(filepath, blob.Value);
                     }
                     else
                     {
@@ -590,7 +590,7 @@ namespace Lobster
                             result = xml.Value;
                         }
 
-                        StreamWriter streamWriter = File.AppendText(tempFile.FullName);
+                        StreamWriter streamWriter = File.AppendText(filepath);
                         streamWriter.Write(result);
                         streamWriter.Close();
                     }
@@ -598,7 +598,7 @@ namespace Lobster
                     if (!reader.Read())
                     {
                         reader.Close();
-                        return tempFile;
+                        return filepath;
                     }
                     else
                     {

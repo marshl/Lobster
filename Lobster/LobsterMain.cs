@@ -496,16 +496,16 @@ namespace Lobster
         /// <param name="args">The event arguments.</param>
         private void LobsterMain_FormClosed(object sender, FormClosedEventArgs args)
         {
-            foreach (FileInfo tempFile in this.model.TempFileList)
+            foreach (string filepath in this.model.TempFileList)
             {
                 try
                 {
-                    File.Delete(tempFile.FullName);
-                    MessageLog.LogInfo("Temporary file deleted " + tempFile.FullName);
+                    File.Delete(filepath);
+                    MessageLog.LogInfo("Temporary file deleted " + filepath);
                 }
                 catch (IOException e)
                 {
-                    MessageLog.LogWarning("Failed to delete temporary file " + tempFile.FullName + " " + e);
+                    MessageLog.LogWarning("Failed to delete temporary file " + filepath + " " + e);
                 }
             }
         }
@@ -832,19 +832,19 @@ namespace Lobster
         {
             Debug.Assert(clobFile.IsSynced, "The ClobFile must be synchronised to diff it.");
 
-            FileInfo tempFile = this.model.SendDownloadClobDataToFileMessage(clobFile);
-            if (tempFile == null)
+            string filepath = this.model.SendDownloadClobDataToFileMessage(clobFile);
+            if (filepath == null)
             {
                 Common.ShowErrorMessage("Diff with Database", "An error ocurred when fetching the file data.");
                 return;
             }
 
-            MessageLog.LogInfo("Temporary file created: " + tempFile.FullName);
-            this.model.TempFileList.Add(tempFile);
+            MessageLog.LogInfo("Temporary file created: " + filepath);
+            this.model.TempFileList.Add(filepath);
 
             string args = string.Format(
                 Settings.Default.DiffProgramArguments,
-                tempFile.FullName,
+                filepath,
                 clobFile.LocalFile.FilePath);
 
             Process.Start(Settings.Default.DiffProgramName, args);
@@ -875,17 +875,17 @@ namespace Lobster
         private void PullDatabaseFile(ClobFile clobFile)
         {
             Debug.Assert(clobFile.DatabaseFile != null, "The file must exist on the database");
-            FileInfo tempFile = this.model.SendDownloadClobDataToFileMessage(clobFile);
-            if (tempFile == null)
+            string filepath = this.model.SendDownloadClobDataToFileMessage(clobFile);
+            if (filepath == null)
             {
                 Common.ShowErrorMessage("Open Database", "An error ocurred when fetching the file data.");
                 return;
             }
 
-            MessageLog.LogInfo("Temporary file created: " + tempFile.FullName);
-            this.model.TempFileList.Add(tempFile);
+            MessageLog.LogInfo("Temporary file created: " + filepath);
+            this.model.TempFileList.Add(filepath);
 
-            Process.Start(tempFile.FullName);
+            Process.Start(filepath);
         }
 
         /// <summary>

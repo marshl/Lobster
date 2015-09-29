@@ -223,11 +223,11 @@ namespace Lobster
         }
 
         /// <summary>
-        /// Creates a new temporary file in the temp file directory with the name of the given original file plus a UID.
+        /// Returns the path in the directory of a temporary file with the name of the given original file plus a UID.
         /// </summary>
-        /// <param name="original">The name of the original file, if it existed.</param>
-        /// <returns>The <see cref="FileInfo"/> for the new temporary file.</returns>
-        public static FileInfo CreateTempFile(string original)
+        /// <param name="originalFilename">The name of the original file, if it existed.</param>
+        /// <returns>The path of the temporary file location.</returns>
+        public static string CreateTempFile(string originalFilename)
         {
             DirectoryInfo tempDir = new DirectoryInfo(Settings.Default.TempFileDirectory);
             if (!tempDir.Exists)
@@ -235,9 +235,7 @@ namespace Lobster
                 tempDir.Create();
             }
 
-            string tempName = Path.Combine(tempDir.FullName, Guid.NewGuid() + original);
-            FileInfo tempFile = new FileInfo(tempName);
-            return tempFile;
+            return Path.Combine(tempDir.FullName, Guid.NewGuid() + originalFilename);
         }
     }
 }
