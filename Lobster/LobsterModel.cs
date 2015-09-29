@@ -195,7 +195,7 @@ namespace Lobster
         public string ConvertFilenameToMnemonic(ClobFile clobFile, Table table, string mimeType)
         {
             Debug.Assert(clobFile.LocalFile != null, "The file must be local to construct its database mnemonic");
-            string mnemonic = Path.GetFileNameWithoutExtension(clobFile.LocalFile.FileInfo.Name);
+            string mnemonic = Path.GetFileNameWithoutExtension(clobFile.LocalFile.Info.Name);
 
             // If the table stores mime types, then the mnemonic will also need to have 
             // the prefix representation of the mime type prefixed to it.
@@ -398,7 +398,7 @@ namespace Lobster
 
                 trans.Commit();
                 command.Dispose();
-                MessageLog.LogInfo("Clob file update successful: " + clobFile.LocalFile.FileInfo.Name);
+                MessageLog.LogInfo("Clob file update successful: " + clobFile.LocalFile.Info.Name);
                 return true;
             }
             catch (Exception e)
@@ -428,7 +428,7 @@ namespace Lobster
 
             // Wait for the file to unlock
             using (FileStream fs = Common.WaitForFile(
-                clobFile.LocalFile.FileInfo.FullName,
+                clobFile.LocalFile.Info.FullName,
                 FileMode.Open,
                 FileAccess.Read,
                 FileShare.ReadWrite))
@@ -488,7 +488,7 @@ namespace Lobster
                     {
                         Common.ShowErrorMessage(
                             "Clob Insert Error",
-                            "An exception occurred when inserting into the parent table of " + clobFile.LocalFile.FileInfo.Name + ": " + e.Message);
+                            "An exception occurred when inserting into the parent table of " + clobFile.LocalFile.Info.Name + ": " + e.Message);
                         MessageLog.LogError("Error creating new clob: " + e.Message + " when executing command: " + command.CommandText);
                         return false;
                     }
@@ -515,7 +515,7 @@ namespace Lobster
                     trans.Rollback();
                     Common.ShowErrorMessage(
                         "Clob Insert Error",
-                        "An invalid operation occurred when inserting " + clobFile.LocalFile.FileInfo.Name + ": " + e.Message);
+                        "An invalid operation occurred when inserting " + clobFile.LocalFile.Info.Name + ": " + e.Message);
                     MessageLog.LogError("Error creating new clob: " + e.Message + " when executing command: " + command.CommandText);
                     return false;
                 }
@@ -529,12 +529,12 @@ namespace Lobster
             clobFile.DatabaseFile = new DBClobFile()
             {
                 Mnemonic = mnemonic,
-                Filename = clobFile.LocalFile.FileInfo.Name,
+                Filename = clobFile.LocalFile.Info.Name,
                 ParentTable = table,
                 MimeType = mimeType
             };
 
-            MessageLog.LogInfo("Clob file creation successful: " + clobFile.LocalFile.FileInfo.Name);
+            MessageLog.LogInfo("Clob file creation successful: " + clobFile.LocalFile.Info.Name);
             return true;
         }
 

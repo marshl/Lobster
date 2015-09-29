@@ -93,7 +93,7 @@ namespace Lobster
         {
             get
             {
-                return !this.LocalFile.FileInfo.IsReadOnly;
+                return !this.LocalFile.Info.IsReadOnly;
             }
         }
     }
