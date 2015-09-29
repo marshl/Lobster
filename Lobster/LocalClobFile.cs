@@ -33,15 +33,15 @@ namespace Lobster
         /// <summary>
         /// Initializes a new instance of the <see cref="LocalClobFile"/> class.
         /// </summary>
-        /// <param name="fileInfo">The file reference attached to this file.</param>
-        public LocalClobFile(FileInfo fileInfo)
+        /// <param name="filePath">The path of the file this is attached to.</param>
+        public LocalClobFile(string filePath)
         {
-            this.Info = fileInfo;
+            this.FilePath = filePath;
         }
 
         /// <summary>
-        /// The info of the file this local file is for.
+        /// The path of the local file this is attached to.
         /// </summary>
-        public FileInfo Info { get; private set; }
+        public string FilePath { get; private set; }
     }
 }

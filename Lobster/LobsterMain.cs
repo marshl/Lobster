@@ -99,7 +99,7 @@ namespace Lobster
             this.lobsterNotificationIcon.ShowBalloonTip(
                 Settings.Default.BalloonPopupDurationMS,
                 result ? "File Inserted" : "File Insert Failed",
-                clobFile.LocalFile.Info.Name,
+                Path.GetFileName(clobFile.LocalFile.FilePath),
                 result ? ToolTipIcon.Info : ToolTipIcon.Error);
 
             (result ? this.successSoundPlayer : this.failureSoundPlayer).Play();
@@ -118,7 +118,7 @@ namespace Lobster
             this.lobsterNotificationIcon.ShowBalloonTip(
                 Settings.Default.BalloonPopupDurationMS,
                 result ? "Database Updated" : "Database Update Failed",
-                clobFile.LocalFile.Info.Name,
+                Path.GetFileName(clobFile.LocalFile.FilePath),
                 result ? ToolTipIcon.Info : ToolTipIcon.Error);
 
             (result ? this.successSoundPlayer : this.failureSoundPlayer).Play();
@@ -233,9 +233,9 @@ namespace Lobster
             }
             else
             {
-                filename = clobFile.LocalFile.Info.Name;
+                filename = Path.GetFileName(clobFile.LocalFile.FilePath);
                 imageHandle = clobFile.IsEditable ? 1 : 2;
-                dateValue = clobFile.LocalFile.Info.LastAccessTime.ToShortDateString();
+                dateValue = File.GetLastAccessTime(clobFile.LocalFile.FilePath).ToShortDateString();
                 if (clobFile.IsSynced)
                 {
                     status = "Synchronised";
@@ -300,11 +300,6 @@ namespace Lobster
             {
                 ClobFile clobFile = pair.Value;
                 Debug.Assert(clobFile.LocalFile != null, "The ClobFile must have a local file for it to be displayed in the file list view");
-                if (clobFile.LocalFile != null)
-                {
-                    clobFile.LocalFile.Info.Refresh();
-                }
-
                 ListViewItem item = this.GetListViewRowForClobFile(clobFile);
                 this.fileListView.Items.Add(item);
             }
@@ -371,7 +366,7 @@ namespace Lobster
             clobToolStripMenuItem.Enabled = clobFile.IsSynced;
 
             // Only enable diffing if the file extension is within the diffable list
-            string extension = Path.GetExtension(clobFile.LocalFile.Info.Name);
+            string extension = Path.GetExtension(clobFile.LocalFile.FilePath);
             diffWithDatabaseToolStripMenuItem.Enabled = clobFile.IsSynced
                 && Settings.Default.DiffableExtensions.Contains(extension);
 
@@ -683,7 +678,7 @@ namespace Lobster
             // Only enable diffing if the file extension is within the diffable list
             if (this.diffWithDBButton.Enabled)
             {
-                string extension = Path.GetExtension(selectedFile.LocalFile.Info.Name);
+                string extension = Path.GetExtension(selectedFile.LocalFile.FilePath);
                 this.diffWithDBButton.Enabled = Settings.Default.DiffableExtensions.Contains(extension);
             }
 
@@ -753,10 +748,10 @@ namespace Lobster
         private void ReclobFile(ClobFile clobFile)
         {
             Debug.Assert(clobFile.IsSynced, "The file must be synchronised to reclob it");
-            if (clobFile.LocalFile.Info.IsReadOnly)
+            if (!clobFile.IsEditable)
             {
                 DialogResult result = MessageBox.Show(
-                    clobFile.LocalFile.Info.Name + " is locked. Are you sure you want to clob it?",
+                    Path.GetFileName(clobFile.LocalFile.FilePath) + " is locked. Are you sure you want to clob it?",
                     "File is Locked",
                     MessageBoxButtons.OKCancel);
 
@@ -797,7 +792,7 @@ namespace Lobster
             Debug.Assert(clobFIle.LocalFile != null, "The file must exist locally to be able to explore to it");
 
             // Windows Explorer command line arguments: https://support.microsoft.com/en-us/kb/152457
-            Process.Start("explorer", "/select," + clobFIle.LocalFile.Info.FullName);
+            Process.Start("explorer", "/select," + clobFIle.LocalFile.FilePath);
         }
 
         /// <summary>
@@ -850,7 +845,7 @@ namespace Lobster
             string args = string.Format(
                 Settings.Default.DiffProgramArguments,
                 tempFile.FullName,
-                clobFile.LocalFile.Info.FullName);
+                clobFile.LocalFile.FilePath);
 
             Process.Start(Settings.Default.DiffProgramName, args);
         }

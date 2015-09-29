@@ -138,18 +138,18 @@ namespace Lobster
             // Break any existing connections to clob files
             this.FileList.ForEach(x => x.DatabaseFile = null);
 
-            foreach (DBClobFile file in this.DatabaseFileList)
+            foreach (DBClobFile databaseFile in this.DatabaseFileList)
             {
-                List<ClobFile> matchingFiles = this.FileList.FindAll(x => x.LocalFile.Info.Name.ToLower() == file.Filename.ToLower());
+                List<ClobFile> matchingFiles = this.FileList.FindAll(x => Path.GetFileName(x.LocalFile.FilePath).ToLower() == databaseFile.Filename.ToLower());
 
                 // Link all matching local files to that database file
                 if (matchingFiles.Count > 0)
                 {
-                    matchingFiles.ForEach(x => x.DatabaseFile = file);
+                    matchingFiles.ForEach(x => x.DatabaseFile = databaseFile);
                     if (matchingFiles.Count > 1)
                     {
-                        MessageLog.LogWarning("Multiple local files have been found for the database file " + file.Filename + " from the table " + file.ParentTable.FullName);
-                        matchingFiles.ForEach(x => MessageLog.LogWarning(x.LocalFile.Info.FullName));
+                        MessageLog.LogWarning("Multiple local files have been found for the database file " + databaseFile.Filename + " from the table " + databaseFile.ParentTable.FullName);
+                        matchingFiles.ForEach(x => MessageLog.LogWarning(x.LocalFile.FilePath));
                         MessageLog.LogWarning("Updating any of those files will update the same database file.");
                     }
                 }
@@ -157,7 +157,7 @@ namespace Lobster
                 {
                     // If it has no local file to link it, then add it to the database only list
                     ClobFile databaseOnlyFile = new ClobFile(this.RootClobNode);
-                    databaseOnlyFile.DatabaseFile = file;
+                    databaseOnlyFile.DatabaseFile = databaseFile;
                     this.DatabaseOnlyFiles.Add(databaseOnlyFile);
                 }
             }
