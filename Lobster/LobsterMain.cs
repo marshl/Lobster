@@ -365,10 +365,13 @@ namespace Lobster
             insertToolStripMenuItem.Enabled = clobFile.IsLocalOnly;
             clobToolStripMenuItem.Enabled = clobFile.IsSynced;
 
-            // Only enable diffing if the file extension is within the diffable list
-            string extension = Path.GetExtension(clobFile.LocalFile.FilePath);
-            diffWithDatabaseToolStripMenuItem.Enabled = clobFile.IsSynced
-                && Settings.Default.DiffableExtensions.Contains(extension);
+            diffWithDatabaseToolStripMenuItem.Enabled = clobFile.IsSynced;
+            if ( clobFile.IsSynced )
+            {
+                // Only enable diffing if the file extension is within the diffable list
+                string extension = Path.GetExtension(clobFile.LocalFile.FilePath);
+                diffWithDatabaseToolStripMenuItem.Enabled = Settings.Default.DiffableExtensions.Contains(extension);
+            }
 
             this.showInExplorerToolStripMenuItem.Enabled = clobFile.LocalFile != null;
             this.openDatabaseToolStripMenuItem.Enabled = clobFile.DatabaseFile != null;
