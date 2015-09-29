@@ -195,6 +195,7 @@ namespace Lobster
         /// </summary>
         /// <param name="caption">The MessageBox text.</param>
         /// <param name="text">The MessageBox caption.</param>
+        /// <returns>The <see cref="DialogResult"/> of the displayed message box.</returns>
         public static DialogResult ShowErrorMessage(string caption, string text)
         {
             return MessageBox.Show(text, caption, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
@@ -221,6 +222,11 @@ namespace Lobster
             return fbd.SelectedPath;
         }
 
+        /// <summary>
+        /// Creates a new temporary file in the temp file directory with the name of the given original file plus a UID.
+        /// </summary>
+        /// <param name="original">The name of the original file, if it existed.</param>
+        /// <returns>The <see cref="FileInfo"/> for the new temporary file.</returns>
         public static FileInfo CreateTempFile(string original)
         {
             DirectoryInfo tempDir = new DirectoryInfo(Settings.Default.TempFileDirectory);
