@@ -182,7 +182,8 @@ namespace Lobster
             get
             {
                 Debug.Assert(this.ColumnPurpose == Purpose.ID, "NextID should only be called on a column with the ID purpose");
-                return this.Sequence != null ? this.ParentTable.schema + "." + this.Sequence + ".NEXTVAL"
+
+                return this.Sequence != null ? this.ParentTable.Schema + "." + this.Sequence + ".NEXTVAL"
                   : "( SELECT NVL( MAX( " + this.FullName + " ), 0 ) + 1 FROM " + this.ParentTable.FullName + " )";
             }
         }

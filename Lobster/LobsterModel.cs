@@ -199,7 +199,7 @@ namespace Lobster
 
             // If the table stores mime types, then the mnemonic will also need to have 
             // the prefix representation of the mime type prefixed to it.
-            if (table.columns.Find(x => x.ColumnPurpose == Column.Purpose.MIME_TYPE) != null)
+            if (table.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MIME_TYPE) != null)
             {
                 MimeTypeList.MimeType mt = this.MimeList.MimeTypes.Find(x => x.Name == mimeType);
                 if (mt == null)
@@ -235,7 +235,7 @@ namespace Lobster
             }
 
             // Assume xml data types for tables without a datatype column, or a prefix
-            if (table.columns.Find(x => x.ColumnPurpose == Column.Purpose.MIME_TYPE) == null || prefix == null)
+            if (table.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MIME_TYPE) == null || prefix == null)
             {
                 filename += table.DefaultExtension ?? ".xml";
             }
@@ -433,7 +433,7 @@ namespace Lobster
                 FileAccess.Read,
                 FileShare.ReadWrite))
             {
-                Column column = table.columns.Find(
+                Column column = table.Columns.Find(
                     x => x.ColumnPurpose == Column.Purpose.CLOB_DATA
                         && (mimeType == null || x.MimeTypeList.Contains(mimeType)));
 
@@ -473,7 +473,7 @@ namespace Lobster
             OracleTransaction trans = con.BeginTransaction();
             string mnemonic = this.ConvertFilenameToMnemonic(clobFile, table, mimeType);
 
-            if (table.parentTable != null)
+            if (table.ParentTable != null)
             {
                 try
                 {
@@ -578,7 +578,7 @@ namespace Lobster
                     else
                     {
                         string result;
-                        Column clobColumn = clobFile.DatabaseFile.ParentTable.columns.Find(x => x.ColumnPurpose == Column.Purpose.CLOB_DATA);
+                        Column clobColumn = clobFile.DatabaseFile.ParentTable.Columns.Find(x => x.ColumnPurpose == Column.Purpose.CLOB_DATA);
                         if (clobColumn.DataType == Column.Datatype.CLOB)
                         {
                             OracleClob clob = reader.GetOracleClob(0);
@@ -654,7 +654,7 @@ namespace Lobster
                     {
                         DBClobFile databaseFile = new DBClobFile();
                         databaseFile.Mnemonic = reader.GetString(0);
-                        databaseFile.MimeType = table.columns.Find(x => x.ColumnPurpose == Column.Purpose.MIME_TYPE) != null ? reader.GetString(1) : null;
+                        databaseFile.MimeType = table.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MIME_TYPE) != null ? reader.GetString(1) : null;
                         databaseFile.Filename = this.ConvertMnemonicToFilename(databaseFile.Mnemonic, table, databaseFile.MimeType);
                         databaseFile.ParentTable = table;
                         clobDir.DatabaseFileList.Add(databaseFile);

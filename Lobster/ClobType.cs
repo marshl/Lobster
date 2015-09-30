@@ -101,7 +101,7 @@ namespace Lobster
         /// <param name="parentConnection">The DatabaseConnection to set as this ClobType's parent.</param>
         public void Initialise(DatabaseConnection parentConnection)
         {
-            this.Tables.ForEach(x => x.LinkColumns());
+            this.Tables.ForEach(x => x.Initialise());
             this.ParentConnection = parentConnection;
         }
         

@@ -64,7 +64,7 @@ namespace Lobster
             this.InitializeComponent();
 
             this.model = new LobsterModel();
-            
+
             this.PopulateConnectionList(this.model.ConnectionList);
 
             this.successSoundPlayer = new SoundPlayer(
@@ -366,7 +366,7 @@ namespace Lobster
             clobToolStripMenuItem.Enabled = clobFile.IsSynced;
 
             diffWithDatabaseToolStripMenuItem.Enabled = clobFile.IsSynced;
-            if ( clobFile.IsSynced )
+            if (clobFile.IsSynced)
             {
                 // Only enable diffing if the file extension is within the diffable list
                 string extension = Path.GetExtension(clobFile.LocalFile.FilePath);
@@ -419,7 +419,7 @@ namespace Lobster
 
             // If the table has a MimeType column, ask the user for the type to use
             string mimeType = null;
-            Column mimeTypeColumn = table.columns.Find(x => x.ColumnPurpose == Column.Purpose.MIME_TYPE);
+            Column mimeTypeColumn = table.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MIME_TYPE);
             if (mimeTypeColumn != null)
             {
                 DatatypePicker typePicker = new DatatypePicker(mimeTypeColumn);

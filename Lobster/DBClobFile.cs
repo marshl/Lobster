@@ -60,7 +60,7 @@ namespace Lobster
         public Column GetColumn()
         {
             // Find the column that is used for storing the clob data that can store the mime type of this file
-            Column col = this.ParentTable.columns.Find(
+            Column col = this.ParentTable.Columns.Find(
                 x => x.ColumnPurpose == Column.Purpose.CLOB_DATA
                     && (this.MimeType == null || x.MimeTypeList.Contains(this.MimeType)));
 

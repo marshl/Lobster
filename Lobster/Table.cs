@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="filename.cs" company="marshl">
+// <copyright file="Table.cs" company="marshl">
 // Copyright 2015, Liam Marshall, marshl.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,251 +31,325 @@ namespace Lobster
     using System.Globalization;
     using System.Xml.Serialization;
 
+    /// <summary>
+    /// Rperesents a single SQL table in the database. Used to build commands for 
+    /// inserting, updating and querying values from this table.
+    /// </summary>
     [DisplayName("Table")]
     [XmlType("table")]
     public class Table : ICloneable
     {
+        /// <summary>
+        /// The schema/user that this table belongs to.
+        /// </summary>
         [DisplayName("Schema/Owner Name")]
         [Description("The schema/owner of this table")]
-        public string schema { get; set; }
+        [XmlElement("schema")]
+        public string Schema { get; set; }
 
+        /// <summary>
+        /// The name of this table in the database.
+        /// </summary>
         [DisplayName("Name")]
         [Description("The name of this table")]
-        public string name { get; set; }
+        [XmlElement("name")]
+        public string Name { get; set; }
 
+        /// <summary>
+        /// The extension that will be added to the mnemonic to create the guesstimate local file name. 
+        /// If the default extension is not set, then .xml will be used
+        /// </summary>
         [DisplayName("Default Extension")]
         [Description("The file extension that will be used to compare mnemonics on the database to local files. The default is '.xml'")]
         [XmlElement("defaultExtension")]
         public string DefaultExtension { get; set; }
 
+        /// <summary>
+        /// The columns in this table that Lobster needs.
+        /// </summary>
         [DisplayName("Column List")]
         [Description("The columns in this table")]
-        public List<Column> columns { get; set; }
+        [XmlArray("columns")]
+        public List<Column> Columns { get; set; }
 
+        /// <summary>
+        /// The parent table of this table, if this table is part of a parent-child relationship.
+        /// </summary>
         [DisplayName("Parent Table")]
         [Description("The parent table if this table is in a parent/child relationship.")]
-        public Table parentTable { get; set; }
+        [XmlElement("parentTable")]
+        public Table ParentTable { get; set; }
 
-        public string FullName { get { return this.schema + "." + this.name; } }
+        /// <summary>
+        /// The full name of this table, including the schema to ensure queries are not ambiguous.
+        /// </summary>
+        public string FullName
+        {
+            get
+            {
+                return this.Schema + "." + this.Name;
+            }
+        }
 
+        /// <summary>
+        /// Returns the string representation of this table.
+        /// This needs to be overriden for display purposes in the property grid editor.
+        /// </summary>
+        /// <returns>The string representation of this Table.</returns>
         public override string ToString()
         {
             return this.FullName;
         }
 
-        public void LinkColumns()
+        /// <summary>
+        /// Connects all the columns in this table to this table.
+        /// (This cannot be done as part of the deserialisation, so it must be done explicitly)
+        /// </summary>
+        public void Initialise()
         {
-            if (this.columns != null)
+            if (this.Columns != null)
             {
-                foreach (Column c in this.columns)
-                {
-                    c.ParentTable = this;
-                }
+                this.Columns.ForEach(x => x.ParentTable = this);
             }
 
-            if (this.parentTable != null)
+            if (this.ParentTable != null)
             {
-                this.parentTable.LinkColumns();
+                this.ParentTable.Initialise();
             }
         }
 
+        /// <summary>
+        /// Prevents the DefaultExtension element from being serialised to file if it is null.
+        /// </summary>
+        /// <returns>Whether the default extension should be serialised.</returns>
         public bool ShouldSerializeDefaultExtension()
         {
             return this.DefaultExtension != null;
         }
 
-        public string BuildUpdateStatement(ClobFile _clobFile)
+        /// <summary>
+        /// Constructs an SQL statement to update a row in the database
+        /// </summary>
+        /// <param name="clobFile">The ClobFile to build an update statement for.</param>
+        /// <returns>The update statement.</returns>
+        public string BuildUpdateStatement(ClobFile clobFile)
         {
-            Column clobCol = _clobFile.DatabaseFile.GetColumn();
-            Debug.Assert(clobCol != null);
-
+            Column clobCol = clobFile.DatabaseFile.GetColumn();
             string command =
                    "UPDATE " + this.FullName
                  + " SET " + clobCol.FullName + " = :data";
 
-            Column dateCol = this.columns.Find(x => x.ColumnPurpose == Column.Purpose.DATETIME);
+            Column dateCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.DATETIME);
             if (dateCol != null)
             {
                 command += ", " + dateCol.FullName + " = SYSDATE";
             }
 
-            if (this.parentTable != null)
+            if (this.ParentTable != null)
             {
-                Table pt = this.parentTable;
-                Column fkCol = this.columns.Find(x => x.ColumnPurpose == Column.Purpose.FOREIGN_KEY);
-                Column parentIDCol = pt.columns.Find(x => x.ColumnPurpose == Column.Purpose.ID);
-                Column parentMnemCol = pt.columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
+                Table pt = this.ParentTable;
+                Column foreignKeyCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.FOREIGN_KEY);
+                Column parentIDCol = pt.Columns.Find(x => x.ColumnPurpose == Column.Purpose.ID);
+                Column parentMnemCol = pt.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
 
-                command += " WHERE " + fkCol.FullName + " = ("
+                command += " WHERE " + foreignKeyCol.FullName + " = ("
                         + " SELECT " + parentIDCol.FullName
                         + " FROM " + pt.FullName
-                        + " WHERE " + parentMnemCol.FullName + " = '" + _clobFile.DatabaseFile.Mnemonic + "')";
+                        + " WHERE " + parentMnemCol.FullName + " = '" + clobFile.DatabaseFile.Mnemonic + "')";
             }
             else
             {
-                Column mnemCol = this.columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
-                command += " WHERE " + mnemCol.FullName + " = '" + _clobFile.DatabaseFile.Mnemonic + "'";
+                Column mnemCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
+                command += " WHERE " + mnemCol.FullName + " = '" + clobFile.DatabaseFile.Mnemonic + "'";
             }
+
             return command;
         }
 
-        public string BuildInsertParentStatement(string _mnemonic)
+        /// <summary>
+        /// Constructs an SQL statement to insert a row into the parent table of this table with the given mnemonic.
+        /// </summary>
+        /// <param name="mnemonic">The mnemonic for the file to insert.</param>
+        /// <returns>The insert statement.</returns>
+        public string BuildInsertParentStatement(string mnemonic)
         {
-            Debug.Assert(this.parentTable != null);
-            Table pt = this.parentTable;
-            Column idCol = pt.columns.Find(x => x.ColumnPurpose == Column.Purpose.ID);
-            Column mnemCol = pt.columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
-            Debug.Assert(idCol != null);
-            Debug.Assert(mnemCol != null);
+            Debug.Assert(this.ParentTable != null, "Inserting into a parent table requires a parent to be defined");
+            Table pt = this.ParentTable;
+
+            Column idCol = pt.Columns.Find(x => x.ColumnPurpose == Column.Purpose.ID);
+            Debug.Assert(idCol != null, "Inserting into a parent table requires the parent to have an ID column");
+
+            Column mnemCol = pt.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
+            Debug.Assert(mnemCol != null, "Inserting into a parent table requires the parent to have a mnemonic column");
 
             string command = "INSERT INTO " + pt.FullName
                 + " (" + idCol.FullName + ", " + mnemCol.FullName + " )"
-                + " VALUES( " + idCol.NextID + "), :mnemonic )";
+                + " VALUES( " + idCol.NextID + "), '" + mnemonic + "' )";
 
             return command;
         }
 
-        public string BuildInsertChildStatement(string _mnemonic, string _mimeType)
+        /// <summary>
+        /// Constructs an SQL statement to insert a file into the database.
+        /// If this table has a parent, then the parent information will be applied. 
+        /// If not, the wile will be inserted normally.
+        /// </summary>
+        /// <param name="mnemonic">The mnemonic for the file to add.</param>
+        /// <param name="mimeType">The mime type of the file to add, if applicable.</param>
+        /// <returns>The insert SQl statement.</returns>
+        public string BuildInsertChildStatement(string mnemonic, string mimeType)
         {
-            Column mnemCol = this.columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
-            Debug.Assert(mnemCol != null);
-            Column dateCol = this.columns.Find(x => x.ColumnPurpose == Column.Purpose.DATETIME);
-            Column idCol = this.columns.Find(x => x.ColumnPurpose == Column.Purpose.ID);
-            Column dataCol = this.columns.Find(x => x.ColumnPurpose == Column.Purpose.CLOB_DATA
-               && (_mimeType == null || x.MimeTypeList.Contains(_mimeType)));
-            Column fullNameCol = this.columns.Find(x => x.ColumnPurpose == Column.Purpose.FULL_NAME);
+            Column mnemCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
+            Debug.Assert(mnemCol != null, "The mnemonic column must exist to insert as a child table");
 
             // Make a string for the column names...
             string insertCommand = "INSERT INTO " + this.FullName + " ( "
                 + mnemCol.FullName;
 
-            // ..and another for the values, which will concatenated together
-            string valueCommand = " VALUES ( '" + _mnemonic + "' ";
+            // ..and another for the values. The insertCommand and valueCommand are joined to form the full statement
+            string valueCommand = " VALUES ( '" + mnemonic + "' ";
 
-            if (this.parentTable != null)
+            if (this.ParentTable != null)
             {
-                Table pt = this.parentTable;
-                Column fkCol = this.columns.Find(x => x.ColumnPurpose == Column.Purpose.FOREIGN_KEY);
-                Column parentIDCol = pt.columns.Find(x => x.ColumnPurpose == Column.Purpose.ID);
-                Column parentMnemCol = pt.columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
+                Table pt = this.ParentTable;
+                Column foreignKeyCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.FOREIGN_KEY);
+                Column parentIDCol = pt.Columns.Find(x => x.ColumnPurpose == Column.Purpose.ID);
+                Column parentMnemCol = pt.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
 
-                insertCommand += ", " + fkCol.FullName;
+                insertCommand += ", " + foreignKeyCol.FullName;
 
                 valueCommand += parentIDCol.NextID + ", "
                         + "( SELECT " + parentIDCol.FullName + " FROM " + pt.FullName
-                        + " WHERE " + parentMnemCol.FullName + " = '" + _mnemonic + "' )";
+                        + " WHERE " + parentMnemCol.FullName + " = '" + mnemonic + "' )";
             }
-            else // No parent table
+            else
             {
+                // No parent table
+                Column idCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.ID);
                 if (idCol != null)
                 {
                     insertCommand += ", " + idCol.FullName;
                     valueCommand += ", " + idCol.NextID;
                 }
 
-                if (_mimeType != null)
+                if (mimeType != null)
                 {
-                    Column mimeCol = this.columns.Find(x => x.ColumnPurpose == Column.Purpose.MIME_TYPE);
-                    Debug.Assert(mimeCol != null);
+                    Column mimeCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MIME_TYPE);
+                    Debug.Assert(mimeCol != null, "If a mime type is given, the table must have a mime type column");
                     insertCommand += ", " + mimeCol.FullName;
-                    valueCommand += ", " + _mimeType;
+                    valueCommand += ", " + mimeType;
                 }
             }
 
+            // The date column is optional
+            Column dateCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.DATETIME);
             if (dateCol != null)
             {
                 insertCommand += ", " + dateCol.FullName;
                 valueCommand += ", SYSDATE ";
             }
 
+            // The full name column is optional. It is set to the PascalCase of the mnemonic
+            Column fullNameCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.FULL_NAME);
             if (fullNameCol != null)
             {
                 TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
-                string fullName = textInfo.ToTitleCase(_mnemonic.ToLower());
+                string fullName = textInfo.ToTitleCase(mnemonic.ToLower());
                 insertCommand += ", " + fullNameCol.FullName;
                 valueCommand += ", '" + fullName + "'";
             }
+
+            Column dataCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.CLOB_DATA
+              && (mimeType == null || x.MimeTypeList.Contains(mimeType)));
 
             insertCommand += ", " + dataCol.FullName + " )";
             valueCommand += ", :data ) ";
             return insertCommand + valueCommand;
         }
 
-        public string BuildGetDataCommand(ClobFile _clobFile)
+        /// <summary>
+        /// Constructs an SQL statement to get the 
+        /// </summary>
+        /// <param name="clobFile">The ClobFile to build the statement for.</param>
+        /// <returns>The SQL command</returns>
+        public string BuildGetDataCommand(ClobFile clobFile)
         {
-            Column clobCol = _clobFile.DatabaseFile.GetColumn();
-            if (this.parentTable != null)
+            Column clobCol = clobFile.DatabaseFile.GetColumn();
+            if (this.ParentTable != null)
             {
-                Table pt = this.parentTable;
-                Column fkCol = this.columns.Find(x => x.ColumnPurpose == Column.Purpose.FOREIGN_KEY);
-                Column parentIDCol = pt.columns.Find(x => x.ColumnPurpose == Column.Purpose.ID);
-                Column parentMnemCol = pt.columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
+                Table pt = this.ParentTable;
+                Column foreignKeyCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.FOREIGN_KEY);
+                Column parentIDCol = pt.Columns.Find(x => x.ColumnPurpose == Column.Purpose.ID);
+                Column parentMnemCol = pt.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
                 return
                     "SELECT " + clobCol.FullName
                     + " FROM " + pt.FullName
                     + " JOIN " + this.FullName
-                    + " ON " + fkCol.FullName + " = " + parentIDCol.FullName
-                    + " WHERE " + parentMnemCol.FullName + " = '" + _clobFile.DatabaseFile.Mnemonic + "'";
+                    + " ON " + foreignKeyCol.FullName + " = " + parentIDCol.FullName
+                    + " WHERE " + parentMnemCol.FullName + " = '" + clobFile.DatabaseFile.Mnemonic + "'";
             }
             else
             {
-                Column mnemCol = this.columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
+                Column mnemCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
                 return
                     "SELECT " + clobCol.FullName
                     + " FROM " + this.FullName
-                    + " WHERE " + mnemCol.FullName + " = '" + _clobFile.DatabaseFile.Mnemonic + "'";
+                    + " WHERE " + mnemCol.FullName + " = '" + clobFile.DatabaseFile.Mnemonic + "'";
             }
         }
 
         /// <summary>
-        /// 
+        /// Constructs an SQL query to retrieve the list of files in this table on the database.
+        /// If this table has a mime type column, then the value of that column will be included in the query.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The SQL command the retrive the file lists for this table.</returns>
         public string GetFileListCommand()
         {
-            Column mimeCol = this.columns.Find(x => x.ColumnPurpose == Column.Purpose.MIME_TYPE);
+            Column mimeCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MIME_TYPE);
 
-            if (this.parentTable != null)
+            if (this.ParentTable != null)
             {
-                Table pt = this.parentTable;
-                Column fkCol = this.columns.Find(x => x.ColumnPurpose == Column.Purpose.FOREIGN_KEY);
-                Column parentIDCol = pt.columns.Find(x => x.ColumnPurpose == Column.Purpose.ID);
-                Column parentMnemCol = pt.columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
+                Table pt = this.ParentTable;
+                Column foreignKeyCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.FOREIGN_KEY);
+                Column parentIDCol = pt.Columns.Find(x => x.ColumnPurpose == Column.Purpose.ID);
+                Column parentMnemCol = pt.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
 
                 return "SELECT " + parentMnemCol.FullName
                     + (mimeCol != null ? ", " + mimeCol.FullName : null)
                     + " FROM " + pt.FullName
                     + " JOIN " + this.FullName
-                    + " ON " + fkCol.FullName + " = " + parentIDCol.FullName;
+                    + " ON " + foreignKeyCol.FullName + " = " + parentIDCol.FullName;
             }
             else
             {
-                Column mnemCol = this.columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
+                Column mnemCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
                 return "SELECT " + mnemCol.FullName
                     + (mimeCol != null ? ", " + mimeCol.FullName : null)
                     + " FROM " + this.FullName;
             }
         }
 
+        /// <summary>
+        /// Creates a deep copy of this table and all columns beaneath it.
+        /// </summary>
+        /// <returns>The copy of the table.</returns>
         public object Clone()
         {
             Table copy = new Table();
-            copy.schema = this.schema;
-            copy.name = this.name;
+            copy.Schema = this.Schema;
+            copy.Name = this.Name;
 
-            if (this.parentTable != null)
+            if (this.ParentTable != null)
             {
-                copy.parentTable = (Table)this.parentTable.Clone();
+                copy.ParentTable = (Table)this.ParentTable.Clone();
             }
 
-            if (this.columns != null)
+            if (this.Columns != null)
             {
-                copy.columns = new List<Column>();
-                foreach (Column column in this.columns)
-                {
-                    copy.columns.Add((Column)column.Clone());
-                }
+                copy.Columns = new List<Column>();
+                this.Columns.ForEach(x => copy.Columns.Add((Column)x.Clone()));
             }
+
             return copy;
         }
     }

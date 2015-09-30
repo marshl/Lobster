@@ -49,7 +49,7 @@
             this.tablePickerAccept.TabIndex = 1;
             this.tablePickerAccept.Text = "OK";
             this.tablePickerAccept.UseVisualStyleBackColor = true;
-            this.tablePickerAccept.Click += new System.EventHandler(this.button1_Click);
+            this.tablePickerAccept.Click += new System.EventHandler(this.tablePickerAccept_Click);
             // 
             // tablePickerCancel
             // 
