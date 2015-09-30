@@ -187,5 +187,17 @@ namespace Lobster.Properties {
                 this["TempFileDirectory"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("LobsterSettings/ClobType.xsd")]
+        public string ClobTypeSchemaFilename {
+            get {
+                return ((string)(this["ClobTypeSchemaFilename"]));
+            }
+            set {
+                this["ClobTypeSchemaFilename"] = value;
+            }
+        }
     }
 }

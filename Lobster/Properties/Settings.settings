@@ -50,5 +50,8 @@
     <Setting Name="TempFileDirectory" Type="System.String" Scope="User">
       <Value Profile="(Default)">temp</Value>
     </Setting>
+    <Setting Name="ClobTypeSchemaFilename" Type="System.String" Scope="User">
+      <Value Profile="(Default)">LobsterSettings/ClobType.xsd</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
