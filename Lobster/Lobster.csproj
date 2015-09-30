@@ -227,11 +227,10 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>mkdir "$(ProjectDir)$(OutDir)LobsterSettings"
-xcopy /s /y "$(ProjectDir)LobsterSettings" "$(ProjectDir)$(OutDir)LobsterSettings"
-xcopy /y "$(ProjectDir)..\README.md" "$(ProjectDir)$(OutDir)"
-copy /y NUL "$(ProjectDir)$(OutDir)lobster.log" &gt;NUL
-del /q "$(ProjectDir)$(OutDir)lobster.log"</PostBuildEvent>
+    <PostBuildEvent>md $(ProjectDir)$(OutDir)LobsterSettings
+xcopy /s /y $(ProjectDir)LobsterSettings $(ProjectDir)$(OutDir)LobsterSettings
+xcopy /y $(ProjectDir)..\README.md $(ProjectDir)$(OutDir)
+del $(ProjectDir)$(OutDir)lobster.log</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
