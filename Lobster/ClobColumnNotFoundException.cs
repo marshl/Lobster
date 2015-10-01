@@ -28,6 +28,7 @@ namespace Lobster
     /// <summary>
     /// An exception thrown when a column isn't found that matches the given mime type
     /// </summary>
+    [Serializable]
     public class ClobColumnNotFoundException : Exception
     {
         /// <summary>

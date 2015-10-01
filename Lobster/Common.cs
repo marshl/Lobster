@@ -227,7 +227,7 @@ namespace Lobster
         /// </summary>
         /// <param name="originalFilename">The name of the original file, if it existed.</param>
         /// <returns>The path of the temporary file location.</returns>
-        public static string CreateTempFile(string originalFilename)
+        public static string GetTempFilepath(string originalFilename)
         {
             DirectoryInfo tempDir = new DirectoryInfo(Settings.Default.TempFileDirectory);
             if (!tempDir.Exists)

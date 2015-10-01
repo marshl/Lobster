@@ -85,6 +85,20 @@ namespace Lobster
             }
             else
             {
+                if (Settings.Default.BackupEnabled)
+                {
+                    DirectoryInfo backupDir = new DirectoryInfo(Settings.Default.BackupDirectory);
+                    if (!backupDir.Exists)
+                    {
+                        backupDir.Create();
+                    }
+
+                    string tempName = string.Format("{0:yyyy-MM-dd_HH-mm-ss}", DateTime.Now)
+                        + Path.GetFileName(clobFile.LocalFile.FilePath);
+                    string filepath = Path.Combine(Settings.Default.BackupDirectory, tempName);
+                    this.DownloadClobDataToFile(clobFile, con, filepath);
+                }
+
                 result = this.UpdateDatabaseClob(clobFile, con);
                 con.Dispose();
             }
@@ -125,9 +139,11 @@ namespace Lobster
                 return null;
             }
 
-            string filepath = this.DownloadClobDataToFile(clobFile, con);
+            string filepath = Common.GetTempFilepath(clobFile.DatabaseFile.Filename);
+            bool result = this.DownloadClobDataToFile(clobFile, con, filepath);
             con.Dispose();
-            return filepath;
+
+            return result ? filepath : null;
         }
 
         /// <summary>
@@ -543,8 +559,9 @@ namespace Lobster
         /// </summary>
         /// <param name="clobFile">The file to download.</param>
         /// <param name="con">The Oracle connection to use.</param>
+        /// <param name="filename">The filepath to download the data into.</param>
         /// <returns>The path of the temporary file, if it exists.</returns>
-        private string DownloadClobDataToFile(ClobFile clobFile, OracleConnection con)
+        private bool DownloadClobDataToFile(ClobFile clobFile, OracleConnection con, string filename)
         {
             Debug.Assert(clobFile.DatabaseFile != null, "The ClobFile must be on the database for it to be downloaded");
             OracleCommand command = con.CreateCommand();
@@ -560,20 +577,19 @@ namespace Lobster
             {
                 Common.ShowErrorMessage("Clob Data Fetch Error", e.Message);
                 MessageLog.LogError(e.Message);
-                return null;
+                return false;
             }
 
             try
             {
                 OracleDataReader reader = command.ExecuteReader();
-                string filepath = Common.CreateTempFile(clobFile.DatabaseFile.Filename);
 
                 if (reader.Read())
                 {
                     if (column.DataType == Column.Datatype.BLOB)
                     {
                         OracleBlob blob = reader.GetOracleBlob(0);
-                        File.WriteAllBytes(filepath, blob.Value);
+                        File.WriteAllBytes(filename, blob.Value);
                     }
                     else
                     {
@@ -590,7 +606,7 @@ namespace Lobster
                             result = xml.Value;
                         }
 
-                        StreamWriter streamWriter = File.AppendText(filepath);
+                        StreamWriter streamWriter = File.AppendText(filename);
                         streamWriter.Write(result);
                         streamWriter.Close();
                     }
@@ -598,7 +614,7 @@ namespace Lobster
                     if (!reader.Read())
                     {
                         reader.Close();
-                        return filepath;
+                        return true;
                     }
                     else
                     {
@@ -608,7 +624,7 @@ namespace Lobster
                             "Too many rows were found for " + clobFile.DatabaseFile.Mnemonic);
 
                         MessageLog.LogError("Too many rows found on clob retrieval of " + clobFile.DatabaseFile.Mnemonic);
-                        return null;
+                        return false;
                     }
                 }
             }
@@ -620,7 +636,7 @@ namespace Lobster
                         "Clob Data Fetch Error",
                         "An invalid operation occurred when retreiving the data of " + clobFile.DatabaseFile.Mnemonic + ": " + e.Message);
                     MessageLog.LogError("Error retrieving data: " + e.Message + " when executing command " + command.CommandText);
-                    return null;
+                    return false;
                 }
 
                 throw;
@@ -630,7 +646,7 @@ namespace Lobster
                 "Clob Data Fetch Error",
                 "No data was found for " + clobFile.DatabaseFile.Mnemonic);
             MessageLog.LogError("No data found on clob retrieval of " + clobFile.DatabaseFile.Mnemonic + " when executing command: " + command.CommandText);
-            return null;
+            return false;
         }
 
         /// <summary>

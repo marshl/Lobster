@@ -53,5 +53,8 @@
     <Setting Name="ClobTypeSchemaFilename" Type="System.String" Scope="User">
       <Value Profile="(Default)">LobsterSettings/ClobType.xsd</Value>
     </Setting>
+    <Setting Name="BackupDirectory" Type="System.String" Scope="User">
+      <Value Profile="(Default)">backup</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
