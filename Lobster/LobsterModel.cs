@@ -26,12 +26,12 @@ namespace Lobster
 {
     using System;
     using System.Collections.Generic;
-    using System.Data;
     using System.Data.Common;
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Runtime.Serialization;
+    using MySql.Data.MySqlClient;
     using Oracle.ManagedDataAccess.Client;
     using Oracle.ManagedDataAccess.Types;
     using Properties;
@@ -280,22 +280,45 @@ namespace Lobster
         {
             try
             {
-                OracleConnection con = new OracleConnection();
-                con.ConnectionString = "User Id=" + config.Username
-                    + ";Password=" + config.Password
-                    + ";Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)("
-                    + "HOST=" + config.Host + ")"
-                    + "(PORT=" + config.Port + ")))(CONNECT_DATA="
-                    + "(SID=" + config.SID + ")(SERVER=DEDICATED)))"
-                    + ";Pooling=" + (config.UsePooling ? "true" : "false");
+                switch (config.Provider)
+                {
+                    case DatabaseProvider.ORACLE:
+                        {
+                            OracleConnection con = new OracleConnection();
+                            con.ConnectionString = "User Id=" + config.Username
+                                + ";Password=" + config.Password
+                                + ";Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)("
+                                + "HOST=" + config.Host + ")"
+                                + "(PORT=" + config.Port + ")))(CONNECT_DATA="
+                                + "(SID=" + config.SID + ")(SERVER=DEDICATED)))"
+                                + ";Pooling=" + (config.UsePooling ? "true" : "false");
 
-                MessageLog.LogInfo("Connecting to database " + config.Name + " using connection string " + con.ConnectionString);
-                con.Open();
-                return con;
+                            MessageLog.LogInfo("Connecting to database " + config.Name + " using connection string " + con.ConnectionString);
+                            con.Open();
+                            return con;
+                        }
+                    case DatabaseProvider.MYSQL:
+                        {
+                            MySqlConnection con = new MySqlConnection();
+                            con.ConnectionString = "server=" + config.Host
+                                + ";user=" + config.Username
+                                + ";database=" + config.SID
+                                + ";port=" + config.Port
+                                + ":password=" + config.Password;
+
+                            MessageLog.LogInfo("Connecting to database " + config.Name + " using connection string " + con.ConnectionString);
+                            con.Open();
+                            return con;
+                        }
+                    default:
+                        {
+                            throw new ArgumentOutOfRangeException();
+                        }
+                }
             }
             catch (Exception e)
             {
-                if (e is InvalidOperationException || e is OracleException || e is FormatException)
+                if (e is InvalidOperationException || e is OracleException || e is FormatException || e is ArgumentOutOfRangeException)
                 {
                     Common.ShowErrorMessage("Database Connection Failure", "Cannot open connection to database: " + e.Message);
                     MessageLog.LogError("Connection to Oracle failed: " + e.Message);
@@ -482,9 +505,9 @@ namespace Lobster
                     StreamReader sr = new StreamReader(fs);
                     string contents = sr.ReadToEnd();
                     contents += this.GetClobFooterMessage(mimeType);
-                    
+
                     param.Value = contents;
-                    if ( command is OracleCommand )
+                    if (command is OracleCommand)
                     {
                         OracleParameter op = (OracleParameter)param;
                         op.OracleDbType = column.DataType == Column.Datatype.XMLTYPE ? OracleDbType.XmlType : OracleDbType.Clob;
@@ -779,6 +802,22 @@ namespace Lobster
             protected ConnectionDirNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context)
             {
             }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public enum DatabaseProvider
+        {
+            /// <summary>
+            /// 
+            /// </summary>
+            ORACLE,
+
+            /// <summary>
+            /// 
+            /// </summary>
+            MYSQL,
         }
     }
 }

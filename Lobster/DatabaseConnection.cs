@@ -49,6 +49,11 @@ namespace Lobster
         [XmlElement("name")]
         public string Name { get; set; }
 
+        [DisplayName("Database Provider")]
+        [Description("The database provider to connect as.")]
+        [XmlElement("provider")]
+        public LobsterModel.DatabaseProvider Provider { get; set; } = LobsterModel.DatabaseProvider.ORACLE;
+
         /// <summary>
         /// The host of the database.
         /// </summary>

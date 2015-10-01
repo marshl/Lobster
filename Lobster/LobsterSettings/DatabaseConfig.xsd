@@ -4,6 +4,7 @@
   <xs:complexType name="DatabaseConfig">
     <xs:sequence>
       <xs:element minOccurs="1" maxOccurs="1" name="name" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="provider" type="Provider" />
       <xs:element minOccurs="1" maxOccurs="1" name="host" type="xs:string" />
       <xs:element minOccurs="1" maxOccurs="1" name="port" type="xs:string" />
       <xs:element minOccurs="1" maxOccurs="1" name="sid" type="xs:string" />
@@ -14,4 +15,10 @@
       <xs:element minOccurs="1" maxOccurs="1" name="clobTypeDir" type="xs:string" />
     </xs:sequence>
   </xs:complexType>
+  <xs:simpleType name="Provider">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="ORACLE" />
+      <xs:enumeration value="MYSQL" />
+    </xs:restriction>
+  </xs:simpleType>
 </xs:schema>
