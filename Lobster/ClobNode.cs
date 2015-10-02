@@ -88,7 +88,7 @@ namespace Lobster
             ClobFile clobFile = new ClobFile(this);
             clobFile.LocalFile = new LocalClobFile(filepath);
 
-            this.ClobFileMap.Add(Path.GetFileName(filepath), clobFile);
+            this.ClobFileMap.Add(Path.GetFileName(filepath).ToLower(), clobFile);
             this.BaseClobDirectory.FileList.Add(clobFile);
         }
 
