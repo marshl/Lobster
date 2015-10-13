@@ -31,7 +31,6 @@ namespace Lobster
     using System.IO;
     using System.Linq;
     using System.Runtime.Serialization;
-    using MySql.Data.MySqlClient;
     using Oracle.ManagedDataAccess.Client;
     using Oracle.ManagedDataAccess.Types;
     using Properties;
@@ -280,45 +279,22 @@ namespace Lobster
         {
             try
             {
-                switch (config.Provider)
-                {
-                    case DatabaseProvider.ORACLE:
-                        {
-                            OracleConnection con = new OracleConnection();
-                            con.ConnectionString = "User Id=" + config.Username
-                                + ";Password=" + config.Password
-                                + ";Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)("
-                                + "HOST=" + config.Host + ")"
-                                + "(PORT=" + config.Port + ")))(CONNECT_DATA="
-                                + "(SID=" + config.SID + ")(SERVER=DEDICATED)))"
-                                + ";Pooling=" + (config.UsePooling ? "true" : "false");
+                OracleConnection con = new OracleConnection();
+                con.ConnectionString = "User Id=" + config.Username
+                    + (string.IsNullOrEmpty(config.Password) ? null : ";Password=" + config.Password)
+                    + ";Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)("
+                    + "HOST=" + config.Host + ")"
+                    + "(PORT=" + config.Port + ")))(CONNECT_DATA="
+                    + "(SID=" + config.SID + ")(SERVER=DEDICATED)))"
+                    + ";Pooling=" + (config.UsePooling ? "true" : "false");
 
-                            MessageLog.LogInfo("Connecting to database " + config.Name + " using connection string " + con.ConnectionString);
-                            con.Open();
-                            return con;
-                        }
-                    case DatabaseProvider.MYSQL:
-                        {
-                            MySqlConnection con = new MySqlConnection();
-                            con.ConnectionString = "server=" + config.Host
-                                + ";user=" + config.Username
-                                + ";database=" + config.SID
-                                + ";port=" + config.Port
-                                + ":password=" + config.Password;
-
-                            MessageLog.LogInfo("Connecting to database " + config.Name + " using connection string " + con.ConnectionString);
-                            con.Open();
-                            return con;
-                        }
-                    default:
-                        {
-                            throw new ArgumentOutOfRangeException();
-                        }
-                }
+                MessageLog.LogInfo("Connecting to database " + config.Name + " using connection string " + con.ConnectionString);
+                con.Open();
+                return con;
             }
             catch (Exception e)
             {
-                if (e is InvalidOperationException || e is OracleException || e is FormatException || e is ArgumentOutOfRangeException)
+                if (e is InvalidOperationException || e is OracleException  || e is FormatException || e is ArgumentOutOfRangeException)
                 {
                     Common.ShowErrorMessage("Database Connection Failure", "Cannot open connection to database: " + e.Message);
                     MessageLog.LogError("Connection to Oracle failed: " + e.Message);
@@ -443,7 +419,7 @@ namespace Lobster
             }
             catch (Exception e)
             {
-                if (e is OracleException || e is InvalidOperationException)
+                if (e is OracleException  || e is InvalidOperationException)
                 {
                     trans.Rollback();
                     Common.ShowErrorMessage("Clob Update Failed", "An invalid operation occurred when updating the database: " + e.Message);
@@ -488,16 +464,8 @@ namespace Lobster
                     fs.Read(fileData, 0, Convert.ToInt32(fs.Length));
 
                     param.Value = fileData;
-
-                    if (command is OracleCommand)
-                    {
-                        OracleParameter op = (OracleParameter)param;
-                        op.OracleDbType = OracleDbType.Blob;
-                    }
-                    else
-                    {
-                        throw new NotImplementedException();
-                    }
+                    OracleParameter op = (OracleParameter)param;
+                    op.OracleDbType = OracleDbType.Blob;
                 }
                 else
                 {
@@ -507,15 +475,8 @@ namespace Lobster
                     contents += this.GetClobFooterMessage(mimeType);
 
                     param.Value = contents;
-                    if (command is OracleCommand)
-                    {
-                        OracleParameter op = (OracleParameter)param;
-                        op.OracleDbType = column.DataType == Column.Datatype.XMLTYPE ? OracleDbType.XmlType : OracleDbType.Clob;
-                    }
-                    else
-                    {
-                        throw new NotImplementedException();
-                    }
+                    OracleParameter op = (OracleParameter)param;
+                    op.OracleDbType = column.DataType == Column.Datatype.XMLTYPE ? OracleDbType.XmlType : OracleDbType.Clob;
                 }
 
                 command.Parameters.Add(param);
