@@ -422,7 +422,7 @@ namespace Lobster
             Column mimeTypeColumn = table.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MIME_TYPE);
             if (mimeTypeColumn != null)
             {
-                DatatypePicker typePicker = new DatatypePicker(mimeTypeColumn);
+                DatatypePicker typePicker = new DatatypePicker(table);
                 DialogResult dialogResult = typePicker.ShowDialog();
                 if (dialogResult != DialogResult.OK)
                 {

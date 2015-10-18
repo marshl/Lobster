@@ -36,16 +36,16 @@ namespace Lobster
         /// <summary>
         /// Initializes a new instance of the <see cref="DatatypePicker"/> class.
         /// </summary>
-        /// <param name="column">The mime type column that definees the mime types that can be chosen from.</param>
-        public DatatypePicker(Column column)
+        /// <param name="table">The table the data types will be chosen from.</param>
+        public DatatypePicker(Table table)
         {
             this.InitializeComponent();
-            Debug.Assert(column.MimeTypeList.Count > 0, "The column must have at least one mime type.");
-            foreach (string str in column.MimeTypeList)
+            foreach (Column column in table.Columns)
             {
-                this.datatypeComboBox.Items.Add(str);
+                this.datatypeComboBox.Items.AddRange(column.MimeTypeList.ToArray());
             }
 
+            Debug.Assert(this.datatypeComboBox.Items.Count > 0, "The table must have at least one mime type.");
             this.datatypeComboBox.SelectedIndex = 0;
         }
 
