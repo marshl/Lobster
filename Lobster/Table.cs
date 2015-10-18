@@ -237,7 +237,7 @@ namespace Lobster
                     Column mimeCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MIME_TYPE);
                     Debug.Assert(mimeCol != null, "If a mime type is given, the table must have a mime type column");
                     insertCommand += ", " + mimeCol.FullName;
-                    valueCommand += ", " + mimeType;
+                    valueCommand += ", '" + mimeType + "'";
                 }
             }
 
