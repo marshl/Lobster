@@ -51,11 +51,6 @@ namespace Lobster
         }
 
         /// <summary>
-        /// The list of valid connection files fond in the connection directory.
-        /// </summary>
-        public List<DatabaseConnection> ConnectionList { get; private set; }
-
-        /// <summary>
         /// The current connection that is being used by this model.
         /// </summary>
         public DatabaseConnection CurrentConnection { get; set; }
@@ -77,7 +72,7 @@ namespace Lobster
         /// <param name="clobFile">The file to update.</param>
         public void SendUpdateClobMessage(ClobFile clobFile)
         {
-            DbConnection con = OpenConnection(this.CurrentConnection);
+            DbConnection con = OpenConnection(this.CurrentConnection.Config);
             bool result;
             if (con == null)
             {
@@ -115,7 +110,7 @@ namespace Lobster
         /// <returns>True if the file was inserted, otherwise false.</returns>
         public bool SendInsertClobMessage(ClobFile clobFile, Table table, string mimeType)
         {
-            DbConnection con = OpenConnection(this.CurrentConnection);
+            DbConnection con = OpenConnection(this.CurrentConnection.Config);
             if (con == null)
             {
                 return false;
@@ -133,7 +128,7 @@ namespace Lobster
         /// <returns>The path of the resulting file.</returns>
         public string SendDownloadClobDataToFileMessage(ClobFile clobFile)
         {
-            DbConnection con = OpenConnection(this.CurrentConnection);
+            DbConnection con = OpenConnection(this.CurrentConnection.Config);
             if (con == null)
             {
                 return null;
@@ -146,29 +141,43 @@ namespace Lobster
             return result ? filepath : null;
         }
 
+        public List<DatabaseConfig> GetConfigList()
+        {
+            List<DatabaseConfig> configList = new List<DatabaseConfig>();
+            foreach (string filename in Directory.GetFiles(Settings.Default.ConnectionDir))
+            {
+                DatabaseConfig connection = DatabaseConfig.LoadDatabaseConfig(filename);
+                if (connection != null)
+                {
+                    configList.Add(connection);
+                }
+            }
+            return configList;
+        }
+
         /// <summary>
         /// Sets the current connection to the given connection, if able.
         /// </summary>
-        /// <param name="connection">The connection to open.</param>
+        /// <param name="config">The connection to open.</param>
         /// <returns>Whether making the connection was successful or not.</returns>
-        public bool SetDatabaseConnection(DatabaseConnection connection)
+        public bool SetDatabaseConnection(DatabaseConfig config)
         {
-            MessageLog.LogInfo("Changing connection to " + connection.Name);
-            using (DbConnection con = OpenConnection(connection))
+            MessageLog.LogInfo("Changing connection to " + config.Name);
+            using (DbConnection con = OpenConnection(config))
             {
                 if (con == null)
                 {
-                    MessageLog.LogError("Could not change connection to " + connection.Name);
+                    MessageLog.LogError("Could not change connection to " + config.Name);
                     return false;
                 }
             }
 
-            if (connection.ClobTypeDir == null || !Directory.Exists(connection.ClobTypeDir))
+            if (config.ClobTypeDir == null || !Directory.Exists(config.ClobTypeDir))
             {
-                connection.ClobTypeDir = Common.PromptForDirectory("Please select your Clob Type directory for " + connection.Name, connection.CodeSource);
-                if (connection.ClobTypeDir != null)
+                config.ClobTypeDir = Common.PromptForDirectory("Please select your Clob Type directory for " + config.Name, config.CodeSource);
+                if (config.ClobTypeDir != null)
                 {
-                    DatabaseConnection.SerialiseToFile(connection.FileLocation, connection);
+                    DatabaseConfig.SerialiseToFile(config.FileLocation, config);
                 }
                 else
                 {
@@ -178,7 +187,10 @@ namespace Lobster
                 }
             }
 
-            this.CurrentConnection = connection;
+            this.CurrentConnection = new DatabaseConnection(config);
+
+            this.CurrentConnection.LoadClobTypes();
+
             this.CurrentConnection.PopulateClobDirectories();
             this.RebuildLocalAndDatabaseFileLists();
 
@@ -275,7 +287,7 @@ namespace Lobster
         /// </summary>
         /// <param name="config">The connection configuration settings to use.</param>
         /// <returns>A new connectionif it opened successfully, otherwise null.</returns>
-        private static DbConnection OpenConnection(DatabaseConnection config)
+        private static DbConnection OpenConnection(DatabaseConfig config)
         {
             try
             {
@@ -323,16 +335,6 @@ namespace Lobster
                 Settings.Default.ConnectionDir = connectionDir;
                 Settings.Default.Save();
             }
-
-            this.ConnectionList = new List<DatabaseConnection>();
-            foreach (string filename in Directory.GetFiles(Settings.Default.ConnectionDir))
-            {
-                DatabaseConnection connection = DatabaseConnection.LoadDatabaseConnection(filename, this);
-                if (connection != null)
-                {
-                    this.ConnectionList.Add(connection);
-                }
-            }
         }
 
         /// <summary>
@@ -340,7 +342,7 @@ namespace Lobster
         /// </summary>
         private void GetDatabaseFileLists()
         {
-            DbConnection con = OpenConnection(this.CurrentConnection);
+            DbConnection con = OpenConnection(this.CurrentConnection.Config);
             if (con == null)
             {
                 MessageLog.LogError("Connection failed, cannot diff files with database.");
@@ -452,7 +454,6 @@ namespace Lobster
                 Column column = table.Columns.Find(
                     x => x.ColumnPurpose == Column.Purpose.CLOB_DATA
                         && (mimeType == null || x.MimeTypeList.Contains(mimeType)));
-
 
                 DbParameter param = command.CreateParameter();
                 param.ParameterName = "data";
@@ -568,6 +569,7 @@ namespace Lobster
         /// Downloads the current content of a file on the database to a local temp file.
         /// </summary>
         /// <param name="clobFile">The file to download.</param>
+        /// <param name="con">The connection to use.</param>
         /// <param name="filename">The filepath to download the data into.</param>
         /// <returns>The path of the temporary file, if it exists.</returns>
         private bool DownloadClobDataToFile(ClobFile clobFile, DbConnection con, string filename)
@@ -597,8 +599,6 @@ namespace Lobster
                 {
                     if (column.DataType == Column.Datatype.BLOB)
                     {
-                        //OracleBlob blob = reader.//reader.GetOracleBlob(0);
-                        //File.WriteAllBytes(filepath, blob.Value);
                         byte[] b = new Byte[(reader.GetBytes(0, 0, null, 0, int.MaxValue))];
                         reader.GetBytes(0, 0, b, 0, b.Length);
                         File.WriteAllBytes(filename, b);

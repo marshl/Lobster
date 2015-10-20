@@ -65,7 +65,7 @@ namespace Lobster
 
             this.model = new LobsterModel();
 
-            this.PopulateConnectionList(this.model.ConnectionList);
+            this.PopulateConnectionList();
 
             this.successSoundPlayer = new SoundPlayer(
                 Path.Combine(
@@ -139,26 +139,29 @@ namespace Lobster
         /// <summary>
         /// Fills the connectionListView with given list of <see cref="DatabaseConnection"/>s.
         /// </summary>
-        /// <param name="connectionList">The list of connections the list should be populated with.</param>
-        private void PopulateConnectionList(List<DatabaseConnection> connectionList)
+        /// <param name="configList">The list of connections the list should be populated with.</param>
+        private void PopulateConnectionList()
         {
             this.connectionListView.Items.Clear();
-            for (int i = 0; i < connectionList.Count; ++i)
+
+            List<DatabaseConfig> configList = this.model.GetConfigList();
+
+
+            foreach (DatabaseConfig config in configList)
             {
-                DatabaseConnection connection = connectionList[i];
-                ListViewItem item = new ListViewItem(connection.Name);
-                string address = connection.Host;
+                ListViewItem item = new ListViewItem(config.Name);
+                string address = config.Host;
 
                 ListViewItem.ListViewSubItem[] subItems = new ListViewItem.ListViewSubItem[]
                 {
                     new ListViewItem.ListViewSubItem(item, address),
-                    new ListViewItem.ListViewSubItem(item, connection.Port),
-                    new ListViewItem.ListViewSubItem(item, connection.SID),
-                    new ListViewItem.ListViewSubItem(item, connection.CodeSource),
-                    new ListViewItem.ListViewSubItem(item, connection.UsePooling.ToString()),
+                    new ListViewItem.ListViewSubItem(item, config.Port),
+                    new ListViewItem.ListViewSubItem(item, config.SID),
+                    new ListViewItem.ListViewSubItem(item, config.CodeSource),
+                    new ListViewItem.ListViewSubItem(item, config.UsePooling.ToString()),
                 };
                 item.SubItems.AddRange(subItems);
-                item.Tag = i;
+                item.Tag = config;
                 this.connectionListView.Items.Add(item);
             }
 
@@ -175,7 +178,7 @@ namespace Lobster
 
             // Use the folder name as the root element
             DatabaseConnection dbc = this.model.CurrentConnection;
-            TreeNode rootNode = new TreeNode(Path.GetFileName(dbc.CodeSource) ?? "CodeSource", 0, 0);
+            TreeNode rootNode = new TreeNode(Path.GetFileName(dbc.Config.CodeSource) ?? "CodeSource", 0, 0);
             foreach (KeyValuePair<ClobType, ClobDirectory> pair in dbc.ClobTypeToDirectoryMap)
             {
                 ClobDirectory clobDir = pair.Value;
@@ -607,9 +610,8 @@ namespace Lobster
 
             LoadingForm loadingForm = new LoadingForm();
             loadingForm.Show();
-
-            int configIndex = (int)this.connectionListView.SelectedItems[0].Tag;
-            DatabaseConnection connection = this.model.ConnectionList[configIndex];
+            
+            DatabaseConfig connection = (DatabaseConfig)this.connectionListView.SelectedItems[0].Tag;
             bool result = this.model.SetDatabaseConnection(connection);
             if (result)
             {
@@ -927,14 +929,12 @@ namespace Lobster
                 MessageBox.Show("You must first select a connection.");
                 return;
             }
-
-            int configIndex = (int)this.connectionListView.SelectedItems[0].Tag;
-            DatabaseConnection connectionRef = this.model.ConnectionList[configIndex];
+            
+            DatabaseConfig connectionRef = (DatabaseConfig)this.connectionListView.SelectedItems[0].Tag;
 
             EditDatabaseConnection editForm = new EditDatabaseConnection(connectionRef, false);
             DialogResult result = editForm.ShowDialog();
-            this.model.ConnectionList[configIndex] = editForm.OriginalObject;
-            this.PopulateConnectionList(this.model.ConnectionList);
+            this.PopulateConnectionList();
         }
 
         /// <summary>
@@ -944,15 +944,13 @@ namespace Lobster
         /// <param name="e">The event arguments.</param>
         private void newConnectionButton_Click(object sender, EventArgs e)
         {
-            DatabaseConnection newConnection = new DatabaseConnection();
-            newConnection.ParentModel = this.model;
+            DatabaseConfig newConnection = new DatabaseConfig();
             newConnection.FileLocation = Path.Combine(Settings.Default.ConnectionDir, "NewConnection.xml");
             EditDatabaseConnection editForm = new EditDatabaseConnection(newConnection, true);
             DialogResult result = editForm.ShowDialog();
             if (result == DialogResult.OK)
             {
-                this.model.ConnectionList.Add(editForm.OriginalObject);
-                this.PopulateConnectionList(this.model.ConnectionList);
+                this.PopulateConnectionList();
             }
         }
 
@@ -969,9 +967,8 @@ namespace Lobster
                 MessageBox.Show("You must first select a connection.");
                 return;
             }
-
-            int configIndex = (int)this.connectionListView.SelectedItems[0].Tag;
-            DatabaseConnection databaseConnection = this.model.ConnectionList[configIndex];
+            
+            DatabaseConfig databaseConnection = (DatabaseConfig)this.connectionListView.SelectedItems[0].Tag;
 
             DialogResult result = MessageBox.Show(
                 "Are you sure you want to permanently delete the connection " + databaseConnection.Name ?? "New Connection" + "?",
@@ -981,8 +978,7 @@ namespace Lobster
             if (result == DialogResult.OK)
             {
                 File.Delete(databaseConnection.FileLocation);
-                this.model.ConnectionList.RemoveAt(configIndex);
-                this.PopulateConnectionList(this.model.ConnectionList);
+                this.PopulateConnectionList();
             }
         }
     }

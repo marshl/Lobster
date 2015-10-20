@@ -92,6 +92,7 @@
     <Compile Include="Column.cs" />
     <Compile Include="Common.cs" />
     <Compile Include="ClobNode.cs" />
+    <Compile Include="DatabaseConfig.cs" />
     <Compile Include="DatabaseConnection.cs" />
     <Compile Include="DatatypePicker.cs">
       <SubType>Form</SubType>

@@ -41,86 +41,12 @@ namespace Lobster
     [XmlType("DatabaseConfig")]
     public class DatabaseConnection : ICloneable
     {
-        /// <summary>
-        /// The name of the connection. This is for display purposes only.
-        /// </summary>
-        [DisplayName("Name")]
-        [Description("The name of the connection. This is for display purposes only.")]
-        [XmlElement("name")]
-        public string Name { get; set; }
+        public DatabaseConnection(DatabaseConfig config)
+        {
+            this.Config = config;
+        }
 
-        /// <summary>
-        /// The host of the database.
-        /// </summary>
-        [DisplayName("Host")]
-        [Description("The host of the database.")]
-        [Category("Database")]
-        [XmlElement("host")]
-        public string Host { get; set; }
-
-        /// <summary>
-        /// The port the database is listening on. Usually 1521 for Oracle.
-        /// </summary>
-        [DisplayName("Port")]
-        [Description("The port the database is listening on. Usually 1521 for Oracle.")]
-        [Category("Database")]
-        [XmlElement("port")]
-        public string Port { get; set; }
-
-        /// <summary>
-        /// The Oracle System ID of the database.
-        /// </summary>
-        [DisplayName("SID")]
-        [Description("The Oracle System ID of the database.")]
-        [Category("Database")]
-        [XmlElement("sid")]
-        public string SID { get; set; }
-
-        /// <summary>
-        /// The name of the user/schema to connect as.
-        /// </summary>
-        [DisplayName("User Name")]
-        [Description("The name of the user/schema to connect as. It is important to connect as a user with the privileges to access every table that could be modified by Lobster.")]
-        [Category("Database")]
-        [XmlElement("username")]
-        public string Username { get; set; }
-
-        /// <summary>
-        /// The password to connect with.
-        /// </summary>
-        [DisplayName("Password")]
-        [Description("The password to connect with.")]
-        [Category("Database")]
-        [XmlElement("password")]
-        public string Password { get; set; }
-
-        /// <summary>
-        /// This is the location of the CodeSource directory that is used for this database.
-        /// </summary>
-        [DisplayName("CodeSource Directory")]
-        [Description("This is the location of the CodeSource directory that is used for this database. If it is invalid, Lobster will prompt you as it starts up.")]
-        [Editor(typeof(FolderNameEditor), typeof(UITypeEditor))]
-        [Category("Directories")]
-        [XmlElement("codeSource")]
-        public string CodeSource { get; set; }
-
-        /// <summary>
-        /// If pooling is enabled, when Lobster connects to the Oracle database Oracle will remember the connection for a time, and reuse it if the same computer connects using the same connection string.
-        /// </summary>
-        [DisplayName("Pooling")]
-        [Description("If pooling is enabled, when Lobster connects to the Oracle database Oracle will remember the connection for a time, and reuse it if the same computer connects using the same connection string.")]
-        [XmlElement("usePooling")]
-        public bool UsePooling { get; set; }
-
-        /// <summary>
-        /// The directory name where ClobTypes are stored.
-        /// </summary>
-        [DisplayName("ClobType Directory")]
-        [Description("ClobTypes are Lobster specific Xml files for describing the different tables located on the database and the rules that govern them.")]
-        [Editor(typeof(FolderNameEditor), typeof(UITypeEditor))]
-        [Category("Directories")]
-        [XmlElement("clobTypeDir")]
-        public string ClobTypeDir { get; set; }
+        public DatabaseConfig Config { get; set; }
 
         /// <summary>
         /// The Lobster model that is the parent of this connection.
@@ -151,81 +77,16 @@ namespace Lobster
         public Dictionary<ClobType, ClobDirectory> ClobTypeToDirectoryMap { get; set; }
 
         /// <summary>
-        /// Deserialises the given file into a new <see cref="DatabaseConnection"/>.
-        /// </summary>
-        /// <param name="fullpath">The location of the file to deserialise.</param>
-        /// <param name="parentModel">The model that will become the connection's parent.</param>
-        /// <returns>The new <see cref="DatabaseConnection"/>.</returns>
-        public static DatabaseConnection LoadDatabaseConnection(string fullpath, LobsterModel parentModel)
-        {
-            MessageLog.LogInfo("Loading Database Config File " + fullpath);
-            DatabaseConnection connection;
-            try
-            {
-                connection = Common.DeserialiseXmlFileUsingSchema<DatabaseConnection>(fullpath, Settings.Default.DatabaseConfigSchemaFilename);
-                connection.ParentModel = parentModel;
-            }
-            catch (Exception e)
-            {
-                if (e is FileNotFoundException || e is InvalidOperationException || e is XmlException || e is XmlSchemaValidationException)
-                {
-                    Common.ShowErrorMessage(
-                        "ClobType Load Failed",
-                        "The DBConfig file " + fullpath + " failed to load. Check the log for more information.");
-                    MessageLog.LogError("An error occurred when loading the ClobType " + fullpath + ": " + e);
-                    return null;
-                }
-
-                throw;
-            }
-
-            connection.FileLocation = fullpath;
-
-            // If the CodeSource folder cannot be found, prompt the user for it
-            if (connection.CodeSource == null || !Directory.Exists(connection.CodeSource))
-            {
-                string codeSourceDir = Common.PromptForDirectory("Please select your CodeSource directory for " + connection.Name, null);
-                if (codeSourceDir != null)
-                {
-                    connection.CodeSource = codeSourceDir;
-                    DatabaseConnection.SerialiseToFile(fullpath, connection);
-                }
-                else
-                {
-                    // Ignore config files that don't have a valid CodeSource folder
-                    return null;
-                }
-            }
-
-            connection.LoadClobTypes();
-            return connection;
-        }
-
-        /// <summary>
-        /// Writes a DatabaseConnection out to file.
-        /// </summary>
-        /// <param name="filename">The file to write to.</param>
-        /// <param name="connection">The DatabaseConnection to serialise.</param>
-        public static void SerialiseToFile(string filename, DatabaseConnection connection)
-        {
-            XmlSerializer xmls = new XmlSerializer(typeof(DatabaseConnection));
-            using (StreamWriter streamWriter = new StreamWriter(filename))
-            {
-                xmls.Serialize(streamWriter, connection);
-            }
-        }
-
-        /// <summary>
         /// Loads each of the xml files in the ClobTypeDir (if they are valid).
         /// </summary>
         public void LoadClobTypes()
         {
             this.ClobTypeList = new List<ClobType>();
-            DirectoryInfo dirInfo = new DirectoryInfo(this.ClobTypeDir);
+            DirectoryInfo dirInfo = new DirectoryInfo(this.Config.ClobTypeDir);
             if (!dirInfo.Exists)
             {
-                MessageBox.Show(this.ClobTypeDir + " could not be found.", "ClobType Load Failed", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
-                MessageLog.LogWarning("The directory " + dirInfo + " could not be found when loading connection " + this.Name);
+                MessageBox.Show(this.Config.ClobTypeDir + " could not be found.", "ClobType Load Failed", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
+                MessageLog.LogWarning("The directory " + dirInfo + " could not be found when loading connection " + this.Config.Name);
                 return;
             }
 
@@ -299,16 +160,8 @@ namespace Lobster
         /// <returns>The new clone.</returns>
         public object Clone()
         {
-            DatabaseConnection other = new DatabaseConnection();
-            other.Name = this.Name;
-            other.Host = this.Host;
-            other.SID = this.SID;
-            other.Port = this.Port;
-            other.Username = this.Username;
-            other.Password = this.Password;
-            other.CodeSource = this.CodeSource;
-            other.UsePooling = this.UsePooling;
-            other.ClobTypeDir = this.ClobTypeDir;
+            DatabaseConnection other = new DatabaseConnection((DatabaseConfig)this.Config.Clone());
+
             other.FileLocation = this.FileLocation;
             other.ParentModel = this.ParentModel;
 
