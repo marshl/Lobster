@@ -121,8 +121,11 @@ namespace Lobster
         {
             Message msg = new Message(message, messageType, DateTime.Now);
             this.MessageList.Add(msg);
-            this.OutStream.WriteLine(msg.ToString());
-            this.OutStream.Flush();
+            lock(this.OutStream)
+            {
+                this.OutStream.WriteLine(msg.ToString());
+                this.OutStream.Flush();
+            }
         }
 
         /// <summary>

@@ -23,12 +23,14 @@
 //-----------------------------------------------------------------------
 namespace Lobster
 {
+    using System;
     using System.IO;
 
     /// <summary>
     /// A ClobFile is the connection between a <see cref="DBClobFile"/> and a <see cref="LocalClobFile"/>.
     /// A ClobFile is synchronised if both files exist, but it can be local-only or database-only.
     /// </summary>
+    [Obsolete]
     public class ClobFile
     {
         /// <summary>

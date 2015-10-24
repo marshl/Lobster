@@ -23,6 +23,7 @@
 //-----------------------------------------------------------------------
 namespace Lobster
 {
+    using System;
     using System.Collections.Generic;
     using System.IO;
 
@@ -48,6 +49,7 @@ namespace Lobster
         /// <summary>
         /// The list all of the files in every node under this directory
         /// </summary>
+        [Obsolete]
         public List<ClobFile> FileList { get; private set; }
 
         /// <summary>
@@ -58,11 +60,13 @@ namespace Lobster
         /// <summary>
         /// The list of files that don't have a local file connection. These files are not found in FileList.
         /// </summary>
+        [Obsolete]
         public List<ClobFile> DatabaseOnlyFiles { get; private set; }
 
         /// <summary>
         /// The ClobNOde that represents this directory on the file system. The root node can have any number of child nodes, representing subfolders under the main directory.
         /// </summary>
+        [Obsolete]
         public ClobNode RootClobNode { get; set; }
 
         /// <summary>
@@ -70,6 +74,7 @@ namespace Lobster
         /// Files are found using the GetLocalFiles function.
         /// </summary>
         /// <returns>False if the directory in the ClobType could not be found, otherwise true.</returns>
+        [Obsolete]
         public bool BuildDirectoryTree()
         {
             DirectoryInfo info = new DirectoryInfo(Path.Combine(this.ClobType.ParentConnection.Config.CodeSource, this.ClobType.Directory));
@@ -93,14 +98,17 @@ namespace Lobster
         /// Gets all editable files within this directory, and stores them in the given list.
         /// </summary>
         /// <param name="workingFileList">The list of files to populate.</param>
-        public void GetWorkingFiles(ref List<ClobFile> workingFileList)
+        public void GetWorkingFiles(ref List<string> workingFileList)
         {
-            this.RootClobNode.GetWorkingFiles(ref workingFileList);
+            string directoryPath = Path.Combine(this.ClobType.ParentConnection.Config.CodeSource, this.ClobType.Directory);
+            string[] files = Directory.GetFiles(directoryPath, "*.*", SearchOption.AllDirectories);
+            workingFileList.AddRange(files);
         }
 
         /// <summary>
         /// Finds all files in all directories under this directory, and links them to the database files.
         /// </summary>
+        [Obsolete]
         public void GetLocalFiles()
         {
             this.FileList = new List<ClobFile>();
@@ -108,13 +116,14 @@ namespace Lobster
             this.LinkLocalAndDatabaseFiles();
 
             // The UI will have to be refreshed
-            LobsterMain.Instance.UpdateUIThread();
+            //LobsterMain.Instance.UpdateUIThread();
         }
 
         /// <summary>
         /// Recursively finds all directories under the given ClobNode and adds them to that node.
         /// </summary>
         /// <param name="clobNode">The ClobNode to operate on.</param>
+        [Obsolete]
         private void PopulateClobNodeDirectories_r(ClobNode clobNode)
         {
             DirectoryInfo[] subDirs = clobNode.DirInfo.GetDirectories();
@@ -130,6 +139,7 @@ namespace Lobster
         /// Links all database files to their corresponding local files.
         /// Files that are not found locally are stored as "database-only".
         /// </summary>
+        [Obsolete]
         private void LinkLocalAndDatabaseFiles()
         {
             // Reset the database only list
@@ -161,6 +171,12 @@ namespace Lobster
                     this.DatabaseOnlyFiles.Add(databaseOnlyFile);
                 }
             }
+        }
+
+        public DBClobFile GetDatabaseFileForFullpath(string fullpath)
+        {
+            string filename = Path.GetFileName(fullpath).ToLower();
+            return this.DatabaseFileList.Find(x => x.Filename.ToLower() == filename);
         }
     }
 }

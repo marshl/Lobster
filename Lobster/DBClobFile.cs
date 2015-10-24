@@ -31,26 +31,34 @@ namespace Lobster
     /// </summary>
     public class DBClobFile
     {
+        public DBClobFile(Table parentTable, string mnemonic, string mimetype, string filename)
+        {
+            this.ParentTable = parentTable;
+            this.Mnemonic = mnemonic;
+            this.MimeType = mimetype;
+            this.Filename = filename;
+        }
+
         /// <summary>
         /// The mnemonic that came from the mnemonic column. 
         /// </summary>
-        public string Mnemonic { get; set; }
+        public string Mnemonic { get; }
 
         /// <summary>
         /// The mime type stored against this file, if it exists.
         /// </summary>
-        public string MimeType { get; set; }
+        public string MimeType { get; }
 
         /// <summary>
         /// The name of file this DBClobFile should match to.
         /// The mnemonic and mimetype is processed to get this value.
         /// </summary>
-        public string Filename { get; set; }
+        public string Filename { get; }
 
         /// <summary>
         /// The table that this file was pulled from.
         /// </summary>
-        public Table ParentTable { get; set; }
+        public Table ParentTable { get; }
 
         /// <summary>
         /// Returns the column that data from this row should be pulled from, depending on the mnemonic.

@@ -23,11 +23,12 @@
 //-----------------------------------------------------------------------
 namespace Lobster
 {
-    using System.IO;
+    using System;
 
     /// <summary>
     /// Used to store information about the local version of a ClobFile.
     /// </summary>
+    [Obsolete]
     public class LocalClobFile
     {
         /// <summary>

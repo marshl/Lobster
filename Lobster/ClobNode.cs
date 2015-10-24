@@ -33,7 +33,8 @@ namespace Lobster
     /// The root ClobNode of a ClobType is stored in the corresponding ClobDirectory.
     /// Sub directories are stored in the ClobNode as additional ClobNodes.
     /// </summary>
-    public class ClobNode : IDisposable
+    [Obsolete]
+    public class ClobNode
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ClobNode"/> class.
@@ -44,8 +45,6 @@ namespace Lobster
         {
             this.DirInfo = dirInfo;
             this.BaseClobDirectory = baseDirectory;
-
-            this.CreateFileWatchers();
         }
 
         /// <summary>
@@ -72,12 +71,12 @@ namespace Lobster
         /// <summary>
         /// The watcher that tracks all change/create/delete/rename events for this folder (not including subdirectories). 
         /// </summary>
-        private FileSystemWatcher FileWatcher { get; set; }
+       // private FileSystemWatcher FileWatcher { get; set; }
 
         /// <summary>
         /// The watcher that tracks all attribute change events (such as file locks) for this folder (not including subdirectories).
         /// </summary>
-        private FileSystemWatcher FileAttributeWatcher { get; set; }
+        //private FileSystemWatcher FileAttributeWatcher { get; set; }
 
         /// <summary>
         /// This adds a file on the file system to the file dictionary on this node.
@@ -131,63 +130,12 @@ namespace Lobster
         }
 
         /// <summary>
-        /// Toggles the file watchers on or off.
-        /// </summary>
-        /// <param name="enabled">Whether to enable the file watchers.</param>
-        public void SetFileWatchersEnabled(bool enabled)
-        {
-            this.FileAttributeWatcher.EnableRaisingEvents = this.FileWatcher.EnableRaisingEvents = enabled;
-        }
-
-        /// <summary>
-        /// The IDisposable Dispose method.
-        /// </summary>
-        public void Dispose()
-        {
-            this.FileAttributeWatcher.Dispose();
-            this.FileWatcher.Dispose();
-        }
-
-        /// <summary>
-        /// Creates the FileWatcher and FileAttribute watcher that wait for file changes by the user.
-        /// </summary>
-        private void CreateFileWatchers()
-        {
-            this.FileWatcher = new FileSystemWatcher();
-            this.FileWatcher.Path = this.DirInfo.FullName;
-            this.FileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.CreationTime;
-            this.FileWatcher.Changed += new FileSystemEventHandler(this.OnFileChanged);
-            this.FileWatcher.Created += new FileSystemEventHandler(this.OnFileCreated);
-            this.FileWatcher.Deleted += new FileSystemEventHandler(this.OnFileDeleted);
-            this.FileWatcher.Renamed += new RenamedEventHandler(this.OnFileRenamed);
-
-            this.FileAttributeWatcher = new FileSystemWatcher();
-            this.FileAttributeWatcher.Path = this.DirInfo.FullName;
-            this.FileAttributeWatcher.NotifyFilter = NotifyFilters.Attributes;
-            this.FileAttributeWatcher.Changed += new FileSystemEventHandler(this.OnFileAttributeChange);
-
-            this.SetFileWatchersEnabled(true);
-        }
-
-        /// <summary>
-        /// The callback for when a file has its attributes changed. This refreshes the UI.
-        /// </summary>
-        /// <param name="sender">The sender of the message.</param>
-        /// <param name="e">The arguments for the event.</param>
-        private void OnFileAttributeChange(object sender, FileSystemEventArgs e)
-        {
-            this.SetFileWatchersEnabled(false);
-            this.BaseClobDirectory.GetLocalFiles();
-            this.SetFileWatchersEnabled(true);
-        }
-
-        /// <summary>
         /// The callback for when a file has its content changed.
         /// This pushes the file to the database if it is synchronised and editable.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">The arguments for the event.</param>
-        private void OnFileChanged(object sender, FileSystemEventArgs e)
+        /*private void OnFileChanged(object sender, FileSystemEventArgs e)
         {
             // Ensure that the file changed exists and is not a directory
             if (!File.Exists(e.FullPath))
@@ -206,7 +154,7 @@ namespace Lobster
                     this.SetFileWatchersEnabled(true);
                 }
             }
-        }
+        }*/
 
         /// <summary>
         /// The callback for when a file is created.
@@ -214,12 +162,12 @@ namespace Lobster
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">The arguments for the event.</param>
-        private void OnFileCreated(object sender, FileSystemEventArgs e)
+        /*private void OnFileCreated(object sender, FileSystemEventArgs e)
         {
             this.SetFileWatchersEnabled(false);
             this.BaseClobDirectory.GetLocalFiles();
             this.SetFileWatchersEnabled(true);
-        }
+        }*/
 
         /// <summary>
         /// The callback for when a file is deleted
@@ -227,12 +175,12 @@ namespace Lobster
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">The arguments for the event.</param>
-        private void OnFileDeleted(object sender, FileSystemEventArgs e)
+        /*private void OnFileDeleted(object sender, FileSystemEventArgs e)
         {
             this.SetFileWatchersEnabled(false);
             this.BaseClobDirectory.GetLocalFiles();
             this.SetFileWatchersEnabled(true);
-        }
+        }*/
 
         /// <summary>
         /// The callback for when a file is renamed.
@@ -240,11 +188,11 @@ namespace Lobster
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">The arguments for the event.</param>
-        private void OnFileRenamed(object sender, FileSystemEventArgs e)
+        /*private void OnFileRenamed(object sender, FileSystemEventArgs e)
         {
             this.SetFileWatchersEnabled(false);
             this.BaseClobDirectory.GetLocalFiles();
             this.SetFileWatchersEnabled(true);
-        }
+        }*/
     }
 }
