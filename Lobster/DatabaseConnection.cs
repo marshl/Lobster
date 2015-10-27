@@ -40,7 +40,7 @@ namespace Lobster
     /// Used to define how a database should be connected to, and where the ClobTypes are stored for it.
     /// </summary>
     [XmlType("DatabaseConfig")]
-    public class DatabaseConnection : ICloneable
+    public class DatabaseConnection
     {
         public DatabaseConnection(LobsterModel parentModel, DatabaseConfig config)
         {
@@ -139,32 +139,6 @@ namespace Lobster
             return null;*/
         }
 
-        [Obsolete]
-        public DBClobFile FindDatabaseFileForFullpath(string fullpath)
-        {
-            foreach (KeyValuePair<ClobType, ClobDirectory> pair in this.ClobTypeToDirectoryMap)
-            {
-                DBClobFile clobFile = pair.Value.GetDatabaseFileForFullpath(fullpath);
-                if (clobFile != null)
-                {
-                    return clobFile;
-                }
-            }
-            return null;
-        }
-
-        /*public ClobDirectory GetClobDirectoryForFile(string fullpath)
-        {
-            foreach (KeyValuePair<ClobType, ClobDirectory> pair in this.ClobTypeToDirectoryMap)
-            {
-                if (fullpath.Contains(Path.Combine(this.Config.CodeSource, pair.Value.ClobType.Directory)))
-                {
-                    return pair.Value;
-                }
-            }
-            return null;
-        }*/
-
         private Thread fileEventThread;
 
         private FileSystemWatcher fileWatcher;
@@ -186,24 +160,6 @@ namespace Lobster
         [XmlIgnore]
         [Browsable(false)]
         public string ConfigFilepath { get; set; }
-
-        /// <summary>
-        /// The list of Clob Types that are loaded from the files location in the directory defined by ClobTypeDir.
-        /// </summary>
-        [XmlIgnore]
-        [Browsable(false)]
-        [Obsolete]
-        public List<ClobType> ClobTypeList { get; set; }
-
-
-
-        /// <summary>
-        /// A mapping of the ClobTypes to the ClobDirectories that are created when the database is connected to.
-        /// </summary>
-        [XmlIgnore]
-        [Browsable(false)]
-        [Obsolete]
-        public Dictionary<ClobType, ClobDirectory> ClobTypeToDirectoryMap { get; set; }
 
         public List<ClobDirectory> ClobDirectoryList { get; set; }
 
@@ -255,20 +211,6 @@ namespace Lobster
         }
 
         /// <summary>
-        /// Creates the ClobDirectories for each of the ClobTypes in this connection.
-        /// </summary>
-        [Obsolete]
-        public void PopulateClobDirectories()
-        {
-            this.ClobTypeToDirectoryMap = new Dictionary<ClobType, ClobDirectory>();
-            foreach (ClobType clobType in this.ClobTypeList)
-            {
-                ClobDirectory clobDir = new ClobDirectory(clobType);
-                this.ClobTypeToDirectoryMap.Add(clobType, clobDir);
-            }
-        }
-
-        /// <summary>
         /// Finds all currently unlocked files in all clob types and populates he input list with them.
         /// </summary>
         /// <param name="workingFileList">The file list to populate.</param>
@@ -282,33 +224,6 @@ namespace Lobster
             {
                 clobDir.GetWorkingFiles(ref workingFileList);
             }
-        }
-
-        /// <summary>
-        /// Creates a deep copy of this DatabaseConnection and returns it.
-        /// </summary>
-        /// <returns>The new clone.</returns>
-        [Obsolete]
-        public object Clone()
-        {
-            DatabaseConnection other = new DatabaseConnection(this.ParentModel, (DatabaseConfig)this.Config.Clone());
-
-            other.ConfigFilepath = this.ConfigFilepath;
-            other.ParentModel = this.ParentModel;
-
-            other.ClobTypeList = new List<ClobType>();
-            if (this.ClobTypeList == null)
-            {
-                this.ClobTypeList = new List<ClobType>();
-            }
-
-            foreach (ClobType clobType in this.ClobTypeList)
-            {
-                other.ClobTypeList.Add((ClobType)clobType.Clone());
-            }
-
-
-            return other;
         }
     }
 }

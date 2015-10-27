@@ -207,22 +207,6 @@ namespace Lobster
         }
 
         /// <summary>
-        /// Requeries the database and local directories for files. 
-        /// </summary>
-        [Obsolete]
-        public void RebuildLocalAndDatabaseFileLists()
-        {
-            Debug.Assert(this.CurrentConnection != null, "Cannot requery the database without being connected to one first");
-
-            this.GetDatabaseFileLists();
-
-            foreach (KeyValuePair<ClobType, ClobDirectory> pair in this.CurrentConnection.ClobTypeToDirectoryMap)
-            {
-                pair.Value.GetLocalFiles();
-            }
-        }
-
-        /// <summary>
         /// Converts the name of a local file to a suitable database mnemonic.
         /// </summary>
         /// <param name="clobFile">The file to convert.</param>

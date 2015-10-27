@@ -893,30 +893,6 @@ namespace Lobster
         }
 
         /// <summary>
-        /// Gets the ClobFile that is currently selected on the file list tab or the working file list tab 
-        /// (depending on which is currently open).
-        /// </summary>
-        /// <returns>The ClobFile that is selected if one is, otherwise null.</returns>
-        [Obsolete]
-        private ClobFile GetCurrentlySelectedClobFile()
-        {
-            ClobFile selectedFile = null;
-
-            if (this.MainTabControl.SelectedTab == this.treeViewTab
-                && this.fileListView.SelectedItems.Count > 0)
-            {
-                selectedFile = (ClobFile)this.fileListView.SelectedItems[0].Tag;
-            }
-            else if (this.MainTabControl.SelectedTab == this.workingFileTab
-                && this.workingFileList.SelectedItems.Count > 0)
-            {
-                selectedFile = (ClobFile)this.workingFileList.SelectedItems[0].Tag;
-            }
-
-            return selectedFile;
-        }
-
-        /// <summary>
         /// The callback for when the edit connection button is clicked.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>

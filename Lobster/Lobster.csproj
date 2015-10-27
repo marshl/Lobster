@@ -87,11 +87,9 @@
   <ItemGroup>
     <Compile Include="ClobColumnNotFoundException.cs" />
     <Compile Include="ClobDirectory.cs" />
-    <Compile Include="ClobFile.cs" />
     <Compile Include="ClobType.cs" />
     <Compile Include="Column.cs" />
     <Compile Include="Common.cs" />
-    <Compile Include="ClobNode.cs" />
     <Compile Include="DatabaseConfig.cs" />
     <Compile Include="DatabaseConnection.cs" />
     <Compile Include="DatatypePicker.cs">
@@ -133,7 +131,6 @@
       <DependentUpon>LobsterMain.cs</DependentUpon>
     </Compile>
     <Compile Include="LobsterModel.cs" />
-    <Compile Include="LocalClobFile.cs" />
     <Compile Include="MessageLog.cs" />
     <Compile Include="MimeTypeList.cs" />
     <Compile Include="NativeListView.cs">
