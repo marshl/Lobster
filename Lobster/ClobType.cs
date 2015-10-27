@@ -67,6 +67,14 @@ namespace Lobster
         [XmlArray("tables")]
         public List<Table> Tables { get; set; }
 
+        public string Fullpath
+        {
+            get
+            {
+                return Path.GetFullPath( Path.Combine(this.ParentConnection.Config.CodeSource, this.Directory) );
+            }
+        }
+
         /// <summary>
         /// The file that stored this ClobType.
         /// </summary>

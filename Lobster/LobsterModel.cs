@@ -83,7 +83,8 @@ namespace Lobster
             }
             else
             {
-                DBClobFile clobFile = this.CurrentConnection.FindDatabaseFileForFullpath(fullpath);
+                ClobDirectory clobDir = this.CurrentConnection.GetClobDirectoryForFile(fullpath);
+                DBClobFile clobFile = clobDir?.GetDatabaseFileForFullpath(fullpath);
 
                 if (Settings.Default.BackupEnabled)
                 {
@@ -197,7 +198,7 @@ namespace Lobster
 
             this.CurrentConnection.LoadClobTypes();
 
-            this.CurrentConnection.PopulateClobDirectories();
+            //this.CurrentConnection.PopulateClobDirectories();
             //this.RebuildLocalAndDatabaseFileLists();
             this.GetDatabaseFileLists();
 
@@ -358,9 +359,9 @@ namespace Lobster
 
             try
             {
-                foreach (KeyValuePair<ClobType, ClobDirectory> pair in this.CurrentConnection.ClobTypeToDirectoryMap)
+                foreach (ClobDirectory clobDir in this.CurrentConnection.ClobDirectoryList)
                 {
-                    this.GetDatabaseFileListForDirectory(pair.Value, con);
+                    this.GetDatabaseFileListForDirectory(clobDir, con);
                 }
             }
             finally

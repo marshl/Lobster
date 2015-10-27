@@ -63,13 +63,13 @@ namespace Lobster
             lock (this.fileEventStack)
             {
                 this.fileEventStack.Push(e);
+            }
 
-                if (this.fileEventThread == null || this.fileEventThread.ThreadState != ThreadState.Running)
-                {
-                    MessageLog.LogInfo("Starting file event thread");
-                    this.fileEventThread = new Thread(new ThreadStart(this.ProcessFileEvents));
-                    this.fileEventThread.Start();
-                }
+            if (this.fileEventThread == null || this.fileEventThread.ThreadState != ThreadState.Running)
+            {
+                MessageLog.LogInfo("Starting file event thread");
+                this.fileEventThread = new Thread(new ThreadStart(this.ProcessFileEvents));
+                this.fileEventThread.Start();
             }
         }
 
@@ -77,36 +77,69 @@ namespace Lobster
         {
             while (this.fileEventStack.Count > 0)
             {
-
                 FileSystemEventArgs e;
                 lock (this.fileEventStack)
                 {
                     e = this.fileEventStack.Pop();
                 }
+
                 MessageLog.LogInfo($"Processing file event of type {e.ChangeType} for file {e.FullPath}");
-                Console.WriteLine(e.FullPath);
-
                 FileInfo fileInfo = new FileInfo(e.FullPath);
-
                 if (e.ChangeType == WatcherChangeTypes.Changed)
                 {
-                    if (!fileInfo.Exists || fileInfo.IsReadOnly)
+                    if (!fileInfo.Exists)
                     {
-                        return;
+                        MessageLog.LogInfo($"File could not be found {e.FullPath}");
+                        continue;
                     }
 
-                    DBClobFile clobFile = this.FindDatabaseFileForFullpath(e.FullPath);
+                    ClobDirectory clobDir = this.GetClobDirectoryForFile(e.FullPath);
+                    if (clobDir == null)
+                    {
+                        MessageLog.LogInfo($"The file does not belong to any ClobDirectory and will be skipped {e.FullPath}");
+                        continue;
+                    }
 
+                    DBClobFile clobFile = clobDir.GetDatabaseFileForFullpath(e.FullPath);
                     if (clobFile == null)
                     {
-                        return;
+                        MessageLog.LogInfo($"The file does not have a DBClobFile and will be skipped {e.FullPath}");
+                        continue;
                     }
 
+                    if (fileInfo.IsReadOnly)
+                    {
+                        MessageLog.LogInfo($"File is read only and will be skipped {e.FullPath}");
+                        continue;
+                    }
+
+                    MessageLog.LogInfo($"Auto-updating file {e.FullPath}");
                     this.ParentModel.SendUpdateClobMessage(e.FullPath);
                 }
+                else
+                {
+                    MessageLog.LogInfo($"Unsupported change type {e.ChangeType} for {e.FullPath}");
+                }
             }
+            MessageLog.LogInfo("File event stack empty");
         }
 
+        public ClobDirectory GetClobDirectoryForFile(string fullpath)
+        {
+            fullpath = Path.GetFullPath(fullpath);
+            return this.ClobDirectoryList.Find(x => fullpath.Contains(x.ClobType.Fullpath));
+
+            /*foreach ( KeyValuePair<ClobType,ClobDirectory> pair in this.ClobTypeToDirectoryMap )
+            {
+                if ( pair.Value.FileIsInDirectory(fullpath))
+                {
+                    return pair.Value;
+                }
+            }
+            return null;*/
+        }
+
+        [Obsolete]
         public DBClobFile FindDatabaseFileForFullpath(string fullpath)
         {
             foreach (KeyValuePair<ClobType, ClobDirectory> pair in this.ClobTypeToDirectoryMap)
@@ -120,7 +153,7 @@ namespace Lobster
             return null;
         }
 
-        public ClobDirectory GetClobDirectoryForFile(string fullpath)
+        /*public ClobDirectory GetClobDirectoryForFile(string fullpath)
         {
             foreach (KeyValuePair<ClobType, ClobDirectory> pair in this.ClobTypeToDirectoryMap)
             {
@@ -130,7 +163,7 @@ namespace Lobster
                 }
             }
             return null;
-        }
+        }*/
 
         private Thread fileEventThread;
 
@@ -159,21 +192,28 @@ namespace Lobster
         /// </summary>
         [XmlIgnore]
         [Browsable(false)]
+        [Obsolete]
         public List<ClobType> ClobTypeList { get; set; }
+
+
 
         /// <summary>
         /// A mapping of the ClobTypes to the ClobDirectories that are created when the database is connected to.
         /// </summary>
         [XmlIgnore]
         [Browsable(false)]
+        [Obsolete]
         public Dictionary<ClobType, ClobDirectory> ClobTypeToDirectoryMap { get; set; }
+
+        public List<ClobDirectory> ClobDirectoryList { get; set; }
 
         /// <summary>
         /// Loads each of the xml files in the ClobTypeDir (if they are valid).
         /// </summary>
         public void LoadClobTypes()
         {
-            this.ClobTypeList = new List<ClobType>();
+            //this.ClobTypeList = new List<ClobType>();
+            this.ClobDirectoryList = new List<ClobDirectory>();
             DirectoryInfo dirInfo = new DirectoryInfo(this.Config.ClobTypeDir);
             if (!dirInfo.Exists)
             {
@@ -191,7 +231,9 @@ namespace Lobster
 
                     clobType.Initialise(this);
                     clobType.FilePath = file.FullName;
-                    this.ClobTypeList.Add(clobType);
+                    //this.ClobTypeList.Add(clobType);
+                    ClobDirectory clobDir = new ClobDirectory(clobType);
+                    this.ClobDirectoryList.Add(clobDir);
                 }
                 catch (Exception e)
                 {
@@ -215,6 +257,7 @@ namespace Lobster
         /// <summary>
         /// Creates the ClobDirectories for each of the ClobTypes in this connection.
         /// </summary>
+        [Obsolete]
         public void PopulateClobDirectories()
         {
             this.ClobTypeToDirectoryMap = new Dictionary<ClobType, ClobDirectory>();
@@ -231,9 +274,13 @@ namespace Lobster
         /// <param name="workingFileList">The file list to populate.</param>
         public void GetWorkingFiles(ref List<string> workingFileList)
         {
-            foreach (KeyValuePair<ClobType, ClobDirectory> pair in this.ClobTypeToDirectoryMap)
+            /*foreach (KeyValuePair<ClobType, ClobDirectory> pair in this.ClobTypeToDirectoryMap)
             {
                 pair.Value.GetWorkingFiles(ref workingFileList);
+            }*/
+            foreach (ClobDirectory clobDir in this.ClobDirectoryList)
+            {
+                clobDir.GetWorkingFiles(ref workingFileList);
             }
         }
 
@@ -241,6 +288,7 @@ namespace Lobster
         /// Creates a deep copy of this DatabaseConnection and returns it.
         /// </summary>
         /// <returns>The new clone.</returns>
+        [Obsolete]
         public object Clone()
         {
             DatabaseConnection other = new DatabaseConnection(this.ParentModel, (DatabaseConfig)this.Config.Clone());
@@ -258,6 +306,7 @@ namespace Lobster
             {
                 other.ClobTypeList.Add((ClobType)clobType.Clone());
             }
+
 
             return other;
         }

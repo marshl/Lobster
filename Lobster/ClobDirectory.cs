@@ -178,5 +178,10 @@ namespace Lobster
             string filename = Path.GetFileName(fullpath).ToLower();
             return this.DatabaseFileList.Find(x => x.Filename.ToLower() == filename);
         }
+
+        public bool FileIsInDirectory(string fullpath)
+        {
+            return fullpath.Contains(this.ClobType.Fullpath);
+        }
     }
 }

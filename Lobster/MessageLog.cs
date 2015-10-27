@@ -124,7 +124,7 @@ namespace Lobster
             lock(this.OutStream)
             {
                 this.OutStream.WriteLine(msg.ToString());
-                this.OutStream.Flush();
+                //this.OutStream.Flush();
             }
         }
 

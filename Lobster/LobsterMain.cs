@@ -175,9 +175,10 @@ namespace Lobster
             // Use the folder name as the root element
             DatabaseConnection dbc = this.model.CurrentConnection;
             TreeNode rootNode = new TreeNode(Path.GetFileName(dbc.Config.CodeSource) ?? "CodeSource", 0, 0);
-            foreach (KeyValuePair<ClobType, ClobDirectory> pair in dbc.ClobTypeToDirectoryMap)
+            //foreach (KeyValuePair<ClobType, ClobDirectory> pair in dbc.ClobTypeToDirectoryMap)
+            foreach (ClobDirectory clobDir in dbc.ClobDirectoryList)
             {
-                ClobDirectory clobDir = pair.Value;
+                //ClobDirectory clobDir = pair.Value;
                 DirectoryInfo dirInfo = new DirectoryInfo(Path.Combine(clobDir.ClobType.ParentConnection.Config.CodeSource, clobDir.ClobType.Directory));
                 TreeNode dirNode = new TreeNode(dirInfo.Name, 0, 0);
                 dirNode.Tag = dirInfo.FullName;
@@ -293,7 +294,8 @@ namespace Lobster
 
             foreach (FileInfo fileInfo in dirInfo.GetFiles())
             {
-                DBClobFile clobFile = this.model.CurrentConnection.FindDatabaseFileForFullpath(fileInfo.FullName);
+                ClobDirectory clobDir = this.model.CurrentConnection.GetClobDirectoryForFile(fileInfo.FullName);
+                DBClobFile clobFile = clobDir?.GetDatabaseFileForFullpath(fileInfo.FullName);
                 ListViewItem item = this.GetListViewRowForClobFile(fileInfo.FullName, clobFile);
                 this.fileListView.Items.Add(item);
             }
@@ -324,7 +326,8 @@ namespace Lobster
 
             foreach (string filename in workingFiles)
             {
-                DBClobFile clobFile = this.model.CurrentConnection.FindDatabaseFileForFullpath(filename);
+                ClobDirectory clobDir = this.model.CurrentConnection.GetClobDirectoryForFile(filename);
+                DBClobFile clobFile = clobDir?.GetDatabaseFileForFullpath(filename);
                 ListViewItem item = this.GetListViewRowForClobFile(filename, clobFile);
                 this.workingFileList.Items.Add(item);
             }
@@ -463,7 +466,7 @@ namespace Lobster
         {
             ToolStripItem item = (ToolStripItem)sender;
             ListViewItem listItem = (ListViewItem)item.GetCurrentParent().Tag;
-            string fullpath= (string)listItem.Tag;
+            string fullpath = (string)listItem.Tag;
             this.DiffClobFileWithDatabase(fullpath);
         }
 
