@@ -1,15 +1,40 @@
-﻿using System;
-using System.ComponentModel;
-using System.Drawing.Design;
-using System.IO;
-using System.Windows.Forms.Design;
-using System.Xml;
-using System.Xml.Schema;
-using System.Xml.Serialization;
-using Lobster.Properties;
-
+﻿//-----------------------------------------------------------------------
+// <copyright file="DatabaseConfig.cs" company="marshl">
+// Copyright 2015, Liam Marshall, marshl.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
+//
+//      "I have not brought you hither to be instructed by you, but to give you a choice."
+//          - Saruman the Wise
+//
+//      [ _The Lord of the Rings_, II/ii: "The Council of Elrond"]
+//-----------------------------------------------------------------------
 namespace Lobster
 {
+    using System;
+    using System.ComponentModel;
+    using System.Drawing.Design;
+    using System.IO;
+    using System.Windows.Forms.Design;
+    using System.Xml;
+    using System.Xml.Schema;
+    using System.Xml.Serialization;
+    using Properties;
+
+    /// <summary>
+    /// Used to store information about a database connection, loaded directly from an XML file.
+    /// </summary>
     public class DatabaseConfig : ICloneable
     {
         /// <summary>
@@ -93,15 +118,31 @@ namespace Lobster
         [XmlElement("clobTypeDir")]
         public string ClobTypeDir { get; set; }
 
+        /// <summary>
+        /// The file from which this DatabaseConfig was loaded.
+        /// </summary>
         [Browsable(false)]
         [XmlIgnore]
         public string FileLocation { get; set; }
 
         /// <summary>
+        /// Writes a <see cref="DatabaseConfig"/> out to file.
+        /// </summary>
+        /// <param name="filename">The file to write to.</param>
+        /// <param name="config">The <see cref="DatabaseConfig"/> to serialise.</param>
+        public static void SerialiseToFile(string filename, DatabaseConfig config)
+        {
+            XmlSerializer xmls = new XmlSerializer(typeof(DatabaseConfig));
+            using (StreamWriter streamWriter = new StreamWriter(filename))
+            {
+                xmls.Serialize(streamWriter, config);
+            }
+        }
+
+        /// <summary>
         /// Deserialises the given file into a new <see cref="DatabaseConnection"/>.
         /// </summary>
         /// <param name="fullpath">The location of the file to deserialise.</param>
-        /// <param name="parentModel">The model that will become the connection's parent.</param>
         /// <returns>The new <see cref="DatabaseConnection"/>.</returns>
         public static DatabaseConfig LoadDatabaseConfig(string fullpath)
         {
@@ -146,6 +187,10 @@ namespace Lobster
             return config;
         }
 
+        /// <summary>
+        /// Creates a deep copy of this DatabaseConfig
+        /// </summary>
+        /// <returns>The newly created copy.</returns>
         public object Clone()
         {
             DatabaseConfig other = new DatabaseConfig();
@@ -162,20 +207,6 @@ namespace Lobster
             other.FileLocation = this.FileLocation;
 
             return other;
-        }
-
-        /// <summary>
-        /// Writes a <see cref="DatabaseConfig"/> out to file.
-        /// </summary>
-        /// <param name="filename">The file to write to.</param>
-        /// <param name="config">The <see cref="DatabaseConfig"/> to serialise.</param>
-        public static void SerialiseToFile(string filename, DatabaseConfig config)
-        {
-            XmlSerializer xmls = new XmlSerializer(typeof(DatabaseConfig));
-            using (StreamWriter streamWriter = new StreamWriter(filename))
-            {
-                xmls.Serialize(streamWriter, config);
-            }
         }
     }
 }

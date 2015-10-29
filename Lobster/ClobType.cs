@@ -67,11 +67,14 @@ namespace Lobster
         [XmlArray("tables")]
         public List<Table> Tables { get; set; }
 
+        /// <summary>
+        /// Returns the absolute path of the directory for this clob type.
+        /// </summary>
         public string Fullpath
         {
             get
             {
-                return Path.GetFullPath( Path.Combine(this.ParentConnection.Config.CodeSource, this.Directory) );
+                return Path.GetFullPath(Path.Combine(this.ParentConnection.Config.CodeSource, this.Directory));
             }
         }
 
@@ -112,7 +115,7 @@ namespace Lobster
             this.Tables.ForEach(x => x.Initialise());
             this.ParentConnection = parentConnection;
         }
-        
+
         /// <summary>
         /// Creates and returns a deep copy of this ClobType.
         /// </summary>

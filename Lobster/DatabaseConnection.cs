@@ -26,11 +26,9 @@ namespace Lobster
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
-    using System.Drawing.Design;
     using System.IO;
     using System.Threading;
     using System.Windows.Forms;
-    using System.Windows.Forms.Design;
     using System.Xml;
     using System.Xml.Schema;
     using System.Xml.Serialization;
@@ -42,6 +40,29 @@ namespace Lobster
     [XmlType("DatabaseConfig")]
     public class DatabaseConnection
     {
+        /// <summary>
+        /// The thread used to process file events when a new event is triggered.
+        /// Only a single event thread is used at any one time.
+        /// </summary>
+        private Thread fileEventThread;
+
+        /// <summary>
+        /// The file watcher for the entire CodeSource directory. 
+        /// FIles that are not covered by any ClobTypes filtered out when processed.
+        /// </summary>
+        private FileSystemWatcher fileWatcher;
+
+        /// <summary>
+        /// The queue of events that have triggered. 
+        /// Events are popped off and processed one at a time by the fileEventThread.
+        /// </summary>
+        private Queue<FileSystemEventArgs> fileEventQueue = new Queue<FileSystemEventArgs>();
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DatabaseConnection"/> class.
+        /// </summary>
+        /// <param name="parentModel">The model that is parent to this connection.</param>
+        /// <param name="config">The configuration file to base this connection off.</param>
         public DatabaseConnection(LobsterModel parentModel, DatabaseConfig config)
         {
             this.ParentModel = parentModel;
@@ -57,118 +78,45 @@ namespace Lobster
             this.fileWatcher.EnableRaisingEvents = true;
         }
 
-        private void OnFileChangeEvent(object sender, FileSystemEventArgs e)
-        {
-            MessageLog.LogInfo($"File change event of type {e.ChangeType} for file {e.FullPath}");
-            lock (this.fileEventStack)
-            {
-                this.fileEventStack.Push(e);
-            }
-
-            if (this.fileEventThread == null || this.fileEventThread.ThreadState != ThreadState.Running)
-            {
-                MessageLog.LogInfo("Starting file event thread");
-                this.fileEventThread = new Thread(new ThreadStart(this.ProcessFileEvents));
-                this.fileEventThread.Start();
-            }
-        }
-
-        private void ProcessFileEvents()
-        {
-            while (this.fileEventStack.Count > 0)
-            {
-                FileSystemEventArgs e;
-                lock (this.fileEventStack)
-                {
-                    e = this.fileEventStack.Pop();
-                }
-
-                MessageLog.LogInfo($"Processing file event of type {e.ChangeType} for file {e.FullPath}");
-                FileInfo fileInfo = new FileInfo(e.FullPath);
-                if (e.ChangeType == WatcherChangeTypes.Changed)
-                {
-                    if (!fileInfo.Exists)
-                    {
-                        MessageLog.LogInfo($"File could not be found {e.FullPath}");
-                        continue;
-                    }
-
-                    ClobDirectory clobDir = this.GetClobDirectoryForFile(e.FullPath);
-                    if (clobDir == null)
-                    {
-                        MessageLog.LogInfo($"The file does not belong to any ClobDirectory and will be skipped {e.FullPath}");
-                        continue;
-                    }
-
-                    DBClobFile clobFile = clobDir.GetDatabaseFileForFullpath(e.FullPath);
-                    if (clobFile == null)
-                    {
-                        MessageLog.LogInfo($"The file does not have a DBClobFile and will be skipped {e.FullPath}");
-                        continue;
-                    }
-
-                    if (fileInfo.IsReadOnly)
-                    {
-                        MessageLog.LogInfo($"File is read only and will be skipped {e.FullPath}");
-                        continue;
-                    }
-
-                    MessageLog.LogInfo($"Auto-updating file {e.FullPath}");
-                    this.ParentModel.SendUpdateClobMessage(e.FullPath);
-                }
-                else
-                {
-                    MessageLog.LogInfo($"Unsupported change type {e.ChangeType} for {e.FullPath}");
-                }
-            }
-            MessageLog.LogInfo("File event stack empty");
-        }
-
-        public ClobDirectory GetClobDirectoryForFile(string fullpath)
-        {
-            fullpath = Path.GetFullPath(fullpath);
-            return this.ClobDirectoryList.Find(x => fullpath.Contains(x.ClobType.Fullpath));
-
-            /*foreach ( KeyValuePair<ClobType,ClobDirectory> pair in this.ClobTypeToDirectoryMap )
-            {
-                if ( pair.Value.FileIsInDirectory(fullpath))
-                {
-                    return pair.Value;
-                }
-            }
-            return null;*/
-        }
-
-        private Thread fileEventThread;
-
-        private FileSystemWatcher fileWatcher;
-
-        private Stack<FileSystemEventArgs> fileEventStack = new Stack<FileSystemEventArgs>();
-
+        /// <summary>
+        /// The configuration file for this connection.
+        /// </summary>
         public DatabaseConfig Config { get; set; }
 
         /// <summary>
         /// The Lobster model that is the parent of this connection.
         /// </summary>
-        [XmlIgnore]
         [Browsable(false)]
         public LobsterModel ParentModel { get; private set; }
 
         /// <summary>
         /// The name of the file where this was loaded from.
         /// </summary>
-        [XmlIgnore]
         [Browsable(false)]
         public string ConfigFilepath { get; set; }
 
+        /// <summary>
+        /// The ClobDirectories for each ClobType located in directory in the configuration settings.
+        /// </summary>
         public List<ClobDirectory> ClobDirectoryList { get; set; }
+
+        /// <summary>
+        /// Returns the ClobDirectory that would contain the given fullpath, if applicable.
+        /// Whether the file exists or not is irrelevent, only that it would be contained in the returned ClobDirectory.
+        /// </summary>
+        /// <param name="fullpath">The file to return the directory for.</param>
+        /// <returns>The matching clobDirectory, if one exists.</returns>
+        public ClobDirectory GetClobDirectoryForFile(string fullpath)
+        {
+            fullpath = Path.GetFullPath(fullpath);
+            return this.ClobDirectoryList.Find(x => fullpath.Contains(x.ClobType.Fullpath));
+        }
 
         /// <summary>
         /// Loads each of the xml files in the ClobTypeDir (if they are valid).
         /// </summary>
         public void LoadClobTypes()
         {
-            //this.ClobTypeList = new List<ClobType>();
             this.ClobDirectoryList = new List<ClobDirectory>();
             DirectoryInfo dirInfo = new DirectoryInfo(this.Config.ClobTypeDir);
             if (!dirInfo.Exists)
@@ -187,7 +135,7 @@ namespace Lobster
 
                     clobType.Initialise(this);
                     clobType.FilePath = file.FullName;
-                    //this.ClobTypeList.Add(clobType);
+
                     ClobDirectory clobDir = new ClobDirectory(clobType);
                     this.ClobDirectoryList.Add(clobDir);
                 }
@@ -216,13 +164,95 @@ namespace Lobster
         /// <param name="workingFileList">The file list to populate.</param>
         public void GetWorkingFiles(ref List<string> workingFileList)
         {
-            /*foreach (KeyValuePair<ClobType, ClobDirectory> pair in this.ClobTypeToDirectoryMap)
-            {
-                pair.Value.GetWorkingFiles(ref workingFileList);
-            }*/
             foreach (ClobDirectory clobDir in this.ClobDirectoryList)
             {
                 clobDir.GetWorkingFiles(ref workingFileList);
+            }
+        }
+
+        /// <summary>
+        /// The event raised when a file is changed within the CodeSource directory.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnFileChangeEvent(object sender, FileSystemEventArgs e)
+        {
+            MessageLog.LogInfo($"File change event of type {e.ChangeType} for file {e.FullPath}");
+            lock (this.fileEventQueue)
+            {
+                this.fileEventQueue.Enqueue(e);
+            }
+
+            if (this.fileEventThread == null || this.fileEventThread.ThreadState != ThreadState.Running)
+            {
+                MessageLog.LogInfo("Starting file event thread");
+                this.fileEventThread = new Thread(new ThreadStart(this.ProcessFileEvents));
+                this.fileEventThread.Start();
+            }
+        }
+
+        /// <summary>
+        /// Used from the worked thread to process any file events on the queue.
+        /// </summary>
+        private void ProcessFileEvents()
+        {
+            while (this.fileEventQueue.Count > 0)
+            {
+                FileSystemEventArgs e;
+                lock (this.fileEventQueue)
+                {
+                    e = this.fileEventQueue.Dequeue();
+                }
+
+                this.ProcessSingleFileEvent(e);
+            }
+
+            MessageLog.LogInfo("File event stack empty");
+        }
+
+        /// <summary>
+        /// Processes a single file event. Sending a file update to the database if necessary.
+        /// </summary>
+        /// <param name="e">The event to process.</param>
+        private void ProcessSingleFileEvent(FileSystemEventArgs e)
+        {
+            MessageLog.LogInfo($"Processing file event of type {e.ChangeType} for file {e.FullPath}");
+            FileInfo fileInfo = new FileInfo(e.FullPath);
+
+            if (e.ChangeType == WatcherChangeTypes.Changed)
+            {
+                if (!fileInfo.Exists)
+                {
+                    MessageLog.LogInfo($"File could not be found {e.FullPath}");
+                    return;
+                }
+
+                ClobDirectory clobDir = this.GetClobDirectoryForFile(e.FullPath);
+                if (clobDir == null)
+                {
+                    MessageLog.LogInfo($"The file does not belong to any ClobDirectory and will be skipped {e.FullPath}");
+                    return;
+                }
+
+                DBClobFile clobFile = clobDir.GetDatabaseFileForFullpath(e.FullPath);
+                if (clobFile == null)
+                {
+                    MessageLog.LogInfo($"The file does not have a DBClobFile and will be skipped {e.FullPath}");
+                    return;
+                }
+
+                if (fileInfo.IsReadOnly)
+                {
+                    MessageLog.LogInfo($"File is read only and will be skipped {e.FullPath}");
+                    return;
+                }
+
+                MessageLog.LogInfo($"Auto-updating file {e.FullPath}");
+                this.ParentModel.SendUpdateClobMessage(e.FullPath);
+            }
+            else
+            {
+                MessageLog.LogInfo($"Unsupported change type {e.ChangeType} for {e.FullPath}");
             }
         }
     }

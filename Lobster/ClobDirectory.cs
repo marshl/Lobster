@@ -58,19 +58,30 @@ namespace Lobster
         public void GetWorkingFiles(ref List<string> workingFileList)
         {
             string directoryPath = Path.Combine(this.ClobType.ParentConnection.Config.CodeSource, this.ClobType.Directory);
-            string[] files = Directory.GetFiles(directoryPath, "*.*", SearchOption.AllDirectories);
+            string[] files = Directory.GetFiles(directoryPath, ".", SearchOption.AllDirectories);
             workingFileList.AddRange(files);
         }
 
+        /// <summary>
+        /// FInds and returns the database file that matches the given local file.
+        /// </summary>
+        /// <param name="fullpath">The path of the file to find the database file for.</param>
+        /// <returns>The database file, if it exists.</returns>
         public DBClobFile GetDatabaseFileForFullpath(string fullpath)
         {
             string filename = Path.GetFileName(fullpath).ToLower();
             return this.DatabaseFileList.Find(x => x.Filename.ToLower() == filename);
         }
 
-        public bool FileIsInDirectory(string fullpath)
+        /// <summary>
+        /// Returns whether the given file exists within the file system directory for this ClobDirectory.
+        /// </summary>
+        /// <param name="fullpath">The file to test for.</param>
+        /// <returns>Whether the file is in this directory or not.</returns>
+        public bool IsLocalFileInDirectory(string fullpath)
         {
-            return fullpath.Contains(this.ClobType.Fullpath);
+            DirectoryInfo dirInfo = new DirectoryInfo(this.ClobType.Fullpath);
+            return Array.Exists(dirInfo.GetFiles(".", SearchOption.AllDirectories), x => x.FullName == fullpath);
         }
     }
 }
