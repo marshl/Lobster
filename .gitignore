@@ -15,3 +15,5 @@ Lobster/bin/Release/
 Lobster/bin/Debug/*.zip
 Lobster/obj/
 Lobster/bin/
+LobsterWpf/obj/
+LobsterWpf/bin/
