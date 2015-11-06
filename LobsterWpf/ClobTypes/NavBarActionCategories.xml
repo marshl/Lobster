@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<clobtype xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <name>Navbar Categories</name>
+  <enabled>true</enabled>
+  <directory>NavBarActionCategories</directory>
+  <includeSubDirectories>false</includeSubDirectories>
+  <tables>
+    <table>
+      <schema>envmgr</schema>
+      <name>nav_bar_action_categories</name>
+      <columns>
+        <column>
+          <name>mnem</name>
+          <purpose>MNEMONIC</purpose>
+        </column>
+        <column>
+          <name>xml_data</name>
+          <purpose>CLOB_DATA</purpose>
+          <dataType>XMLTYPE</dataType>
+        </column>
+      </columns>
+    </table>
+  </tables>
+</clobtype>

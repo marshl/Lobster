@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<clobtype xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <name>FoxModules</name>
+  <enabled>true</enabled>
+  <directory>FoxModules</directory>
+  <includeSubDirectories>true</includeSubDirectories>
+  <tables>
+    <table>
+      <schema>envmgr</schema>
+      <name>fox_components</name>
+      <columns>
+        <column>
+          <name>name</name>
+          <purpose>MNEMONIC</purpose>
+        </column>
+        <column>
+          <name>data</name>
+          <purpose>CLOB_DATA</purpose>
+          <dataType>CLOB</dataType>
+          <mimeTypes>
+            <string>module</string>
+            <string>text/html</string>
+            <string>text/css</string>
+            <string>text/javascript</string>
+          </mimeTypes>
+        </column>
+        <column>
+          <name>bindata</name>
+          <purpose>CLOB_DATA</purpose>
+          <dataType>BLOB</dataType>
+          <mimeTypes>
+            <string>image/gif</string>
+            <string>image/jpg</string>
+            <string>image/png</string>
+            <string>image/x-icon</string>
+          </mimeTypes>
+        </column>
+        <column>
+          <name>type</name>
+          <purpose>MIME_TYPE</purpose>
+        </column>
+      </columns>
+    </table>
+  </tables>
+</clobtype>

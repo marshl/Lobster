@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DatabaseConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <name>Home Database</name>
+  <host>127.0.0.1</host>
+  <port>11521</port>
+  <sid>liamdb</sid>
+  <username>promotemgr</username>
+  <password>password</password>
+  <!-- The location of your Fox project CodeSource folder -->
+  <codeSource>C:\IconWS\trunk\CodeSource</codeSource>
+  <!-- Using pooling will keep a session open but inactive in the database, but improves Lobster performance -->
+  <usePooling>true</usePooling>
+  <clobTypeDir>C:\IconWS\trunk\LobsterClobTypes</clobTypeDir>
+</DatabaseConfig>
