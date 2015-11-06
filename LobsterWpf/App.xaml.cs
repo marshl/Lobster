@@ -13,6 +13,35 @@ namespace LobsterWpf
     /// </summary>
     public partial class App : Application
     {
-        
+        public App()
+        {
+
+        }
+
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            base.OnStartup(e);
+
+            Lobster.MessageLog messageLog = new Lobster.MessageLog();
+
+            Console.WriteLine("foobar");
+            TempListener tmp = new TempListener();
+            Lobster.LobsterModel model = new Lobster.LobsterModel(tmp);
+            MainWindow mainWindow = new MainWindow(model);
+            mainWindow.Show();
+        }
+    }
+
+    class TempListener : Lobster.IModelEventListener
+    {
+        public void OnFileChange()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnUpdateComplete()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

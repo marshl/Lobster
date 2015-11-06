@@ -23,14 +23,18 @@ namespace LobsterWpf
     {
         public ObservableCollection<ClobType> ClobTypes { get; }
 
+        private Lobster.LobsterModel model;
+
         public class ClobType
         {
             public string Name { get; set; }
         }
 
-        public MainWindow()
+        public MainWindow(Lobster.LobsterModel lobsterModel)
         {
             InitializeComponent();
+
+            this.model = lobsterModel;
 
             this.ClobTypes = new ObservableCollection<ClobType>();
             this.ClobTypes.Add(new ClobType() { Name = "Hello" });
@@ -41,7 +45,7 @@ namespace LobsterWpf
 
         private void MenuItem_Click(object sender, RoutedEventArgs e)
         {
-            ConnectionListWindow window = new ConnectionListWindow();
+            ConnectionListWindow window = new ConnectionListWindow(this.model);
             window.ShowDialog();
         }
     }

@@ -47,12 +47,19 @@
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
                         <GridSplitter x:Name="gridSplitter1" HorizontalAlignment="Left" Width="5" Grid.Column="2"/>
-                        <ListBox Name="localFileListBox" Grid.Column="1">
-                            <ListBoxItem>Mike</ListBoxItem>
-                            <ListBoxItem>Lisa</ListBoxItem>
-                            <ListBoxItem>John</ListBoxItem>
-                        </ListBox>
 
+                        <Grid Grid.Column="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition Height="25"/>
+                            </Grid.RowDefinitions>
+                            <ListBox Name="localFileListBox" Grid.Row="0">
+                                <ListBoxItem>Mike</ListBoxItem>
+                                <ListBoxItem>Lisa</ListBoxItem>
+                                <ListBoxItem>John</ListBoxItem>
+                            </ListBox>
+                            <CheckBox x:Name="hideReadonlyCheckbox" Grid.Row="1" Content="Hide Readonly Files" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        </Grid>
                         <StackPanel>
                             <Button x:Name="pushButton" Grid.Column="0" MaxHeight="50">
                                 <StackPanel MaxHeight="50">
@@ -81,7 +88,10 @@
                         </StackPanel>
                         <StackPanel Grid.Column="2">
                             <Border BorderThickness="1" Background="White" CornerRadius="5" BorderBrush="Black">
-                                <Expander x:Name="detailsExpander" Header="Details" IsExpanded="True" >
+                                <Expander x:Name="detailsExpander"  IsExpanded="True" >
+                                    <Expander.Header>
+                                        <TextBlock>Details</TextBlock>
+                                    </Expander.Header>
                                     <StackPanel Grid.Column="2">
                                         <Label>Hello</Label>
                                         <Label>World</Label>
@@ -102,6 +112,7 @@
                                 </Expander>
                             </Border>
                         </StackPanel>
+
                     </Grid>
                 </TabItem>
                 <TabItem Header="Database Only Files">

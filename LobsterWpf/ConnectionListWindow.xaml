@@ -8,10 +8,13 @@
         Title="ConnectionListWindow" Height="300" Width="300">
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
             <RowDefinition/>
             <RowDefinition Height="35"/>
         </Grid.RowDefinitions>
-        <ListBox Name="peopleListBox" Grid.Row="0" ItemsSource="{Binding Connections}">
+
+        <Label x:Name="directoryLabel" Width="170" HorizontalAlignment="Left" VerticalAlignment="Center" Content="[DefaultDirectory]" Margin="0,12"/>
+        <ListBox Grid.Row="1" Name="connectionListBox" ItemsSource="{Binding databaseConfigList}">
             <ListBox.ItemTemplate>
                 <DataTemplate >
                     <StackPanel>
@@ -22,7 +25,9 @@
             </ListBox.ItemTemplate>
         </ListBox>
 
-        <Button x:Name="connectButton" Content="Connect" HorizontalAlignment="Left" Margin="128,9.667,0,0" Grid.Row="1" VerticalAlignment="Top" Width="75"/>
-        <Button x:Name="cancelButton" Content="Cancel" HorizontalAlignment="Left" Margin="208,9.667,0,0" Grid.Row="1" VerticalAlignment="Top" Width="75" RenderTransformOrigin="-0.567,0.738"/>
+        <Button x:Name="connectButton" Content="Connect" HorizontalAlignment="Right" Margin="0,10,90.333,0" Grid.Row="2" VerticalAlignment="Top" Width="75"/>
+        <Button x:Name="cancelButton" Content="Cancel" HorizontalAlignment="Right" Margin="0,10,10.333,0" Grid.Row="2" VerticalAlignment="Top" Width="75" RenderTransformOrigin="-0.567,0.738" Click="cancelButton_Click"/>
+        <Button x:Name="button" Content="Change Directory" HorizontalAlignment="Right" Margin="0,13,10.333,17" VerticalAlignment="Center" Width="108"/>
+        <ComboBox x:Name="comboBox" HorizontalAlignment="Left" Margin="298,120,-124.667,0" Grid.Row="1" VerticalAlignment="Top" Width="120"/>
     </Grid>
 </Window>
