@@ -45,7 +45,7 @@ namespace LobsterModel
         public LobsterModel(IModelEventListener eventListener)
         {
             this.eventListener = eventListener;
-            this.MimeList = Common.DeserialiseXmlFileUsingSchema<MimeTypeList>("LobsterSettings/MimeTypes.xml", null);
+            this.MimeList = Utils.DeserialiseXmlFileUsingSchema<MimeTypeList>("LobsterSettings/MimeTypes.xml", null);
 
             this.LoadDatabaseConnections();
         }
@@ -140,7 +140,7 @@ namespace LobsterModel
                 return null;
             }
 
-            string filepath = Common.GetTempFilepath(clobFile.Filename);
+            string filepath = Utils.GetTempFilepath(clobFile.Filename);
             bool result = this.DownloadClobDataToFile(clobFile, con, filepath);
             con.Dispose();
 
@@ -180,7 +180,7 @@ namespace LobsterModel
 
             if (config.ClobTypeDir == null || !Directory.Exists(config.ClobTypeDir))
             {
-                config.ClobTypeDir = Common.PromptForDirectory("Please select your Clob Type directory for " + config.Name, config.CodeSource);
+                config.ClobTypeDir = Utils.PromptForDirectory("Please select your Clob Type directory for " + config.Name, config.CodeSource);
                 if (config.ClobTypeDir != null)
                 {
                     DatabaseConfig.SerialiseToFile(config.FileLocation, config);
@@ -299,7 +299,7 @@ namespace LobsterModel
             {
                 if (e is InvalidOperationException || e is OracleException || e is FormatException || e is ArgumentOutOfRangeException)
                 {
-                    Common.ShowErrorMessage("Database Connection Failure", "Cannot open connection to database: " + e.Message);
+                    Utils.ShowErrorMessage("Database Connection Failure", "Cannot open connection to database: " + e.Message);
                     MessageLog.LogError("Connection to Oracle failed: " + e.Message);
                     return null;
                 }
@@ -316,7 +316,7 @@ namespace LobsterModel
             // TODO: Get rid of this shit
             if (Settings.Default.ConnectionDir == null || !Directory.Exists(Settings.Default.ConnectionDir))
             {
-                string connectionDir = Common.PromptForDirectory("Please select your DatabaseConnections folder", null);
+                string connectionDir = Utils.PromptForDirectory("Please select your DatabaseConnections folder", null);
 
                 if (connectionDir == null)
                 {
@@ -372,7 +372,7 @@ namespace LobsterModel
             }
             catch (ClobColumnNotFoundException e)
             {
-                Common.ShowErrorMessage("Clob Data Fetch Error", e.Message);
+                Utils.ShowErrorMessage("Clob Data Fetch Error", e.Message);
                 MessageLog.LogError(e.Message);
                 return false;
             }
@@ -384,7 +384,7 @@ namespace LobsterModel
             catch (IOException e)
             {
                 trans.Rollback();
-                Common.ShowErrorMessage("Clob Update Failed", "An IO Exception occurred when updating the database: " + e.Message);
+                Utils.ShowErrorMessage("Clob Update Failed", "An IO Exception occurred when updating the database: " + e.Message);
                 MessageLog.LogError("Clob update failed with message \"" + e.Message + "\" for command \"" + command.CommandText + "\"");
                 return false;
             }
@@ -398,7 +398,7 @@ namespace LobsterModel
                 if (rowsAffected != 1)
                 {
                     trans.Rollback();
-                    Common.ShowErrorMessage("Clob Update Failed", rowsAffected + " rows were affected during the update (expected only 1). The transaction has been rolled back.");
+                    Utils.ShowErrorMessage("Clob Update Failed", rowsAffected + " rows were affected during the update (expected only 1). The transaction has been rolled back.");
                     MessageLog.LogError("In invalid number of rows (" + rowsAffected + ") were updated for command: " + command.CommandText);
                     return false;
                 }
@@ -413,7 +413,7 @@ namespace LobsterModel
                 if (e is OracleException || e is InvalidOperationException)
                 {
                     trans.Rollback();
-                    Common.ShowErrorMessage("Clob Update Failed", "An invalid operation occurred when updating the database: " + e.Message);
+                    Utils.ShowErrorMessage("Clob Update Failed", "An invalid operation occurred when updating the database: " + e.Message);
                     MessageLog.LogError("Clob update failed: " + e.Message + " for command: " + command.CommandText);
                     return false;
                 }
@@ -432,7 +432,7 @@ namespace LobsterModel
         private void AddFileDataParameter(DbCommand command, string fullpath, Table table, string mimeType)
         {
             // Wait for the file to unlock
-            using (FileStream fs = Common.WaitForFile(
+            using (FileStream fs = Utils.WaitForFile(
                 fullpath,
                 FileMode.Open,
                 FileAccess.Read,
@@ -498,7 +498,7 @@ namespace LobsterModel
                 {
                     if (e is InvalidOperationException || e is OracleException)
                     {
-                        Common.ShowErrorMessage(
+                        Utils.ShowErrorMessage(
                             "Clob Insert Error",
                             $"An exception occurred when inserting into the parent table of {fullpath}: {e.Message}");
                         MessageLog.LogError($"Error creating new clob: {e.Message} when executing command: {command.CommandText}");
@@ -525,7 +525,7 @@ namespace LobsterModel
                 {
                     // Discard the insert amde into the parent table
                     trans.Rollback();
-                    Common.ShowErrorMessage(
+                    Utils.ShowErrorMessage(
                         "Clob Insert Error",
                         $"An invalid operation occurred when inserting {fullpath}: {e.Message}");
                     MessageLog.LogError($"Error creating new clob: {e.Message} when executing command: {command.CommandText}");
@@ -564,7 +564,7 @@ namespace LobsterModel
             }
             catch (ClobColumnNotFoundException e)
             {
-                Common.ShowErrorMessage("Clob Data Fetch Error", e.Message);
+                Utils.ShowErrorMessage("Clob Data Fetch Error", e.Message);
                 MessageLog.LogError(e.Message);
                 return false;
             }
@@ -612,7 +612,7 @@ namespace LobsterModel
                     else
                     {
                         reader.Close();
-                        Common.ShowErrorMessage(
+                        Utils.ShowErrorMessage(
                             "Clob Data Fetch Error",
                             "Too many rows were found for " + clobFile.Mnemonic);
 
@@ -625,7 +625,7 @@ namespace LobsterModel
             {
                 if (e is InvalidOperationException || e is OracleNullValueException)
                 {
-                    Common.ShowErrorMessage(
+                    Utils.ShowErrorMessage(
                         "Clob Data Fetch Error",
                         "An invalid operation occurred when retreiving the data of " + clobFile.Mnemonic + ": " + e.Message);
                     MessageLog.LogError("Error retrieving data: " + e.Message + " when executing command " + command.CommandText);
@@ -635,7 +635,7 @@ namespace LobsterModel
                 throw;
             }
 
-            Common.ShowErrorMessage(
+            Utils.ShowErrorMessage(
                 "Clob Data Fetch Error",
                 "No data was found for " + clobFile.Mnemonic);
             MessageLog.LogError("No data found on clob retrieval of " + clobFile.Mnemonic + " when executing command: " + command.CommandText);
@@ -682,7 +682,7 @@ namespace LobsterModel
                 catch (InvalidOperationException e)
                 {
                     command.Dispose();
-                    Common.ShowErrorMessage(
+                    Utils.ShowErrorMessage(
                         "Directory Comparison Error",
                         "An invalid operation occurred when retriving the file list for  " + ct.Name);
                     MessageLog.LogError("Error comparing to database: " + e.Message + " when executing command " + command.CommandText);
@@ -706,7 +706,7 @@ namespace LobsterModel
                 + " Last clobbed by user " + Environment.UserName
                 + " on machine " + Environment.MachineName
                 + " at " + DateTime.Now
-                + " (Lobster build " + Common.RetrieveLinkerTimestamp().ToShortDateString() + ")"
+                + " (Lobster build " + Utils.RetrieveLinkerTimestamp().ToShortDateString() + ")"
                 + (mimeType == "text/javascript" ? "*/" : "-->");
         }
 

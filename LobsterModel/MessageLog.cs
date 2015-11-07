@@ -49,7 +49,7 @@ namespace LobsterModel
             this.OutStream = new StreamWriter(Settings.Default.LogFilename, true);
             this.OutStream.WriteLine();
 
-            MessageLog.LogInfo("Starting Lobster (build " + Common.RetrieveLinkerTimestamp() + ")");
+            MessageLog.LogInfo("Starting Lobster (build " + Utils.RetrieveLinkerTimestamp() + ")");
         }
 
         /// <summary>

@@ -30,11 +30,12 @@ namespace LobsterModel
     using System.Threading;
     using System.Xml;
     using System.Xml.Schema;
+    using Properties;
 
     /// <summary>
     /// A storage place for helper functions
     /// </summary>
-    public abstract class Common
+    public abstract class Utils
     {
         /// <summary>
         /// Found here http://stackoverflow.com/questions/50744/wait-until-file-is-unlocked-in-net?lq=1

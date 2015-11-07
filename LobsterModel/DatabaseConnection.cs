@@ -131,7 +131,7 @@ namespace LobsterModel
                 try
                 {
                     MessageLog.LogInfo("Loading ClobType file " + file.FullName);
-                    ClobType clobType = Common.DeserialiseXmlFileUsingSchema<ClobType>(file.FullName, Settings.Default.ClobTypeSchemaFilename);
+                    ClobType clobType = Utils.DeserialiseXmlFileUsingSchema<ClobType>(file.FullName, Settings.Default.ClobTypeSchemaFilename);
 
                     clobType.Initialise(this);
                     clobType.FilePath = file.FullName;

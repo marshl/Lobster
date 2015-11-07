@@ -120,7 +120,7 @@ namespace LobsterModel
             DatabaseConfig config;
             try
             {
-                config = Common.DeserialiseXmlFileUsingSchema<DatabaseConfig>(fullpath, Settings.Default.DatabaseConfigSchemaFilename);
+                config = Utils.DeserialiseXmlFileUsingSchema<DatabaseConfig>(fullpath, Settings.Default.DatabaseConfigSchemaFilename);
             }
             catch (Exception e)
             {
@@ -141,7 +141,7 @@ namespace LobsterModel
             // If the CodeSource folder cannot be found, prompt the user for it
             if (config.CodeSource == null || !Directory.Exists(config.CodeSource))
             {
-                string codeSourceDir = Common.PromptForDirectory("Please select your CodeSource directory for " + config.Name, null);
+                string codeSourceDir = Utils.PromptForDirectory("Please select your CodeSource directory for " + config.Name, null);
                 if (codeSourceDir != null)
                 {
                     config.CodeSource = codeSourceDir;
