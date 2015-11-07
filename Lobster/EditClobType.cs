@@ -75,7 +75,7 @@ namespace Lobster
                 SaveFileDialog sfd = new SaveFileDialog();
                 if (this.WorkingObject.ParentConnection != null)
                 {
-                    sfd.InitialDirectory = this.WorkingObject.ParentConnection.Config.ClobTypeDir;
+                    sfd.InitialDirectory = this.WorkingObject.ParentConnection.ClobTypeDir;
                 }
 
                 sfd.AddExtension = true;

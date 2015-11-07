@@ -30,14 +30,14 @@ namespace Lobster
     /// <summary>
     /// A form used to edit an old or new DatabaseConnection and its underlying ClobTypes.
     /// </summary>
-    public class EditDatabaseConnection : EditCompositeObjectForm<DatabaseConfig>
+    public class EditDatabaseConnection : EditCompositeObjectForm<DatabaseConnection>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="EditDatabaseConnection"/> class.
         /// </summary>
         /// <param name="originalConnection">The connection to edit.</param>
         /// <param name="isNewConnection">Whether the DatabaseConnection is new or old.</param>
-        public EditDatabaseConnection(DatabaseConfig originalConnection, bool isNewConnection)
+        public EditDatabaseConnection(DatabaseConnection originalConnection, bool isNewConnection)
             : base(originalConnection, isNewConnection)
         {
         }
@@ -63,16 +63,13 @@ namespace Lobster
         {
             this.subItemListView.Clear();
 
-            DirectoryInfo dirInfo = new DirectoryInfo(this.WorkingObject.ClobTypeDir);
-
-            if (!dirInfo.Exists)
+            for (int i = 0; i < this.WorkingObject.ClobTypeList.Count; ++i)
             {
-                return;
-            }
+                ClobType clobType = this.WorkingObject.ClobTypeList[i];
+                ListViewItem item = new ListViewItem(clobType.Name);
 
-            foreach ( FileInfo file in dirInfo.GetFiles() )
-            {
-                this.subItemListView.Items.Add(file.Name);
+                this.subItemListView.Items.Add(item);
+                item.Tag = i;
             }
         }
 
@@ -108,7 +105,7 @@ namespace Lobster
                     return false;
                 }
 
-                //this.WorkingObject.FileLocation = sfd.FileName;
+                this.WorkingObject.FileLocation = sfd.FileName;
             }
 
             return true;
@@ -122,7 +119,7 @@ namespace Lobster
         {
             try
             {
-                DatabaseConfig.SerialiseToFile(this.WorkingObject.FileLocation, this.WorkingObject);
+                DatabaseConnection.SerialiseToFile(this.WorkingObject.FileLocation, this.WorkingObject);
             }
             catch (UnauthorizedAccessException)
             {
@@ -131,7 +128,7 @@ namespace Lobster
             }
 
             this.OriginalObject = this.WorkingObject;
-            this.WorkingObject = (DatabaseConfig)this.OriginalObject.Clone();
+            this.WorkingObject = (DatabaseConnection)this.OriginalObject.Clone();
 
             this.IsNewObject = false;
             return true;
@@ -146,12 +143,13 @@ namespace Lobster
         protected override void addSubItemButton_click(object sender, EventArgs e)
         {
             ClobType clobType = new ClobType();
+            clobType.ParentConnection = this.WorkingObject;
             EditClobType editForm = new EditClobType(clobType, true);
             DialogResult result = editForm.ShowDialog();
 
             if (result == DialogResult.OK)
             {
-                //this.WorkingObject.ClobTypeList.Add(editForm.OriginalObject);
+                this.WorkingObject.ClobTypeList.Add(editForm.OriginalObject);
                 this.PopulateSubItemList();
             }
         }
@@ -171,8 +169,8 @@ namespace Lobster
             }
 
             int clobTypeIndex = (int)this.subItemListView.SelectedItems[0].Tag;
-            //ClobType clobType = this.WorkingObject.ClobTypeList[clobTypeIndex];
-            //this.WorkingObject.ClobTypeList.Remove(clobType);
+            ClobType clobType = this.WorkingObject.ClobTypeList[clobTypeIndex];
+            this.WorkingObject.ClobTypeList.Remove(clobType);
             this.PopulateSubItemList();
         }
 
@@ -191,11 +189,11 @@ namespace Lobster
             }
 
             int clobTypeIndex = (int)this.subItemListView.SelectedItems[0].Tag;
-            //ClobType clobType = this.WorkingObject.ClobTypeList[clobTypeIndex];
+            ClobType clobType = this.WorkingObject.ClobTypeList[clobTypeIndex];
 
-            //EditClobType editForm = new EditClobType(clobType, false);
-            //DialogResult result = editForm.ShowDialog();
-            //this.WorkingObject.ClobTypeList[clobTypeIndex] = editForm.OriginalObject;
+            EditClobType editForm = new EditClobType(clobType, false);
+            DialogResult result = editForm.ShowDialog();
+            this.WorkingObject.ClobTypeList[clobTypeIndex] = editForm.OriginalObject;
             this.PopulateSubItemList();
         }
     }

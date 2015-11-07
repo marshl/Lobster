@@ -83,8 +83,8 @@ namespace Lobster
             catch (Exception e)
             {
                 MessageLog.LogError("UNHANDLED EXCEPTION: " + e.ToString());
-                string msg = $@"An unhandled exception was thrown. Check {Settings.Default.LogFilename}
-                    for more information, and please create an error issue at https://github.com/marshl/lobster";
+                string msg = "An unhandled " + e.GetType().ToString() + " was thrown. Check " + Settings.Default.LogFilename
+                    + " for more information, and please create an error issue at https://github.com/marshl/lobster";
                 Common.ShowErrorMessage("Error", msg);
             }
 #endif
@@ -101,9 +101,9 @@ namespace Lobster
         /// <param name="e">The event arguments.</param>
         private static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
         {
-            MessageLog.LogError("UNHANDLED EXCEPTION: " + e.Exception.ToString());
-            string msg = $@"An unhandled exception was thrown. Check {Settings.Default.LogFilename}
-                for more information, and please create an error issue at https://github.com/marshl/lobster";
+            MessageLog.LogError("UNHANDLED EXCEPTION: " + e.ToString());
+            string msg = "An unhandled " + e.GetType().ToString() + " was thrown. Check " + Settings.Default.LogFilename
+                + " for more information, and please create an error issue at https://github.com/marshl/lobster";
             Common.ShowErrorMessage("Error", msg);
         }
     }

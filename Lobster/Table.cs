@@ -132,9 +132,9 @@ namespace Lobster
         /// </summary>
         /// <param name="clobFile">The ClobFile to build an update statement for.</param>
         /// <returns>The update statement.</returns>
-        public string BuildUpdateStatement(DBClobFile clobFile)
+        public string BuildUpdateStatement(ClobFile clobFile)
         {
-            Column clobCol = clobFile.GetColumn();
+            Column clobCol = clobFile.DatabaseFile.GetColumn();
             string command =
                    "UPDATE " + this.FullName
                  + " SET " + clobCol.FullName + " = :data";
@@ -155,12 +155,12 @@ namespace Lobster
                 command += " WHERE " + foreignKeyCol.FullName + " = ("
                         + " SELECT " + parentIDCol.FullName
                         + " FROM " + pt.FullName
-                        + " WHERE " + parentMnemCol.FullName + " = '" + clobFile.Mnemonic + "')";
+                        + " WHERE " + parentMnemCol.FullName + " = '" + clobFile.DatabaseFile.Mnemonic + "')";
             }
             else
             {
                 Column mnemCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
-                command += " WHERE " + mnemCol.FullName + " = '" + clobFile.Mnemonic + "'";
+                command += " WHERE " + mnemCol.FullName + " = '" + clobFile.DatabaseFile.Mnemonic + "'";
             }
 
             return command;
@@ -272,9 +272,9 @@ namespace Lobster
         /// </summary>
         /// <param name="clobFile">The ClobFile to build the statement for.</param>
         /// <returns>The SQL command</returns>
-        public string BuildGetDataCommand(DBClobFile clobFile)
+        public string BuildGetDataCommand(ClobFile clobFile)
         {
-            Column clobCol = clobFile.GetColumn();
+            Column clobCol = clobFile.DatabaseFile.GetColumn();
             if (this.ParentTable != null)
             {
                 Table pt = this.ParentTable;
@@ -286,7 +286,7 @@ namespace Lobster
                     + " FROM " + pt.FullName
                     + " JOIN " + this.FullName
                     + " ON " + foreignKeyCol.FullName + " = " + parentIDCol.FullName
-                    + " WHERE " + parentMnemCol.FullName + " = '" + clobFile.Mnemonic + "'";
+                    + " WHERE " + parentMnemCol.FullName + " = '" + clobFile.DatabaseFile.Mnemonic + "'";
             }
             else
             {
@@ -294,7 +294,7 @@ namespace Lobster
                 return
                     "SELECT " + clobCol.FullName
                     + " FROM " + this.FullName
-                    + " WHERE " + mnemCol.FullName + " = '" + clobFile.Mnemonic + "'";
+                    + " WHERE " + mnemCol.FullName + " = '" + clobFile.DatabaseFile.Mnemonic + "'";
             }
         }
 
