@@ -106,12 +106,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Lobster\Lobster.csproj">
-      <Project>{72ccd30b-bebd-4b93-8eb7-404be075e12a}</Project>
-      <Name>Lobster</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="img\112_UpArrowShort_Orange_48x48_72.png" />
   </ItemGroup>
   <ItemGroup>
@@ -136,6 +130,12 @@
     <Resource Include="img\popup_success.bmp" />
     <Resource Include="img\refresh.png" />
     <Resource Include="img\search.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\LobsterModel\LobsterModel.csproj">
+      <Project>{b66611a5-33c7-4c8d-b986-c0f3261cf977}</Project>
+      <Name>LobsterModel</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
