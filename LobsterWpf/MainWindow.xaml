@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LobsterWpf"
         mc:Ignorable="d"
-        Title="Lobster" Height="600" Width="800">
+        Title="Lobster" Height="600" Width="800" Loaded="Window_Loaded">
     <Grid x:Name="LayoutRoot">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -17,22 +17,22 @@
                 <MenuItem Header="_File">
                     <MenuItem Header="Connections" Click="MenuItem_Click" />
                     <Separator/>
-                    <MenuItem Header="_Exit" />
+                    <MenuItem Header="_Exit" Click="MenuItem_Click_1" />
                 </MenuItem>
             </Menu>
         </Grid>
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="1" IsEnabled="False" Name="ConnectionContainer">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
 
-            <ListBox Name="peopleListBox" Grid.Column="0" Grid.Row="1" ItemsSource="{Binding ClobTypes}">
+            <ListBox Name="peopleListBox" Grid.Column="0" Grid.Row="1" ItemsSource="{Binding ClobTypes }">
                 <ListBox.ItemTemplate>
-                    <DataTemplate >
+                    <DataTemplate>
                         <StackPanel>
                             <TextBlock>Name</TextBlock>
-                            <TextBlock Text="{Binding Path=Name}"/>
+                            <TextBlock Text="{Binding Name}"/>
                         </StackPanel>
                     </DataTemplate>
                 </ListBox.ItemTemplate>

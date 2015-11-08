@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using LobsterModel;
 
 namespace LobsterWpf
 {
@@ -21,32 +22,44 @@ namespace LobsterWpf
     /// </summary>
     public partial class MainWindow : Window
     {
-        public ObservableCollection<ClobType> ClobTypes { get; }
+        private Model model;
 
-        private Lobster.LobsterModel model;
+        //public DatabaseConnection CurrentConnection { get; private set; }
 
-        public class ClobType
-        {
-            public string Name { get; set; }
-        }
-
-        public MainWindow(Lobster.LobsterModel lobsterModel)
+        public MainWindow(Model lobsterModel)
         {
             InitializeComponent();
 
             this.model = lobsterModel;
 
-            this.ClobTypes = new ObservableCollection<ClobType>();
-            this.ClobTypes.Add(new ClobType() { Name = "Hello" });
-            this.ClobTypes.Add(new ClobType() { Name = "World" });
 
-            this.DataContext = this;
+            this.ConnectionContainer.DataContext = null;
+        }
+
+        private void OpenConnectionDialog()
+        {
+            ConnectionListWindow window = new ConnectionListWindow(this.model);
+            bool? result = window.ShowDialog();
+            if (result.HasValue && result.Value)
+            {
+                this.ConnectionContainer.IsEnabled = this.model.CurrentConnection != null;
+                this.ConnectionContainer.DataContext = new ConnectionView(this.model.CurrentConnection);
+            }
         }
 
         private void MenuItem_Click(object sender, RoutedEventArgs e)
         {
-            ConnectionListWindow window = new ConnectionListWindow(this.model);
-            window.ShowDialog();
+            this.OpenConnectionDialog();
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            this.OpenConnectionDialog();
+        }
+
+        private void MenuItem_Click_1(object sender, RoutedEventArgs e)
+        {
+            this.Close();
         }
     }
 }

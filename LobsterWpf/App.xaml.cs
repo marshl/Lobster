@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using LobsterModel;
 
 namespace LobsterWpf
 {
@@ -22,17 +23,17 @@ namespace LobsterWpf
         {
             base.OnStartup(e);
 
-            Lobster.MessageLog messageLog = new Lobster.MessageLog();
+            MessageLog messageLog = new MessageLog();
 
             Console.WriteLine("foobar");
             TempListener tmp = new TempListener();
-            Lobster.LobsterModel model = new Lobster.LobsterModel(tmp);
+            LobsterModel.Model model = new LobsterModel.Model(tmp);
             MainWindow mainWindow = new MainWindow(model);
             mainWindow.Show();
         }
     }
 
-    class TempListener : Lobster.IModelEventListener
+    class TempListener : LobsterModel.IModelEventListener
     {
         public void OnFileChange()
         {

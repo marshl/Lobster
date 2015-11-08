@@ -12,6 +12,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using LobsterModel;
+using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace LobsterWpf
 {
@@ -20,28 +22,58 @@ namespace LobsterWpf
     /// </summary>
     public partial class ConnectionListWindow : Window
     {
-        private Lobster.LobsterModel model;
+        private Model model;
 
         public string ConnectionDirectory { get; set; }
 
-        public ObservableCollection<Lobster.DatabaseConfig> databaseConfigList { get; set; }
+        public ObservableCollection<DatabaseConfig> databaseConfigList { get; set; }
 
-        public ConnectionListWindow(Lobster.LobsterModel lobsterModel)
+        //public DatabaseConfig SelectedConnection { get; private set; }
+
+        public ConnectionListWindow(Model lobsterModel)
         {
             InitializeComponent();
 
             this.model = lobsterModel;
 
-            this.ConnectionDirectory = 
-            this.databaseConfigList = new ObservableCollection<Lobster.DatabaseConfig>(this.model.GetConfigList());
+            this.ConnectionDirectory = this.model.ConnectionDirectory;
+            this.databaseConfigList = new ObservableCollection<DatabaseConfig>(this.model.GetConfigList());
 
             this.DataContext = this;
-            //this.connectionListBox.DataContext = lobsterModel.GetConfigList();
         }
 
         private void cancelButton_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
+        }
+
+        private void changeDirectoryButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dlg = new CommonOpenFileDialog();
+            dlg.IsFolderPicker = true;
+            CommonFileDialogResult result = dlg.ShowDialog();
+            if ( result == CommonFileDialogResult.Ok )
+            {
+                this.model.ChnageConnectionDirectory(dlg.FileName);
+                this.databaseConfigList = new ObservableCollection<DatabaseConfig>(this.model.GetConfigList());
+                this.ConnectionDirectory = this.model.ConnectionDirectory;
+            }
+            
+        }
+
+        private void connectButton_Click(object sender, RoutedEventArgs e)
+        {
+            if ( this.connectionListBox.SelectedIndex == -1 )
+            {
+                return;
+            }
+
+            DatabaseConfig config = this.databaseConfigList[this.connectionListBox.SelectedIndex];
+            if ( this.model.SetDatabaseConnection(config) )
+            {
+                this.DialogResult = true;
+                this.Close();
+            }
         }
     }
 }
