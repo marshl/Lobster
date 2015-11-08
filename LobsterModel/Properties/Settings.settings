@@ -1,6 +1,48 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)">
-  <Profiles>
-    <Profile Name="(Default)" />
-  </Profiles>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="LobsterModel.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="ConnectionDir" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="DiffProgramName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">tortoisemerge</Value>
+    </Setting>
+    <Setting Name="DiffProgramArguments" Type="System.String" Scope="User">
+      <Value Profile="(Default)">/mine:{0} /theirs:{1}</Value>
+    </Setting>
+    <Setting Name="SettingsDirectory" Type="System.String" Scope="User">
+      <Value Profile="(Default)">LobsterSettings</Value>
+    </Setting>
+    <Setting Name="LogFilename" Type="System.String" Scope="User">
+      <Value Profile="(Default)">lobster.log</Value>
+    </Setting>
+    <Setting Name="BackupEnabled" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="DatabaseConfigSchemaFilename" Type="System.String" Scope="User">
+      <Value Profile="(Default)">LobsterSettings/DatabaseConfig.xsd</Value>
+    </Setting>
+    <Setting Name="TempFileDirectory" Type="System.String" Scope="User">
+      <Value Profile="(Default)">temp</Value>
+    </Setting>
+    <Setting Name="ClobTypeSchemaFilename" Type="System.String" Scope="User">
+      <Value Profile="(Default)">LobsterSettings/ClobType.xsd</Value>
+    </Setting>
+    <Setting Name="BackupDirectory" Type="System.String" Scope="User">
+      <Value Profile="(Default)">backup</Value>
+    </Setting>
+    <Setting Name="DiffableExtensions" Type="System.Collections.Specialized.StringCollection" Scope="User">
+      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;string&gt;.html&lt;/string&gt;
+  &lt;string&gt;.txt&lt;/string&gt;
+  &lt;string&gt;.xml&lt;/string&gt;
+  &lt;string&gt;.xmls&lt;/string&gt;
+  &lt;string&gt;.xmlp&lt;/string&gt;
+  &lt;string&gt;.js&lt;/string&gt;
+  &lt;string&gt;.css&lt;/string&gt;
+&lt;/ArrayOfString&gt;</Value>
+    </Setting>
+  </Settings>
 </SettingsFile>

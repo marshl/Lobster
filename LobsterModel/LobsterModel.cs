@@ -37,17 +37,17 @@ namespace LobsterModel
     /// <summary>
     /// The database connection model 
     /// </summary>
-    public class LobsterModel
+    public class Model
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="LobsterModel"/> class.
+        /// Initializes a new instance of the <see cref="Model"/> class.
         /// </summary>
-        public LobsterModel(IModelEventListener eventListener)
+        public Model(IModelEventListener eventListener)
         {
             this.eventListener = eventListener;
             this.MimeList = Utils.DeserialiseXmlFileUsingSchema<MimeTypeList>("LobsterSettings/MimeTypes.xml", null);
 
-            this.LoadDatabaseConnections();
+            //this.LoadDatabaseConnections();
         }
 
         private IModelEventListener eventListener;
@@ -150,6 +150,12 @@ namespace LobsterModel
         public List<DatabaseConfig> GetConfigList()
         {
             List<DatabaseConfig> configList = new List<DatabaseConfig>();
+
+            if (!this.IsConnectionDirectoryValid)
+            {
+                return configList;
+            }
+
             foreach (string filename in Directory.GetFiles(Settings.Default.ConnectionDir))
             {
                 DatabaseConfig connection = DatabaseConfig.LoadDatabaseConfig(filename);
@@ -325,6 +331,22 @@ namespace LobsterModel
 
                 Settings.Default.ConnectionDir = connectionDir;
                 Settings.Default.Save();
+            }
+        }
+
+        public bool IsConnectionDirectoryValid
+        {
+            get
+            {
+                return Settings.Default.ConnectionDir != null && Directory.Exists(Settings.Default.ConnectionDir);
+            }
+        }
+
+        public string ConnectionDirectory
+        {
+            get
+            {
+                return Settings.Default.ConnectionDir;
             }
         }
 
@@ -708,6 +730,12 @@ namespace LobsterModel
                 + " at " + DateTime.Now
                 + " (Lobster build " + Utils.RetrieveLinkerTimestamp().ToShortDateString() + ")"
                 + (mimeType == "text/javascript" ? "*/" : "-->");
+        }
+
+        public void ChnageConnectionDirectory(string fileName)
+        {
+            Settings.Default.ConnectionDir = fileName;
+            Settings.Default.Save();
         }
 
         /// <summary>

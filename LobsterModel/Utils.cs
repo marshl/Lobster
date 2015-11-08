@@ -28,6 +28,7 @@ namespace LobsterModel
     using System.IO;
     using System.Linq;
     using System.Threading;
+    using System.Windows.Forms;
     using System.Xml;
     using System.Xml.Schema;
     using Properties;
@@ -203,6 +204,38 @@ namespace LobsterModel
             }
 
             return Path.Combine(tempDir.FullName, Guid.NewGuid() + originalFilename);
+        }
+
+        /// <summary>
+        /// Displays a folder browser dialog and retuns the result.
+        /// </summary>
+        /// <param name="description">The description to be displayed on the dialog.</param>
+        /// <param name="startingPath">The path for the dialog explorer to start.</param>
+        /// <returns>The path of the directory that was selected, null if one wasn't selected.</returns>
+        public static string PromptForDirectory(string description, string startingPath)
+        {
+            FolderBrowserDialog fbd = new FolderBrowserDialog();
+            fbd.Description = description;
+            fbd.SelectedPath = startingPath;
+
+            DialogResult result = fbd.ShowDialog();
+            if (result != DialogResult.OK)
+            {
+                return null;
+            }
+
+            return fbd.SelectedPath;
+        }
+
+        /// <summary>
+        /// Displays a MessageBox with the given text and caption.
+        /// </summary>
+        /// <param name="caption">The MessageBox text.</param>
+        /// <param name="text">The MessageBox caption.</param>
+        /// <returns>The <see cref="DialogResult"/> of the displayed message box.</returns>
+        public static DialogResult ShowErrorMessage(string caption, string text)
+        {
+            return MessageBox.Show(text, caption, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
         }
     }
 }

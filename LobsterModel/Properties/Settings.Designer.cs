@@ -22,5 +22,146 @@ namespace LobsterModel.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string ConnectionDir {
+            get {
+                return ((string)(this["ConnectionDir"]));
+            }
+            set {
+                this["ConnectionDir"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("tortoisemerge")]
+        public string DiffProgramName {
+            get {
+                return ((string)(this["DiffProgramName"]));
+            }
+            set {
+                this["DiffProgramName"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("/mine:{0} /theirs:{1}")]
+        public string DiffProgramArguments {
+            get {
+                return ((string)(this["DiffProgramArguments"]));
+            }
+            set {
+                this["DiffProgramArguments"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("LobsterSettings")]
+        public string SettingsDirectory {
+            get {
+                return ((string)(this["SettingsDirectory"]));
+            }
+            set {
+                this["SettingsDirectory"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("lobster.log")]
+        public string LogFilename {
+            get {
+                return ((string)(this["LogFilename"]));
+            }
+            set {
+                this["LogFilename"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool BackupEnabled {
+            get {
+                return ((bool)(this["BackupEnabled"]));
+            }
+            set {
+                this["BackupEnabled"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("LobsterSettings/DatabaseConfig.xsd")]
+        public string DatabaseConfigSchemaFilename {
+            get {
+                return ((string)(this["DatabaseConfigSchemaFilename"]));
+            }
+            set {
+                this["DatabaseConfigSchemaFilename"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("temp")]
+        public string TempFileDirectory {
+            get {
+                return ((string)(this["TempFileDirectory"]));
+            }
+            set {
+                this["TempFileDirectory"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("LobsterSettings/ClobType.xsd")]
+        public string ClobTypeSchemaFilename {
+            get {
+                return ((string)(this["ClobTypeSchemaFilename"]));
+            }
+            set {
+                this["ClobTypeSchemaFilename"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("backup")]
+        public string BackupDirectory {
+            get {
+                return ((string)(this["BackupDirectory"]));
+            }
+            set {
+                this["BackupDirectory"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute(@"<?xml version=""1.0"" encoding=""utf-16""?>
+<ArrayOfString xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+  <string>.html</string>
+  <string>.txt</string>
+  <string>.xml</string>
+  <string>.xmls</string>
+  <string>.xmlp</string>
+  <string>.js</string>
+  <string>.css</string>
+</ArrayOfString>")]
+        public global::System.Collections.Specialized.StringCollection DiffableExtensions {
+            get {
+                return ((global::System.Collections.Specialized.StringCollection)(this["DiffableExtensions"]));
+            }
+            set {
+                this["DiffableExtensions"] = value;
+            }
+        }
     }
 }

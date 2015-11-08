@@ -138,8 +138,9 @@ namespace LobsterModel
 
             config.FileLocation = fullpath;
 
+            //TODO
             // If the CodeSource folder cannot be found, prompt the user for it
-            if (config.CodeSource == null || !Directory.Exists(config.CodeSource))
+            /*if (config.CodeSource == null || !Directory.Exists(config.CodeSource))
             {
                 string codeSourceDir = Utils.PromptForDirectory("Please select your CodeSource directory for " + config.Name, null);
                 if (codeSourceDir != null)
@@ -152,7 +153,7 @@ namespace LobsterModel
                     // Ignore config files that don't have a valid CodeSource folder
                     return null;
                 }
-            }
+            }*/
 
             return config;
         }

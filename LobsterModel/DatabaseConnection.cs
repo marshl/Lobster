@@ -63,7 +63,7 @@ namespace LobsterModel
         /// </summary>
         /// <param name="parentModel">The model that is parent to this connection.</param>
         /// <param name="config">The configuration file to base this connection off.</param>
-        public DatabaseConnection(LobsterModel parentModel, DatabaseConfig config)
+        public DatabaseConnection(Model parentModel, DatabaseConfig config)
         {
             this.ParentModel = parentModel;
             this.Config = config;
@@ -86,13 +86,12 @@ namespace LobsterModel
         /// <summary>
         /// The Lobster model that is the parent of this connection.
         /// </summary>
-        [Browsable(false)]
-        public LobsterModel ParentModel { get; private set; }
+        public Model ParentModel { get; private set; }
 
         /// <summary>
         /// The name of the file where this was loaded from.
         /// </summary>
-        [Browsable(false)]
+
         public string ConfigFilepath { get; set; }
 
         /// <summary>

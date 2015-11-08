@@ -24,8 +24,6 @@
 
 namespace LobsterModel
 {
-    using System;
-
     /// <summary>
     /// A DBClobFile describes a row in a table on the database used by a ClobType.
     /// </summary>

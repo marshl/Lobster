@@ -38,32 +38,24 @@ namespace LobsterModel
         /// The display name for this ClobType. This value has no functional impact, 
         /// and is used for display purposes only.
         /// </summary>
-        [DisplayName("Name")]
-        [Description("The display name")]
         [XmlElement("name")]
         public string Name { get; set; }
 
         /// <summary>
         /// The name of the directory in CodeSource to be used for this ClobType. Directory separators can be used.
         /// </summary>
-        [DisplayName("Directory")]
-        [Description("The name of the directory in CodeSource to be used for this ClobType. Directory separators can be used.")]
         [XmlElement("directory")]
         public string Directory { get; set; }
 
         /// <summary>
         /// Whether or not all subdirectories under the specified folder should also be used.
         /// </summary>
-        [DisplayName("Include Subdirectories")]
-        [Description("Whether or not all subdirectories under the specified folder should also be used.")]
         [XmlElement("includeSubDirectories")]
         public bool IncludeSubDirectories { get; set; }
 
         /// <summary>
         /// Most ClobTypes use only a single table, but if there is more than one, then the user will be asked which to use when inserting a new file.
         /// </summary>
-        [DisplayName("Table List")]
-        [Description("The tables used by this ClobType")]
         [XmlArray("tables")]
         public List<Table> Tables { get; set; }
 
@@ -82,14 +74,12 @@ namespace LobsterModel
         /// The file that stored this ClobType.
         /// </summary>
         [XmlIgnore]
-        [Browsable(false)]
         public string FilePath { get; set; }
 
         /// <summary>
         /// The <see cref="DatabaseConnection"/> object that stores this ClobType.
         /// </summary>
         [XmlIgnore]
-        [Browsable(false)]
         public DatabaseConnection ParentConnection { get; set; }
 
         /// <summary>
