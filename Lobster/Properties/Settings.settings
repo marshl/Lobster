@@ -5,18 +5,6 @@
     <Setting Name="ConnectionDir" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="DiffableExtensions" Type="System.Collections.Specialized.StringCollection" Scope="User">
-      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
-&lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
-  &lt;string&gt;.html&lt;/string&gt;
-  &lt;string&gt;.txt&lt;/string&gt;
-  &lt;string&gt;.xml&lt;/string&gt;
-  &lt;string&gt;.xmls&lt;/string&gt;
-  &lt;string&gt;.xmlp&lt;/string&gt;
-  &lt;string&gt;.js&lt;/string&gt;
-  &lt;string&gt;.css&lt;/string&gt;
-&lt;/ArrayOfString&gt;</Value>
-    </Setting>
     <Setting Name="DiffProgramName" Type="System.String" Scope="User">
       <Value Profile="(Default)">tortoisemerge</Value>
     </Setting>
@@ -55,6 +43,18 @@
     </Setting>
     <Setting Name="BackupDirectory" Type="System.String" Scope="User">
       <Value Profile="(Default)">backup</Value>
+    </Setting>
+    <Setting Name="DiffableExtensions" Type="System.Collections.Specialized.StringCollection" Scope="User">
+      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;string&gt;.html&lt;/string&gt;
+  &lt;string&gt;.txt&lt;/string&gt;
+  &lt;string&gt;.xml&lt;/string&gt;
+  &lt;string&gt;.xmls&lt;/string&gt;
+  &lt;string&gt;.xmlp&lt;/string&gt;
+  &lt;string&gt;.js&lt;/string&gt;
+  &lt;string&gt;.css&lt;/string&gt;
+&lt;/ArrayOfString&gt;</Value>
     </Setting>
   </Settings>
 </SettingsFile>
