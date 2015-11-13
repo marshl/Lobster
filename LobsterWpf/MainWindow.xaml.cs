@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,6 +26,8 @@ namespace LobsterWpf
         private Model model;
 
         //public DatabaseConnection CurrentConnection { get; private set; }
+
+        private ConnectionView connectionView;
 
         public MainWindow(Model lobsterModel)
         {
@@ -61,5 +64,66 @@ namespace LobsterWpf
         {
             this.Close();
         }
+
+        private void clobTypeListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (this.clobTypeListBox.SelectedIndex == -1)
+            {
+                return;
+            }
+
+            ClobType clobType = this.model.CurrentConnection.ClobDirectoryList[this.clobTypeListBox.SelectedIndex].ClobType;
+
+            this.connectionView = this.ConnectionContainer.DataContext as ConnectionView;
+            if (connectionView != null)
+            {
+                connectionView.PopulateFileTreeForClobType(clobType);
+                this.localFileTreeView.ItemsSource = connectionView.RootFile.Children;
+            }
+
+            //this.PopulateFileTreeForClobType(clobType);
+        }
+        /*
+        private void PopulateFileTreeForClobType(ClobType clobType)
+        {
+            //this.localFileTreeView.Items.Clear();
+
+            DirectoryInfo rootDirInfo = new DirectoryInfo(clobType.Fullpath);
+            if (!rootDirInfo.Exists)
+            {
+                return;
+            }
+
+            /*foreach (DirectoryInfo childDirInfo in rootDirInfo.GetDirectories())
+            {
+                this.localFileTreeView.Items.Add(childDirInfo.Name);
+            }* /
+
+            FileNodeView node = new FileNodeView(rootDirInfo.FullName);
+            this.localFileTreeView.DataContext = node;
+        }*/
+
+        private void hideReadonlyCheckbox_Checked(object sender, RoutedEventArgs e)
+        {
+            //this.clobTypeListBox_SelectionChanged(null, null);
+            this.connectionView.NotifyPropertyChanged("ClobTypes");
+        }
+
+        private void hideReadonlyCheckbox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            //this.clobTypeListBox_SelectionChanged(null, null);
+            this.connectionView.NotifyPropertyChanged("ClobTypes");
+        }
+
+        /*
+        private void PopulateFileTreeNode(DirectoryInfo dirInfo )
+        {
+        foreach (DirectoryInfo childDirInfo in rootDirInfo.GetDirectories())
+        {
+        this.localFileTreeView.Items.Add(childDirInfo.Name);
+        }
+
+        this.localFileTreeView.DataContext = this.
+        }*/
     }
 }

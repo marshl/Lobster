@@ -27,12 +27,12 @@
                 <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
 
-            <ListBox Name="peopleListBox" Grid.Column="0" Grid.Row="1" ItemsSource="{Binding ClobTypes }">
+            <ListBox Name="clobTypeListBox" Grid.Column="0" Grid.Row="1" ItemsSource="{Binding ClobTypes }" SelectionChanged="clobTypeListBox_SelectionChanged">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel>
-                            <TextBlock>Name</TextBlock>
-                            <TextBlock Text="{Binding Name}"/>
+                            <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding Directory}" FontStyle="Italic"/>
                         </StackPanel>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
@@ -53,15 +53,30 @@
                                 <RowDefinition/>
                                 <RowDefinition Height="25"/>
                             </Grid.RowDefinitions>
-                            <ListBox Name="localFileListBox" Grid.Row="0">
-                                <ListBoxItem>Mike</ListBoxItem>
-                                <ListBoxItem>Lisa</ListBoxItem>
-                                <ListBoxItem>John</ListBoxItem>
-                            </ListBox>
-                            <CheckBox x:Name="hideReadonlyCheckbox" Grid.Row="1" Content="Hide Readonly Files" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            <TreeView Name="localFileTreeView" ItemsSource="{Binding RootFile}" Grid.Row="0">
+                                <TreeView.ItemTemplate>
+                                    <HierarchicalDataTemplate DataType="{x:Type local:FileNodeView}" ItemsSource="{Binding Children}">
+                                        <HierarchicalDataTemplate.Resources>
+                                            <Style TargetType="{x:Type StackPanel}">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsVisible}" Value="False">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </HierarchicalDataTemplate.Resources>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Image Source="img/Folder_Open.png" Height="24"/>
+                                            <TextBlock Text="{Binding Path=Name}" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </HierarchicalDataTemplate>
+                                </TreeView.ItemTemplate>
+                            </TreeView>
+
+                            <CheckBox x:Name="showReadOnlyFilesCheckbox" Grid.Row="1" Content="Show Readonly Files" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0" Checked="hideReadonlyCheckbox_Checked" Unchecked="hideReadonlyCheckbox_Unchecked" IsChecked="{Binding Path=ShowReadOnlyFiles, Mode=TwoWay}"/>
                         </Grid>
                         <StackPanel>
-                            <Button x:Name="pushButton" Grid.Column="0" MaxHeight="50">
+                            <Button x:Name="pushButton" Grid.Column="0" MaxHeight="50" Margin="0">
                                 <StackPanel MaxHeight="50">
                                     <Image Source="img/112_UpArrowShort_Orange_48x48_72.png" VerticalAlignment="Top" Height="30"/>
                                     <TextBlock HorizontalAlignment="Center" MinHeight="15" VerticalAlignment="Bottom">Push</TextBlock>
@@ -93,8 +108,8 @@
                                         <TextBlock>Details</TextBlock>
                                     </Expander.Header>
                                     <StackPanel Grid.Column="2">
-                                        <Label>Hello</Label>
-                                        <Label>World</Label>
+                                        <Label>[Filename]</Label>
+                                        <Label>[Size]</Label>
                                     </StackPanel>
                                 </Expander>
                             </Border>
@@ -102,7 +117,7 @@
                                 <Expander x:Name="istoryExpander" IsExpanded="True" Background="White">
                                     <Expander.Header>
                                         <StackPanel>
-                                            <TextBlock>Hello</TextBlock>
+                                            <TextBlock>Change Log</TextBlock>
                                         </StackPanel>
                                     </Expander.Header>
                                     <StackPanel Grid.Column="2">

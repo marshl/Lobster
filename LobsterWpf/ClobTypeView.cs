@@ -22,6 +22,14 @@ namespace LobsterWpf
             get
             {
                 return this.clobType.Name;
+            }           
+        }
+
+        public string Directory
+        {
+            get
+            {
+                return this.clobType.Directory;
             }
         }
     }
