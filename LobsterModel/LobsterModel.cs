@@ -103,7 +103,7 @@ namespace LobsterModel
                 con.Dispose();
             }
 
-            this.eventListener.OnUpdateComplete();
+            this.eventListener.OnUpdateComplete(fullpath);
             //LobsterMain.Instance.OnFileUpdateComplete(fullpath, result);
         }
 
@@ -114,8 +114,27 @@ namespace LobsterModel
         /// <param name="table">The table to insert the file into.</param>
         /// <param name="mimeType">The mimetype to insert the file as (if applicable, otherwise null).</param>
         /// <returns>True if the file was inserted, otherwise false.</returns>
-        public bool SendInsertClobMessage(string fullpath, Table table, string mimeType)
+        public bool SendInsertClobMessage(string fullpath)
         {
+            ClobDirectory clobDir = this.CurrentConnection.GetClobDirectoryForFile(fullpath);
+
+            Table table;
+            if (clobDir.ClobType.Tables.Count > 1)
+            {
+                table = this.eventListener.PromptForTable(fullpath);
+            }
+            else
+            {
+                table = clobDir.ClobType.Tables[0];
+            }
+
+            string mimeType = null;
+            Column mimeTypeColumn = table.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MIME_TYPE);
+            if (mimeTypeColumn != null)
+            {
+                this.eventListener.PromptForMimeType(fullpath, table);
+            }
+
             DbConnection con = OpenConnection(this.CurrentConnection.Config);
             if (con == null)
             {
@@ -125,6 +144,53 @@ namespace LobsterModel
             bool result = this.InsertDatabaseClob(fullpath, table, mimeType, con);
             con.Dispose();
             return result;
+
+            /*
+
+            Debug.Assert(clobFile.IsLocalOnly, "A ClobFile that is already on the database cannot be inserted again.");
+            Table table;
+            ClobDirectory clobDir = clobFile.ParentClobNode.BaseClobDirectory;
+
+            // If there is > 1 tables in this ClobType, ask the user for which one to use
+            if (clobDir.ClobType.Tables.Count > 1)
+            {
+                TablePicker tablePicker = new TablePicker(clobDir.ClobType);
+                DialogResult dialogResult = tablePicker.ShowDialog();
+                if (dialogResult != DialogResult.OK)
+                {
+                    return;
+                }
+
+                table = tablePicker.tableCombo.SelectedItem as Table;
+            }
+            else
+            {
+                table = clobDir.ClobType.Tables[0];
+            }
+
+            // If the table has a MimeType column, ask the user for the type to use
+            string mimeType = null;
+            Column mimeTypeColumn = table.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MIME_TYPE);
+            if (mimeTypeColumn != null)
+            {
+                DatatypePicker typePicker = new DatatypePicker(table);
+                DialogResult dialogResult = typePicker.ShowDialog();
+                if (dialogResult != DialogResult.OK)
+                {
+                    return;
+                }
+
+                mimeType = typePicker.datatypeComboBox.Text;
+            }
+
+            bool result = this.model.SendInsertClobMessage(clobFile, table, mimeType);
+            if (result)
+            {
+                this.RefreshClobLists();
+            }
+
+            this.OnFileInsertComplete(clobFile, result);
+            */
         }
 
         /// <summary>
@@ -226,10 +292,10 @@ namespace LobsterModel
             // the prefix representation of the mime type prefixed to it.
             if (table.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MIME_TYPE) != null)
             {
-                MimeTypeList.MimeType mt = this.MimeList.MimeTypes.Find(x => x.Name == mimeType);
+                MimeTypeList.MimeType mt = this.MimeList.MimeTypes.Find(x => x.Name.Equals(mimeType));
                 if (mt == null)
                 {
-                    throw new ArgumentException("Unknown mime-to-prefix key " + mimeType);
+                    throw new MimeTypeNotFoundException("Unknown mime-to-prefix key " + mimeType);
                 }
 
                 if (mt.Prefix.Length > 0)
@@ -266,11 +332,11 @@ namespace LobsterModel
             }
             else
             {
-                MimeTypeList.MimeType mt = this.MimeList.MimeTypes.Find(x => x.Name == mimeType);
+                MimeTypeList.MimeType mt = this.MimeList.MimeTypes.Find(x => x.Name.Equals(mimeType));
 
                 if (mt == null)
                 {
-                    throw new ArgumentException("Unkown mime-to-extension key " + mimeType);
+                    throw new MimeTypeNotFoundException("Unkown mime-to-extension key " + mimeType);
                 }
 
                 filename += mt.Extension;
@@ -643,18 +709,13 @@ namespace LobsterModel
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (e is InvalidOperationException || e is OracleNullValueException)
             {
-                if (e is InvalidOperationException || e is OracleNullValueException)
-                {
-                    Utils.ShowErrorMessage(
-                        "Clob Data Fetch Error",
-                        "An invalid operation occurred when retreiving the data of " + clobFile.Mnemonic + ": " + e.Message);
-                    MessageLog.LogError("Error retrieving data: " + e.Message + " when executing command " + command.CommandText);
-                    return false;
-                }
-
-                throw;
+                Utils.ShowErrorMessage(
+                    "Clob Data Fetch Error",
+                    "An invalid operation occurred when retreiving the data of " + clobFile.Mnemonic + ": " + e.Message);
+                MessageLog.LogError("Error retrieving data: " + e.Message + " when executing command " + command.CommandText);
+                return false;
             }
 
             Utils.ShowErrorMessage(
@@ -729,7 +790,7 @@ namespace LobsterModel
                 + " on machine " + Environment.MachineName
                 + " at " + DateTime.Now
                 + " (Lobster build " + Utils.RetrieveLinkerTimestamp().ToShortDateString() + ")"
-                + (mimeType == "text/javascript" ? "*/" : "-->");
+                + (mimeType.Equals("text/javascript", StringComparison.OrdinalIgnoreCase) ? "*/" : "-- >");
         }
 
         public void ChnageConnectionDirectory(string fileName)

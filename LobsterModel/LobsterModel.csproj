@@ -47,8 +47,11 @@
   <ItemGroup>
     <Compile Include="ClobColumnNotFoundException.cs" />
     <Compile Include="ClobDirectory.cs" />
+    <Compile Include="ClobDirectoryNotFoundForFileException.cs" />
     <Compile Include="ClobType.cs" />
     <Compile Include="Column.cs" />
+    <Compile Include="MimeTypeNotFoundException.cs" />
+    <Compile Include="MultipleClobDirectoriesFoundForFileException.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="DatabaseConfig.cs" />
     <Compile Include="DatabaseConnection.cs" />

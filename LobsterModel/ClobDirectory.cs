@@ -69,8 +69,8 @@ namespace LobsterModel
         /// <returns>The database file, if it exists.</returns>
         public DBClobFile GetDatabaseFileForFullpath(string fullpath)
         {
-            string filename = Path.GetFileName(fullpath).ToLower();
-            return this.DatabaseFileList.Find(x => x.Filename.ToLower() == filename);
+            string filename = Path.GetFileName(fullpath);
+            return this.DatabaseFileList.Find(x => x.Filename.Equals(filename, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace LobsterModel
         public bool IsLocalFileInDirectory(string fullpath)
         {
             DirectoryInfo dirInfo = new DirectoryInfo(this.ClobType.Fullpath);
-            return Array.Exists(dirInfo.GetFiles(".", SearchOption.AllDirectories), x => x.FullName == fullpath);
+            return Array.Exists(dirInfo.GetFiles(".", SearchOption.AllDirectories), x => x.FullName.Equals(fullpath, StringComparison.OrdinalIgnoreCase));
         }
     }
 }

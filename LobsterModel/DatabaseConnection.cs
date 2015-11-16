@@ -107,8 +107,18 @@ namespace LobsterModel
         /// <returns>The matching clobDirectory, if one exists.</returns>
         public ClobDirectory GetClobDirectoryForFile(string fullpath)
         {
-            fullpath = Path.GetFullPath(fullpath);
-            return this.ClobDirectoryList.Find(x => fullpath.Contains(x.ClobType.Fullpath));
+            string absolutePath = Path.GetFullPath(fullpath);
+            List<ClobDirectory> clobDirList = this.ClobDirectoryList.FindAll(x => absolutePath.Contains(x.ClobType.Fullpath));
+            if ( clobDirList.Count == 0 )
+            {
+                throw new ClobDirectoryNotFoundForFileException();
+            }
+            else if ( clobDirList.Count > 1 )
+            {
+                throw new MultipleClobDirectoriesFoundForFileException();
+            }
+
+            return clobDirList[0];
         }
 
         /// <summary>

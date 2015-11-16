@@ -7,7 +7,9 @@ namespace LobsterModel
 {
     public interface IModelEventListener
     {
-        void OnFileChange();
-        void OnUpdateComplete();
+        void OnFileChange(string filename);
+        void OnUpdateComplete(string filename);
+        Table PromptForTable(string fullpath);
+        string PromptForMimeType(string fullpath, Table tableToInsertInto);
     }
 }
