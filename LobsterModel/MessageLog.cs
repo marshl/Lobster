@@ -124,8 +124,12 @@ namespace LobsterModel
             lock(this.OutStream)
             {
                 this.OutStream.WriteLine(msg.ToString());
-                //this.OutStream.Flush();
             }
+        }
+
+        public static void Flush()
+        {
+            MessageLog.Instance?.OutStream.Flush();
         }
 
         /// <summary>

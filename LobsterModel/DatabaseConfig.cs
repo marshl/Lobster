@@ -122,39 +122,14 @@ namespace LobsterModel
             {
                 config = Utils.DeserialiseXmlFileUsingSchema<DatabaseConfig>(fullpath, Settings.Default.DatabaseConfigSchemaFilename);
             }
-            catch (Exception e)
+            catch (Exception e) when (e is FileNotFoundException || e is InvalidOperationException || e is XmlException || e is XmlSchemaValidationException)
             {
-                if (e is FileNotFoundException || e is InvalidOperationException || e is XmlException || e is XmlSchemaValidationException)
-                {
-                    /*Common.ShowErrorMessage(
-                        "ClobType Load Failed",
-                        "The DBConfig file " + fullpath + " failed to load. Check the log for more information.");*/
-                    MessageLog.LogError("An error occurred when loading the ClobType " + fullpath + ": " + e);
-                    return null;
-                }
-
-                throw;
+                MessageLog.LogError("An error occurred when loading the ClobType " + fullpath + ": " + e);
+                return null;
             }
 
+
             config.FileLocation = fullpath;
-
-            //TODO
-            // If the CodeSource folder cannot be found, prompt the user for it
-            /*if (config.CodeSource == null || !Directory.Exists(config.CodeSource))
-            {
-                string codeSourceDir = Utils.PromptForDirectory("Please select your CodeSource directory for " + config.Name, null);
-                if (codeSourceDir != null)
-                {
-                    config.CodeSource = codeSourceDir;
-                    DatabaseConfig.SerialiseToFile(fullpath, config);
-                }
-                else
-                {
-                    // Ignore config files that don't have a valid CodeSource folder
-                    return null;
-                }
-            }*/
-
             return config;
         }
 

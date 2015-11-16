@@ -233,6 +233,7 @@ namespace LobsterModel
         /// <param name="caption">The MessageBox text.</param>
         /// <param name="text">The MessageBox caption.</param>
         /// <returns>The <see cref="DialogResult"/> of the displayed message box.</returns>
+        [Obsolete]
         public static DialogResult ShowErrorMessage(string caption, string text)
         {
             return MessageBox.Show(text, caption, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);

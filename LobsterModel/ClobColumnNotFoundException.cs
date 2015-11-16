@@ -29,14 +29,14 @@ namespace LobsterModel
     /// An exception thrown when a column isn't found that matches the given mime type
     /// </summary>
     [Serializable]
-    public class ClobColumnNotFoundException : Exception
+    public class ColumnNotFoundException : Exception
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ClobColumnNotFoundException"/> class.
+        /// Initializes a new instance of the <see cref="ColumnNotFoundException"/> class.
         /// </summary>
         /// <param name="databaseFile">The file that a CLOB_DATA column could not be found for.</param>
-        public ClobColumnNotFoundException(DBClobFile databaseFile)
-            : base("The clob column for file " + databaseFile.Filename + " of mimetype " + databaseFile.MimeType + " could not be found the table " + databaseFile.ParentTable.FullName)
+        public ColumnNotFoundException(DBClobFile databaseFile, Column.Purpose columnPurpose)
+            : base("The " + columnPurpose + " column for file " + databaseFile.Filename + " of mimetype " + databaseFile.MimeType + " could not be found the table " + databaseFile.ParentTable.FullName)
         {
         }
     }

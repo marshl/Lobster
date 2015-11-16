@@ -11,5 +11,6 @@ namespace LobsterModel
         void OnUpdateComplete(string filename);
         Table PromptForTable(string fullpath);
         string PromptForMimeType(string fullpath, Table tableToInsertInto);
+        void OnFileInsertComplete(bool result);
     }
 }

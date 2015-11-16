@@ -109,11 +109,11 @@ namespace LobsterModel
         {
             string absolutePath = Path.GetFullPath(fullpath);
             List<ClobDirectory> clobDirList = this.ClobDirectoryList.FindAll(x => absolutePath.Contains(x.ClobType.Fullpath));
-            if ( clobDirList.Count == 0 )
+            if (clobDirList.Count == 0)
             {
                 throw new ClobDirectoryNotFoundForFileException();
             }
-            else if ( clobDirList.Count > 1 )
+            else if (clobDirList.Count > 1)
             {
                 throw new MultipleClobDirectoriesFoundForFileException();
             }
@@ -148,22 +148,18 @@ namespace LobsterModel
                     ClobDirectory clobDir = new ClobDirectory(clobType);
                     this.ClobDirectoryList.Add(clobDir);
                 }
-                catch (Exception e)
+                catch (Exception e) when (e is InvalidOperationException || e is XmlException || e is XmlSchemaValidationException || e is IOException)
                 {
-                    if (e is InvalidOperationException || e is XmlException || e is XmlSchemaValidationException || e is IOException)
-                    {
-                        MessageBox.Show(
-                            "The ClobType " + file.FullName + " failed to load. Check the log for more information.",
-                            "ClobType Load Failed",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Error,
-                            MessageBoxDefaultButton.Button1);
-                        MessageLog.LogError("An error occurred when loading the ClobType " + file.Name + " " + e);
-                        continue;
-                    }
-
-                    throw;
+                    MessageBox.Show(
+                        "The ClobType " + file.FullName + " failed to load. Check the log for more information.",
+                        "ClobType Load Failed",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error,
+                        MessageBoxDefaultButton.Button1);
+                    MessageLog.LogError("An error occurred when loading the ClobType " + file.Name + " " + e);
+                    continue;
                 }
+
             }
         }
 

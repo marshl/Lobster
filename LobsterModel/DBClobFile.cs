@@ -62,7 +62,7 @@ namespace LobsterModel
         /// Returns the column that data from this row should be pulled from, depending on the mnemonic.
         /// </summary>
         /// <returns>The column, if it exists</returns>
-        /// <exception cref="ClobColumnNotFoundException">Thrown when a column that matches the mime type isn't found.</exception>
+        /// <exception cref="ColumnNotFoundException">Thrown when a column that matches the mime type isn't found.</exception>
         public Column GetColumn()
         {
             // Find the column that is used for storing the clob data that can store the mime type of this file
@@ -72,7 +72,7 @@ namespace LobsterModel
 
             if (col == null)
             {
-                throw new ClobColumnNotFoundException(this);
+                throw new ColumnNotFoundException(this);
             }
 
             return col;
