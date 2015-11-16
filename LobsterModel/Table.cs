@@ -134,13 +134,13 @@ namespace LobsterModel
         /// <returns>The update statement.</returns>
         public string BuildUpdateStatement(DBClobFile clobFile)
         {
-            Column clobCol = clobFile.GetColumn();
+            Column clobCol = clobFile.GetDataColumn();
             string command =
                    "UPDATE " + this.FullName
                  + " SET " + clobCol.FullName + " = :data";
 
-            Column dateCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.DATETIME);
-            if (dateCol != null)
+            Column dateCol;
+            if (this.TryGetColumnWithPurpose(Column.Purpose.DATETIME, out dateCol))
             {
                 command += ", " + dateCol.FullName + " = SYSDATE";
             }
@@ -148,9 +148,9 @@ namespace LobsterModel
             if (this.ParentTable != null)
             {
                 Table pt = this.ParentTable;
-                Column foreignKeyCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.FOREIGN_KEY);
-                Column parentIDCol = pt.Columns.Find(x => x.ColumnPurpose == Column.Purpose.ID);
-                Column parentMnemCol = pt.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
+                Column foreignKeyCol = this.GetColumnWithPurpose(Column.Purpose.FOREIGN_KEY);
+                Column parentIDCol = pt.GetColumnWithPurpose(Column.Purpose.ID);
+                Column parentMnemCol = pt.GetColumnWithPurpose(Column.Purpose.MNEMONIC);
 
                 command += " WHERE " + foreignKeyCol.FullName + " = ("
                         + " SELECT " + parentIDCol.FullName
@@ -159,7 +159,7 @@ namespace LobsterModel
             }
             else
             {
-                Column mnemCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
+                Column mnemCol = this.GetColumnWithPurpose(Column.Purpose.MNEMONIC);
                 command += " WHERE " + mnemCol.FullName + " = '" + clobFile.Mnemonic + "'";
             }
 
@@ -176,11 +176,8 @@ namespace LobsterModel
             Debug.Assert(this.ParentTable != null, "Inserting into a parent table requires a parent to be defined");
             Table pt = this.ParentTable;
 
-            Column idCol = pt.Columns.Find(x => x.ColumnPurpose == Column.Purpose.ID);
-            Debug.Assert(idCol != null, "Inserting into a parent table requires the parent to have an ID column");
-
-            Column mnemCol = pt.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
-            Debug.Assert(mnemCol != null, "Inserting into a parent table requires the parent to have a mnemonic column");
+            Column idCol = pt.GetColumnWithPurpose(Column.Purpose.ID);
+            Column mnemCol = pt.GetColumnWithPurpose(Column.Purpose.MNEMONIC);
 
             string command = "INSERT INTO " + pt.FullName
                 + " (" + idCol.FullName + ", " + mnemCol.FullName + " )"
@@ -199,8 +196,7 @@ namespace LobsterModel
         /// <returns>The insert SQl statement.</returns>
         public string BuildInsertChildStatement(string mnemonic, string mimeType)
         {
-            Column mnemCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
-            Debug.Assert(mnemCol != null, "The mnemonic column must exist to insert as a child table");
+            Column mnemCol = this.GetColumnWithPurpose(Column.Purpose.MNEMONIC);
 
             // Make a string for the column names...
             string insertCommand = "INSERT INTO " + this.FullName + " ( "
@@ -212,9 +208,9 @@ namespace LobsterModel
             if (this.ParentTable != null)
             {
                 Table pt = this.ParentTable;
-                Column foreignKeyCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.FOREIGN_KEY);
-                Column parentIDCol = pt.Columns.Find(x => x.ColumnPurpose == Column.Purpose.ID);
-                Column parentMnemCol = pt.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
+                Column foreignKeyCol = this.GetColumnWithPurpose(Column.Purpose.FOREIGN_KEY);
+                Column parentIDCol = pt.GetColumnWithPurpose(Column.Purpose.ID);
+                Column parentMnemCol = pt.GetColumnWithPurpose(Column.Purpose.MNEMONIC);
 
                 insertCommand += ", " + foreignKeyCol.FullName;
 
@@ -225,7 +221,7 @@ namespace LobsterModel
             else
             {
                 // No parent table
-                Column idCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.ID);
+                Column idCol = this.GetColumnWithPurpose(Column.Purpose.ID);
                 if (idCol != null)
                 {
                     insertCommand += ", " + idCol.FullName;
@@ -234,7 +230,7 @@ namespace LobsterModel
 
                 if (mimeType != null)
                 {
-                    Column mimeCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MIME_TYPE);
+                    Column mimeCol = this.GetColumnWithPurpose(Column.Purpose.MIME_TYPE);
                     Debug.Assert(mimeCol != null, "If a mime type is given, the table must have a mime type column");
                     insertCommand += ", " + mimeCol.FullName;
                     valueCommand += ", '" + mimeType + "'";
@@ -242,16 +238,16 @@ namespace LobsterModel
             }
 
             // The date column is optional
-            Column dateCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.DATETIME);
-            if (dateCol != null)
+            Column dateCol;
+            if (this.TryGetColumnWithPurpose(Column.Purpose.DATETIME, out dateCol))
             {
                 insertCommand += ", " + dateCol.FullName;
                 valueCommand += ", SYSDATE ";
             }
 
             // The full name column is optional. It is set to the PascalCase of the mnemonic
-            Column fullNameCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.FULL_NAME);
-            if (fullNameCol != null)
+            Column fullNameCol;
+            if (this.TryGetColumnWithPurpose(Column.Purpose.FULL_NAME, out fullNameCol))
             {
                 TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
                 string fullName = textInfo.ToTitleCase(mnemonic.ToLower());
@@ -260,7 +256,12 @@ namespace LobsterModel
             }
 
             Column dataCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.CLOB_DATA
-              && (mimeType == null || x.MimeTypeList.Contains(mimeType)));
+                                                && (mimeType == null || x.MimeTypeList.Contains(mimeType)));
+
+            if (dataCol == null)
+            {
+                throw new ColumnNotFoundException(this, Column.Purpose.DATETIME, mimeType);
+            }
 
             insertCommand += ", " + dataCol.FullName + " )";
             valueCommand += ", :data ) ";
@@ -274,13 +275,13 @@ namespace LobsterModel
         /// <returns>The SQL command</returns>
         public string BuildGetDataCommand(DBClobFile clobFile)
         {
-            Column clobCol = clobFile.GetColumn();
+            Column clobCol = clobFile.GetDataColumn();
             if (this.ParentTable != null)
             {
                 Table pt = this.ParentTable;
-                Column foreignKeyCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.FOREIGN_KEY);
-                Column parentIDCol = pt.Columns.Find(x => x.ColumnPurpose == Column.Purpose.ID);
-                Column parentMnemCol = pt.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
+                Column foreignKeyCol = this.GetColumnWithPurpose(Column.Purpose.FOREIGN_KEY);
+                Column parentIDCol = pt.GetColumnWithPurpose(Column.Purpose.ID);
+                Column parentMnemCol = pt.GetColumnWithPurpose(Column.Purpose.MNEMONIC);
                 return
                     "SELECT " + clobCol.FullName
                     + " FROM " + pt.FullName
@@ -290,7 +291,7 @@ namespace LobsterModel
             }
             else
             {
-                Column mnemCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
+                Column mnemCol = this.GetColumnWithPurpose(Column.Purpose.MNEMONIC);
                 return
                     "SELECT " + clobCol.FullName
                     + " FROM " + this.FullName
@@ -305,14 +306,15 @@ namespace LobsterModel
         /// <returns>The SQL command the retrive the file lists for this table.</returns>
         public string GetFileListCommand()
         {
-            Column mimeCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MIME_TYPE);
+            Column mimeCol;
+            this.TryGetColumnWithPurpose(Column.Purpose.MIME_TYPE, out mimeCol);
 
             if (this.ParentTable != null)
             {
                 Table pt = this.ParentTable;
-                Column foreignKeyCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.FOREIGN_KEY);
-                Column parentIDCol = pt.Columns.Find(x => x.ColumnPurpose == Column.Purpose.ID);
-                Column parentMnemCol = pt.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
+                Column foreignKeyCol = this.GetColumnWithPurpose(Column.Purpose.FOREIGN_KEY);
+                Column parentIDCol = pt.GetColumnWithPurpose(Column.Purpose.ID);
+                Column parentMnemCol = pt.GetColumnWithPurpose(Column.Purpose.MNEMONIC);
 
                 return "SELECT " + parentMnemCol.FullName
                     + (mimeCol != null ? ", " + mimeCol.FullName : null)
@@ -322,7 +324,7 @@ namespace LobsterModel
             }
             else
             {
-                Column mnemCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MNEMONIC);
+                Column mnemCol = this.GetColumnWithPurpose(Column.Purpose.MIME_TYPE);
                 return "SELECT " + mnemCol.FullName
                     + (mimeCol != null ? ", " + mimeCol.FullName : null)
                     + " FROM " + this.FullName;
@@ -351,6 +353,22 @@ namespace LobsterModel
             }
 
             return copy;
+        }
+
+        public bool TryGetColumnWithPurpose(Column.Purpose purpose, out Column result)
+        {
+            result = this.Columns.Find(x => x.ColumnPurpose == purpose);
+            return result != null;
+        }
+
+        public Column GetColumnWithPurpose(Column.Purpose purpose)
+        {
+            Column c;
+            if (!this.TryGetColumnWithPurpose(purpose, out c))
+            {
+                throw new ColumnNotFoundException(this, purpose);
+            }
+            return c;
         }
     }
 }

@@ -124,8 +124,8 @@ namespace LobsterModel
             }
 
             string mimeType = null;
-            Column mimeTypeColumn = table.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MIME_TYPE);
-            if (mimeTypeColumn != null)
+            Column mimeTypeColumn;
+            if (table.TryGetColumnWithPurpose(Column.Purpose.MIME_TYPE, out mimeTypeColumn))
             {
                 this.eventListener.PromptForMimeType(fullpath, table);
             }
@@ -238,7 +238,8 @@ namespace LobsterModel
 
             // If the table stores mime types, then the mnemonic will also need to have 
             // the prefix representation of the mime type prefixed to it.
-            if (table.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MIME_TYPE) != null)
+            Column mimeTypeColumn;
+            if (table.TryGetColumnWithPurpose(Column.Purpose.MIME_TYPE, out mimeTypeColumn))
             {
                 MimeTypeList.MimeType mt = this.MimeList.MimeTypes.Find(x => x.Name.Equals(mimeType));
                 if (mt == null)
@@ -274,7 +275,8 @@ namespace LobsterModel
             }
 
             // Assume xml data types for tables without a datatype column, or a prefix
-            if (table.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MIME_TYPE) == null || prefix == null)
+            Column mimeTypeColumn;
+            if (!table.TryGetColumnWithPurpose(Column.Purpose.MIME_TYPE, out mimeTypeColumn) || prefix == null)
             {
                 filename += table.DefaultExtension ?? ".xml";
             }
@@ -571,7 +573,7 @@ namespace LobsterModel
             Column column;
             try
             {
-                column = clobFile.GetColumn();
+                column = clobFile.GetDataColumn();
                 command.CommandText = table.BuildGetDataCommand(clobFile);
             }
             catch (ColumnNotFoundException e)
@@ -596,7 +598,7 @@ namespace LobsterModel
                     else
                     {
                         string result;
-                        Column clobColumn = clobFile.ParentTable.Columns.Find(x => x.ColumnPurpose == Column.Purpose.CLOB_DATA);
+                        Column clobColumn = clobFile.ParentTable.GetColumnWithPurpose(Column.Purpose.MIME_TYPE);
                         if (clobColumn.DataType == Column.Datatype.CLOB)
                         {
                             result = reader.GetString(0);
@@ -669,7 +671,13 @@ namespace LobsterModel
                     while (reader.Read())
                     {
                         string mnemonic = reader.GetString(0);
-                        string mimeType = table.Columns.Find(x => x.ColumnPurpose == Column.Purpose.MIME_TYPE) != null ? reader.GetString(1) : null;
+                        Column mimeTypeCol;
+                        string mimeType = null;
+                        if (table.TryGetColumnWithPurpose(Column.Purpose.MIME_TYPE, out mimeTypeCol))
+                        {
+                            mimeType = reader.GetString(1);
+                        }
+
                         DBClobFile databaseFile = new DBClobFile(
                             parentTable: table,
                             mnemonic: mnemonic,

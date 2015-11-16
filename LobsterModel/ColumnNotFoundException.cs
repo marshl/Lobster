@@ -35,8 +35,8 @@ namespace LobsterModel
         /// Initializes a new instance of the <see cref="ColumnNotFoundException"/> class.
         /// </summary>
         /// <param name="databaseFile">The file that a CLOB_DATA column could not be found for.</param>
-        public ColumnNotFoundException(DBClobFile databaseFile, Column.Purpose columnPurpose)
-            : base("The " + columnPurpose + " column for file " + databaseFile.Filename + " of mimetype " + databaseFile.MimeType + " could not be found the table " + databaseFile.ParentTable.FullName)
+        public ColumnNotFoundException(Table table, Column.Purpose columnPurpose, string mimeType = null, string filename = null)
+            : base("The " + columnPurpose + " column " + (filename != null ? " for file " + filename : null) + (mimeType != null ? " with mimetype " + mimeType : null) + " could not be found the table " + table.FullName)
         {
         }
     }

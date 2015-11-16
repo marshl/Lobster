@@ -63,7 +63,7 @@ namespace LobsterModel
         /// </summary>
         /// <returns>The column, if it exists</returns>
         /// <exception cref="ColumnNotFoundException">Thrown when a column that matches the mime type isn't found.</exception>
-        public Column GetColumn()
+        public Column GetDataColumn()
         {
             // Find the column that is used for storing the clob data that can store the mime type of this file
             Column col = this.ParentTable.Columns.Find(
@@ -72,7 +72,7 @@ namespace LobsterModel
 
             if (col == null)
             {
-                throw new ColumnNotFoundException(this);
+                throw new ColumnNotFoundException(this.ParentTable, Column.Purpose.CLOB_DATA, this.MimeType, this.Filename);
             }
 
             return col;
