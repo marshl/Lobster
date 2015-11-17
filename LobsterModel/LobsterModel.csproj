@@ -45,14 +45,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClobColumnNotFoundException.cs" />
     <Compile Include="ClobDirectory.cs" />
     <Compile Include="ClobDirectoryNotFoundForFileException.cs" />
     <Compile Include="ClobType.cs" />
     <Compile Include="Column.cs" />
+    <Compile Include="ColumnNotFoundException.cs" />
     <Compile Include="ConnectionDirNotFoundException.cs" />
     <Compile Include="DatabaseConnectionFailedException.cs" />
+    <Compile Include="FileDownloadException.cs" />
+    <Compile Include="FileListRetrievalException.cs" />
     <Compile Include="FileUpdateFailedException.cs" />
+    <Compile Include="FileInsertFailedException.cs" />
     <Compile Include="MimeTypeNotFoundException.cs" />
     <Compile Include="Model.cs" />
     <Compile Include="MultipleClobDirectoriesFoundForFileException.cs" />
