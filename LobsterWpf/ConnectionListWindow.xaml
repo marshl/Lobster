@@ -18,7 +18,7 @@
 
         <Button x:Name="changeDirectoryButton" Grid.Row="1"  Content="Change Directory" HorizontalAlignment="Left" VerticalAlignment="Center" Width="108" Click="changeDirectoryButton_Click"/>
 
-        <ListBox Grid.Row="2" Name="connectionListBox" ItemsSource="{Binding databaseConfigList}">
+        <ListBox Grid.Row="2" Name="connectionListBox" ItemsSource="{Binding DatabaseConfigList}">
             <ListBox.ItemTemplate>
                 <DataTemplate >
                     <StackPanel>

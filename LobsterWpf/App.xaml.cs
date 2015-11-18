@@ -14,35 +14,37 @@ namespace LobsterWpf
     /// </summary>
     public partial class App : Application
     {
+        private MessageLog log;
+
         public App()
         {
+            this.log = new MessageLog();
+#if !DEBUG
+            AppDomain currentDomain = AppDomain.CurrentDomain;
+            currentDomain.UnhandledException += new UnhandledExceptionEventHandler(GlobalExceptionHandler);
+#endif
+            }
 
+        private void GlobalExceptionHandler(object sender, UnhandledExceptionEventArgs args)
+        {
+            Exception e = (Exception)args.ExceptionObject;
+            MessageLog.LogError("Unhandled Exception " + e);
+            MessageLog.Flush();
         }
 
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
 
-            MessageLog messageLog = new MessageLog();
-
-            Console.WriteLine("foobar");
-            TempListener tmp = new TempListener();
-            LobsterModel.Model model = new LobsterModel.Model(tmp);
-            MainWindow mainWindow = new MainWindow(model);
+            MainWindow mainWindow = new MainWindow();
+            Model model = new Model(mainWindow);
+            mainWindow.Model = model;
             mainWindow.Show();
         }
-    }
 
-    class TempListener : LobsterModel.IModelEventListener
-    {
-        public void OnFileChange()
+        private void Application_Exit(object sender, ExitEventArgs e)
         {
-            throw new NotImplementedException();
-        }
-
-        public void OnUpdateComplete()
-        {
-            throw new NotImplementedException();
+            MessageLog.Close();
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -15,38 +16,33 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using LobsterModel;
+using LobsterWpf.Properties;
 
 namespace LobsterWpf
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public sealed partial class MainWindow : Window, IModelEventListener
     {
-        private Model model;
-
-        //public DatabaseConnection CurrentConnection { get; private set; }
-
         private ConnectionView connectionView;
 
-        public MainWindow(Model lobsterModel)
+        public Model Model { get; set; }
+
+        public MainWindow()
         {
             InitializeComponent();
-
-            this.model = lobsterModel;
-
-
-            this.ConnectionContainer.DataContext = null;
         }
 
         private void OpenConnectionDialog()
         {
-            ConnectionListWindow window = new ConnectionListWindow(this.model);
+            ConnectionListWindow window = new ConnectionListWindow(this.Model);
+            window.Owner = this;
             bool? result = window.ShowDialog();
             if (result.HasValue && result.Value)
             {
-                this.ConnectionContainer.IsEnabled = this.model.CurrentConnection != null;
-                this.ConnectionContainer.DataContext = new ConnectionView(this.model.CurrentConnection);
+                this.ConnectionContainer.IsEnabled = this.Model.CurrentConnection != null;
+                this.ConnectionContainer.DataContext = new ConnectionView(this.Model.CurrentConnection);
             }
         }
 
@@ -67,63 +63,114 @@ namespace LobsterWpf
 
         private void clobTypeListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            this.RepopulateFileListView();
+        }
+
+        private void RepopulateFileListView()
+        {
             if (this.clobTypeListBox.SelectedIndex == -1)
             {
                 return;
             }
 
-            ClobType clobType = this.model.CurrentConnection.ClobDirectoryList[this.clobTypeListBox.SelectedIndex].ClobType;
-
+            ClobType clobType = this.Model.CurrentConnection.ClobDirectoryList[this.clobTypeListBox.SelectedIndex].ClobType;
             this.connectionView = this.ConnectionContainer.DataContext as ConnectionView;
             if (connectionView != null)
             {
                 connectionView.PopulateFileTreeForClobType(clobType);
                 this.localFileTreeView.ItemsSource = connectionView.RootFile.Children;
             }
-
-            //this.PopulateFileTreeForClobType(clobType);
         }
-        /*
-        private void PopulateFileTreeForClobType(ClobType clobType)
-        {
-            //this.localFileTreeView.Items.Clear();
-
-            DirectoryInfo rootDirInfo = new DirectoryInfo(clobType.Fullpath);
-            if (!rootDirInfo.Exists)
-            {
-                return;
-            }
-
-            /*foreach (DirectoryInfo childDirInfo in rootDirInfo.GetDirectories())
-            {
-                this.localFileTreeView.Items.Add(childDirInfo.Name);
-            }* /
-
-            FileNodeView node = new FileNodeView(rootDirInfo.FullName);
-            this.localFileTreeView.DataContext = node;
-        }*/
 
         private void hideReadonlyCheckbox_Checked(object sender, RoutedEventArgs e)
         {
-            //this.clobTypeListBox_SelectionChanged(null, null);
-            this.connectionView.NotifyPropertyChanged("ClobTypes");
+            this.RepopulateFileListView();
         }
 
         private void hideReadonlyCheckbox_Unchecked(object sender, RoutedEventArgs e)
         {
-            //this.clobTypeListBox_SelectionChanged(null, null);
-            this.connectionView.NotifyPropertyChanged("ClobTypes");
+            this.RepopulateFileListView();
         }
 
-        /*
-        private void PopulateFileTreeNode(DirectoryInfo dirInfo )
+        private void pushButton_Click(object sender, RoutedEventArgs e)
         {
-        foreach (DirectoryInfo childDirInfo in rootDirInfo.GetDirectories())
-        {
-        this.localFileTreeView.Items.Add(childDirInfo.Name);
+            if (this.connectionView.SelectedFileNode != null)
+            {
+                this.Model.SendUpdateClobMessage(this.connectionView.SelectedFileNode.FullName);
+            }
         }
 
-        this.localFileTreeView.DataContext = this.
-        }*/
+        private void diffButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.connectionView.SelectedFileNode == null)
+            {
+                return;
+            }
+
+            string filename = this.connectionView.SelectedFileNode.FullName;
+
+
+            try
+            {
+                string downloadedFile = this.Model.SendDownloadClobDataToFileMessage(filename);
+                string args = string.Format(
+                    Settings.Default.DiffProgramArguments,
+                    downloadedFile,
+                    filename);
+
+                Process.Start(Settings.Default.DiffProgramName, args);
+            }
+            catch (FileDownloadException ex)
+            {
+                MessageBox.Show(ex.Message);
+                return;
+            }
+
+
+        }
+
+        private void exploreButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.connectionView.SelectedFileNode != null)
+            {
+                // Windows Explorer command line arguments: https://support.microsoft.com/en-us/kb/152457
+                Process.Start("explorer", "/select," + this.connectionView.SelectedFileNode.FullName);
+            }
+        }
+
+        private void insertButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.connectionView.SelectedFileNode != null)
+            {
+                this.Model.SendInsertClobMessage(this.connectionView.SelectedFileNode.FullName);
+            }
+        }
+
+        private void localFileTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            //FileNodeView fnv = (FileNodeView)e.NewValue;
+            this.connectionView.SelectedFileNode = (FileNodeView)e.NewValue;
+            //MessageBox.Show(fnv.FullName);
+        }
+
+        void IModelEventListener.OnFileChange(string filename)
+        {
+            MessageBox.Show("File Change");
+        }
+
+        void IModelEventListener.OnAutoUpdateComplete(string filename)
+        {
+            throw new NotImplementedException();
+        }
+
+        LobsterModel.Table IModelEventListener.PromptForTable(string fullpath, LobsterModel.Table[] tables)
+        {
+            throw new NotImplementedException();
+        }
+
+        string IModelEventListener.PromptForMimeType(string fullpath, string[] mimeTypes)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

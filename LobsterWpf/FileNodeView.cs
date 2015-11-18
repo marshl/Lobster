@@ -31,6 +31,12 @@ namespace LobsterWpf
 
                 foreach (FileInfo file in dirInfo.GetFiles())
                 {
+                    if (!this.parentConnectionView.ShowReadOnlyFiles
+                        || (File.GetAttributes(this.FullName) & FileAttributes.ReadOnly) != 0)
+                    {
+                        continue;
+                    }
+
                     FileNodeView node = new FileNodeView(connectionView, file.FullName);
                     this.Children.Add(node);
                 }
@@ -51,6 +57,14 @@ namespace LobsterWpf
 
         public ObservableCollection<FileNodeView> Children { get; set; }
 
+       /* public string ImageURL
+        {
+            get
+            {
+
+            }
+        }*/
+
         public bool IsVisible
         {
             get
@@ -66,7 +80,7 @@ namespace LobsterWpf
                 }
                 catch (FileNotFoundException)
                 {
-                    return true;
+                    return false;
                 }
             }
         }

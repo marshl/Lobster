@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -20,13 +22,52 @@ namespace LobsterWpf
     /// <summary>
     /// Interaction logic for ConnectionListWindow.xaml
     /// </summary>
-    public partial class ConnectionListWindow : Window
+    public partial class ConnectionListWindow : Window, INotifyPropertyChanged
     {
         private Model model;
 
-        public string ConnectionDirectory { get; set; }
+        private string _connectionDirectory;
 
-        public ObservableCollection<DatabaseConfig> databaseConfigList { get; set; }
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public string ConnectionDirectory
+        {
+            get
+            {
+                return this._connectionDirectory;
+            }
+            set
+            {
+                this._connectionDirectory = value;
+                this.NotifyPropertyChanged("ConnectionDirectory");
+            }
+        }
+
+        // This method is called by the Set accessor of each property.
+        // The CallerMemberName attribute that is applied to the optional propertyName
+        // parameter causes the property name of the caller to be substituted as an argument.
+        private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        private ObservableCollection<DatabaseConfig> _databaseConfigList;
+        public ObservableCollection<DatabaseConfig> DatabaseConfigList
+        {
+            get
+            {
+                return this._databaseConfigList;
+            }
+
+            set
+            {
+                this._databaseConfigList = value;
+                this.NotifyPropertyChanged("DatabaseConfigList");
+            }
+        }
 
         //public DatabaseConfig SelectedConnection { get; private set; }
 
@@ -37,7 +78,7 @@ namespace LobsterWpf
             this.model = lobsterModel;
 
             this.ConnectionDirectory = this.model.ConnectionDirectory;
-            this.databaseConfigList = new ObservableCollection<DatabaseConfig>(this.model.GetConfigList());
+            this.DatabaseConfigList = new ObservableCollection<DatabaseConfig>(this.model.GetConfigList());
 
             this.DataContext = this;
         }
@@ -52,27 +93,33 @@ namespace LobsterWpf
             var dlg = new CommonOpenFileDialog();
             dlg.IsFolderPicker = true;
             CommonFileDialogResult result = dlg.ShowDialog();
-            if ( result == CommonFileDialogResult.Ok )
+            if (result == CommonFileDialogResult.Ok)
             {
                 this.model.ChnageConnectionDirectory(dlg.FileName);
-                this.databaseConfigList = new ObservableCollection<DatabaseConfig>(this.model.GetConfigList());
+                this.DatabaseConfigList = new ObservableCollection<DatabaseConfig>(this.model.GetConfigList());
                 this.ConnectionDirectory = this.model.ConnectionDirectory;
             }
-            
+
         }
 
         private void connectButton_Click(object sender, RoutedEventArgs e)
         {
-            if ( this.connectionListBox.SelectedIndex == -1 )
+            if (this.connectionListBox.SelectedIndex == -1)
             {
                 return;
             }
 
-            DatabaseConfig config = this.databaseConfigList[this.connectionListBox.SelectedIndex];
-            if ( this.model.SetDatabaseConnection(config) )
+            DatabaseConfig config = this.DatabaseConfigList[this.connectionListBox.SelectedIndex];
+
+            try
             {
+                this.model.SetDatabaseConnection(config);
                 this.DialogResult = true;
                 this.Close();
+            }
+            catch (SetConnectionException ex)
+            {
+                MessageBox.Show($"An error occurred when attempting to connect to the database: {ex}");
             }
         }
     }

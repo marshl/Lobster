@@ -100,6 +100,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Resources.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -130,36 +134,106 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="img\112_UpArrowShort_Orange_48x48_72.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="img\041_Sort_48x48_72.png" />
-    <Resource Include="img\112_ArrowCurve_Blue_Left_48x48_72.png" />
-    <Resource Include="img\112_DownArrowLong_Blue.ico" />
-    <Resource Include="img\112_Plus_Green_48x48_72.png" />
-    <Resource Include="img\112_RefreshArrow_Blue.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="img\attach_file.png" />
-    <Resource Include="img\base_lock_32.png" />
     <Resource Include="img\cartoon-lobster.ico" />
-    <Resource Include="img\cartoon-lobster.jpg" />
-    <Resource Include="img\cartoon-lobster.png" />
-    <Resource Include="img\DocumentViewerElement_10706_24.bmp" />
-    <Resource Include="img\FolderOpen_7140_24.bmp" />
-    <Resource Include="img\Folder_Open.png" />
-    <Resource Include="img\Network_ConnectTo.png" />
-    <Resource Include="img\Page.png" />
-    <Resource Include="img\popup_failure.bmp" />
-    <Resource Include="img\popup_success.bmp" />
-    <Resource Include="img\refresh.png" />
-    <Resource Include="img\search.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LobsterModel\LobsterModel.csproj">
       <Project>{b66611a5-33c7-4c8d-b986-c0f3261cf977}</Project>
       <Name>LobsterModel</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <SplashScreen Include="MainSplashScreen.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Images\008_Reminder.ico" />
+    <Resource Include="Resources\Images\010_LowPriority.ico" />
+    <Content Include="Resources\Images\041_Sort.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Resource Include="Resources\Images\042b_AddCategory.ico" />
+    <Resource Include="Resources\Images\075b_UpFolder.ico" />
+    <Resource Include="Resources\Images\077_AddFile.ico" />
+    <Resource Include="Resources\Images\112_ArrowCurveBlue_Right.ico" />
+    <Resource Include="Resources\Images\112_ArrowReturnLeft_Blue.ico" />
+    <Resource Include="Resources\Images\112_ArrowReturnRight_Blue.ico" />
+    <Resource Include="Resources\Images\112_DownArrowLong_Blue.ico" />
+    <Resource Include="Resources\Images\112_DownArrowLong_Green.ico" />
+    <Resource Include="Resources\Images\112_DownArrowLong_Grey.ico" />
+    <Resource Include="Resources\Images\112_DownArrowLong_Orange.ico" />
+    <Resource Include="Resources\Images\112_DownArrowShort_Blue.ico" />
+    <Resource Include="Resources\Images\112_DownArrowShort_Green.ico" />
+    <Resource Include="Resources\Images\112_DownArrowShort_Grey.ico" />
+    <Resource Include="Resources\Images\112_DownArrowShort_Orange.ico" />
+    <Resource Include="Resources\Images\112_LeftArrowLong_Blue.ico" />
+    <Resource Include="Resources\Images\112_LeftArrowLong_Green.ico" />
+    <Resource Include="Resources\Images\112_LeftArrowLong_Grey.ico" />
+    <Resource Include="Resources\Images\112_LeftArrowLong_Orange.ico" />
+    <Resource Include="Resources\Images\112_LeftArrowShort_Blue.ico" />
+    <Resource Include="Resources\Images\112_LeftArrowShort_Green.ico" />
+    <Resource Include="Resources\Images\112_LeftArrowShort_Grey.ico" />
+    <Resource Include="Resources\Images\112_LeftArrowShort_Orange.ico" />
+    <Content Include="Resources\Images\112_Plus_Green.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Resource Include="Resources\Images\112_Plus_Grey.ico" />
+    <Resource Include="Resources\Images\112_Plus_Orange.ico" />
+    <Resource Include="Resources\Images\112_RefreshArrow_Blue.ico" />
+    <Resource Include="Resources\Images\112_UpArrowLong_Blue.ico" />
+    <Resource Include="Resources\Images\112_UpArrowLong_Green.ico" />
+    <Resource Include="Resources\Images\112_UpArrowLong_Grey.ico" />
+    <Resource Include="Resources\Images\112_UpArrowShort_Blue.ico" />
+    <Resource Include="Resources\Images\112_UpArrowShort_Green.ico" />
+    <Resource Include="Resources\Images\112_UpArrowShort_Grey.ico" />
+    <Resource Include="Resources\Images\112_UpArrowShort_Orange.ico" />
+    <Resource Include="Resources\Images\125_FullView.ico" />
+    <Resource Include="Resources\Images\126_Edit.ico" />
+    <Resource Include="Resources\Images\1381_cog.ico" />
+    <Resource Include="Resources\Images\1382_cogs.ico" />
+    <Resource Include="Resources\Images\1415_Paintbrush.ico" />
+    <Resource Include="Resources\Images\1447_eraser.ico" />
+    <Resource Include="Resources\Images\1475_Text Balloon.ico" />
+    <Resource Include="Resources\Images\1496_wall.ico" />
+    <Resource Include="Resources\Images\1532_Flag_Blue.ico" />
+    <Resource Include="Resources\Images\1532_Flag_Green.ico" />
+    <Resource Include="Resources\Images\1532_Flag_Purple.ico" />
+    <Resource Include="Resources\Images\1532_Flag_Red.ico" />
+    <Resource Include="Resources\Images\1532_Flag_Yellow.ico" />
+    <Resource Include="Resources\Images\1549_Paper_clip_gray.ico" />
+    <Resource Include="Resources\Images\Annotate_Blocked_large.ico" />
+    <Resource Include="Resources\Images\Annotate_Complete.ico" />
+    <Resource Include="Resources\Images\Annotate_Default.ico" />
+    <Resource Include="Resources\Images\Annotate_Disabled.ico" />
+    <Resource Include="Resources\Images\Annotate_Help.ico" />
+    <Resource Include="Resources\Images\Annotate_HighPriority.ico" />
+    <Resource Include="Resources\Images\Annotate_QuestionBlue.ico" />
+    <Resource Include="Resources\Images\Annotate_QuestionRed.ico" />
+    <Resource Include="Resources\Images\Annotate_Warning.ico" />
+    <Resource Include="Resources\Images\autoList.ico" />
+    <Resource Include="Resources\Images\Book_Green.ico" />
+    <Resource Include="Resources\Images\Close.ico" />
+    <Resource Include="Resources\Images\copy.ico" />
+    <Resource Include="Resources\Images\CPU.ico" />
+    <Resource Include="Resources\Images\delete.ico" />
+    <Resource Include="Resources\Images\Favorites.ico" />
+    <Resource Include="Resources\Images\FloppyDisk.ico" />
+    <Content Include="Resources\Images\folder.ico" />
+    <Resource Include="Resources\Images\Folder_6221.ico" />
+    <Resource Include="Resources\Images\Folder_6222.ico" />
+    <Content Include="Resources\Images\folder_open.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Resource Include="Resources\Images\Folder_stuffed.ico" />
+    <Resource Include="Resources\Images\GenericVSEditor_9905.ico" />
+    <Resource Include="Resources\Images\Generic_Document.ico" />
+    <Resource Include="Resources\Images\Monitor.ico" />
+    <Resource Include="Resources\Images\move.ico" />
+    <Resource Include="Resources\Images\Network_Folder.ico" />
+    <Resource Include="Resources\Images\New.ico" />
+    <Resource Include="Resources\Images\PropertyIcon.ico" />
+    <Resource Include="Resources\Images\search.ico" />
+    <Resource Include="Resources\Images\Settings.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

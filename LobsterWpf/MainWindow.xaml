@@ -21,13 +21,13 @@
                 </MenuItem>
             </Menu>
         </Grid>
-        <Grid Grid.Row="1" IsEnabled="False" Name="ConnectionContainer">
+        <Grid Grid.Row="1" IsEnabled="{Binding Path=IsEnabled, FallbackValue=false}" Name="ConnectionContainer">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
 
-            <ListBox Name="clobTypeListBox" Grid.Column="0" Grid.Row="1" ItemsSource="{Binding ClobTypes }" SelectionChanged="clobTypeListBox_SelectionChanged">
+            <ListBox Name="clobTypeListBox" Grid.Column="0" Grid.Row="1" ItemsSource="{Binding ClobTypes}" SelectionChanged="clobTypeListBox_SelectionChanged">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel>
@@ -53,7 +53,7 @@
                                 <RowDefinition/>
                                 <RowDefinition Height="25"/>
                             </Grid.RowDefinitions>
-                            <TreeView Name="localFileTreeView" ItemsSource="{Binding RootFile}" Grid.Row="0">
+                            <TreeView Name="localFileTreeView" ItemsSource="{Binding RootFile}" Grid.Row="0" SelectedItemChanged="localFileTreeView_SelectedItemChanged">
                                 <TreeView.ItemTemplate>
                                     <HierarchicalDataTemplate DataType="{x:Type local:FileNodeView}" ItemsSource="{Binding Children}">
                                         <HierarchicalDataTemplate.Resources>
@@ -66,7 +66,7 @@
                                             </Style>
                                         </HierarchicalDataTemplate.Resources>
                                         <StackPanel Orientation="Horizontal">
-                                            <Image Source="img/Folder_Open.png" Height="24"/>
+                                            <Image Source="{DynamicResource FolderImageSource}" Height="24"/>
                                             <TextBlock Text="{Binding Path=Name}" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </HierarchicalDataTemplate>
@@ -76,27 +76,27 @@
                             <CheckBox x:Name="showReadOnlyFilesCheckbox" Grid.Row="1" Content="Show Readonly Files" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0" Checked="hideReadonlyCheckbox_Checked" Unchecked="hideReadonlyCheckbox_Unchecked" IsChecked="{Binding Path=ShowReadOnlyFiles, Mode=TwoWay}"/>
                         </Grid>
                         <StackPanel>
-                            <Button x:Name="pushButton" Grid.Column="0" MaxHeight="50" Margin="0">
+                            <Button x:Name="pushButton" Grid.Column="0" MaxHeight="50" Margin="0" Click="pushButton_Click" IsEnabled="{Binding Path=UpdateFileButtonEnabled}">
                                 <StackPanel MaxHeight="50">
-                                    <Image Source="img/112_UpArrowShort_Orange_48x48_72.png" VerticalAlignment="Top" Height="30"/>
+                                    <Image Source="{DynamicResource PushImageSource}" VerticalAlignment="Top" Height="30"/>
                                     <TextBlock HorizontalAlignment="Center" MinHeight="15" VerticalAlignment="Bottom">Push</TextBlock>
                                 </StackPanel>
                             </Button>
-                            <Button x:Name="diffButton" Grid.Column="0" MaxHeight="50">
+                            <Button x:Name="diffButton" Grid.Column="0" MaxHeight="50" Click="diffButton_Click" IsEnabled="{Binding Path=DiffFileButtonEnabled}">
                                 <StackPanel MaxHeight="50">
-                                    <Image Source="img/041_Sort_48x48_72.png" VerticalAlignment="Top" Height="30"/>
+                                    <Image Source="{DynamicResource MergeImageSource}" VerticalAlignment="Top" Height="30"/>
                                     <TextBlock HorizontalAlignment="Center" MinHeight="15" VerticalAlignment="Bottom">Diff</TextBlock>
                                 </StackPanel>
                             </Button>
-                            <Button x:Name="exploreButton" Grid.Column="0" MaxHeight="50">
+                            <Button x:Name="exploreButton" Grid.Column="0" MaxHeight="50" Click="exploreButton_Click" IsEnabled="{Binding Path=ExploreFileButtonEnabled}">
                                 <StackPanel MaxHeight="50">
-                                    <Image Source="img/Folder_Open.png" VerticalAlignment="Top" Height="30"/>
+                                    <Image Source="{DynamicResource FolderImageSource}" VerticalAlignment="Top" Height="30"/>
                                     <TextBlock HorizontalAlignment="Center" MinHeight="15" VerticalAlignment="Bottom">Explore</TextBlock>
                                 </StackPanel>
                             </Button>
-                            <Button x:Name="insertButton" Grid.Column="0" MaxHeight="50">
+                            <Button x:Name="insertButton" Grid.Column="0" MaxHeight="50" Click="insertButton_Click" IsEnabled="{Binding Path=InsertFileButtonEnabled}">
                                 <StackPanel MaxHeight="50">
-                                    <Image Source="img/112_Plus_Green_48x48_72.png" VerticalAlignment="Top" Height="30"/>
+                                    <Image Source="{DynamicResource InsertImageSource}" VerticalAlignment="Top" Height="30"/>
                                     <TextBlock HorizontalAlignment="Center" MinHeight="15" VerticalAlignment="Bottom">Insert</TextBlock>
                                 </StackPanel>
                             </Button>
@@ -136,4 +136,26 @@
             </TabControl>
         </Grid>
     </Grid>
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <!--
+            <Style x:Key="grayedIfNotLogged" TargetType="Image">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding StatusInfo.IsLogged}" Value="False">
+                        <Setter Property="Effect">
+                            <Setter.Value>
+                                <fx:GreyscaleEffect />
+                            </Setter.Value>
+                        </Setter>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+            -->
+        </ResourceDictionary>
+
+    </Window.Resources>
+
 </Window>

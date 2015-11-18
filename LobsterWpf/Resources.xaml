@@ -1,0 +1,8 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:LobsterWpf">
+    <BitmapImage x:Key="FolderImageSource" UriSource="/LobsterWpf;component/Resources/Images/folder_open.ico"/>
+    <BitmapImage x:Key="InsertImageSource" UriSource="/LobsterWpf;component/Resources/Images/112_Plus_Green.ico"/>
+    <BitmapImage x:Key="MergeImageSource" UriSource="/LobsterWpf;component/Resources/Images/041_Sort.ico"/>
+    <BitmapImage x:Key="PushImageSource" UriSource="/LobsterWpf;component/Resources/Images/112_UpArrowShort_Orange.ico"/>
+</ResourceDictionary>

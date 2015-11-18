@@ -20,14 +20,136 @@ namespace LobsterWpf
 
         public FileNodeView RootFile { get; set; }
 
-        public bool ShowReadOnlyFiles { get; set; }
+        private FileNodeView _selectedFileNode;
+        public FileNodeView SelectedFileNode
+        {
+            get
+            {
+                return this._selectedFileNode;
+            }
+
+            set
+            {
+                this._selectedFileNode = value;
+
+                if (this.SelectedFileNode == null)
+                {
+                    this.UpdateFileButtonEnabled = false;
+                    this.InsertFileButtonEnabled = false;
+                    this.DiffFileButtonEnabled = false;
+                    this.ExploreFileButtonEnabled = false;
+                }
+                else if (this.SelectedFileNode.IsDirectory)
+                {
+                    this.UpdateFileButtonEnabled = false;
+                    this.InsertFileButtonEnabled = false;
+                    this.DiffFileButtonEnabled = false;
+                    this.ExploreFileButtonEnabled = true;
+                }
+                else
+                {
+                    bool selectedFileIsInDatabase = false;
+                    if (this.SelectedFileNode != null )
+                    {
+                        string fullpath = this.SelectedFileNode.FullName;
+                        ClobDirectory clobDir = this.connection.GetClobDirectoryForFile(fullpath);
+                        selectedFileIsInDatabase = clobDir.GetDatabaseFileForFullpath(fullpath) != null;
+                    }
+
+                    this.UpdateFileButtonEnabled = selectedFileIsInDatabase;
+                    this.InsertFileButtonEnabled = !selectedFileIsInDatabase;
+                    this.DiffFileButtonEnabled = selectedFileIsInDatabase;
+                    this.ExploreFileButtonEnabled = true;
+                }
+
+                this.NotifyPropertyChanged("SelectedFileNode");
+            }
+        }
+
+        public bool ShowReadOnlyFiles { get; set; } = true;
 
         public ObservableCollection<ClobTypeView> ClobTypes { get; set; }
+
+        private bool _updateFileButtonEnabled = false;
+
+        public bool UpdateFileButtonEnabled
+        {
+            get
+            {
+                return this._updateFileButtonEnabled;
+            }
+            set
+            {
+                this._updateFileButtonEnabled = value;
+                this.NotifyPropertyChanged("UpdateFileButtonEnabled");
+            }
+        }
+
+        private bool _insertFileButtonEnabled = false;
+        public bool InsertFileButtonEnabled
+        {
+            get
+            {
+                return this._insertFileButtonEnabled;
+            }
+
+            set
+            {
+                this._insertFileButtonEnabled = value;
+                this.NotifyPropertyChanged("InsertFileButtonEnabled");
+            }
+        }
+
+        private bool _diffFileButtonEnabled = false;
+
+        public bool DiffFileButtonEnabled
+        {
+            get
+            {
+                return this._diffFileButtonEnabled;
+            }
+            set
+            {
+                this._diffFileButtonEnabled = value;
+                this.NotifyPropertyChanged("DiffFileButtonEnabled");
+            }
+        }
+
+        private bool _exploreFileButtonEnabled = false;
+
+        public bool ExploreFileButtonEnabled
+        {
+            get
+            {
+                return this._exploreFileButtonEnabled;
+            }
+
+            set
+            {
+                this._exploreFileButtonEnabled = value;
+                this.NotifyPropertyChanged("ExploreFileButtonEnabled");
+            }
+        }
+
+        private bool _isEnabled = false;
+        public bool IsEnabled
+        {
+            get
+            {
+                return this._isEnabled;
+            }
+
+            set
+            {
+                this._isEnabled = value;
+                this.NotifyPropertyChanged("IsEnabled");
+            }
+        }
 
         // This method is called by the Set accessor of each property.
         // The CallerMemberName attribute that is applied to the optional propertyName
         // parameter causes the property name of the caller to be substituted as an argument.
-        public void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
+        private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
         {
             if (PropertyChanged != null)
             {
