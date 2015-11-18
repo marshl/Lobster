@@ -92,6 +92,11 @@ namespace LobsterModel
         public List<ClobDirectory> ClobDirectoryList { get; private set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the database should be automatically updated when a file is changed.
+        /// </summary>
+        public bool IsAutoClobEnabled { get; set; } = true;
+
+        /// <summary>
         /// Returns the ClobDirectory that would contain the given fullpath, if applicable.
         /// Whether the file exists or not is irrelevent, only that it would be contained in the returned ClobDirectory.
         /// </summary>
@@ -170,6 +175,13 @@ namespace LobsterModel
         private void OnFileChangeEvent(object sender, FileSystemEventArgs e)
         {
             MessageLog.LogInfo($"File change event of type {e.ChangeType} for file {e.FullPath}");
+
+            if (!this.IsAutoClobEnabled)
+            {
+                MessageLog.LogInfo($"Automatic clobbing is disabled, ignoring event.");
+                return;
+            }
+
             lock (this.fileEventQueue)
             {
                 this.fileEventQueue.Enqueue(e);
