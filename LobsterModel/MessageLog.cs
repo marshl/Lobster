@@ -35,37 +35,45 @@ namespace LobsterModel
     /// <summary>
     /// Used to log detailed information about the 
     /// </summary>
-    public class MessageLog : IDisposable
+    public class MessageLog
     {
+        /// <summary>
+        /// The instance of this logger.
+        /// </summary>
+        private static MessageLog instance;
+
+        /// <summary>
+        /// The file stream this logger writes to.
+        /// </summary>
+        private StreamWriter outStream;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MessageLog"/> class.
         /// </summary>
         public MessageLog()
         {
-            MessageLog.Instance = this;
+            MessageLog.instance = this;
 
             this.MessageList = new List<Message>();
 
-            this.OutStream = new StreamWriter(Settings.Default.LogFilename, true);
-            this.OutStream.WriteLine();
+            this.outStream = new StreamWriter(Settings.Default.LogFilename, true);
+            this.outStream.WriteLine();
 
             MessageLog.LogInfo("Starting Lobster (build " + Utils.RetrieveLinkerTimestamp() + ")");
         }
 
         /// <summary>
-        /// All messages that have been created by this program since startup.
+        /// Gets the messages that have been created by this program since startup.
         /// </summary>
         public List<Message> MessageList { get; private set; }
 
         /// <summary>
-        /// The instance of this logger.
+        /// Flushes the stream buffer.
         /// </summary>
-        private static MessageLog Instance { get; set; }
-
-        /// <summary>
-        /// The file stream this logger writes to.
-        /// </summary>
-        private StreamWriter OutStream { get; set; }
+        public static void Flush()
+        {
+            MessageLog.instance.outStream.Flush();
+        }
 
         /// <summary>
         /// Logs a warning type message.
@@ -73,7 +81,7 @@ namespace LobsterModel
         /// <param name="message">The text of the message to create.</param>
         public static void LogWarning(string message)
         {
-            MessageLog.Instance.InternalLog(Message.TYPE.WARNING, message);
+            MessageLog.instance.InternalLog(Message.TYPE.WARNING, message);
         }
 
         /// <summary>
@@ -82,7 +90,7 @@ namespace LobsterModel
         /// <param name="message">The text of the message to create.</param>
         public static void LogError(string message)
         {
-            MessageLog.Instance.InternalLog(Message.TYPE.ERROR, message);
+            MessageLog.instance.InternalLog(Message.TYPE.ERROR, message);
         }
 
         /// <summary>
@@ -91,25 +99,17 @@ namespace LobsterModel
         /// <param name="message">The text of the message to create.</param>
         public static void LogInfo(string message)
         {
-            MessageLog.Instance.InternalLog(Message.TYPE.INFO, message);
+            MessageLog.instance.InternalLog(Message.TYPE.INFO, message);
         }
 
         /// <summary>
         /// Closes his message log
         /// </summary>
-        public void Close()
+        public static void Close()
         {
             MessageLog.LogInfo("Lobster Stopped");
-            this.OutStream.Close();
-            MessageLog.Instance = null;
-        }
-
-        /// <summary>
-        /// The dispose override.
-        /// </summary>
-        public void Dispose()
-        {
-            this.OutStream.Close();
+            instance.outStream.Close();
+            instance = null;
         }
 
         /// <summary>
@@ -121,15 +121,10 @@ namespace LobsterModel
         {
             Message msg = new Message(message, messageType, DateTime.Now);
             this.MessageList.Add(msg);
-            lock(this.OutStream)
+            lock (this.outStream.BaseStream)
             {
-                this.OutStream.WriteLine(msg.ToString());
+                this.outStream.WriteLine(msg.ToString());
             }
-        }
-
-        public static void Flush()
-        {
-            MessageLog.Instance?.OutStream.Flush();
         }
 
         /// <summary>
@@ -172,17 +167,17 @@ namespace LobsterModel
             }
 
             /// <summary>
-            /// The text of this message.
+            /// Gets the text of this message.
             /// </summary>
             public string Text { get; private set; }
 
             /// <summary>
-            /// The date that this message was created.
+            /// Gets the date that this message was created.
             /// </summary>
             public DateTime DateCreated { get; private set; }
 
             /// <summary>
-            /// The type of this message.
+            /// Gets the type of this message.
             /// </summary>
             public TYPE MessageType { get; private set; }
 

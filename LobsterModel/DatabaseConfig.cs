@@ -127,8 +127,7 @@ namespace LobsterModel
                 MessageLog.LogError("An error occurred when loading the ClobType " + fullpath + ": " + e);
                 return null;
             }
-
-
+            
             config.FileLocation = fullpath;
             return config;
         }

@@ -25,10 +25,8 @@ namespace LobsterModel
 {
     using System;
     using System.Collections.Generic;
-    using System.ComponentModel;
     using System.IO;
     using System.Threading;
-    using System.Windows.Forms;
     using System.Xml;
     using System.Xml.Schema;
     using System.Xml.Serialization;
@@ -79,25 +77,19 @@ namespace LobsterModel
         }
 
         /// <summary>
-        /// The configuration file for this connection.
+        /// Gets the configuration file for this connection.
         /// </summary>
-        public DatabaseConfig Config { get; set; }
+        public DatabaseConfig Config { get; private set; }
 
         /// <summary>
-        /// The Lobster model that is the parent of this connection.
+        /// Gets the Lobster model that is the parent of this connection.
         /// </summary>
         public Model ParentModel { get; private set; }
 
         /// <summary>
-        /// The name of the file where this was loaded from.
+        /// Gets the list of ClobDirectories for each ClobType located in directory in the configuration settings.
         /// </summary>
-
-        public string ConfigFilepath { get; set; }
-
-        /// <summary>
-        /// The ClobDirectories for each ClobType located in directory in the configuration settings.
-        /// </summary>
-        public List<ClobDirectory> ClobDirectoryList { get; set; }
+        public List<ClobDirectory> ClobDirectoryList { get; private set; }
 
         /// <summary>
         /// Returns the ClobDirectory that would contain the given fullpath, if applicable.
@@ -124,13 +116,15 @@ namespace LobsterModel
         /// <summary>
         /// Loads each of the xml files in the ClobTypeDir (if they are valid).
         /// </summary>
-        public void LoadClobTypes()
+        /// <param name="errors">Any errors that are raised during loading.</param>
+        public void LoadClobTypes(out List<ClobTypeLoadException> errors)
         {
+            errors = new List<ClobTypeLoadException>();
+
             this.ClobDirectoryList = new List<ClobDirectory>();
             DirectoryInfo dirInfo = new DirectoryInfo(this.Config.ClobTypeDir);
             if (!dirInfo.Exists)
             {
-                MessageBox.Show(this.Config.ClobTypeDir + " could not be found.", "ClobType Load Failed", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
                 MessageLog.LogWarning("The directory " + dirInfo + " could not be found when loading connection " + this.Config.Name);
                 return;
             }
@@ -150,16 +144,9 @@ namespace LobsterModel
                 }
                 catch (Exception e) when (e is InvalidOperationException || e is XmlException || e is XmlSchemaValidationException || e is IOException)
                 {
-                    MessageBox.Show(
-                        "The ClobType " + file.FullName + " failed to load. Check the log for more information.",
-                        "ClobType Load Failed",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Error,
-                        MessageBoxDefaultButton.Button1);
+                    errors.Add(new ClobTypeLoadException("ClobType load error", e));
                     MessageLog.LogError("An error occurred when loading the ClobType " + file.Name + " " + e);
-                    continue;
                 }
-
             }
         }
 
@@ -191,7 +178,7 @@ namespace LobsterModel
             if (this.fileEventThread == null || this.fileEventThread.ThreadState != ThreadState.Running)
             {
                 MessageLog.LogInfo("Starting file event thread");
-                this.fileEventThread = new Thread(new ThreadStart(this.ProcessFileEvents));
+                this.fileEventThread = new Thread(new ThreadStart(this.ProcessAllFileEvents));
                 this.fileEventThread.Start();
             }
         }
@@ -199,7 +186,7 @@ namespace LobsterModel
         /// <summary>
         /// Used from the worked thread to process any file events on the queue.
         /// </summary>
-        private void ProcessFileEvents()
+        private void ProcessAllFileEvents()
         {
             while (this.fileEventQueue.Count > 0)
             {
@@ -209,7 +196,7 @@ namespace LobsterModel
                     e = this.fileEventQueue.Dequeue();
                 }
 
-                this.ProcessSingleFileEvent(e);
+                this.ProcessFileEvent(e);
             }
 
             MessageLog.LogInfo("File event stack empty");
@@ -219,7 +206,7 @@ namespace LobsterModel
         /// Processes a single file event. Sending a file update to the database if necessary.
         /// </summary>
         /// <param name="e">The event to process.</param>
-        private void ProcessSingleFileEvent(FileSystemEventArgs e)
+        private void ProcessFileEvent(FileSystemEventArgs e)
         {
             MessageLog.LogInfo($"Processing file event of type {e.ChangeType} for file {e.FullPath}");
             FileInfo fileInfo = new FileInfo(e.FullPath);
@@ -232,8 +219,12 @@ namespace LobsterModel
                     return;
                 }
 
-                ClobDirectory clobDir = this.GetClobDirectoryForFile(e.FullPath);
-                if (clobDir == null)
+                ClobDirectory clobDir;
+                try
+                {
+                    clobDir = this.GetClobDirectoryForFile(e.FullPath);
+                }
+                catch (Exception ex) when (ex is ClobDirectoryNotFoundForFileException || ex is MultipleClobDirectoriesFoundForFileException)
                 {
                     MessageLog.LogInfo($"The file does not belong to any ClobDirectory and will be skipped {e.FullPath}");
                     return;

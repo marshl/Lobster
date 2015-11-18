@@ -12,7 +12,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
+// </copyright>
+//-----------------------------------------------------------------------
 //
 //      And Mr. Drogo was staying at Brandy Hall with his father-in-law, old Master Gorbadoc, as he
 //      often did after his marriage (him being partial to his vittles, and old Gorbadoc keeping a mighty
@@ -20,7 +21,6 @@
 //          -- The Old Gaffer
 //      [ _The Lord of the Rings_, I/i: "A Long Expected Party"]
 //
-// </copyright>
 //-----------------------------------------------------------------------
 namespace LobsterModel
 {
@@ -40,7 +40,7 @@ namespace LobsterModel
     public class Table : ICloneable
     {
         /// <summary>
-        /// The schema/user that this table belongs to.
+        /// Gets or sets the schema/user that this table belongs to.
         /// </summary>
         [DisplayName("Schema/Owner Name")]
         [Description("The schema/owner of this table")]
@@ -48,7 +48,7 @@ namespace LobsterModel
         public string Schema { get; set; }
 
         /// <summary>
-        /// The name of this table in the database.
+        /// Gets or sets the name of this table in the database.
         /// </summary>
         [DisplayName("Name")]
         [Description("The name of this table")]
@@ -56,7 +56,7 @@ namespace LobsterModel
         public string Name { get; set; }
 
         /// <summary>
-        /// The extension that will be added to the mnemonic to create the guesstimate local file name. 
+        /// Gets or sets the extension that will be added to the mnemonic to create the guesstimate local file name. 
         /// If the default extension is not set, then .xml will be used
         /// </summary>
         [DisplayName("Default Extension")]
@@ -65,7 +65,7 @@ namespace LobsterModel
         public string DefaultExtension { get; set; }
 
         /// <summary>
-        /// The columns in this table that Lobster needs.
+        /// Gets or sets the columns in this table that Lobster needs.
         /// </summary>
         [DisplayName("Column List")]
         [Description("The columns in this table")]
@@ -73,7 +73,7 @@ namespace LobsterModel
         public List<Column> Columns { get; set; }
 
         /// <summary>
-        /// The parent table of this table, if this table is part of a parent-child relationship.
+        /// Gets or sets the parent table of this table, if this table is part of a parent-child relationship.
         /// </summary>
         [DisplayName("Parent Table")]
         [Description("The parent table if this table is in a parent/child relationship.")]
@@ -81,7 +81,7 @@ namespace LobsterModel
         public Table ParentTable { get; set; }
 
         /// <summary>
-        /// The full name of this table, including the schema to ensure queries are not ambiguous.
+        /// Gets the full name of this table, including the schema to ensure queries are not ambiguous.
         /// </summary>
         public string FullName
         {
@@ -323,7 +323,7 @@ namespace LobsterModel
             }
             else
             {
-                Column mnemCol = this.GetColumnWithPurpose(Column.Purpose.MIME_TYPE);
+                Column mnemCol = this.GetColumnWithPurpose(Column.Purpose.MNEMONIC);
                 return "SELECT " + mnemCol.FullName
                     + (mimeCol != null ? ", " + mimeCol.FullName : null)
                     + " FROM " + this.FullName;
@@ -354,12 +354,23 @@ namespace LobsterModel
             return copy;
         }
 
+        /// <summary>
+        /// Tries to find a Column with the specified purpose.
+        /// </summary>
+        /// <param name="purpose">The column purpose that will be searched for.</param>
+        /// <param name="result">The <see cref="Column"/> column to be returned, if found.</param>
+        /// <returns>True if a coolumn with the specified purpose was found, otherwise false.</returns>
         public bool TryGetColumnWithPurpose(Column.Purpose purpose, out Column result)
         {
             result = this.Columns.Find(x => x.ColumnPurpose == purpose);
             return result != null;
         }
 
+        /// <summary>
+        /// Gets the column with the specified purpose, or throws a <see cref="ColumnNotFoundException"/> if it cannot be found.
+        /// </summary>
+        /// <param name="purpose">The column purpose to search for.</param>
+        /// <returns>The column in this column list that has the specified purpose.</returns>
         public Column GetColumnWithPurpose(Column.Purpose purpose)
         {
             Column c;
@@ -367,6 +378,7 @@ namespace LobsterModel
             {
                 throw new ColumnNotFoundException(this, purpose);
             }
+
             return c;
         }
     }

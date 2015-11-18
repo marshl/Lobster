@@ -105,7 +105,7 @@ namespace LobsterModel
         }
 
         /// <summary>
-        /// The name of the column as it appears in the database.
+        /// Gets or sets the name of this column as it appears in the database.
         /// </summary>
         [DisplayName("Name")]
         [Description("The name of this column")]
@@ -113,7 +113,7 @@ namespace LobsterModel
         public string Name { get; set; }
 
         /// <summary>
-        /// The name of the sequence that this columns will call NEXTVAL on if this column has the ID purpose.
+        /// Gets or sets the name of the sequence that this columns will call NEXTVAL on if this column has the ID purpose.
         /// Sequence names should not be put on a column that has any other purpose.
         /// </summary>
         [DisplayName("Sequence")]
@@ -122,7 +122,7 @@ namespace LobsterModel
         public string Sequence { get; set; }
 
         /// <summary>
-        /// The Purpose of the column is an enumeration that defines how the column will be used.
+        /// Gets or sets the purpose of the column is an enumeration that defines how the column will be used.
         /// When a column with a specific purpose is needed, it will be queried from the table column list.
         /// </summary>
         [DisplayName("Purpose")]
@@ -131,7 +131,7 @@ namespace LobsterModel
         public Purpose ColumnPurpose { get; set; }
 
         /// <summary>
-        /// The Oracle data type that the column on the database uses. 
+        /// Gets or sets the Oracle data type that the column on the database uses. 
         /// The DataType of a column should only be used if it has the CLOB_DATA purpose.
         /// A table can have multiple CLOB_DATA columns, but each must have a differnt DataType.
         /// </summary>
@@ -141,7 +141,7 @@ namespace LobsterModel
         public Datatype? DataType { get; set; }
 
         /// <summary>
-        /// The MimeTypeList stores which mime types that this column will accept.
+        /// Gets or sets the list of mime types that this column will accept.
         /// If a table with multiple CLOB_DATA columns has a new file inserted, then the column with the matching data type will be used.
         /// Information on the Editor attribute can be found here: http://stackoverflow.com/questions/6307006/how-can-i-use-a-winforms-propertygrid-to-edit-a-list-of-strings
         /// </summary>
@@ -156,18 +156,18 @@ namespace LobsterModel
         public Table ParentTable { get; set; }
 
         /// <summary>
-        /// The complete name of this column, including the name of the parent table, and the schema the table is in.
+        /// Gets the complete name of this column, including the name of the parent table, and the schema the table is in.
         /// </summary>
         public string FullName
         {
             get
             {
-                return this.ParentTable.FullName + "." + this.Name;
+                return $"{this.ParentTable.FullName}.{this.Name}";
             }
         }
 
         /// <summary>
-        /// Returns an SQL string that returns the next ID for this column.
+        /// Gets an SQL string that returns the next ID for this column.
         /// If this column has a sequence, it will return {sequence}.NEXTVAL
         /// Otherwise it will return a query that will find the highest value of the column + 1
         /// </summary>

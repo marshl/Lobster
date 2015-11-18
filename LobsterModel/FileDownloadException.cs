@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace LobsterModel
 {
     [Serializable]
-    internal class FileDownloadException : Exception
+    public class FileDownloadException : Exception
     {
         public FileDownloadException()
         {

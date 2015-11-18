@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace LobsterModel
 {
     [Serializable]
-    internal class MimeTypeNotFoundException : Exception
+    public class MimeTypeNotFoundException : Exception
     {
         public MimeTypeNotFoundException()
         {

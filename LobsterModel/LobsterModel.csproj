@@ -36,7 +36,6 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -50,15 +49,16 @@
     <Compile Include="ClobType.cs" />
     <Compile Include="Column.cs" />
     <Compile Include="ColumnNotFoundException.cs" />
-    <Compile Include="ConnectionDirNotFoundException.cs" />
-    <Compile Include="DatabaseConnectionFailedException.cs" />
+    <Compile Include="ConnectToDatabaseException.cs" />
+    <Compile Include="ClobTypeLoadException.cs" />
     <Compile Include="FileDownloadException.cs" />
+    <Compile Include="FileInsertException.cs" />
     <Compile Include="FileListRetrievalException.cs" />
-    <Compile Include="FileUpdateFailedException.cs" />
-    <Compile Include="FileInsertFailedException.cs" />
+    <Compile Include="FileUpdateException.cs" />
     <Compile Include="MimeTypeNotFoundException.cs" />
     <Compile Include="Model.cs" />
     <Compile Include="MultipleClobDirectoriesFoundForFileException.cs" />
+    <Compile Include="SetConnectionException.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="DatabaseConfig.cs" />
     <Compile Include="DatabaseConnection.cs" />

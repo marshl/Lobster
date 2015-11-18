@@ -42,12 +42,12 @@ namespace LobsterModel
         }
 
         /// <summary>
-        /// The ClobType that controls this directory
+        /// Gets the ClobType that controls this directory
         /// </summary>
         public ClobType ClobType { get; private set; }
 
         /// <summary>
-        /// The list of files that Lobster has found on the database for this directory
+        /// Gets or sets the list of files that Lobster has found on the database for this directory
         /// </summary>
         public List<DBClobFile> DatabaseFileList { get; set; }
 
@@ -63,7 +63,7 @@ namespace LobsterModel
         }
 
         /// <summary>
-        /// FInds and returns the database file that matches the given local file.
+        /// Finds and returns the database file that matches the given local file.
         /// </summary>
         /// <param name="fullpath">The path of the file to find the database file for.</param>
         /// <returns>The database file, if it exists.</returns>

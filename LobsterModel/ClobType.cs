@@ -35,32 +35,33 @@ namespace LobsterModel
     public class ClobType : ICloneable
     {
         /// <summary>
-        /// The display name for this ClobType. This value has no functional impact, 
+        /// Gets or sets the display name for this ClobType. This value has no functional impact, 
         /// and is used for display purposes only.
         /// </summary>
         [XmlElement("name")]
         public string Name { get; set; }
 
         /// <summary>
-        /// The name of the directory in CodeSource to be used for this ClobType. Directory separators can be used.
+        /// Gets or sets the name of the directory in CodeSource to be used for this ClobType. Directory separators can be used.
         /// </summary>
         [XmlElement("directory")]
         public string Directory { get; set; }
 
         /// <summary>
-        /// Whether or not all subdirectories under the specified folder should also be used.
+        /// Gets or sets a value indicating whether or not all subdirectories under the specified folder should also be used.
         /// </summary>
         [XmlElement("includeSubDirectories")]
         public bool IncludeSubDirectories { get; set; }
 
         /// <summary>
-        /// Most ClobTypes use only a single table, but if there is more than one, then the user will be asked which to use when inserting a new file.
+        /// Gets or sets the tables that files for this ClobType are stored in.
+        /// ClobTypes usually have only a single table, but if there is more than one, then the user will be asked which to use when inserting a new file.
         /// </summary>
         [XmlArray("tables")]
         public List<Table> Tables { get; set; }
 
         /// <summary>
-        /// Returns the absolute path of the directory for this clob type.
+        /// Gets the absolute path of the directory for this clob type.
         /// </summary>
         public string Fullpath
         {
@@ -71,13 +72,13 @@ namespace LobsterModel
         }
 
         /// <summary>
-        /// The file that stored this ClobType.
+        /// Gets or sets the path of the file from where this ClobType was deserialised.
         /// </summary>
         [XmlIgnore]
         public string FilePath { get; set; }
 
         /// <summary>
-        /// The <see cref="DatabaseConnection"/> object that stores this ClobType.
+        /// Gets or sets the <see cref="DatabaseConnection"/> object that stores this ClobType.
         /// </summary>
         [XmlIgnore]
         public DatabaseConnection ParentConnection { get; set; }

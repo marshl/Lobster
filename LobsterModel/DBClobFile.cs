@@ -29,6 +29,13 @@ namespace LobsterModel
     /// </summary>
     public class DBClobFile
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DBClobFile"/> class.
+        /// </summary>
+        /// <param name="parentTable">The table that contains this clob file</param>
+        /// <param name="mnemonic">The database mnemonic of this file.</param>
+        /// <param name="mimetype">The mime type of this file, if applicable.</param>
+        /// <param name="filename">A guesstimated filename, that may not match any local files.</param>
         public DBClobFile(Table parentTable, string mnemonic, string mimetype, string filename)
         {
             this.ParentTable = parentTable;
@@ -38,23 +45,23 @@ namespace LobsterModel
         }
 
         /// <summary>
-        /// The mnemonic that came from the mnemonic column. 
+        /// Gets the mnemonic that came from the mnemonic column. 
         /// </summary>
         public string Mnemonic { get; }
 
         /// <summary>
-        /// The mime type stored against this file, if it exists.
+        /// Gets the mime type stored against this file, if it exists.
         /// </summary>
         public string MimeType { get; }
 
         /// <summary>
-        /// The name of file this DBClobFile should match to.
+        /// Gets the name of file this DBClobFile should match to.
         /// The mnemonic and mimetype is processed to get this value.
         /// </summary>
         public string Filename { get; }
 
         /// <summary>
-        /// The table that this file was pulled from.
+        /// Gets the table that this file was pulled from.
         /// </summary>
         public Table ParentTable { get; }
 

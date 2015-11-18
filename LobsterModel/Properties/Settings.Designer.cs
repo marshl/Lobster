@@ -37,30 +37,6 @@ namespace LobsterModel.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("tortoisemerge")]
-        public string DiffProgramName {
-            get {
-                return ((string)(this["DiffProgramName"]));
-            }
-            set {
-                this["DiffProgramName"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("/mine:{0} /theirs:{1}")]
-        public string DiffProgramArguments {
-            get {
-                return ((string)(this["DiffProgramArguments"]));
-            }
-            set {
-                this["DiffProgramArguments"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("LobsterSettings")]
         public string SettingsDirectory {
             get {

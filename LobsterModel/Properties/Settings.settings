@@ -5,12 +5,6 @@
     <Setting Name="ConnectionDir" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="DiffProgramName" Type="System.String" Scope="User">
-      <Value Profile="(Default)">tortoisemerge</Value>
-    </Setting>
-    <Setting Name="DiffProgramArguments" Type="System.String" Scope="User">
-      <Value Profile="(Default)">/mine:{0} /theirs:{1}</Value>
-    </Setting>
     <Setting Name="SettingsDirectory" Type="System.String" Scope="User">
       <Value Profile="(Default)">LobsterSettings</Value>
     </Setting>
