@@ -9,25 +9,26 @@
     <Grid RenderTransformOrigin="0,1" >
 
         <!-- Notification area -->
-        <Border BorderThickness="1" Background="Beige" BorderBrush="Black" CornerRadius="10">
-            <StackPanel Margin="20">
-                <TextBlock TextWrapping="Wrap" Margin="5">
+        <Border BorderThickness="1" Background="Azure" BorderBrush="Black" CornerRadius="10">
+            <StackPanel Margin="15" Orientation="Horizontal">
+                <Image Source="{DynamicResource SuccessImageSource}" Width="54"/>
+                <TextBlock TextWrapping="Wrap" Margin="5" Width="200">
           <Bold>Notification data</Bold><LineBreak /><LineBreak />
           Something just happened and you are being notified of it.
                 </TextBlock>
-                <CheckBox Content="Checkable" Margin="5 5 0 5" />
-                <Button Content="Clickable" HorizontalAlignment="Center" />
             </StackPanel>
         </Border>
 
         <!-- Animation -->
+        <!--
         <Grid.Triggers>
             <EventTrigger RoutedEvent="FrameworkElement.Loaded">
                 <BeginStoryboard>
                     <Storyboard Completed="Storyboard_Completed">
-                        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)">
+
+                        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.CenterX)">
                             <SplineDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
-                            <SplineDoubleKeyFrame KeyTime="0:0:0.5" Value="1"/>
+                            <SplineDoubleKeyFrame KeyTime="0:0:0.5" Value="300"/>
                         </DoubleAnimationUsingKeyFrames>
                         <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)">
                             <SplineDoubleKeyFrame KeyTime="0:0:2" Value="1"/>
@@ -37,10 +38,17 @@
                 </BeginStoryboard>
             </EventTrigger>
         </Grid.Triggers>
-
+-->
         <Grid.RenderTransform>
             <ScaleTransform ScaleY="1" />
         </Grid.RenderTransform>
 
     </Grid>
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
 </Window>

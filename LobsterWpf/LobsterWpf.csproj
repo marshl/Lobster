@@ -212,13 +212,17 @@
     <Resource Include="Resources\Images\1549_Paper_clip_gray.ico" />
     <Resource Include="Resources\Images\Annotate_Blocked_large.ico" />
     <Resource Include="Resources\Images\Annotate_Complete.ico" />
-    <Resource Include="Resources\Images\Annotate_Default.ico" />
+    <Content Include="Resources\Images\Annotate_Default.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Resource Include="Resources\Images\Annotate_Disabled.ico" />
     <Resource Include="Resources\Images\Annotate_Help.ico" />
     <Resource Include="Resources\Images\Annotate_HighPriority.ico" />
     <Resource Include="Resources\Images\Annotate_QuestionBlue.ico" />
     <Resource Include="Resources\Images\Annotate_QuestionRed.ico" />
-    <Resource Include="Resources\Images\Annotate_Warning.ico" />
+    <Content Include="Resources\Images\Annotate_Warning.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Resource Include="Resources\Images\autoList.ico" />
     <Resource Include="Resources\Images\Book_Green.ico" />
     <Resource Include="Resources\Images\Close.ico" />
