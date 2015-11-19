@@ -40,7 +40,7 @@ namespace LobsterModel
         /// This is not raised when a file is manually updated through the UI.
         /// </summary>
         /// <param name="filename">The name of the file that was updated.</param>
-        void OnAutoUpdateComplete(string filename);
+        void OnAutoUpdateComplete(string filename, bool updateSucess);
 
         /// <summary>
         /// Raised when a file being inserted into the database requires a table to be specified for it.
@@ -57,5 +57,9 @@ namespace LobsterModel
         /// <param name="mimeTypes">The list of mime types that can be selected from.</param>
         /// <returns>The mime type the file should be inserted with, or null if the insert is cancelled.</returns>
         string PromptForMimeType(string fullpath, string[] mimeTypes);
+
+        void OnEventProcessingStart();
+
+        void OnFileProcessingFinished();
     }
 }

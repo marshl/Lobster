@@ -176,12 +176,6 @@ namespace LobsterModel
         {
             MessageLog.LogInfo($"File change event of type {e.ChangeType} for file {e.FullPath}");
 
-            if (!this.IsAutoClobEnabled)
-            {
-                MessageLog.LogInfo($"Automatic clobbing is disabled, ignoring event.");
-                return;
-            }
-
             lock (this.fileEventQueue)
             {
                 this.fileEventQueue.Enqueue(e);
@@ -200,6 +194,8 @@ namespace LobsterModel
         /// </summary>
         private void ProcessAllFileEvents()
         {
+            this.ParentModel.EventListener.OnEventProcessingStart();
+
             while (this.fileEventQueue.Count > 0)
             {
                 FileSystemEventArgs e;
@@ -212,6 +208,7 @@ namespace LobsterModel
             }
 
             MessageLog.LogInfo("File event stack empty");
+            this.ParentModel.EventListener.OnFileProcessingFinished();
         }
 
         /// <summary>
@@ -225,6 +222,12 @@ namespace LobsterModel
 
             if (e.ChangeType == WatcherChangeTypes.Changed)
             {
+                if (!this.IsAutoClobEnabled)
+                {
+                    MessageLog.LogInfo($"Automatic clobbing is disabled, ignoring event.");
+                    return;
+                }
+
                 if (!fileInfo.Exists)
                 {
                     MessageLog.LogInfo($"File could not be found {e.FullPath}");
@@ -256,8 +259,15 @@ namespace LobsterModel
                 }
 
                 MessageLog.LogInfo($"Auto-updating file {e.FullPath}");
-                this.ParentModel.SendUpdateClobMessage(e.FullPath);
-                this.ParentModel.EventListener.OnAutoUpdateComplete(e.FullPath);
+                try
+                {
+                    this.ParentModel.SendUpdateClobMessage(e.FullPath);
+                }
+                catch ( FileUpdateFailedException)
+                {
+                    this.ParentModel.EventListener.OnAutoUpdateComplete(e.FullPath,false);
+                }
+                this.ParentModel.EventListener.OnAutoUpdateComplete(e.FullPath,true);
             }
             else
             {

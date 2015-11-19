@@ -98,18 +98,24 @@ namespace LobsterModel
         /// <param name="fullpath">The file to update.</param>
         public void SendUpdateClobMessage(string fullpath)
         {
-            DbConnection con = OpenConnection(this.CurrentConnection.Config);
-
-            ClobDirectory clobDir = this.CurrentConnection.GetClobDirectoryForFile(fullpath);
-            DBClobFile clobFile = clobDir?.GetDatabaseFileForFullpath(fullpath);
-
-            if (Settings.Default.BackupEnabled)
+            try
             {
-                this.BackupClobFile(con, clobFile, fullpath);
-            }
+                DbConnection con = OpenConnection(this.CurrentConnection.Config);
+                ClobDirectory clobDir = this.CurrentConnection.GetClobDirectoryForFile(fullpath);
+                DBClobFile clobFile = clobDir?.GetDatabaseFileForFullpath(fullpath);
 
-            this.UpdateDatabaseClob(fullpath, clobFile, con);
-            con.Dispose();
+                if (Settings.Default.BackupEnabled)
+                {
+                    this.BackupClobFile(con, clobFile, fullpath);
+                }
+
+                this.UpdateDatabaseClob(fullpath, clobFile, con);
+                con.Dispose();
+            }
+            catch (ConnectToDatabaseException e)
+            {
+                throw new FileUpdateFailedException("An error occurred when connecting to the database.", e);
+            }
         }
 
         /// <summary>
