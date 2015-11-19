@@ -257,6 +257,7 @@ namespace LobsterModel
 
                 MessageLog.LogInfo($"Auto-updating file {e.FullPath}");
                 this.ParentModel.SendUpdateClobMessage(e.FullPath);
+                this.ParentModel.EventListener.OnAutoUpdateComplete(e.FullPath);
             }
             else
             {
