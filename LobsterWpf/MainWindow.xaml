@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:LobsterWpf"
         mc:Ignorable="d"
         Title="Lobster" Height="600" Width="800" Loaded="Window_Loaded">
-    <Grid x:Name="LayoutRoot">
+    <Grid x:Name="ConnectionContainer">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -19,14 +19,16 @@
                     <Separator/>
                     <MenuItem Header="_Exit" Click="MenuItem_Click_1" />
                 </MenuItem>
+                <MenuItem Header="_Connection" IsEnabled="{Binding IsEnabled, FallbackValue=false}">
+                    <MenuItem Header="Clob Automatically" IsCheckable="True" IsChecked="{Binding Path=IsAutoClobEnabled, FallbackValue=True}"/>
+                </MenuItem>
             </Menu>
         </Grid>
-        <Grid Grid.Row="1" IsEnabled="{Binding Path=IsEnabled, FallbackValue=false}" Name="ConnectionContainer">
+        <Grid Grid.Row="1" IsEnabled="{Binding IsEnabled, FallbackValue=false}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
-
             <ListBox Name="clobTypeListBox" Grid.Column="0" Grid.Row="1" ItemsSource="{Binding ClobTypes}" SelectionChanged="clobTypeListBox_SelectionChanged">
                 <ListBox.ItemTemplate>
                     <DataTemplate>

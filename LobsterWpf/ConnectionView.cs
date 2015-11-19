@@ -131,7 +131,7 @@ namespace LobsterWpf
             }
         }
 
-        private bool _isEnabled = false;
+        private bool _isEnabled = true;
         public bool IsEnabled
         {
             get
@@ -143,6 +143,19 @@ namespace LobsterWpf
             {
                 this._isEnabled = value;
                 this.NotifyPropertyChanged("IsEnabled");
+            }
+        }
+        
+        public bool IsAutoClobEnabled
+        {
+            get
+            {
+                return this.connection.IsAutoClobEnabled;
+            }
+            set
+            {
+                this.connection.IsAutoClobEnabled = value;
+                this.NotifyPropertyChanged("IsAutoClobEnabled");
             }
         }
 
