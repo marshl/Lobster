@@ -125,8 +125,6 @@ namespace LobsterWpf
                 MessageBox.Show(ex.Message);
                 return;
             }
-
-
         }
 
         private void exploreButton_Click(object sender, RoutedEventArgs e)
@@ -160,7 +158,15 @@ namespace LobsterWpf
 
         void IModelEventListener.OnAutoUpdateComplete(string filename)
         {
-            throw new NotImplementedException();
+            this.Dispatcher.Invoke(new NotificationDelegate(DisplayUpdateNotification), filename);
+        }
+
+        private delegate void NotificationDelegate(string filename);
+
+        private void DisplayUpdateNotification(string filename)
+        {
+            NotificationWindow nw = new NotificationWindow();
+            nw.Show();
         }
 
         LobsterModel.Table IModelEventListener.PromptForTable(string fullpath, LobsterModel.Table[] tables)
