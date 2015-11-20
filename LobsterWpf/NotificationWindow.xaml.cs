@@ -25,9 +25,14 @@ namespace LobsterWpf
 
         private int windowIndex;
 
-        public NotificationWindow()
+        public string Filename { get; set; }
+
+        public NotificationWindow(string filename)
         {
             InitializeComponent();
+
+            this.Filename = filename;
+            this.DataContext = this;
 
             if (activeWindowList == null)
             {

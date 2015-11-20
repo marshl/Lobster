@@ -12,10 +12,7 @@
         <Border BorderThickness="1" Background="Azure" BorderBrush="Black" CornerRadius="10">
             <StackPanel Margin="15" Orientation="Horizontal">
                 <Image Source="{DynamicResource SuccessImageSource}" Width="54"/>
-                <TextBlock TextWrapping="Wrap" Margin="5" Width="200">
-          <Bold>Notification data</Bold><LineBreak /><LineBreak />
-          Something just happened and you are being notified of it.
-                </TextBlock>
+                <TextBlock TextWrapping="Wrap" Margin="5" Width="200" Text="{Binding Filename, FallbackValue=MESSAGE}" VerticalAlignment="Center"/>
             </StackPanel>
         </Border>
 

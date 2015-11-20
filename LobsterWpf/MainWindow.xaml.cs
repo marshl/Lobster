@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Media;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -42,7 +43,7 @@ namespace LobsterWpf
             if (result.HasValue && result.Value)
             {
                 this.ConnectionContainer.IsEnabled = this.Model.CurrentConnection != null;
-                this.ConnectionContainer.DataContext = new ConnectionView(this.Model.CurrentConnection);
+                this.ConnectionContainer.DataContext = this.connectionView = new ConnectionView(this.Model.CurrentConnection);
             }
         }
 
@@ -96,7 +97,18 @@ namespace LobsterWpf
         {
             if (this.connectionView.SelectedFileNode != null)
             {
-                this.Model.SendUpdateClobMessage(this.connectionView.SelectedFileNode.FullName);
+                string filename = this.connectionView.SelectedFileNode.FullName;
+
+                try
+                {
+                    this.Model.SendUpdateClobMessage(filename);
+                }
+                catch ( FileUpdateException )
+                {
+                    this.DisplayUpdateNotification(filename,false);
+                    return;
+                }
+                this.DisplayUpdateNotification(filename, true);
             }
         }
 
@@ -156,17 +168,18 @@ namespace LobsterWpf
             MessageBox.Show("File Change");
         }
 
-        void IModelEventListener.OnAutoUpdateComplete(string filename)
+        void IModelEventListener.OnAutoUpdateComplete(string filename, bool updateSuccess)
         {
-            this.Dispatcher.Invoke(new NotificationDelegate(DisplayUpdateNotification), filename);
+            this.Dispatcher.Invoke(new NotificationDelegate(DisplayUpdateNotification), filename, updateSuccess);
         }
 
-        private delegate void NotificationDelegate(string filename);
+        private delegate void NotificationDelegate(string filename, bool success);
 
-        private void DisplayUpdateNotification(string filename)
+        private void DisplayUpdateNotification(string filename, bool success)
         {
-            NotificationWindow nw = new NotificationWindow();
+            NotificationWindow nw = new NotificationWindow(filename);
             nw.Show();
+            SystemSounds.Question.Play();
         }
 
         LobsterModel.Table IModelEventListener.PromptForTable(string fullpath, LobsterModel.Table[] tables)
@@ -177,6 +190,24 @@ namespace LobsterWpf
         string IModelEventListener.PromptForMimeType(string fullpath, string[] mimeTypes)
         {
             throw new NotImplementedException();
+        }
+
+        void IModelEventListener.OnEventProcessingStart()
+        {
+            this.Dispatcher.Invoke(delegate
+            {
+                this.connectionView.IsEnabled = false;
+            });
+        }
+
+        void IModelEventListener.OnFileProcessingFinished()
+        {
+            this.Dispatcher.Invoke(delegate
+            {
+                this.connectionView.IsEnabled = true;
+
+                this.RepopulateFileListView();
+            });
         }
     }
 }
