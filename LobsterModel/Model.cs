@@ -114,7 +114,7 @@ namespace LobsterModel
             }
             catch (ConnectToDatabaseException e)
             {
-                throw new FileUpdateFailedException("An error occurred when connecting to the database.", e);
+                throw new FileUpdateException("An error occurred when connecting to the database.", e);
             }
         }
 
@@ -436,7 +436,7 @@ namespace LobsterModel
             catch (ColumnNotFoundException e)
             {
                 MessageLog.LogError($"The data column couldn't be found when building the update statement: {e}");
-                throw new FileUpdateFailedException("The Clob Column could not be found.", e);
+                throw new FileUpdateException("The Clob Column could not be found.", e);
             }
 
             try
@@ -446,7 +446,7 @@ namespace LobsterModel
             catch (IOException e)
             {
                 MessageLog.LogError($"Clob update failed with  for command {command.CommandText} {e}");
-                throw new FileUpdateFailedException("An IOException ocurred when attempting to add the file as a data parameter.", e);
+                throw new FileUpdateException("An IOException ocurred when attempting to add the file as a data parameter.", e);
             }
 
             int rowsAffected;
@@ -460,7 +460,7 @@ namespace LobsterModel
                     trans.Rollback();
                     MessageLog.LogError($"In invalid number of rows ({rowsAffected}) were updated for command: {command.CommandText}");
 
-                    throw new FileUpdateFailedException(rowsAffected + " rows were affected during the update (expected only 1). The transaction has been rolled back.");
+                    throw new FileUpdateException(rowsAffected + " rows were affected during the update (expected only 1). The transaction has been rolled back.");
                 }
 
                 trans.Commit();
@@ -472,7 +472,7 @@ namespace LobsterModel
             {
                 trans.Rollback();
                 MessageLog.LogError($"Clob update failed for command: {command.CommandText} {e}");
-                throw new FileUpdateFailedException($"An invalid operation occurred when updating the database: {e.Message}", e);
+                throw new FileUpdateException($"An invalid operation occurred when updating the database: {e.Message}", e);
             }
         }
 
