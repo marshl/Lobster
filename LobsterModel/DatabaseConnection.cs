@@ -54,7 +54,7 @@ namespace LobsterModel
         /// The queue of events that have triggered. 
         /// Events are popped off and processed one at a time by the fileEventThread.
         /// </summary>
-        private Queue<FileSystemEventArgs> fileEventQueue = new Queue<FileSystemEventArgs>();
+        private List<FileSystemEventArgs> fileEventQueue = new List<FileSystemEventArgs>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseConnection"/> class.
@@ -178,7 +178,15 @@ namespace LobsterModel
 
             lock (this.fileEventQueue)
             {
-                this.fileEventQueue.Enqueue(e);
+                // Ignore the event if it is already in the event list.
+                // This often occurs, as most programs invoke several file change events when saving.
+                if (this.fileEventQueue.Find(x => x.FullPath.Equals(e.FullPath, StringComparison.OrdinalIgnoreCase)) != null)
+                {
+                    MessageLog.LogInfo("Ignoring event, as it is already in the list.");
+                    return;
+                }
+
+                this.fileEventQueue.Add(e);
             }
 
             if (this.fileEventThread == null || this.fileEventThread.ThreadState != ThreadState.Running)
@@ -201,7 +209,8 @@ namespace LobsterModel
                 FileSystemEventArgs e;
                 lock (this.fileEventQueue)
                 {
-                    e = this.fileEventQueue.Dequeue();
+                    e = this.fileEventQueue[0];
+                    this.fileEventQueue.RemoveAt(0);
                 }
 
                 this.ProcessFileEvent(e);
@@ -263,11 +272,12 @@ namespace LobsterModel
                 {
                     this.ParentModel.SendUpdateClobMessage(e.FullPath);
                 }
-                catch ( FileUpdateFailedException)
+                catch (FileUpdateException)
                 {
-                    this.ParentModel.EventListener.OnAutoUpdateComplete(e.FullPath,false);
+                    this.ParentModel.EventListener.OnAutoUpdateComplete(e.FullPath, false);
                 }
-                this.ParentModel.EventListener.OnAutoUpdateComplete(e.FullPath,true);
+
+                this.ParentModel.EventListener.OnAutoUpdateComplete(e.FullPath, true);
             }
             else
             {
