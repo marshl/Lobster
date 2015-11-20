@@ -11,6 +11,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -134,7 +135,7 @@ namespace LobsterWpf
             }
             catch (FileDownloadException ex)
             {
-                MessageBox.Show(ex.Message);
+                System.Windows.MessageBox.Show(ex.Message);
                 return;
             }
         }
@@ -165,7 +166,7 @@ namespace LobsterWpf
 
         void IModelEventListener.OnFileChange(string filename)
         {
-            MessageBox.Show("File Change");
+            System.Windows.MessageBox.Show("File Change");
         }
 
         void IModelEventListener.OnAutoUpdateComplete(string filename, bool updateSuccess)
@@ -194,7 +195,7 @@ namespace LobsterWpf
 
         void IModelEventListener.OnEventProcessingStart()
         {
-            this.Dispatcher.Invoke(delegate
+            this.Dispatcher.Invoke((MethodInvoker)delegate
             {
                 this.connectionView.IsEnabled = false;
             });
@@ -202,7 +203,7 @@ namespace LobsterWpf
 
         void IModelEventListener.OnFileProcessingFinished()
         {
-            this.Dispatcher.Invoke(delegate
+            this.Dispatcher.Invoke((MethodInvoker)delegate
             {
                 this.connectionView.IsEnabled = true;
 
