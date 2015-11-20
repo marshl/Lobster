@@ -181,7 +181,7 @@ namespace LobsterModel
 
             string command = "INSERT INTO " + pt.FullName
                 + " (" + idCol.FullName + ", " + mnemCol.FullName + " )"
-                + " VALUES( " + idCol.NextID + "), '" + mnemonic + "' )";
+                + " VALUES( " + idCol.NextID + ", '" + mnemonic + "' )";
 
             return command;
         }
@@ -196,14 +196,11 @@ namespace LobsterModel
         /// <returns>The insert SQl statement.</returns>
         public string BuildInsertChildStatement(string mnemonic, string mimeType)
         {
-            Column mnemCol = this.GetColumnWithPurpose(Column.Purpose.MNEMONIC);
-
             // Make a string for the column names...
-            string insertCommand = "INSERT INTO " + this.FullName + " ( "
-                + mnemCol.FullName;
+            string insertCommand = "INSERT INTO " + this.FullName + " t ( ";
 
             // ..and another for the values. The insertCommand and valueCommand are joined to form the full statement
-            string valueCommand = " VALUES ( '" + mnemonic + "' ";
+            string valueCommand = " VALUES ( ";
 
             if (this.ParentTable != null)
             {
@@ -212,35 +209,40 @@ namespace LobsterModel
                 Column parentIDCol = pt.GetColumnWithPurpose(Column.Purpose.ID);
                 Column parentMnemCol = pt.GetColumnWithPurpose(Column.Purpose.MNEMONIC);
 
-                insertCommand += ", " + foreignKeyCol.FullName;
+                insertCommand += $"t.{foreignKeyCol.Name}";
 
-                valueCommand += parentIDCol.NextID + ", "
-                        + "( SELECT " + parentIDCol.FullName + " FROM " + pt.FullName
-                        + " WHERE " + parentMnemCol.FullName + " = '" + mnemonic + "' )";
+                valueCommand += $@"( SELECT p.{parentIDCol.Name} FROM {pt.FullName} p 
+                            WHERE p.{parentMnemCol.Name} = '{mnemonic}' )";
             }
             else
             {
-                // No parent table
-                Column idCol = this.GetColumnWithPurpose(Column.Purpose.ID);
-                if (idCol != null)
-                {
-                    insertCommand += ", " + idCol.FullName;
-                    valueCommand += ", " + idCol.NextID;
-                }
+                Column mnemCol = this.GetColumnWithPurpose(Column.Purpose.MNEMONIC);
+                insertCommand += $" t.{mnemCol.Name} ";
+                valueCommand += $" '{mnemonic}' ";
+
+                
 
                 if (mimeType != null)
                 {
                     Column mimeCol = this.GetColumnWithPurpose(Column.Purpose.MIME_TYPE);
-                    insertCommand += ", " + mimeCol.FullName;
-                    valueCommand += ", '" + mimeType + "'";
+                    insertCommand += $", {mimeCol.Name} ";
+                    valueCommand += $", '{mimeType}' ";
                 }
+            }
+
+            // No parent table
+            Column idCol = this.GetColumnWithPurpose(Column.Purpose.ID);
+            if (idCol != null)
+            {
+                insertCommand += $", t.{idCol.Name} ";
+                valueCommand += $", {idCol.NextID} ";
             }
 
             // The date column is optional
             Column dateCol;
             if (this.TryGetColumnWithPurpose(Column.Purpose.DATETIME, out dateCol))
             {
-                insertCommand += ", " + dateCol.FullName;
+                insertCommand += $", t.{dateCol.Name} ";
                 valueCommand += ", SYSDATE ";
             }
 
@@ -250,8 +252,8 @@ namespace LobsterModel
             {
                 TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
                 string fullName = textInfo.ToTitleCase(mnemonic.ToLower());
-                insertCommand += ", " + fullNameCol.FullName;
-                valueCommand += ", '" + fullName + "'";
+                insertCommand += $", t.{fullNameCol.Name} ";
+                valueCommand += $", '{fullName}' ";
             }
 
             Column dataCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.CLOB_DATA
@@ -262,7 +264,7 @@ namespace LobsterModel
                 throw new ColumnNotFoundException(this, Column.Purpose.DATETIME, mimeType);
             }
 
-            insertCommand += ", " + dataCol.FullName + " )";
+            insertCommand += $", t.{dataCol.Name} )";
             valueCommand += ", :data ) ";
             return insertCommand + valueCommand;
         }

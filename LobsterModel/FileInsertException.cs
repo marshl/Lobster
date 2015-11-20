@@ -4,21 +4,21 @@ using System.Runtime.Serialization;
 namespace LobsterModel
 {
     [Serializable]
-    internal class FileInsertFailedException : Exception
+    public class FileInsertException : Exception
     {
-        public FileInsertFailedException()
+        public FileInsertException()
         {
         }
 
-        public FileInsertFailedException(string message) : base(message)
+        public FileInsertException(string message) : base(message)
         {
         }
 
-        public FileInsertFailedException(string message, Exception innerException) : base(message, innerException)
+        public FileInsertException(string message, Exception innerException) : base(message, innerException)
         {
         }
 
-        protected FileInsertFailedException(SerializationInfo info, StreamingContext context) : base(info, context)
+        protected FileInsertException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
     }

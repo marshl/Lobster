@@ -72,6 +72,7 @@ namespace LobsterModel
             this.fileWatcher.Changed += new FileSystemEventHandler(this.OnFileChangeEvent);
             this.fileWatcher.Created += new FileSystemEventHandler(this.OnFileChangeEvent);
             this.fileWatcher.Deleted += new FileSystemEventHandler(this.OnFileChangeEvent);
+            this.fileWatcher.Renamed += new RenamedEventHandler(this.OnFileRenameEvent);
 
             this.fileWatcher.EnableRaisingEvents = true;
         }
@@ -165,6 +166,11 @@ namespace LobsterModel
             {
                 clobDir.GetWorkingFiles(ref workingFileList);
             }
+        }
+
+        private void OnFileRenameEvent(object sender, RenamedEventArgs e)
+        {
+            this.OnFileChangeEvent(sender, e);
         }
 
         /// <summary>

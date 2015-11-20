@@ -173,7 +173,7 @@ namespace LobsterModel
             {
                 ClobDirectory clobDir = this.CurrentConnection.GetClobDirectoryForFile(fullpath);
                 clobFile = clobDir.GetDatabaseFileForFullpath(fullpath);
-                
+
             }
             catch (Exception e) when (e is ClobDirectoryNotFoundForFileException || e is MultipleClobDirectoriesFoundForFileException)
             {
@@ -554,7 +554,7 @@ namespace LobsterModel
                 catch (Exception e) when (e is InvalidOperationException || e is OracleException)
                 {
                     MessageLog.LogError($"Error creating new clob when executing command: {command.CommandText} {e}");
-                    throw new FileInsertFailedException("An exception ocurred when attempting to insert a file into the parent table.", e);
+                    throw new FileInsertException("An exception ocurred when attempting to insert a file into the parent table.", e);
                 }
             }
 
@@ -568,12 +568,12 @@ namespace LobsterModel
                 command.Dispose();
                 trans.Commit();
             }
-            catch (Exception e) when (e is InvalidOperationException || e is OracleException || e is IOException)
+            catch (Exception e) when (e is InvalidOperationException || e is OracleException || e is IOException || e is ColumnNotFoundException)
             {
                 // Discard the insert amde into the parent table
                 trans.Rollback();
                 MessageLog.LogError($"Error creating new clob when executing command: {command.CommandText} {e}");
-                throw new FileInsertFailedException("An exception ocurred when attempting to insert a file into the child table.", e);
+                throw new FileInsertException("An exception ocurred when attempting to insert a file into the child table.", e);
             }
 
             DBClobFile clobFile = new DBClobFile(table, mnemonic, mimeType, fullpath);
