@@ -123,14 +123,18 @@ namespace LobsterModel
         /// for table and mimetype information if required.
         /// </summary>
         /// <param name="fullpath">The path of the file to insert.</param>
-        public void SendInsertClobMessage(string fullpath)
+        public bool SendInsertClobMessage(string fullpath)
         {
             ClobDirectory clobDir = this.CurrentConnection.GetClobDirectoryForFile(fullpath);
 
-            Table table;
+            Table table = null;
             if (clobDir.ClobType.Tables.Count > 1)
             {
-                table = this.EventListener.PromptForTable(fullpath, clobDir.ClobType.Tables.ToArray());
+                bool result = this.EventListener.PromptForTable(fullpath, clobDir.ClobType.Tables.ToArray(), ref table);
+                if (!result)
+                {
+                    return false;
+                }
             }
             else
             {
@@ -139,9 +143,16 @@ namespace LobsterModel
 
             string mimeType = null;
             Column mimeTypeColumn;
-            if (table.TryGetColumnWithPurpose(Column.Purpose.MIME_TYPE, out mimeTypeColumn))
+            Column dataColumn;
+            if (table.TryGetColumnWithPurpose(Column.Purpose.MIME_TYPE, out mimeTypeColumn)
+                && table.TryGetColumnWithPurpose(Column.Purpose.CLOB_DATA, out dataColumn))
             {
-                mimeType = this.EventListener.PromptForMimeType(fullpath, mimeTypeColumn.MimeTypeList.ToArray());
+                bool result = this.EventListener.PromptForMimeType(fullpath, dataColumn.MimeTypeList.ToArray(), ref mimeType);
+
+                if (!result)
+                {
+                    return false;
+                }
             }
 
             DbConnection con = OpenConnection(this.CurrentConnection.Config);
@@ -153,6 +164,8 @@ namespace LobsterModel
             {
                 con.Dispose();
             }
+
+            return true;
         }
 
         /// <summary>
@@ -360,7 +373,7 @@ namespace LobsterModel
                     + $"(SID={config.SID})(SERVER=DEDICATED)))"
                     + $";Pooling=" + (config.UsePooling ? "true" : "false");
 
-                MessageLog.LogInfo($"Connecting to database {config.Name} using connection string {con.ConnectionString}");
+                MessageLog.LogSensitive($"Connecting to database {config.Name} using connection string {con.ConnectionString}");
                 con.Open();
                 return con;
             }
@@ -388,7 +401,11 @@ namespace LobsterModel
             string tempName = string.Format("{0:yyyy-MM-dd_HH-mm-ss}", DateTime.Now)
                 + Path.GetFileName(fullpath);
             string filepath = Path.Combine(Settings.Default.BackupDirectory, tempName);
-            this.DownloadClobDataToFile(clobFile, con, filepath);
+
+            if (!File.Exists(filepath))
+            {
+                this.DownloadClobDataToFile(clobFile, con, filepath);
+            }
         }
 
         /// <summary>
@@ -460,7 +477,7 @@ namespace LobsterModel
                     trans.Rollback();
                     MessageLog.LogError($"In invalid number of rows ({rowsAffected}) were updated for command: {command.CommandText}");
 
-                    throw new FileUpdateException(rowsAffected + " rows were affected during the update (expected only 1). The transaction has been rolled back.");
+                    throw new FileUpdateException($"{rowsAffected} rows were affected during the update (expected only 1). The transaction has been rolled back.");
                 }
 
                 trans.Commit();
@@ -610,7 +627,7 @@ namespace LobsterModel
 
                 if (!reader.Read())
                 {
-                    MessageLog.LogError($"No data found on clob retrieval of {clobFile.Mnemonic} when executing command: " + command.CommandText);
+                    MessageLog.LogError($"No data found on clob retrieval of {clobFile.Mnemonic} when executing command: {command.CommandText}");
                     throw new FileDownloadException($"No data was found for the given command {command.CommandText}");
                 }
 

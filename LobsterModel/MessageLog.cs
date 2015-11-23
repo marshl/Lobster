@@ -103,6 +103,15 @@ namespace LobsterModel
         }
 
         /// <summary>
+        /// Logs a sensitive message.
+        /// </summary>
+        /// <param name="message">The text of the message to create.</param>
+        public static void LogSensitive(string message)
+        {
+            MessageLog.instance.InternalLog(Message.TYPE.SENSITIVE, message);
+        }
+
+        /// <summary>
         /// Closes his message log
         /// </summary>
         public static void Close()
@@ -164,6 +173,11 @@ namespace LobsterModel
                 /// Error message type: Used to describe unexpected problems that prevented the program from operating.
                 /// </summary>
                 ERROR,
+
+                /// <summary>
+                /// THe message type for messages that should not be included in a log file that is unsecurely transmitted.
+                /// </summary>
+                SENSITIVE,
             }
 
             /// <summary>

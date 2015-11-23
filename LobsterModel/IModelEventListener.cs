@@ -30,12 +30,6 @@ namespace LobsterModel
     public interface IModelEventListener
     {
         /// <summary>
-        /// Raised whenver any file is changed.
-        /// </summary>
-        /// <param name="filename">The name of the file that was changed.</param>
-        void OnFileChange(string filename);
-
-        /// <summary>
         /// Raised when the automatic update of a file has been completed.
         /// This is not raised when a file is manually updated through the UI.
         /// </summary>
@@ -48,7 +42,7 @@ namespace LobsterModel
         /// <param name="fullpath">The name of the file that is being inserted.</param>
         /// <param name="tables">The list of possible tables the file could be inserted into.</param>
         /// <returns>The table that the file should be inserted into, or null if the insert is cancelled.</returns>
-        Table PromptForTable(string fullpath, Table[] tables);
+        bool PromptForTable(string fullpath, Table[] tables, ref Table table);
 
         /// <summary>
         /// Raised when the user is reuiqred to pick the mime type that a new file should be inserted as.
@@ -56,7 +50,7 @@ namespace LobsterModel
         /// <param name="fullpath">The file that will be inserted into the database.</param>
         /// <param name="mimeTypes">The list of mime types that can be selected from.</param>
         /// <returns>The mime type the file should be inserted with, or null if the insert is cancelled.</returns>
-        string PromptForMimeType(string fullpath, string[] mimeTypes);
+        bool PromptForMimeType(string fullpath, string[] mimeTypes, ref string mimeType);
 
         void OnEventProcessingStart();
 

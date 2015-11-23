@@ -220,7 +220,7 @@ namespace LobsterModel
                 insertCommand += $" t.{mnemCol.Name} ";
                 valueCommand += $" '{mnemonic}' ";
 
-                
+
 
                 if (mimeType != null)
                 {
@@ -231,8 +231,8 @@ namespace LobsterModel
             }
 
             // No parent table
-            Column idCol = this.GetColumnWithPurpose(Column.Purpose.ID);
-            if (idCol != null)
+            Column idCol;
+            if (this.TryGetColumnWithPurpose(Column.Purpose.ID, out idCol))
             {
                 insertCommand += $", t.{idCol.Name} ";
                 valueCommand += $", {idCol.NextID} ";
