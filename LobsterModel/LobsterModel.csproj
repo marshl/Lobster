@@ -46,7 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClobDirectory.cs" />
-    <Compile Include="ClobDirectoryNotFoundForFileException.cs" />
+    <Compile Include="ClobFileLookupException.cs" />
     <Compile Include="ClobType.cs" />
     <Compile Include="Column.cs" />
     <Compile Include="ColumnNotFoundException.cs" />
@@ -58,7 +58,6 @@
     <Compile Include="FileUpdateException.cs" />
     <Compile Include="MimeTypeNotFoundException.cs" />
     <Compile Include="Model.cs" />
-    <Compile Include="MultipleClobDirectoriesFoundForFileException.cs" />
     <Compile Include="SetConnectionException.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="DatabaseConfig.cs" />

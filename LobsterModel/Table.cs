@@ -211,16 +211,13 @@ namespace LobsterModel
 
                 insertCommand += $"t.{foreignKeyCol.Name}";
 
-                valueCommand += $@"( SELECT p.{parentIDCol.Name} FROM {pt.FullName} p 
-                            WHERE p.{parentMnemCol.Name} = '{mnemonic}' )";
+                valueCommand += $"( SELECT p.{parentIDCol.Name} FROM {pt.FullName} p WHERE p.{parentMnemCol.Name} = '{mnemonic}' )";
             }
             else
             {
                 Column mnemCol = this.GetColumnWithPurpose(Column.Purpose.MNEMONIC);
                 insertCommand += $" t.{mnemCol.Name} ";
                 valueCommand += $" '{mnemonic}' ";
-
-
 
                 if (mimeType != null)
                 {

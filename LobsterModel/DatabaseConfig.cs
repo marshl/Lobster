@@ -23,7 +23,6 @@
 namespace LobsterModel
 {
     using System;
-    using System.ComponentModel;
     using System.IO;
     using System.Xml;
     using System.Xml.Schema;
@@ -36,61 +35,62 @@ namespace LobsterModel
     public class DatabaseConfig : ICloneable
     {
         /// <summary>
-        /// The name of the connection. This is for display purposes only.
+        /// Gets or sets the name of the connection. This is for display purposes only.
         /// </summary>
         [XmlElement("name")]
         public string Name { get; set; }
 
         /// <summary>
-        /// The host of the database.
+        /// Gets or sets the host of the database.
         /// </summary>
         [XmlElement("host")]
         public string Host { get; set; }
 
         /// <summary>
-        /// The port the database is listening on. Usually 1521 for Oracle.
+        /// Gets or sets the port the database is listening on. Usually 1521 for Oracle.
         /// </summary>
         [XmlElement("port")]
         public string Port { get; set; }
 
         /// <summary>
-        /// The Oracle System ID of the database.
+        /// Gets or sets the Oracle System ID of the database.
         /// </summary>
         [XmlElement("sid")]
         public string SID { get; set; }
 
         /// <summary>
-        /// The name of the user/schema to connect as.
+        /// Gets or sets the name of the user/schema to connect as.
         /// </summary>
         [XmlElement("username")]
         public string Username { get; set; }
 
         /// <summary>
-        /// The password to connect with.
+        /// Gets or sets the password to connect with.
         /// </summary>
         [XmlElement("password")]
         public string Password { get; set; }
 
         /// <summary>
-        /// This is the location of the CodeSource directory that is used for this database.
+        /// Gets or sets the location of the CodeSource directory that is used for this database.
         /// </summary>
         [XmlElement("codeSource")]
         public string CodeSource { get; set; }
 
         /// <summary>
-        /// If pooling is enabled, when Lobster connects to the Oracle database Oracle will remember the connection for a time, and reuse it if the same computer connects using the same connection string.
+        /// Gets or sets a value indicating whether pooling is enabled or not. 
+        /// When enabled, Oracle will remember new connections for a time, and reuse it if the same computer connects using the same connection string.
         /// </summary>
         [XmlElement("usePooling")]
         public bool UsePooling { get; set; }
 
         /// <summary>
-        /// The directory name where ClobTypes are stored.
+        /// Gets or sets the directory name where ClobTypes are stored.
         /// </summary>
         [XmlElement("clobTypeDir")]
         public string ClobTypeDir { get; set; }
 
         /// <summary>
-        /// The file from which this DatabaseConfig was loaded.
+        /// Gets or sets the file from which this DatabaseConfig was loaded.
         /// </summary>
         [XmlIgnore]
         public string FileLocation { get; set; }

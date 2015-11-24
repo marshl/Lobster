@@ -34,14 +34,16 @@ namespace LobsterModel
         /// This is not raised when a file is manually updated through the UI.
         /// </summary>
         /// <param name="filename">The name of the file that was updated.</param>
-        void OnAutoUpdateComplete(string filename, bool updateSucess);
+        /// <param name="updateSuccess">Whether the update was a success or not.</param>
+        void OnAutoUpdateComplete(string filename, bool updateSuccess);
 
         /// <summary>
         /// Raised when a file being inserted into the database requires a table to be specified for it.
         /// </summary>
         /// <param name="fullpath">The name of the file that is being inserted.</param>
         /// <param name="tables">The list of possible tables the file could be inserted into.</param>
-        /// <returns>The table that the file should be inserted into, or null if the insert is cancelled.</returns>
+        /// <param name="table">The table that the file should be inserted into, or null if the insert is cancelled.</param>
+        /// <returns>A vale indicating whether the user chose a table or not.</returns>
         bool PromptForTable(string fullpath, Table[] tables, ref Table table);
 
         /// <summary>
@@ -49,11 +51,18 @@ namespace LobsterModel
         /// </summary>
         /// <param name="fullpath">The file that will be inserted into the database.</param>
         /// <param name="mimeTypes">The list of mime types that can be selected from.</param>
-        /// <returns>The mime type the file should be inserted with, or null if the insert is cancelled.</returns>
+        /// <param name="mimeType">The mime type the file should be inserted with, or null if the insert is cancelled.</param>
+        /// <returns>A value indicating whether ther user chose a mime type or not.</returns>
         bool PromptForMimeType(string fullpath, string[] mimeTypes, ref string mimeType);
 
+        /// <summary>
+        /// The event raised when the first file change event in a processing group is received.
+        /// </summary>
         void OnEventProcessingStart();
 
+        /// <summary>
+        /// The event raised when the first last file change event of a processing group is completed.
+        /// </summary>
         void OnFileProcessingFinished();
     }
 }

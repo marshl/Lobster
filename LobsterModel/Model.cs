@@ -40,11 +40,6 @@ namespace LobsterModel
     public class Model
     {
         /// <summary>
-        /// The event listener that is sent messages whenever a change is made to the model due to a FileSystemEvent.
-        /// </summary>
-        public IModelEventListener EventListener { get; private set; }
-
-        /// <summary>
         /// Gets or sets the list of mime types that are used to translate from file names to database mnemonics and vice-sersa.
         /// </summary>
         private MimeTypeList mimeList;
@@ -58,6 +53,11 @@ namespace LobsterModel
             this.EventListener = eventListener;
             this.mimeList = Utils.DeserialiseXmlFileUsingSchema<MimeTypeList>("LobsterSettings/MimeTypes.xml", null);
         }
+
+        /// <summary>
+        /// Gets the event listener that is sent messages whenever a change is made to the model due to a FileSystemEvent.
+        /// </summary>
+        public IModelEventListener EventListener { get; private set; }
 
         /// <summary>
         /// Gets or sets the current connection that is being used by this model.
@@ -123,6 +123,7 @@ namespace LobsterModel
         /// for table and mimetype information if required.
         /// </summary>
         /// <param name="fullpath">The path of the file to insert.</param>
+        /// <returns>A value indicating whether the insert was followed through.</returns>
         public bool SendInsertClobMessage(string fullpath)
         {
             ClobDirectory clobDir = this.CurrentConnection.GetClobDirectoryForFile(fullpath);
@@ -171,7 +172,7 @@ namespace LobsterModel
         /// <summary>
         /// Public access for downloading database files.
         /// </summary>
-        /// <param name="clobFile">The database file that will be downloaded.</param>
+        /// <param name="fullpath">The file name to download the file for.</param>
         /// <returns>The path of the resulting file.</returns>
         public string SendDownloadClobDataToFileMessage(string fullpath)
         {
@@ -186,9 +187,8 @@ namespace LobsterModel
             {
                 ClobDirectory clobDir = this.CurrentConnection.GetClobDirectoryForFile(fullpath);
                 clobFile = clobDir.GetDatabaseFileForFullpath(fullpath);
-
             }
-            catch (Exception e) when (e is ClobDirectoryNotFoundForFileException || e is MultipleClobDirectoriesFoundForFileException)
+            catch (Exception e) when (e is ClobFileLookupException)
             {
                 throw new FileDownloadException("The path could not be mapped to a DbClobFile");
             }
@@ -197,7 +197,6 @@ namespace LobsterModel
             {
                 throw new FileDownloadException("The path was found in a directory, but could be found as a file.");
             }
-
 
             string filepath = Utils.GetTempFilepath(clobFile.Filename);
             try
@@ -240,7 +239,6 @@ namespace LobsterModel
         /// Sets the current connection to the given connection, if able.
         /// </summary>
         /// <param name="config">The connection to open.</param>
-        /// <returns>Whether making the connection was successful or not.</returns>
         public void SetDatabaseConnection(DatabaseConfig config)
         {
             MessageLog.LogInfo($"Changing connection to {config.Name}");

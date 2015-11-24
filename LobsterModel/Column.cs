@@ -149,7 +149,7 @@ namespace LobsterModel
         public List<string> MimeTypeList { get; set; }
 
         /// <summary>
-        /// The parent Table of this column.
+        /// Gets or sets the parent Table of this column.
         /// </summary>
         [XmlIgnore]
         [Browsable(false)]

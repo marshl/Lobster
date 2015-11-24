@@ -109,11 +109,11 @@ namespace LobsterModel
             List<ClobDirectory> clobDirList = this.ClobDirectoryList.FindAll(x => absolutePath.Contains(x.ClobType.Fullpath));
             if (clobDirList.Count == 0)
             {
-                throw new ClobDirectoryNotFoundForFileException();
+                throw new ClobFileLookupException($"The file could not be found: {fullpath}");
             }
             else if (clobDirList.Count > 1)
             {
-                throw new MultipleClobDirectoriesFoundForFileException();
+                throw new ClobFileLookupException($"The file was found in too many places: {fullpath}");
             }
 
             return clobDirList[0];
@@ -168,6 +168,11 @@ namespace LobsterModel
             }
         }
 
+        /// <summary>
+        /// The event raised when a file is renamed within the CodeSource directory.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
         private void OnFileRenameEvent(object sender, RenamedEventArgs e)
         {
             this.OnFileChangeEvent(sender, e);
@@ -254,7 +259,7 @@ namespace LobsterModel
                 {
                     clobDir = this.GetClobDirectoryForFile(e.FullPath);
                 }
-                catch (Exception ex) when (ex is ClobDirectoryNotFoundForFileException || ex is MultipleClobDirectoriesFoundForFileException)
+                catch (Exception ex) when (ex is ClobFileLookupException)
                 {
                     MessageLog.LogInfo($"The file does not belong to any ClobDirectory and will be skipped {e.FullPath}");
                     return;
