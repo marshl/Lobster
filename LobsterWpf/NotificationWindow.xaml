@@ -11,35 +11,10 @@
         <!-- Notification area -->
         <Border BorderThickness="1" Background="Azure" BorderBrush="Black" CornerRadius="10">
             <StackPanel Margin="15" Orientation="Horizontal">
-                <Image Source="{DynamicResource SuccessImageSource}" Width="54"/>
-                <TextBlock TextWrapping="Wrap" Margin="5" Width="200" Text="{Binding Filename, FallbackValue=MESSAGE}" VerticalAlignment="Center"/>
+                <Image Name="statusImage" Source="{Binding ImageSource, FallbackValue=SucessImageSource}" Width="54"/>
+                <TextBlock TextWrapping="Wrap" Margin="5" Width="200" Text="{Binding Message, FallbackValue=MESSAGE}" VerticalAlignment="Center"/>
             </StackPanel>
         </Border>
-
-        <!-- Animation -->
-        <!--
-        <Grid.Triggers>
-            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
-                <BeginStoryboard>
-                    <Storyboard Completed="Storyboard_Completed">
-
-                        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.CenterX)">
-                            <SplineDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
-                            <SplineDoubleKeyFrame KeyTime="0:0:0.5" Value="300"/>
-                        </DoubleAnimationUsingKeyFrames>
-                        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)">
-                            <SplineDoubleKeyFrame KeyTime="0:0:2" Value="1"/>
-                            <SplineDoubleKeyFrame KeyTime="0:0:4" Value="0"/>
-                        </DoubleAnimationUsingKeyFrames>
-                    </Storyboard>
-                </BeginStoryboard>
-            </EventTrigger>
-        </Grid.Triggers>
--->
-        <Grid.RenderTransform>
-            <ScaleTransform ScaleY="1" />
-        </Grid.RenderTransform>
-
     </Grid>
     <Window.Resources>
         <ResourceDictionary>

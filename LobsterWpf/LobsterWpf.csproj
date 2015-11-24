@@ -81,6 +81,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="TableSelectorWindow.xaml.cs">
+      <DependentUpon>TableSelectorWindow.xaml</DependentUpon>
+    </Compile>
     <Page Include="ConnectionListWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -103,6 +106,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="MimeTypeSelectorWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="NotificationWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -111,8 +118,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="TableSelectorWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MimeTypeSelectorWindow.xaml.cs">
+      <DependentUpon>MimeTypeSelectorWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="NotificationWindow.xaml.cs">
       <DependentUpon>NotificationWindow.xaml</DependentUpon>
     </Compile>
@@ -157,6 +171,9 @@
     <SplashScreen Include="MainSplashScreen.png" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Resources\Images\SecurityLock.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Resource Include="Resources\Images\008_Reminder.ico" />
     <Resource Include="Resources\Images\010_LowPriority.ico" />
     <Content Include="Resources\Images\041_Sort.ico">

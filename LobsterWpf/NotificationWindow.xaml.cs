@@ -1,21 +1,35 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using System.Windows.Threading;
-
+﻿//-----------------------------------------------------------------------
+// <copyright file="NotificationWindow.cs" company="marshl">
+// Copyright 2015, Liam Marshall, marshl.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
+//
+//      'What was that?' asked Beregond. 'You also felt something?'
+//      'Yes,' muttered Pippin. 'It is the sign of our fall, and the shadow of
+//       doom, a Fell Rider of the air.'
+//
+//      [ _The Lord of the Rings_, V/i: "Minas Tirith"]
+//-----------------------------------------------------------------------
 namespace LobsterWpf
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Windows;
+    using System.Windows.Media;
+    using System.Windows.Media.Animation;
+    using System.Windows.Threading;
+
     /// <summary>
     /// Interaction logic for NotificationWindow.xaml
     /// </summary>
@@ -25,14 +39,18 @@ namespace LobsterWpf
 
         private int windowIndex;
 
-        public string Filename { get; set; }
+        public string Message { get; set; }
 
-        public NotificationWindow(string filename)
+        public ImageSource ImageSource { get; set; }
+
+        public NotificationWindow(string message, bool result)
         {
             InitializeComponent();
 
-            this.Filename = filename;
+            this.Message = message;
             this.DataContext = this;
+
+            this.ImageSource = (ImageSource)(result ? Resources["SuccessImageSource"] : Resources["WarningImageSource"]);
 
             if (activeWindowList == null)
             {
@@ -64,42 +82,31 @@ namespace LobsterWpf
 
                 this.Left = corner.X;
                 this.Top = corner.Y - this.ActualHeight * (this.windowIndex + 1);
-                //ScaleTransform
-                //UIElement
 
                 TimeSpan slideDuration = new TimeSpan(0, 0, 0, 0, 250);
                 TimeSpan pauseDuration = new TimeSpan(0, 0, 0, 1, 0);
                 TimeSpan fadeDuration = new TimeSpan(0, 0, 0, 2, 0);
 
                 var sb = new Storyboard { Duration = new Duration(slideDuration + fadeDuration + pauseDuration) };
-
-                //var aniWidth = new DoubleAnimationUsingKeyFrames();
-                var aniHeight = new DoubleAnimationUsingKeyFrames();
+                
+                var heightAnimation = new DoubleAnimationUsingKeyFrames();
                 var fadeAnimation = new DoubleAnimationUsingKeyFrames();
-
-                //aniWidth.Duration = new Duration(new TimeSpan(0, 0, 0, 0, 200));
-                aniHeight.Duration = new Duration(slideDuration);
+                
+                heightAnimation.Duration = new Duration(slideDuration);
                 fadeAnimation.Duration = new Duration(fadeDuration);
 
-                aniHeight.KeyFrames.Add(new EasingDoubleKeyFrame(corner.X, KeyTime.FromTimeSpan(TimeSpan.Zero)));
-                aniHeight.KeyFrames.Add(new EasingDoubleKeyFrame(corner.X - this.ActualWidth, KeyTime.FromTimeSpan(slideDuration)));
+                heightAnimation.KeyFrames.Add(new EasingDoubleKeyFrame(corner.X, KeyTime.FromTimeSpan(TimeSpan.Zero)));
+                heightAnimation.KeyFrames.Add(new EasingDoubleKeyFrame(corner.X - this.ActualWidth, KeyTime.FromTimeSpan(slideDuration)));
                 fadeAnimation.KeyFrames.Add(new EasingDoubleKeyFrame(1, KeyTime.FromTimeSpan(slideDuration + pauseDuration)));
                 fadeAnimation.KeyFrames.Add(new EasingDoubleKeyFrame(0, KeyTime.FromTimeSpan(fadeDuration)));
 
-                //aniWidth.KeyFrames.Add(new EasingDoubleKeyFrame(target.ActualWidth, KeyTime.FromTimeSpan(new TimeSpan(0, 0, 0, 0, 00))));
-                //aniWidth.KeyFrames.Add(new EasingDoubleKeyFrame(newWidth, KeyTime.FromTimeSpan(new TimeSpan(0, 0, 0, 0, 200))));
-
-                //Storyboard.SetTarget(aniWidth, target);
-                //Storyboard.SetTargetProperty(aniWidth, new PropertyPath(Window.WidthProperty));
-
-                Storyboard.SetTarget(aniHeight, this);
-                Storyboard.SetTargetProperty(aniHeight, new PropertyPath(Window.LeftProperty));
+                Storyboard.SetTarget(heightAnimation, this);
+                Storyboard.SetTargetProperty(heightAnimation, new PropertyPath(Window.LeftProperty));
 
                 Storyboard.SetTarget(fadeAnimation, this);
                 Storyboard.SetTargetProperty(fadeAnimation, new PropertyPath(Window.OpacityProperty));
 
-                //sb.Children.Add(aniWidth);
-                sb.Children.Add(aniHeight);
+                sb.Children.Add(heightAnimation);
                 sb.Children.Add(fadeAnimation);
 
                 sb.Completed += Storyboard_Completed;
@@ -111,7 +118,7 @@ namespace LobsterWpf
 
         private void Storyboard_Completed(object sender, EventArgs e)
         {
-            activeWindowList[windowIndex] = false;
+            NotificationWindow.activeWindowList[windowIndex] = false;
             this.Close();
         }
     }

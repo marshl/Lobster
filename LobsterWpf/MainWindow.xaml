@@ -31,7 +31,7 @@
             </Grid.ColumnDefinitions>
             <ListBox Name="clobTypeListBox" Grid.Column="0" Grid.Row="1" ItemsSource="{Binding ClobTypes}" SelectionChanged="clobTypeListBox_SelectionChanged">
                 <ListBox.ItemTemplate>
-                    <DataTemplate>
+                    <DataTemplate DataType="ClobType">
                         <StackPanel>
                             <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
                             <TextBlock Text="{Binding Directory}" FontStyle="Italic"/>
@@ -68,7 +68,7 @@
                                             </Style>
                                         </HierarchicalDataTemplate.Resources>
                                         <StackPanel Orientation="Horizontal">
-                                            <Image Source="{DynamicResource FolderImageSource}" Height="24"/>
+                                            <Image Source="{Binding Path=ImageUrl}" Height="24"/>
                                             <TextBlock Text="{Binding Path=Name}" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </HierarchicalDataTemplate>
@@ -105,12 +105,18 @@
                         </StackPanel>
                         <StackPanel Grid.Column="2">
                             <Border BorderThickness="1" Background="White" CornerRadius="5" BorderBrush="Black">
-                                <Expander x:Name="detailsExpander"  IsExpanded="True" >
+                                <Expander x:Name="detailsExpander"  IsExpanded="True" DataContext="{Binding Path=SelectedFileNode}" >
                                     <Expander.Header>
                                         <TextBlock>Details</TextBlock>
                                     </Expander.Header>
                                     <StackPanel Grid.Column="2">
-                                        <Label>[Filename]</Label>
+                                        <TextBlock Margin="5,5,0,5">
+                                            <TextBlock.Text>
+                                                <MultiBinding StringFormat="Last Modified: {0:MM/dd/yyyy}" FallbackValue="Last Modified">
+                                                    <Binding Path="LastWriteTime" />
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
                                         <Label>[Size]</Label>
                                     </StackPanel>
                                 </Expander>
