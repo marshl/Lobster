@@ -20,10 +20,17 @@
 
         <ListBox Grid.Row="2" Name="connectionListBox" ItemsSource="{Binding DatabaseConfigList}">
             <ListBox.ItemTemplate>
-                <DataTemplate >
+                <DataTemplate DataType="DatabaseConfig">
                     <StackPanel>
-                        <TextBlock>Name</TextBlock>
                         <TextBlock Text="{Binding Path=Name}"/>
+                        <TextBlock>
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="Host: {0}:{1}">
+                                    <Binding Path="Host" />
+                                    <Binding Path="Port" />
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
                     </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>
