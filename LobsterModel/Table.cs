@@ -42,16 +42,12 @@ namespace LobsterModel
         /// <summary>
         /// Gets or sets the schema/user that this table belongs to.
         /// </summary>
-        [DisplayName("Schema/Owner Name")]
-        [Description("The schema/owner of this table")]
         [XmlElement("schema")]
         public string Schema { get; set; }
 
         /// <summary>
         /// Gets or sets the name of this table in the database.
         /// </summary>
-        [DisplayName("Name")]
-        [Description("The name of this table")]
         [XmlElement("name")]
         public string Name { get; set; }
 
@@ -59,24 +55,18 @@ namespace LobsterModel
         /// Gets or sets the extension that will be added to the mnemonic to create the guesstimate local file name. 
         /// If the default extension is not set, then .xml will be used
         /// </summary>
-        [DisplayName("Default Extension")]
-        [Description("The file extension that will be used to compare mnemonics on the database to local files. The default is '.xml'")]
         [XmlElement("defaultExtension")]
         public string DefaultExtension { get; set; }
 
         /// <summary>
         /// Gets or sets the columns in this table that Lobster needs.
         /// </summary>
-        [DisplayName("Column List")]
-        [Description("The columns in this table")]
         [XmlArray("columns")]
         public List<Column> Columns { get; set; }
 
         /// <summary>
         /// Gets or sets the parent table of this table, if this table is part of a parent-child relationship.
         /// </summary>
-        [DisplayName("Parent Table")]
-        [Description("The parent table if this table is in a parent/child relationship.")]
         [XmlElement("parentTable")]
         public Table ParentTable { get; set; }
 
