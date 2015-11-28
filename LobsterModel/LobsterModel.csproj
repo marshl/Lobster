@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BackupLog.cs" />
     <Compile Include="ClobDirectory.cs" />
     <Compile Include="ClobFileLookupException.cs" />
     <Compile Include="ClobType.cs" />
@@ -52,6 +53,7 @@
     <Compile Include="ColumnNotFoundException.cs" />
     <Compile Include="ConnectToDatabaseException.cs" />
     <Compile Include="ClobTypeLoadException.cs" />
+    <Compile Include="FileBackup.cs" />
     <Compile Include="FileDownloadException.cs" />
     <Compile Include="FileInsertException.cs" />
     <Compile Include="FileListRetrievalException.cs" />

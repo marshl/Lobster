@@ -52,6 +52,8 @@ namespace LobsterModel
         {
             this.EventListener = eventListener;
             this.mimeList = Utils.DeserialiseXmlFileUsingSchema<MimeTypeList>("LobsterSettings/MimeTypes.xml", null);
+
+            this.FileBackupLog = new BackupLog();
         }
 
         /// <summary>
@@ -69,6 +71,8 @@ namespace LobsterModel
         /// These files are deleted when the model is disposed.
         /// </summary>
         public List<string> TempFileList { get; private set; } = new List<string>();
+
+        public BackupLog FileBackupLog { get; }
 
         /// <summary>
         /// Gets a value indicating whether the currently set connection directory is valid or not.
@@ -112,9 +116,9 @@ namespace LobsterModel
                 this.UpdateDatabaseClob(fullpath, clobFile, con);
                 con.Dispose();
             }
-            catch (ConnectToDatabaseException e)
+            catch (Exception ex) when (ex is ConnectToDatabaseException || ex is ClobFileLookupException)
             {
-                throw new FileUpdateException("An error occurred when connecting to the database.", e);
+                throw new FileUpdateException("An error occurred when connecting to the database.", ex);
             }
         }
 
@@ -398,11 +402,12 @@ namespace LobsterModel
 
             string tempName = string.Format("{0:yyyy-MM-dd_HH-mm-ss}", DateTime.Now)
                 + Path.GetFileName(fullpath);
-            string filepath = Path.Combine(Settings.Default.BackupDirectory, tempName);
+            string backupFilename = Path.GetFullPath(Path.Combine(Settings.Default.BackupDirectory, tempName));
 
-            if (!File.Exists(filepath))
+            if (!File.Exists(backupFilename))
             {
-                this.DownloadClobDataToFile(clobFile, con, filepath);
+                this.DownloadClobDataToFile(clobFile, con, backupFilename);
+                this.FileBackupLog.AddBackup(fullpath, backupFilename);
             }
         }
 
