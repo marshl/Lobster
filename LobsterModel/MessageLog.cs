@@ -50,7 +50,7 @@ namespace LobsterModel
         /// <summary>
         /// Initializes a new instance of the <see cref="MessageLog"/> class.
         /// </summary>
-        public MessageLog()
+        private MessageLog()
         {
             MessageLog.instance = this;
 
@@ -60,6 +60,16 @@ namespace LobsterModel
             this.outStream.WriteLine();
 
             MessageLog.LogInfo("Starting Lobster (build " + Utils.RetrieveLinkerTimestamp() + ")");
+        }
+
+        public static MessageLog Initialise()
+        {
+            if ( instance == null )
+            {
+                instance = new MessageLog();
+            }
+
+            return instance;
         }
 
         /// <summary>
