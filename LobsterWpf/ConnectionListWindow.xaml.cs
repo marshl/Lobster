@@ -68,9 +68,7 @@ namespace LobsterWpf
                 this.NotifyPropertyChanged("DatabaseConfigList");
             }
         }
-
-        //public DatabaseConfig SelectedConnection { get; private set; }
-
+        
         public ConnectionListWindow(Model lobsterModel)
         {
             InitializeComponent();
@@ -111,6 +109,17 @@ namespace LobsterWpf
 
             DatabaseConfig config = this.DatabaseConfigList[this.connectionListBox.SelectedIndex];
 
+            this.TryConnectWithConfig(config);
+        }
+
+        protected void HandleDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            DatabaseConfig config = ((ListBoxItem)sender).Content as DatabaseConfig;
+            this.TryConnectWithConfig(config);
+        }
+
+        private void TryConnectWithConfig(DatabaseConfig config)
+        {
             try
             {
                 this.model.SetDatabaseConnection(config);
@@ -119,7 +128,7 @@ namespace LobsterWpf
             }
             catch (SetConnectionException ex)
             {
-                MessageBox.Show($"An error occurred when attempting to connect to the database: {ex}");
+                MessageBox.Show($"An error occurred when attempting to connect to the database: \n{ex}");
             }
         }
     }

@@ -144,7 +144,6 @@ namespace LobsterWpf
 
             string filename = this.connectionView.SelectedFileNode.FullName;
 
-
             try
             {
                 string downloadedFile = this.Model.SendDownloadClobDataToFileMessage(filename);
@@ -175,9 +174,9 @@ namespace LobsterWpf
         {
             if (this.connectionView.SelectedFileNode != null)
             {
+                string filename = this.connectionView.SelectedFileNode.FullName;
                 try
                 {
-                    string filename = this.connectionView.SelectedFileNode.FullName;
                     bool result = this.Model.SendInsertClobMessage(filename);
 
                     if (result)
@@ -187,7 +186,8 @@ namespace LobsterWpf
                 }
                 catch (FileInsertException ex)
                 {
-                    System.Windows.MessageBox.Show(ex.Message);
+                    System.Windows.MessageBox.Show($"The file insert failed: {ex}");
+                    this.DisplayUpdateNotification(filename, false);
                 }
             }
         }

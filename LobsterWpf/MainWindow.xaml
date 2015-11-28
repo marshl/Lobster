@@ -10,6 +10,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0">
@@ -103,45 +104,85 @@
                                 </StackPanel>
                             </Button>
                         </StackPanel>
-                        <StackPanel Grid.Column="2">
+                        <StackPanel Grid.Column="2" DataContext="{Binding Path=SelectedFileNode}">
                             <Border BorderThickness="1" Background="White" CornerRadius="5" BorderBrush="Black">
-                                <Expander x:Name="detailsExpander"  IsExpanded="True" DataContext="{Binding Path=SelectedFileNode}" >
+                                <Expander x:Name="detailsExpander"  IsExpanded="True">
                                     <Expander.Header>
                                         <TextBlock>Details</TextBlock>
                                     </Expander.Header>
                                     <StackPanel Grid.Column="2">
                                         <TextBlock Margin="5,5,0,5">
                                             <TextBlock.Text>
-                                                <MultiBinding StringFormat="Last Modified: {0:MM/dd/yyyy}" FallbackValue="Last Modified">
+                                                <MultiBinding StringFormat="Last Modified: {0:MM/dd/yyyy}">
                                                     <Binding Path="LastWriteTime" />
                                                 </MultiBinding>
                                             </TextBlock.Text>
                                         </TextBlock>
-                                        <Label>[Size]</Label>
+                                        <TextBlock Margin="5,5,0,5">
+                                            <TextBlock.Text>
+                                                <MultiBinding StringFormat="Size: {0:N2} KB">
+                                                    <Binding Path="FileSize" />
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
                                     </StackPanel>
                                 </Expander>
                             </Border>
                             <Border BorderThickness="1" Background="White" CornerRadius="5" BorderBrush="Black">
-                                <Expander x:Name="istoryExpander" IsExpanded="True" Background="White">
+                                <Expander x:Name="historyExpander" IsExpanded="True" Background="White">
                                     <Expander.Header>
                                         <StackPanel>
-                                            <TextBlock>Change Log</TextBlock>
+                                            <TextBlock>File History</TextBlock>
                                         </StackPanel>
                                     </Expander.Header>
-                                    <StackPanel Grid.Column="2">
-                                        <Label>Hello</Label>
-                                        <Label>World</Label>
-                                    </StackPanel>
+                                    <ListBox Name="fileHistoryListBox" ItemsSource="{Binding FileBackupList}">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate DataType="FileBackup">
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding DateCreated}" FontWeight="Bold"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
                                 </Expander>
                             </Border>
                         </StackPanel>
-
                     </Grid>
                 </TabItem>
                 <TabItem Header="Database Only Files">
                     <Grid Background="#FFE5E5E5"/>
                 </TabItem>
             </TabControl>
+        </Grid>
+        <Grid Grid.Row="2">
+            <StatusBar DataContext="{Binding SelectedFileNode}">
+                <StatusBar.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="50" />
+                            </Grid.ColumnDefinitions>
+                        </Grid>
+                    </ItemsPanelTemplate>
+                </StatusBar.ItemsPanel>
+                <StatusBarItem Grid.Column="0">
+                    <TextBlock Text="{Binding FullName}"/>
+                </StatusBarItem>
+                <StatusBarItem Grid.Column="1" HorizontalContentAlignment="Right">
+                    <TextBlock>
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="Last Modified: {0:MM/dd/yyyy}">
+                                <Binding Path="LastWriteTime" />
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                </StatusBarItem>
+                <StatusBarItem Grid.Column="2" HorizontalContentAlignment="Right">
+                    <TextBlock Text="{Binding FileSize}"/>
+                </StatusBarItem>
+            </StatusBar>
         </Grid>
     </Grid>
     <Window.Resources>

@@ -14,7 +14,10 @@ namespace LobsterWpf
 {
     class ConnectionView : INotifyPropertyChanged
     {
-        private DatabaseConnection connection;
+        public DatabaseConnection connection
+        {
+            get;
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -49,7 +52,7 @@ namespace LobsterWpf
                 else
                 {
                     bool selectedFileIsInDatabase = false;
-                    if (this.SelectedFileNode != null )
+                    if (this.SelectedFileNode != null)
                     {
                         string fullpath = this.SelectedFileNode.FullName;
                         ClobDirectory clobDir = this.connection.GetClobDirectoryForFile(fullpath);
@@ -145,7 +148,7 @@ namespace LobsterWpf
                 this.NotifyPropertyChanged("IsEnabled");
             }
         }
-        
+
         public bool IsAutoClobEnabled
         {
             get

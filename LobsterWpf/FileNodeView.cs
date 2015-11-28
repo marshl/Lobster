@@ -7,11 +7,22 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
+using LobsterModel;
 
 namespace LobsterWpf
 {
     class FileNodeView
     {
+        public string FileSize
+        {
+            get
+            {
+                return this.IsDirectory ? null : Utils.BytesToString(new FileInfo(this.FullName).Length);
+            }
+        }
+
+        public ObservableCollection<FileBackup> FileBackupList { get; }
+
         private ConnectionView parentConnectionView;
         public FileNodeView(ConnectionView connectionView, string path)
         {
@@ -22,6 +33,12 @@ namespace LobsterWpf
             if (fileInfo.Exists)
             {
                 this.LastWriteTime = fileInfo.LastWriteTime;
+
+                List<FileBackup> fileBackups = this.parentConnectionView.connection.ParentModel.FileBackupLog.GetBackupsForFile(path);
+                if (fileBackups != null)
+                {
+                    this.FileBackupList = new ObservableCollection<FileBackup>(fileBackups);
+                }
             }
 
             DirectoryInfo dirInfo = new DirectoryInfo(path);
@@ -29,6 +46,7 @@ namespace LobsterWpf
 
             if (this.IsDirectory)
             {
+                this.LastWriteTime = dirInfo.LastWriteTime;
                 this.Children = new ObservableCollection<FileNodeView>();
 
                 foreach (DirectoryInfo subDir in dirInfo.GetDirectories())
@@ -102,7 +120,7 @@ namespace LobsterWpf
                 {
                     return this.IsReadOnly ? @"Resources\Images\SecurityLock.ico" : @"Resources\Images\Generic_Document.ico";
                 }
-                catch ( IOException)
+                catch (IOException)
                 {
                     // In case the file was not found
                     return @"Resources\Images\Annotate_Blocked_large.ico";
