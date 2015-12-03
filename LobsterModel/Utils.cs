@@ -205,11 +205,20 @@ namespace LobsterModel
             return Path.Combine(tempDir.FullName, Guid.NewGuid() + originalFilename);
         }
 
+        /// <summary>
+        /// Converts any number of bytes into a human readable string containing the most significant byte size with 2 decimal places.
+        /// </summary>
+        /// <param name="byteCount">The number of bytes to convert.</param>
+        /// <returns>The human readable string.</returns>
         public static string BytesToString(long byteCount)
         {
-            string[] suf = { "B", "KB", "MB", "GB", "TB", "PB", "EB" }; //Longs run out around EB
+            // Longs run out around EB
+            string[] suf = { "B", "KB", "MB", "GB", "TB", "PB", "EB" };
             if (byteCount == 0)
+            {
                 return "0" + suf[0];
+            }
+
             long bytes = Math.Abs(byteCount);
             int place = Convert.ToInt32(Math.Floor(Math.Log(bytes, 1024)));
             double num = Math.Round(bytes / Math.Pow(1024, place), 1);

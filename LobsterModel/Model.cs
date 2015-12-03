@@ -72,6 +72,9 @@ namespace LobsterModel
         /// </summary>
         public List<string> TempFileList { get; private set; } = new List<string>();
 
+        /// <summary>
+        /// Gets the backup log for this model. 
+        /// </summary>
         public BackupLog FileBackupLog { get; }
 
         /// <summary>
@@ -97,29 +100,39 @@ namespace LobsterModel
         }
 
         /// <summary>
-        /// Updates a database file with its local content.
+        /// Updates the database recrod of the target file with the data from the source file (which are normally the same file).
         /// </summary>
-        /// <param name="fullpath">The file to update.</param>
-        public void SendUpdateClobMessage(string fullpath)
+        /// <param name="targetFilename">The file to update the database record for.</param>
+        /// <param name="sourceFilename">The file to get the data fro the update the record with.</param>
+        public void UpdateClobWithExternalFile(string targetFilename, string sourceFilename)
         {
             try
             {
                 DbConnection con = OpenConnection(this.CurrentConnection.Config);
-                ClobDirectory clobDir = this.CurrentConnection.GetClobDirectoryForFile(fullpath);
-                DBClobFile clobFile = clobDir?.GetDatabaseFileForFullpath(fullpath);
+                ClobDirectory clobDir = this.CurrentConnection.GetClobDirectoryForFile(targetFilename);
+                DBClobFile clobFile = clobDir?.GetDatabaseFileForFullpath(targetFilename);
 
                 if (Settings.Default.BackupEnabled)
                 {
-                    this.BackupClobFile(con, clobFile, fullpath);
+                    this.BackupClobFile(con, clobFile, targetFilename);
                 }
 
-                this.UpdateDatabaseClob(fullpath, clobFile, con);
+                this.UpdateDatabaseClob(sourceFilename, clobFile, con);
                 con.Dispose();
             }
             catch (Exception ex) when (ex is ConnectToDatabaseException || ex is ClobFileLookupException)
             {
                 throw new FileUpdateException("An error occurred when connecting to the database.", ex);
             }
+        }
+
+        /// <summary>
+        /// Updates a database file with its local content.
+        /// </summary>
+        /// <param name="fullpath">The file to update.</param>
+        public void SendUpdateClobMessage(string fullpath)
+        {
+            this.UpdateClobWithExternalFile(fullpath, fullpath);
         }
 
         /// <summary>

@@ -126,13 +126,12 @@ namespace LobsterModel
         {
             Column clobCol = clobFile.GetDataColumn();
             string command =
-                   "UPDATE " + this.FullName
-                 + " SET " + clobCol.FullName + " = :data";
+                   $"UPDATE {this.FullName} c SET c.{clobCol.Name} = :data";
 
             Column dateCol;
             if (this.TryGetColumnWithPurpose(Column.Purpose.DATETIME, out dateCol))
             {
-                command += ", " + dateCol.FullName + " = SYSDATE";
+                command += $", {dateCol.Name} = SYSDATE";
             }
 
             if (this.ParentTable != null)
@@ -142,15 +141,15 @@ namespace LobsterModel
                 Column parentIDCol = pt.GetColumnWithPurpose(Column.Purpose.ID);
                 Column parentMnemCol = pt.GetColumnWithPurpose(Column.Purpose.MNEMONIC);
 
-                command += " WHERE " + foreignKeyCol.FullName + " = ("
-                        + " SELECT " + parentIDCol.FullName
-                        + " FROM " + pt.FullName
-                        + " WHERE " + parentMnemCol.FullName + " = '" + clobFile.Mnemonic + "')";
+                command += $" WHERE c.{foreignKeyCol.Name} = ("
+                        + $" SELECT p.{parentIDCol.Name}"
+                        + $" FROM {pt.FullName} p"
+                        + $" WHERE p.{parentMnemCol.Name} = '{clobFile.Mnemonic}')";
             }
             else
             {
                 Column mnemCol = this.GetColumnWithPurpose(Column.Purpose.MNEMONIC);
-                command += " WHERE " + mnemCol.FullName + " = '" + clobFile.Mnemonic + "'";
+                command += $" WHERE c.{mnemCol.Name} = '{clobFile.Mnemonic}'";
             }
 
             return command;
@@ -169,9 +168,9 @@ namespace LobsterModel
             Column idCol = pt.GetColumnWithPurpose(Column.Purpose.ID);
             Column mnemCol = pt.GetColumnWithPurpose(Column.Purpose.MNEMONIC);
 
-            string command = "INSERT INTO " + pt.FullName
-                + " (" + idCol.FullName + ", " + mnemCol.FullName + " )"
-                + " VALUES( " + idCol.NextID + ", '" + mnemonic + "' )";
+            string command = $"INSERT INTO {pt.FullName} p"
+                + $" (p.{idCol.Name}, p.{mnemCol.Name} )"
+                + $" VALUES( {idCol.NextID}, '{mnemonic}' )";
 
             return command;
         }
@@ -212,7 +211,7 @@ namespace LobsterModel
                 if (mimeType != null)
                 {
                     Column mimeCol = this.GetColumnWithPurpose(Column.Purpose.MIME_TYPE);
-                    insertCommand += $", {mimeCol.Name} ";
+                    insertCommand += $", t.{mimeCol.Name} ";
                     valueCommand += $", '{mimeType}' ";
                 }
             }
@@ -271,19 +270,19 @@ namespace LobsterModel
                 Column parentIDCol = pt.GetColumnWithPurpose(Column.Purpose.ID);
                 Column parentMnemCol = pt.GetColumnWithPurpose(Column.Purpose.MNEMONIC);
                 return
-                    "SELECT " + clobCol.FullName
-                    + " FROM " + pt.FullName
-                    + " JOIN " + this.FullName
-                    + " ON " + foreignKeyCol.FullName + " = " + parentIDCol.FullName
-                    + " WHERE " + parentMnemCol.FullName + " = '" + clobFile.Mnemonic + "'";
+                    $"SELECT c.{clobCol.Name}"
+                    + $" FROM {pt.FullName} p"
+                    + $" JOIN {this.FullName} c"
+                    + $" ON c.{foreignKeyCol.Name} = p.{parentIDCol.Name}"
+                    + $" WHERE p.{parentMnemCol.Name} = '{clobFile.Mnemonic}'";
             }
             else
             {
                 Column mnemCol = this.GetColumnWithPurpose(Column.Purpose.MNEMONIC);
                 return
-                    "SELECT " + clobCol.FullName
-                    + " FROM " + this.FullName
-                    + " WHERE " + mnemCol.FullName + " = '" + clobFile.Mnemonic + "'";
+                    $"SELECT t.{clobCol.Name}"
+                    + $" FROM {this.FullName} t"
+                    + $" WHERE t.{mnemCol.Name} = '{clobFile.Mnemonic}'";
             }
         }
 
@@ -304,18 +303,18 @@ namespace LobsterModel
                 Column parentIDCol = pt.GetColumnWithPurpose(Column.Purpose.ID);
                 Column parentMnemCol = pt.GetColumnWithPurpose(Column.Purpose.MNEMONIC);
 
-                return "SELECT " + parentMnemCol.FullName
-                    + (mimeCol != null ? ", " + mimeCol.FullName : null)
-                    + " FROM " + pt.FullName
-                    + " JOIN " + this.FullName
-                    + " ON " + foreignKeyCol.FullName + " = " + parentIDCol.FullName;
+                return $"SELECT p.{parentMnemCol.Name}"
+                    + (mimeCol != null ? $", c.{mimeCol.Name}" : null)
+                    + $" FROM {pt.FullName} p"
+                    + $" JOIN {this.FullName} c"
+                    + $" ON c.{foreignKeyCol.Name}= p.{parentIDCol.Name}";
             }
             else
             {
                 Column mnemCol = this.GetColumnWithPurpose(Column.Purpose.MNEMONIC);
-                return "SELECT " + mnemCol.FullName
-                    + (mimeCol != null ? ", " + mimeCol.FullName : null)
-                    + " FROM " + this.FullName;
+                return $"SELECT t.{mnemCol.Name}"
+                    + (mimeCol != null ? $", t.{mimeCol.Name}" : null)
+                    + $" FROM {this.FullName} t";
             }
         }
 

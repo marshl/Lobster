@@ -48,7 +48,7 @@ namespace LobsterModel
         private StreamWriter outStream;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MessageLog"/> class.
+        /// Prevents a default instance of the <see cref="MessageLog"/> class from being created.
         /// </summary>
         private MessageLog()
         {
@@ -61,21 +61,25 @@ namespace LobsterModel
 
             MessageLog.LogInfo("Starting Lobster (build " + Utils.RetrieveLinkerTimestamp() + ")");
         }
+        
+        /// <summary>
+        /// Gets the messages that have been created by this program since startup.
+        /// </summary>
+        public List<Message> MessageList { get; private set; }
 
+        /// <summary>
+        /// Initalizes a new instance of the <see cref="MessageLog"/> class.
+        /// </summary>
+        /// <returns>The old instance of the log if it exists. Otherwise the new instance.</returns>
         public static MessageLog Initialise()
         {
-            if ( instance == null )
+            if (instance == null)
             {
                 instance = new MessageLog();
             }
 
             return instance;
         }
-
-        /// <summary>
-        /// Gets the messages that have been created by this program since startup.
-        /// </summary>
-        public List<Message> MessageList { get; private set; }
 
         /// <summary>
         /// Flushes the stream buffer.
