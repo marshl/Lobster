@@ -35,11 +35,9 @@ namespace LobsterWpf
         public App()
         {
             log = MessageLog.Initialise();
-#if !DEBUG
             AppDomain currentDomain = AppDomain.CurrentDomain;
             currentDomain.UnhandledException += new UnhandledExceptionEventHandler(GlobalExceptionHandler);
-#endif
-            }
+        }
 
         private void GlobalExceptionHandler(object sender, UnhandledExceptionEventArgs args)
         {

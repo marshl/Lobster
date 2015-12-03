@@ -132,6 +132,8 @@ namespace LobsterWpf
                     return;
                 }
                 this.DisplayUpdateNotification(filename, true);
+
+                this.connectionView.SelectedFileNode.Refresh();
             }
         }
 
@@ -165,9 +167,13 @@ namespace LobsterWpf
         {
             if (this.connectionView.SelectedFileNode != null)
             {
-                // Windows Explorer command line arguments: https://support.microsoft.com/en-us/kb/152457
-                Process.Start("explorer", "/select," + this.connectionView.SelectedFileNode.FullName);
+                this.OpenFileInExplorer(this.connectionView.SelectedFileNode.FullName);
             }
+        }
+
+        private void OpenFileInExplorer(string fullName)
+        {
+            Process.Start("explorer", $"/select,{fullName}");
         }
 
         private void insertButton_Click(object sender, RoutedEventArgs e)
@@ -252,6 +258,29 @@ namespace LobsterWpf
 
                 this.RepopulateFileListView();
             });
+        }
+
+        private void pushBackupButton_Click(object sender, EventArgs e)
+        {
+            FileBackup fileBackup = ((Grid)((System.Windows.Controls.Button)sender).Parent).DataContext as FileBackup;
+
+            try
+            {
+                this.Model.UpdateClobWithExternalFile(fileBackup.OriginalFilename, fileBackup.BackupFilename);
+            }
+            catch (FileUpdateException)
+            {
+                this.DisplayUpdateNotification(fileBackup.BackupFilename, false);
+                return;
+            }
+
+            this.DisplayUpdateNotification(fileBackup.BackupFilename, true);
+        }
+
+        private void openBackupButton_Click(object sender, EventArgs e)
+        {
+            FileBackup fileBackup = ((Grid)((System.Windows.Controls.Button)sender).Parent).DataContext as FileBackup;
+            this.OpenFileInExplorer(fileBackup.BackupFilename);
         }
     }
 }

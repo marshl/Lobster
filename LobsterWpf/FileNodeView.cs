@@ -11,7 +11,7 @@ using LobsterModel;
 
 namespace LobsterWpf
 {
-    class FileNodeView
+    class FileNodeView : INotifyPropertyChanged
     {
         public string FileSize
         {
@@ -21,7 +21,19 @@ namespace LobsterWpf
             }
         }
 
-        public ObservableCollection<FileBackup> FileBackupList { get; }
+        private ObservableCollection<FileBackup> _fileBackupList;
+        public ObservableCollection<FileBackup> FileBackupList
+        {
+            get
+            {
+                return this._fileBackupList;
+            }
+            set
+            {
+                this._fileBackupList = value;
+                this.NotifyPropertyChanged("FileBackupList");
+            }
+        }
 
         private ConnectionView parentConnectionView;
         public FileNodeView(ConnectionView connectionView, string path)
@@ -33,12 +45,6 @@ namespace LobsterWpf
             if (fileInfo.Exists)
             {
                 this.LastWriteTime = fileInfo.LastWriteTime;
-
-                List<FileBackup> fileBackups = this.parentConnectionView.connection.ParentModel.FileBackupLog.GetBackupsForFile(path);
-                if (fileBackups != null)
-                {
-                    this.FileBackupList = new ObservableCollection<FileBackup>(fileBackups);
-                }
             }
 
             DirectoryInfo dirInfo = new DirectoryInfo(path);
@@ -64,6 +70,8 @@ namespace LobsterWpf
                     }
                 }
             }
+
+            this.Refresh();
         }
 
         public string FullName { get; private set; }
@@ -151,6 +159,20 @@ namespace LobsterWpf
                 catch (FileNotFoundException)
                 {
                     return false;
+                }
+            }
+        }
+
+        public void Refresh()
+        {
+            this.NotifyPropertyChanged("FileSize");
+
+            if (!this.IsDirectory)
+            {
+                List<FileBackup> fileBackups = this.parentConnectionView.connection.ParentModel.FileBackupLog.GetBackupsForFile(this.FullName);
+                if (fileBackups != null)
+                {
+                    this.FileBackupList = new ObservableCollection<FileBackup>(fileBackups.OrderByDescending(backup => backup.DateCreated));
                 }
             }
         }

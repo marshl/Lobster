@@ -105,47 +105,27 @@
                             </Button>
                         </StackPanel>
                         <StackPanel Grid.Column="2" DataContext="{Binding Path=SelectedFileNode}">
-                            <Border BorderThickness="1" Background="White" CornerRadius="5" BorderBrush="Black">
-                                <Expander x:Name="detailsExpander"  IsExpanded="True">
-                                    <Expander.Header>
-                                        <TextBlock>Details</TextBlock>
-                                    </Expander.Header>
-                                    <StackPanel Grid.Column="2">
-                                        <TextBlock Margin="5,5,0,5">
-                                            <TextBlock.Text>
-                                                <MultiBinding StringFormat="Last Modified: {0:MM/dd/yyyy}">
-                                                    <Binding Path="LastWriteTime" />
-                                                </MultiBinding>
-                                            </TextBlock.Text>
-                                        </TextBlock>
-                                        <TextBlock Margin="5,5,0,5">
-                                            <TextBlock.Text>
-                                                <MultiBinding StringFormat="Size: {0:N2} KB">
-                                                    <Binding Path="FileSize" />
-                                                </MultiBinding>
-                                            </TextBlock.Text>
-                                        </TextBlock>
-                                    </StackPanel>
-                                </Expander>
-                            </Border>
-                            <Border BorderThickness="1" Background="White" CornerRadius="5" BorderBrush="Black">
-                                <Expander x:Name="historyExpander" IsExpanded="True" Background="White">
-                                    <Expander.Header>
-                                        <StackPanel>
-                                            <TextBlock>File History</TextBlock>
-                                        </StackPanel>
-                                    </Expander.Header>
-                                    <ListBox Name="fileHistoryListBox" ItemsSource="{Binding FileBackupList}">
-                                        <ListBox.ItemTemplate>
-                                            <DataTemplate DataType="FileBackup">
-                                                <StackPanel>
-                                                    <TextBlock Text="{Binding DateCreated}" FontWeight="Bold"/>
-                                                </StackPanel>
-                                            </DataTemplate>
-                                        </ListBox.ItemTemplate>
-                                    </ListBox>
-                                </Expander>
-                            </Border>
+                            <TextBox>File History</TextBox>
+                            <ListBox Name="fileHistoryListBox" ItemsSource="{Binding FileBackupList}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate DataType="FileBackup">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding DateCreated}" Grid.Column="0"/>
+                                            <Button Height="20" Click="pushBackupButton_Click" Grid.Column="1" Margin="5,0">
+                                                <Image Source="{DynamicResource PushImageSource}"/>
+                                            </Button>
+                                            <Button Height="20" Click="openBackupButton_Click" Grid.Column="2" Margin="5,0">
+                                                <Image Source="{DynamicResource FolderImageSource}"/>
+                                            </Button>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
                         </StackPanel>
                     </Grid>
                 </TabItem>
