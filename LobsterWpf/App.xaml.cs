@@ -42,7 +42,7 @@ namespace LobsterWpf
         private void GlobalExceptionHandler(object sender, UnhandledExceptionEventArgs args)
         {
             Exception e = (Exception)args.ExceptionObject;
-            MessageLog.LogError("Unhandled Exception " + e);
+            MessageLog.LogError($"Unhandled Exception {e}");
             MessageLog.Flush();
         }
 

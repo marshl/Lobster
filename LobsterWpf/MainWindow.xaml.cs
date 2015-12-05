@@ -122,6 +122,19 @@ namespace LobsterWpf
             {
                 string filename = this.connectionView.SelectedFileNode.FullName;
 
+                FileInfo fi = new FileInfo(filename);
+                if ( fi.IsReadOnly)
+                {
+                    MessageBoxResult result = System.Windows.MessageBox.Show(
+                        $"{this.connectionView.SelectedFileNode.Name} is locked. Are you sure you want to clob it?",
+                        "File is Locked", MessageBoxButton.OKCancel);
+
+                    if (result != MessageBoxResult.OK)
+                    {
+                        return;
+                    }
+                }
+
                 try
                 {
                     this.Model.SendUpdateClobMessage(filename);
