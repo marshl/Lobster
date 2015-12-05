@@ -38,15 +38,17 @@ namespace LobsterModel
     public abstract class Utils
     {
         /// <summary>
-        /// Found here http://stackoverflow.com/questions/50744/wait-until-file-is-unlocked-in-net?lq=1
+        /// Attempts to read a file, even if the file is locked. Tries 10 times before throwing an IOException
         /// </summary>
         /// <param name="fullPath">The location of the file.</param>
         /// <param name="mode">The FileMode the file should be opened with.</param>
         /// <param name="access">The File Access rules the file should be opened with.</param>
         /// <param name="share"> The FileShare rules the file should be opened with.</param>
         /// <returns>A FileStream of the given file, if it could be opened.</returns>
+        /// <remarks>Found here http://stackoverflow.com/questions/50744/wait-until-file-is-unlocked-in-net</remarks>
         public static FileStream WaitForFile(string fullPath, FileMode mode, FileAccess access, FileShare share)
         {
+            Exception ex = null;
             for (int numTries = 0; numTries < 10; numTries++)
             {
                 try
@@ -58,13 +60,14 @@ namespace LobsterModel
 
                     return fs;
                 }
-                catch (IOException)
+                catch (Exception e)
                 {
+                    ex = e;
                     Thread.Sleep(50);
                 }
             }
 
-            return null;
+            throw ex;
         }
 
         /// <summary>

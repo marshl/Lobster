@@ -647,19 +647,22 @@ namespace LobsterModel
                     throw new FileDownloadException($"No data was found for the given command {command.CommandText}");
                 }
 
-                if (column.DataType == Column.Datatype.BLOB)
+                using (FileStream fs = Utils.WaitForFile(filename, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
                 {
-                    byte[] b = new byte[reader.GetBytes(0, 0, null, 0, int.MaxValue)];
-                    reader.GetBytes(0, 0, b, 0, b.Length);
-                    File.WriteAllBytes(filename, b);
-                }
-                else
-                {
-                    string result = reader.GetString(0);
-                    StreamWriter streamWriter = File.AppendText(filename);
-                    streamWriter.NewLine = "\n";
-                    streamWriter.Write(result);
-                    streamWriter.Close();
+                    if (column.DataType == Column.Datatype.BLOB)
+                    {
+                        byte[] b = new byte[reader.GetBytes(0, 0, null, 0, int.MaxValue)];
+                        reader.GetBytes(0, 0, b, 0, b.Length);
+                        fs.Write(b, 0, b.Length);
+                    }
+                    else
+                    {
+                        string result = reader.GetString(0);
+                        StreamWriter streamWriter = new StreamWriter(fs);
+                        streamWriter.NewLine = "\n";
+                        streamWriter.Write(result);
+                        streamWriter.Close();
+                    }
                 }
 
                 if (!reader.Read())
@@ -675,7 +678,7 @@ namespace LobsterModel
                     throw new FileDownloadException($"Too many rows were found for the given command {command.CommandText}");
                 }
             }
-            catch (Exception e) when (e is InvalidOperationException || e is OracleNullValueException)
+            catch (Exception e) when (e is InvalidOperationException || e is OracleNullValueException || e is IOException)
             {
                 MessageLog.LogError($"Error retrieving data when executing command {command.CommandText} {e}");
                 throw new FileDownloadException($"An exception ocurred when executing the command {command.CommandText}");
@@ -741,7 +744,7 @@ namespace LobsterModel
         {
             string openingComment = "<!--";
             string closingComment = "-->";
-            if (mimeType != null && mimeType.Equals("text/javascript", StringComparison.OrdinalIgnoreCase))
+            if (mimeType != null && (mimeType.Equals("text/javascript", StringComparison.OrdinalIgnoreCase) || mimeType.Equals("text/css", StringComparison.OrdinalIgnoreCase)))
             {
                 openingComment = "/*";
                 closingComment = "*/";

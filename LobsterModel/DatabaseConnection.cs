@@ -39,12 +39,6 @@ namespace LobsterModel
     public class DatabaseConnection
     {
         /// <summary>
-        /// The thread used to process file events when a new event is triggered.
-        /// Only a single event thread is used at any one time.
-        /// </summary>
-        private Thread fileEventThread;
-
-        /// <summary>
         /// The file watcher for the entire CodeSource directory. 
         /// FIles that are not covered by any ClobTypes filtered out when processed.
         /// </summary>
@@ -55,6 +49,16 @@ namespace LobsterModel
         /// Events are popped off and processed one at a time by the fileEventThread.
         /// </summary>
         private List<FileSystemEventArgs> fileEventQueue = new List<FileSystemEventArgs>();
+
+        /// <summary>
+        /// A basic object to be locked when a thread is procesing a file event.
+        /// </summary>
+        private object fileEventProcessingSemaphore = new object();
+
+        /// <summary>
+        /// The write time of the last file event received. This is used to ignore duplicated file events.
+        /// </summary>
+        private DateTime previousWriteTime = DateTime.MinValue;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseConnection"/> class.
@@ -187,6 +191,16 @@ namespace LobsterModel
         {
             MessageLog.LogInfo($"File change event of type {e.ChangeType} for file {e.FullPath}");
 
+            // Find the last write time
+            DateTime writeTime = File.GetLastWriteTime(e.FullPath);
+            if (writeTime == this.previousWriteTime)
+            {
+                MessageLog.LogInfo("Ignoring event, as it is a duplicate of the last event.");
+                return;
+            }
+
+            this.previousWriteTime = writeTime;
+
             lock (this.fileEventQueue)
             {
                 // Ignore the event if it is already in the event list.
@@ -197,40 +211,30 @@ namespace LobsterModel
                     return;
                 }
 
+                if (this.fileEventQueue.Count == 0)
+                {
+                    MessageLog.LogInfo("event stack populated.");
+                    this.ParentModel.EventListener.OnEventProcessingStart();
+                }
+
                 this.fileEventQueue.Add(e);
             }
 
-            if (this.fileEventThread == null || this.fileEventThread.ThreadState != ThreadState.Running)
+            lock (this.fileEventProcessingSemaphore)
             {
-                MessageLog.LogInfo("Starting file event thread");
-                this.fileEventThread = new Thread(new ThreadStart(this.ProcessAllFileEvents));
-                this.fileEventThread.Start();
-            }
-        }
-
-        /// <summary>
-        /// Used from the worked thread to process any file events on the queue.
-        /// </summary>
-        private void ProcessAllFileEvents()
-        {
-            this.ParentModel.EventListener.OnEventProcessingStart();
-
-            while (this.fileEventQueue.Count > 0)
-            {
-                FileSystemEventArgs e;
+                this.ProcessFileEvent(e);
                 lock (this.fileEventQueue)
                 {
-                    e = this.fileEventQueue[0];
-                    this.fileEventQueue.RemoveAt(0);
+                    this.fileEventQueue.Remove(e);
+                    if (this.fileEventQueue.Count == 0)
+                    {
+                        MessageLog.LogInfo("Event stack empty.");
+                        this.ParentModel.EventListener.OnFileProcessingFinished();
+                    }
                 }
-
-                this.ProcessFileEvent(e);
             }
-
-            MessageLog.LogInfo("File event stack empty");
-            this.ParentModel.EventListener.OnFileProcessingFinished();
         }
-
+        
         /// <summary>
         /// Processes a single file event. Sending a file update to the database if necessary.
         /// </summary>
