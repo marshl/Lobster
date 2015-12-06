@@ -122,7 +122,7 @@ namespace LobsterModel
             {
                 config = Utils.DeserialiseXmlFileUsingSchema<DatabaseConfig>(fullpath, Settings.Default.DatabaseConfigSchemaFilename);
             }
-            catch (Exception e) when (e is FileNotFoundException || e is InvalidOperationException || e is XmlException || e is XmlSchemaValidationException)
+            catch (Exception e) when (e is FileNotFoundException || e is InvalidOperationException || e is XmlException || e is XmlSchemaValidationException || e is IOException)
             {
                 MessageLog.LogError("An error occurred when loading the ClobType " + fullpath + ": " + e);
                 return null;

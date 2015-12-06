@@ -86,6 +86,10 @@ namespace LobsterWpf
             {
                 // Swallow exceptional exceptions
             }
+            finally
+            {
+                this.Shutdown();
+            }
         }
 
         /// <summary>

@@ -1,106 +1,161 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using LobsterModel;
-using Microsoft.WindowsAPICodePack.Dialogs;
-
+﻿//-----------------------------------------------------------------------
+// <copyright file="ConnectionListWindow.xaml.cs" company="marshl">
+// Copyright 2015, Liam Marshall, marshl.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
+//
+//      'Who are you, and who is your lord?' asked Frodo.
+//
+//      [ _The Lord of the Rings_, I/iii: "Three is Company"]
+//
+//-----------------------------------------------------------------------
 namespace LobsterWpf
 {
+    using System.Collections.ObjectModel;
+    using System.ComponentModel;
+    using System.Windows;
+    using System.Windows.Controls;
+    using System.Windows.Input;
+    using LobsterModel;
+    using Microsoft.WindowsAPICodePack.Dialogs;
+
     /// <summary>
     /// Interaction logic for ConnectionListWindow.xaml
     /// </summary>
     public partial class ConnectionListWindow : Window, INotifyPropertyChanged
     {
+        /// <summary>
+        /// The model for this connection window.
+        /// </summary>
         private Model model;
 
-        private string _connectionDirectory;
+        /// <summary>
+        /// The internal value for DatabaseConfigList.
+        /// </summary>
+        private ObservableCollection<DatabaseConfig> databaseConfigList;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConnectionListWindow"/> class.
+        /// </summary>
+        /// <param name="lobsterModel">The model to use for this connection window.</param>
+        public ConnectionListWindow(Model lobsterModel)
+        {
+            this.InitializeComponent();
+
+            this.model = lobsterModel;
+            this.DatabaseConfigList = new ObservableCollection<DatabaseConfig>(this.model.GetConfigList());
+            this.DataContext = this;
+        }
+
+        /// <summary>
+        /// The event for when a property is changed.
+        /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
+        /// <summary>
+        /// Gets or sets the directory that connections are found in.
+        /// </summary>
         public string ConnectionDirectory
         {
             get
             {
-                return this._connectionDirectory;
+                return this.model.ConnectionDirectory;
             }
+
             set
             {
-                this._connectionDirectory = value;
+                this.model.ConnectionDirectory = value;
                 this.NotifyPropertyChanged("ConnectionDirectory");
             }
         }
 
-        // This method is called by the Set accessor of each property.
-        // The CallerMemberName attribute that is applied to the optional propertyName
-        // parameter causes the property name of the caller to be substituted as an argument.
-        private void NotifyPropertyChanged(string propertyName = "")
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
-
-        private ObservableCollection<DatabaseConfig> _databaseConfigList;
+        /// <summary>
+        /// Gets or sets the list of configuation files for the current connection directory.
+        /// </summary>
         public ObservableCollection<DatabaseConfig> DatabaseConfigList
         {
             get
             {
-                return this._databaseConfigList;
+                return this.databaseConfigList;
             }
 
             set
             {
-                this._databaseConfigList = value;
+                this.databaseConfigList = value;
                 this.NotifyPropertyChanged("DatabaseConfigList");
             }
         }
-        
-        public ConnectionListWindow(Model lobsterModel)
+
+        /// <summary>
+        /// The event when a connection config item is double clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        protected void HandleDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            InitializeComponent();
-
-            this.model = lobsterModel;
-
-            this.ConnectionDirectory = this.model.ConnectionDirectory;
-            this.DatabaseConfigList = new ObservableCollection<DatabaseConfig>(this.model.GetConfigList());
-
-            this.DataContext = this;
+            DatabaseConfig config = ((ListBoxItem)sender).Content as DatabaseConfig;
+            this.TryConnectWithConfig(config);
         }
 
-        private void cancelButton_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Implementation of the INotifyPropertyChange, to tell WPF when a data value has changed
+        /// </summary>
+        /// <param name="propertyName">The name of the property that has changed.</param>
+        /// <remarks>This method is called by the Set accessor of each property.
+        /// The CallerMemberName attribute that is applied to the optional propertyName
+        /// parameter causes the property name of the caller to be substituted as an argument.</remarks>
+        private void NotifyPropertyChanged(string propertyName = "")
+        {
+            if (this.PropertyChanged != null)
+            {
+                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        /// <summary>
+        /// The event for when the cancel button is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
         }
 
-        private void changeDirectoryButton_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// The evenet for when the change directory method is clicked, prompting the user for the new directory.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The routed event arguments.</param>
+        private void ChangeDirectoryButton_Click(object sender, RoutedEventArgs e)
         {
-            var dlg = new CommonOpenFileDialog();
+            CommonOpenFileDialog dlg = new CommonOpenFileDialog();
             dlg.IsFolderPicker = true;
             CommonFileDialogResult result = dlg.ShowDialog();
             if (result == CommonFileDialogResult.Ok)
             {
-                this.model.ChnageConnectionDirectory(dlg.FileName);
+                this.ConnectionDirectory = dlg.FileName;
                 this.DatabaseConfigList = new ObservableCollection<DatabaseConfig>(this.model.GetConfigList());
-                this.ConnectionDirectory = this.model.ConnectionDirectory;
             }
-
         }
 
-        private void connectButton_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// The event when the connection button is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The routed event arguments.</param>
+        private void ConnectButton_Click(object sender, RoutedEventArgs e)
         {
             if (this.connectionListBox.SelectedIndex == -1)
             {
@@ -112,12 +167,10 @@ namespace LobsterWpf
             this.TryConnectWithConfig(config);
         }
 
-        protected void HandleDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            DatabaseConfig config = ((ListBoxItem)sender).Content as DatabaseConfig;
-            this.TryConnectWithConfig(config);
-        }
-
+        /// <summary>
+        /// Attempts to change the current connection to the input config. If successful, the window is closed.
+        /// </summary>
+        /// <param name="config">The config to connect with.</param>
         private void TryConnectWithConfig(DatabaseConfig config)
         {
             try

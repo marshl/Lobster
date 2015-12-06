@@ -113,6 +113,12 @@ namespace LobsterModel
             {
                 return Settings.Default.ConnectionDir;
             }
+
+            set
+            {
+                Settings.Default.ConnectionDir = value;
+                Settings.Default.Save();
+            }
         }
 
         /// <summary>
@@ -257,7 +263,7 @@ namespace LobsterModel
                 return configList;
             }
 
-            foreach (string filename in Directory.GetFiles(Settings.Default.ConnectionDir))
+            foreach (string filename in Directory.GetFiles(this.ConnectionDirectory, "*.xml"))
             {
                 DatabaseConfig connection = DatabaseConfig.LoadDatabaseConfig(filename);
                 if (connection != null)
@@ -375,16 +381,6 @@ namespace LobsterModel
             }
 
             return filename;
-        }
-
-        /// <summary>
-        /// Changes the connection directory to the new value.
-        /// </summary>
-        /// <param name="fileName">The directory to now use as the conection directory.</param>
-        public void ChnageConnectionDirectory(string fileName)
-        {
-            Settings.Default.ConnectionDir = fileName;
-            Settings.Default.Save();
         }
 
         /// <summary>
