@@ -37,7 +37,7 @@ namespace LobsterModel
     /// <summary>
     /// The database connection model 
     /// </summary>
-    public class Model
+    public class Model : IDisposable
     {
         /// <summary>
         /// Gets or sets the list of mime types that are used to translate from file names to database mnemonics and vice-sersa.
@@ -54,6 +54,22 @@ namespace LobsterModel
             this.mimeList = Utils.DeserialiseXmlFileUsingSchema<MimeTypeList>("LobsterSettings/MimeTypes.xml", null);
 
             this.FileBackupLog = new BackupLog();
+        }
+
+        public void Dispose()
+        {
+            foreach (string filename in this.TempFileList)
+            {
+                try
+                {
+                    MessageLog.LogInfo($"Deleting temporary file {filename}");
+                    File.Delete(filename);
+                }
+                catch (IOException)
+                {
+                    MessageLog.LogInfo($"An error occurred when deleting temporary file {filename}");
+                }
+            }
         }
 
         /// <summary>
@@ -219,6 +235,7 @@ namespace LobsterModel
             try
             {
                 this.DownloadClobDataToFile(clobFile, con, filepath);
+                this.TempFileList.Add(filepath);
                 return filepath;
             }
             finally
