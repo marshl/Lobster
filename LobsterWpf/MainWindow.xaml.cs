@@ -65,8 +65,9 @@ namespace LobsterWpf
             bool? result = window.ShowDialog();
             if (result.HasValue && result.Value)
             {
-                this.ConnectionContainer.IsEnabled = this.Model.CurrentConnection != null;
                 this.ConnectionContainer.DataContext = this.connectionView = new ConnectionView(this.Model.CurrentConnection);
+                this.clobTypeListBox.SelectedItem = null;
+                this.RepopulateFileListView();
             }
         }
 
@@ -75,6 +76,11 @@ namespace LobsterWpf
             this.OpenConnectionDialog();
         }
 
+        /// <summary>
+        /// The event for when the window is loaded.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             this.OpenConnectionDialog();
@@ -196,11 +202,13 @@ namespace LobsterWpf
                 string filename = this.connectionView.SelectedFileNode.FullName;
                 try
                 {
-                    bool result = this.Model.SendInsertClobMessage(filename);
+                    DBClobFile dbFile = null;
+                    bool result = this.Model.SendInsertClobMessage(filename, ref dbFile);
 
                     if (result)
                     {
                         this.DisplayUpdateNotification(filename, true);
+                        this.connectionView.SelectedFileNode.DatabaseFile = dbFile;
                     }
                 }
                 catch (FileInsertException ex)

@@ -1,29 +1,51 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using LobsterModel;
-
-
+﻿//-----------------------------------------------------------------------
+// <copyright file="ConnectionView.cs" company="marshl">
+// Copyright 2015, Liam Marshall, marshl.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 namespace LobsterWpf
 {
+    using System.Collections.ObjectModel;
+    using System.ComponentModel;
+    using System.IO;
+    using LobsterModel;
+
+    /// <summary>
+    /// The ViewModel for a model DatabaseConnection object.
+    /// </summary>
     class ConnectionView : INotifyPropertyChanged
     {
+        /// <summary>
+        /// Gets the connection model for this view
+        /// </summary>
         public DatabaseConnection connection
         {
             get;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
         public FileNodeView RootFile { get; set; }
 
         private FileNodeView _selectedFileNode;
+
+        /// <summary>
+        /// Gets or sets the currenclty selected file in this connection.
+        /// </summary>
         public FileNodeView SelectedFileNode
         {
             get
@@ -34,37 +56,6 @@ namespace LobsterWpf
             set
             {
                 this._selectedFileNode = value;
-
-                if (this.SelectedFileNode == null)
-                {
-                    this.UpdateFileButtonEnabled = false;
-                    this.InsertFileButtonEnabled = false;
-                    this.DiffFileButtonEnabled = false;
-                    this.ExploreFileButtonEnabled = false;
-                }
-                else if (this.SelectedFileNode.IsDirectory)
-                {
-                    this.UpdateFileButtonEnabled = false;
-                    this.InsertFileButtonEnabled = false;
-                    this.DiffFileButtonEnabled = false;
-                    this.ExploreFileButtonEnabled = true;
-                }
-                else
-                {
-                    bool selectedFileIsInDatabase = false;
-                    if (this.SelectedFileNode != null)
-                    {
-                        string fullpath = this.SelectedFileNode.FullName;
-                        ClobDirectory clobDir = this.connection.GetClobDirectoryForFile(fullpath);
-                        selectedFileIsInDatabase = clobDir.GetDatabaseFileForFullpath(fullpath) != null;
-                    }
-
-                    this.UpdateFileButtonEnabled = selectedFileIsInDatabase;
-                    this.InsertFileButtonEnabled = !selectedFileIsInDatabase;
-                    this.DiffFileButtonEnabled = selectedFileIsInDatabase;
-                    this.ExploreFileButtonEnabled = true;
-                }
-
                 this.NotifyPropertyChanged("SelectedFileNode");
             }
         }
@@ -72,67 +63,6 @@ namespace LobsterWpf
         public bool ShowReadOnlyFiles { get; set; } = true;
 
         public ObservableCollection<ClobTypeView> ClobTypes { get; set; }
-
-        private bool _updateFileButtonEnabled = false;
-
-        public bool UpdateFileButtonEnabled
-        {
-            get
-            {
-                return this._updateFileButtonEnabled;
-            }
-            set
-            {
-                this._updateFileButtonEnabled = value;
-                this.NotifyPropertyChanged("UpdateFileButtonEnabled");
-            }
-        }
-
-        private bool _insertFileButtonEnabled = false;
-        public bool InsertFileButtonEnabled
-        {
-            get
-            {
-                return this._insertFileButtonEnabled;
-            }
-
-            set
-            {
-                this._insertFileButtonEnabled = value;
-                this.NotifyPropertyChanged("InsertFileButtonEnabled");
-            }
-        }
-
-        private bool _diffFileButtonEnabled = false;
-
-        public bool DiffFileButtonEnabled
-        {
-            get
-            {
-                return this._diffFileButtonEnabled;
-            }
-            set
-            {
-                this._diffFileButtonEnabled = value;
-                this.NotifyPropertyChanged("DiffFileButtonEnabled");
-            }
-        }
-
-        private bool _exploreFileButtonEnabled = false;
-
-        public bool ExploreFileButtonEnabled
-        {
-            get
-            {
-                return this._exploreFileButtonEnabled;
-            }
-
-            set
-            {
-                this._exploreFileButtonEnabled = value;
-                this.NotifyPropertyChanged("ExploreFileButtonEnabled");
-            }
-        }
 
         private bool _isEnabled = true;
         public bool IsEnabled
@@ -182,6 +112,7 @@ namespace LobsterWpf
             {
                 this.ClobTypes.Add(new ClobTypeView(clobDir.ClobType));
             }
+            
         }
 
         public void PopulateFileTreeForClobType(ClobType clobType)

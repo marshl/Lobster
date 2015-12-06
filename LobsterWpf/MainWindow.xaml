@@ -60,16 +60,16 @@
                                 <TreeView.ItemTemplate>
                                     <HierarchicalDataTemplate DataType="{x:Type local:FileNodeView}" ItemsSource="{Binding Children}">
                                         <HierarchicalDataTemplate.Resources>
-                                            <Style TargetType="{x:Type StackPanel}">
+                                            <Style TargetType="{x:Type TextBlock}">
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsVisible}" Value="False">
-                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <DataTrigger Binding="{Binding IsLocalOnly}" Value="True">
+                                                        <Setter Property="FontStyle" Value="Italic"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </HierarchicalDataTemplate.Resources>
                                         <StackPanel Orientation="Horizontal">
-                                            <Image Source="{Binding Path=ImageUrl}" Height="24"/>
+                                            <Image Source="{Binding Path=ImageUrl}" Height="18"/>
                                             <TextBlock Text="{Binding Path=Name}" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </HierarchicalDataTemplate>
@@ -79,25 +79,25 @@
                             <CheckBox x:Name="showReadOnlyFilesCheckbox" Grid.Row="1" Content="Show Readonly Files" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0" Checked="hideReadonlyCheckbox_Checked" Unchecked="hideReadonlyCheckbox_Unchecked" IsChecked="{Binding Path=ShowReadOnlyFiles, Mode=TwoWay}"/>
                         </Grid>
                         <StackPanel>
-                            <Button x:Name="pushButton" Grid.Column="0" MaxHeight="50" Margin="0" Click="pushButton_Click" IsEnabled="{Binding Path=UpdateFileButtonEnabled}">
+                            <Button x:Name="pushButton" Grid.Column="0" MaxHeight="50" Margin="0" Click="pushButton_Click" IsEnabled="{Binding Path=SelectedFileNode.CanBeUpdated, FallbackValue=false}">
                                 <StackPanel MaxHeight="50">
                                     <Image Source="{DynamicResource PushImageSource}" VerticalAlignment="Top" Height="30"/>
                                     <TextBlock HorizontalAlignment="Center" MinHeight="15" VerticalAlignment="Bottom">Push</TextBlock>
                                 </StackPanel>
                             </Button>
-                            <Button x:Name="diffButton" Grid.Column="0" MaxHeight="50" Click="diffButton_Click" IsEnabled="{Binding Path=DiffFileButtonEnabled}">
+                            <Button x:Name="diffButton" Grid.Column="0" MaxHeight="50" Click="diffButton_Click" IsEnabled="{Binding Path=SelectedFileNode.CanBeDiffed, FallbackValue=false}">
                                 <StackPanel MaxHeight="50">
                                     <Image Source="{DynamicResource MergeImageSource}" VerticalAlignment="Top" Height="30"/>
                                     <TextBlock HorizontalAlignment="Center" MinHeight="15" VerticalAlignment="Bottom">Diff</TextBlock>
                                 </StackPanel>
                             </Button>
-                            <Button x:Name="exploreButton" Grid.Column="0" MaxHeight="50" Click="exploreButton_Click" IsEnabled="{Binding Path=ExploreFileButtonEnabled}">
+                            <Button x:Name="exploreButton" Grid.Column="0" MaxHeight="50" Click="exploreButton_Click" IsEnabled="{Binding Path=SelectedFileNode.CanBeExploredTo, FallbackValue=false}">
                                 <StackPanel MaxHeight="50">
                                     <Image Source="{DynamicResource FolderImageSource}" VerticalAlignment="Top" Height="30"/>
                                     <TextBlock HorizontalAlignment="Center" MinHeight="15" VerticalAlignment="Bottom">Explore</TextBlock>
                                 </StackPanel>
                             </Button>
-                            <Button x:Name="insertButton" Grid.Column="0" MaxHeight="50" Click="insertButton_Click" IsEnabled="{Binding Path=InsertFileButtonEnabled}">
+                            <Button x:Name="insertButton" Grid.Column="0" MaxHeight="50" Click="insertButton_Click" IsEnabled="{Binding Path=SelectedFileNode.CanBeInserted, FallbackValue=false}">
                                 <StackPanel MaxHeight="50">
                                     <Image Source="{DynamicResource InsertImageSource}" VerticalAlignment="Top" Height="30"/>
                                     <TextBlock HorizontalAlignment="Center" MinHeight="15" VerticalAlignment="Bottom">Insert</TextBlock>

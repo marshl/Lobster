@@ -163,7 +163,7 @@ namespace LobsterModel
         /// </summary>
         /// <param name="fullpath">The path of the file to insert.</param>
         /// <returns>A value indicating whether the insert was followed through.</returns>
-        public bool SendInsertClobMessage(string fullpath)
+        public bool SendInsertClobMessage(string fullpath, ref DBClobFile dbFile )
         {
             ClobDirectory clobDir = this.CurrentConnection.GetClobDirectoryForFile(fullpath);
 
@@ -198,7 +198,9 @@ namespace LobsterModel
             DbConnection con = OpenConnection(this.CurrentConnection.Config);
             try
             {
-                this.InsertDatabaseClob(fullpath, table, mimeType, con);
+                DBClobFile databaseFile = this.InsertDatabaseClob(fullpath, table, mimeType, con);
+                clobDir.DatabaseFileList.Add(databaseFile);
+                dbFile = databaseFile;
             }
             finally
             {
@@ -622,7 +624,7 @@ namespace LobsterModel
                 throw new FileInsertException("An exception ocurred when attempting to insert a file into the child table.", e);
             }
 
-            DBClobFile clobFile = new DBClobFile(table, mnemonic, mimeType, fullpath);
+            DBClobFile clobFile = new DBClobFile(table, mnemonic, mimeType, Path.GetFileName(fullpath));
             MessageLog.LogInfo($"Clob file creation successful: {fullpath}");
             return clobFile;
         }

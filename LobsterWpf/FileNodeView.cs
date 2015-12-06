@@ -41,6 +41,16 @@ namespace LobsterWpf
             this.FullName = path;
             this.parentConnectionView = connectionView;
 
+            /*try
+            {
+                ClobDirectory clobDir = this.parentConnectionView.connection.GetClobDirectoryForFile(this.FullName);
+                this.DatabaseFile = clobDir.GetDatabaseFileForFullpath(this.FullName);
+            }
+            catch (ClobFileLookupException)
+            {
+                this.DatabaseFile = null;
+            }*/
+
             FileInfo fileInfo = new FileInfo(path);
             if (fileInfo.Exists)
             {
@@ -74,7 +84,7 @@ namespace LobsterWpf
             this.Refresh();
         }
 
-        public string FullName { get; private set; }
+        public string FullName { get; }
 
         public string Name
         {
@@ -87,8 +97,6 @@ namespace LobsterWpf
         public bool IsDirectory { get; private set; }
 
         public ObservableCollection<FileNodeView> Children { get; set; }
-
-
 
         private DateTime _lastWriteTime;
         public DateTime LastWriteTime
@@ -144,25 +152,6 @@ namespace LobsterWpf
             }
         }
 
-        public bool IsVisible
-        {
-            get
-            {
-                if (this.IsDirectory)
-                {
-                    return true;
-                }
-                try
-                {
-                    return this.parentConnectionView.ShowReadOnlyFiles || !this.IsReadOnly;
-                }
-                catch (FileNotFoundException)
-                {
-                    return false;
-                }
-            }
-        }
-
         public void Refresh()
         {
             this.NotifyPropertyChanged("FileSize");
@@ -174,6 +163,74 @@ namespace LobsterWpf
                 {
                     this.FileBackupList = new ObservableCollection<FileBackup>(fileBackups.OrderByDescending(backup => backup.DateCreated));
                 }
+            }
+        }
+
+        //private DBClobFile databaseFile;
+        public DBClobFile DatabaseFile
+        {
+            get
+            {
+                try
+                {
+                    ClobDirectory clobDir = this.parentConnectionView.connection.GetClobDirectoryForFile(this.FullName);
+                    return clobDir.GetDatabaseFileForFullpath(this.FullName);
+                }
+                catch (ClobFileLookupException)
+                {
+                    return null;
+                }
+                //return this.databaseFile;
+            }
+
+            set
+            {
+                //this.databaseFile = value;
+                this.NotifyPropertyChanged("DatabaseFile");
+                this.NotifyPropertyChanged("IsLocalOnly");
+                this.NotifyPropertyChanged("CanBeUpdated");
+                this.NotifyPropertyChanged("CanBeDiffed");
+                this.NotifyPropertyChanged("CanBeInserted");
+            }
+        }
+
+        public bool IsLocalOnly
+        {
+            get
+            {
+                return !this.IsDirectory && this.DatabaseFile == null;
+            }
+        }
+
+        public bool CanBeUpdated
+        {
+            get
+            {
+                return !this.IsDirectory && this.DatabaseFile != null;
+            }
+        }
+
+        public bool CanBeDiffed
+        {
+            get
+            {
+                return !this.IsDirectory && this.DatabaseFile != null;
+            }
+        }
+
+        public bool CanBeInserted
+        {
+            get
+            {
+                return !this.IsDirectory && this.DatabaseFile == null;
+            }
+        }
+
+        public bool CanBeExploredTo
+        {
+            get
+            {
+                return true;
             }
         }
     }
