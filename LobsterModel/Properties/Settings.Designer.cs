@@ -139,5 +139,17 @@ namespace LobsterModel.Properties {
                 this["DiffableExtensions"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool LogSensitiveMessages {
+            get {
+                return ((bool)(this["LogSensitiveMessages"]));
+            }
+            set {
+                this["LogSensitiveMessages"] = value;
+            }
+        }
     }
 }

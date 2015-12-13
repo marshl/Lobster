@@ -24,9 +24,6 @@
 namespace LobsterModel
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
 
     /// <summary>
     /// A single copy of a backed-up file.

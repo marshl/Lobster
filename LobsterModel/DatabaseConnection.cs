@@ -110,7 +110,7 @@ namespace LobsterModel
         public ClobDirectory GetClobDirectoryForFile(string fullpath)
         {
             string absolutePath = Path.GetFullPath(fullpath);
-            List<ClobDirectory> clobDirList = this.ClobDirectoryList.FindAll(x => absolutePath.Contains(x.ClobType.Fullpath));
+            List<ClobDirectory> clobDirList = this.ClobDirectoryList.FindAll(x => absolutePath.Contains(x.ClobType.GetFullPath(this)));
             if (clobDirList.Count == 0)
             {
                 throw new ClobFileLookupException($"The file could not be found: {fullpath}");
@@ -146,7 +146,7 @@ namespace LobsterModel
                     MessageLog.LogInfo("Loading ClobType file " + file.FullName);
                     ClobType clobType = Utils.DeserialiseXmlFileUsingSchema<ClobType>(file.FullName, Settings.Default.ClobTypeSchemaFilename);
 
-                    clobType.Initialise(this);
+                    clobType.Initialise();
                     clobType.FilePath = file.FullName;
 
                     ClobDirectory clobDir = new ClobDirectory(clobType);
@@ -155,7 +155,7 @@ namespace LobsterModel
                 catch (Exception e) when (e is InvalidOperationException || e is XmlException || e is XmlSchemaValidationException || e is IOException)
                 {
                     errors.Add(new ClobTypeLoadException("ClobType load error", e));
-                    MessageLog.LogError("An error occurred when loading the ClobType " + file.Name + " " + e);
+                    MessageLog.LogError($"An error occurred when loading the ClobType {file.Name} {e}");
                 }
             }
         }
@@ -168,7 +168,7 @@ namespace LobsterModel
         {
             foreach (ClobDirectory clobDir in this.ClobDirectoryList)
             {
-                clobDir.GetWorkingFiles(ref workingFileList);
+                clobDir.GetWorkingFiles(this, ref workingFileList);
             }
         }
 
@@ -189,13 +189,31 @@ namespace LobsterModel
         /// <param name="e">The event arguments.</param>
         private void OnFileChangeEvent(object sender, FileSystemEventArgs e)
         {
-            MessageLog.LogInfo($"File change event of type {e.ChangeType} for file {e.FullPath}");
+            MessageLog.LogInfo($"File change event of type {e.ChangeType} for file {e.FullPath} with a write time of {File.GetLastWriteTime(e.FullPath).ToString("yyyy-MM-dd HH:mm:ss.fff")}");
+
+            ClobDirectory clobDir;
+            try
+            {
+                clobDir = this.GetClobDirectoryForFile(e.FullPath);
+            }
+            catch (Exception ex) when (ex is ClobFileLookupException)
+            {
+                MessageLog.LogInfo($"The file does not belong to any ClobDirectory and will be skipped {e.FullPath}");
+                return;
+            }
+
+            DBClobFile clobFile = clobDir.GetDatabaseFileForFullpath(e.FullPath);
+            if (clobFile == null)
+            {
+                MessageLog.LogInfo($"The file does not have a DBClobFile and will be skipped {e.FullPath}");
+                return;
+            }
 
             // Find the last write time
             DateTime writeTime = File.GetLastWriteTime(e.FullPath);
             if (writeTime == this.previousWriteTime)
             {
-                MessageLog.LogInfo("Ignoring event, as it is a duplicate of the last event.");
+                MessageLog.LogInfo($"Ignoring event, as it is a duplicate of the last event (Write time {writeTime.ToString("yyyy-MM-dd HH:mm:ss.fff")})");
                 return;
             }
 
@@ -213,16 +231,19 @@ namespace LobsterModel
 
                 if (this.fileEventQueue.Count == 0)
                 {
-                    MessageLog.LogInfo("event stack populated.");
+                    MessageLog.LogInfo("Event stack populated.");
                     this.ParentModel.EventListener.OnEventProcessingStart();
                 }
 
                 this.fileEventQueue.Add(e);
             }
 
+            MessageLog.LogInfo("Awaiting semaphore...");
             lock (this.fileEventProcessingSemaphore)
             {
+                MessageLog.LogInfo("Lock achieved, processing event.");
                 this.ProcessFileEvent(e);
+
                 lock (this.fileEventQueue)
                 {
                     this.fileEventQueue.Remove(e);
@@ -234,7 +255,7 @@ namespace LobsterModel
                 }
             }
         }
-        
+
         /// <summary>
         /// Processes a single file event. Sending a file update to the database if necessary.
         /// </summary>

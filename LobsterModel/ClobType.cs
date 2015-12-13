@@ -12,9 +12,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//-----------------------------------------------------------------------
 //
-//      They were on ponies, and each pony was slung about with all kinds of baggages, packages,
-//      parcels, and paraphernalia.
+//      They were on ponies, and each pony was slung about with all kinds 
+//      of baggages, packages, parcels, and paraphernalia.
+//
 //          [ _The Hobbit_, II "Roast Mutton" ] 
 //
 // </copyright>
@@ -23,7 +25,6 @@ namespace LobsterModel
 {
     using System;
     using System.Collections.Generic;
-    using System.ComponentModel;
     using System.IO;
     using System.Xml.Serialization;
 
@@ -53,6 +54,9 @@ namespace LobsterModel
         [XmlElement("includeSubDirectories")]
         public bool IncludeSubDirectories { get; set; }
 
+        [XmlElement("loaderStatement")]
+        public string LoaderStatement { get; set; }
+
         /// <summary>
         /// Gets or sets the tables that files for this ClobType are stored in.
         /// ClobTypes usually have only a single table, but if there is more than one, then the user will be asked which to use when inserting a new file.
@@ -60,15 +64,9 @@ namespace LobsterModel
         [XmlArray("tables")]
         public List<Table> Tables { get; set; }
 
-        /// <summary>
-        /// Gets the absolute path of the directory for this clob type.
-        /// </summary>
-        public string Fullpath
+        public string GetFullPath(DatabaseConnection connection )
         {
-            get
-            {
-                return Path.GetFullPath(Path.Combine(this.ParentConnection.Config.CodeSource, this.Directory));
-            }
+            return Path.GetFullPath(Path.Combine(connection.Config.CodeSource, this.Directory));
         }
 
         /// <summary>
@@ -76,12 +74,6 @@ namespace LobsterModel
         /// </summary>
         [XmlIgnore]
         public string FilePath { get; set; }
-
-        /// <summary>
-        /// Gets or sets the <see cref="DatabaseConnection"/> object that stores this ClobType.
-        /// </summary>
-        [XmlIgnore]
-        public DatabaseConnection ParentConnection { get; set; }
 
         /// <summary>
         /// Serializes a ClobType and writes it out to the given filename.
@@ -101,10 +93,9 @@ namespace LobsterModel
         /// Initializes values that cannot be set during deserialisation.
         /// </summary>
         /// <param name="parentConnection">The DatabaseConnection to set as this ClobType's parent.</param>
-        public void Initialise(DatabaseConnection parentConnection)
+        public void Initialise()
         {
             this.Tables.ForEach(x => x.Initialise());
-            this.ParentConnection = parentConnection;
         }
 
         /// <summary>
@@ -117,7 +108,6 @@ namespace LobsterModel
             copy.Name = this.Name;
             copy.Directory = this.Directory;
             copy.IncludeSubDirectories = this.IncludeSubDirectories;
-            copy.ParentConnection = this.ParentConnection;
             copy.FilePath = this.FilePath;
 
             copy.Tables = new List<Table>();
@@ -129,7 +119,7 @@ namespace LobsterModel
                 }
             }
 
-            copy.Initialise(this.ParentConnection);
+            copy.Initialise();
             return copy;
         }
     }

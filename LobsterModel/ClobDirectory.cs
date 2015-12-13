@@ -44,7 +44,7 @@ namespace LobsterModel
         /// <summary>
         /// Gets the ClobType that controls this directory
         /// </summary>
-        public ClobType ClobType { get; private set; }
+        public ClobType ClobType { get; }
 
         /// <summary>
         /// Gets or sets the list of files that Lobster has found on the database for this directory
@@ -55,9 +55,9 @@ namespace LobsterModel
         /// Gets all editable files within this directory, and stores them in the given list.
         /// </summary>
         /// <param name="workingFileList">The list of files to populate.</param>
-        public void GetWorkingFiles(ref List<string> workingFileList)
+        public void GetWorkingFiles(DatabaseConnection connection, ref List<string> workingFileList)
         {
-            string directoryPath = Path.Combine(this.ClobType.ParentConnection.Config.CodeSource, this.ClobType.Directory);
+            string directoryPath = Path.Combine(connection.Config.CodeSource, this.ClobType.Directory);
             string[] files = Directory.GetFiles(directoryPath, ".", SearchOption.AllDirectories);
             workingFileList.AddRange(files);
         }
@@ -78,9 +78,9 @@ namespace LobsterModel
         /// </summary>
         /// <param name="fullpath">The file to test for.</param>
         /// <returns>Whether the file is in this directory or not.</returns>
-        public bool IsLocalFileInDirectory(string fullpath)
+        public bool IsLocalFileInDirectory(DatabaseConnection connection, string fullpath)
         {
-            DirectoryInfo dirInfo = new DirectoryInfo(this.ClobType.Fullpath);
+            DirectoryInfo dirInfo = new DirectoryInfo(this.ClobType.GetFullPath(connection));
             return Array.Exists(dirInfo.GetFiles(".", SearchOption.AllDirectories), x => x.FullName.Equals(fullpath, StringComparison.OrdinalIgnoreCase));
         }
     }

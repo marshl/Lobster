@@ -144,9 +144,13 @@ namespace LobsterModel
         {
             Message msg = new Message(message, messageType, DateTime.Now);
             this.MessageList.Add(msg);
-            lock (this.outStream.BaseStream)
+
+            if (messageType != Message.TYPE.SENSITIVE || Settings.Default.LogSensitiveMessages)
             {
-                this.outStream.WriteLine(msg.ToString());
+                lock (this.outStream.BaseStream)
+                {
+                    this.outStream.WriteLine(msg.ToString());
+                }
             }
         }
 

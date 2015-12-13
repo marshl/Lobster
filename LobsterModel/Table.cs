@@ -126,7 +126,7 @@ namespace LobsterModel
         {
             Column clobCol = clobFile.GetDataColumn();
             string command =
-                   $"UPDATE {this.FullName} c SET c.{clobCol.Name} = :data";
+                   $"UPDATE {this.FullName} c SET c.{clobCol.Name} = :clob";
 
             Column dateCol;
             if (this.TryGetColumnWithPurpose(Column.Purpose.DATETIME, out dateCol))
@@ -251,7 +251,7 @@ namespace LobsterModel
             }
 
             insertCommand += $", t.{dataCol.Name} )";
-            valueCommand += ", :data ) ";
+            valueCommand += ", :clob ) ";
             return insertCommand + valueCommand;
         }
 

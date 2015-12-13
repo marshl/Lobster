@@ -139,7 +139,7 @@ namespace LobsterModel
                     this.BackupClobFile(con, clobFile, targetFilename);
                 }
 
-                this.UpdateDatabaseClob(sourceFilename, clobFile, con);
+                this.UpdateDatabaseClob(sourceFilename, clobFile, clobDir, con);
                 con.Dispose();
             }
             catch (Exception ex) when (ex is ConnectToDatabaseException || ex is ClobFileLookupException)
@@ -163,7 +163,7 @@ namespace LobsterModel
         /// </summary>
         /// <param name="fullpath">The path of the file to insert.</param>
         /// <returns>A value indicating whether the insert was followed through.</returns>
-        public bool SendInsertClobMessage(string fullpath, ref DBClobFile dbFile )
+        public bool SendInsertClobMessage(string fullpath, ref DBClobFile dbFile)
         {
             ClobDirectory clobDir = this.CurrentConnection.GetClobDirectoryForFile(fullpath);
 
@@ -198,7 +198,7 @@ namespace LobsterModel
             DbConnection con = OpenConnection(this.CurrentConnection.Config);
             try
             {
-                DBClobFile databaseFile = this.InsertDatabaseClob(fullpath, table, mimeType, con);
+                DBClobFile databaseFile = this.InsertDatabaseClob(fullpath, clobDir, table, mimeType, con);
                 clobDir.DatabaseFileList.Add(databaseFile);
                 dbFile = databaseFile;
             }
@@ -403,7 +403,8 @@ namespace LobsterModel
                     + $"(SID={config.SID})(SERVER=DEDICATED)))"
                     + $";Pooling=" + (config.UsePooling ? "true" : "false");
 
-                MessageLog.LogSensitive($"Connecting to database {config.Name} using connection string {con.ConnectionString}");
+                MessageLog.LogInfo($"Connecting to database {config.Name}");
+                MessageLog.LogSensitive($"Connection string is {con.ConnectionString}");
                 con.Open();
                 return con;
             }
@@ -442,7 +443,7 @@ namespace LobsterModel
         /// <summary>
         /// Queries the database for all files in all ClobDireectories and stores them in the directory.
         /// </summary>
-        private void GetDatabaseFileLists()
+        public void GetDatabaseFileLists()
         {
             DbConnection con = OpenConnection(this.CurrentConnection.Config);
             if (con == null)
@@ -471,25 +472,39 @@ namespace LobsterModel
         /// <param name="fullpath">The path of the local file to use as the dat asource.</param>
         /// <param name="clobFile">The file to insert into the database.</param>
         /// <param name="con">The Oracle connction to use.</param>
-        private void UpdateDatabaseClob(string fullpath, DBClobFile clobFile, DbConnection con)
+        private void UpdateDatabaseClob(string fullpath, DBClobFile clobFile, ClobDirectory clobDir, DbConnection con)
         {
             DbTransaction trans = con.BeginTransaction();
             DbCommand command = con.CreateCommand();
             Table table = clobFile.ParentTable;
 
-            try
+            bool usingCustomLoader = clobDir.ClobType.LoaderStatement != null;
+            if (usingCustomLoader)
             {
-                command.CommandText = table.BuildUpdateStatement(clobFile);
+                //command.CommandText = string.Format("BEGIN {0} END;", File.ReadAllText(Path.Combine(clobDir.ClobType.ParentConnection.Config.CodeSource, clobDir.ClobType.LoaderFile)));
+                command.CommandText = clobDir.ClobType.LoaderStatement;
+
+                if (command.CommandText.Contains(":name"))
+                {
+                    command.Parameters.Add(new OracleParameter(":name", Path.GetFileName(fullpath)));
+                }
             }
-            catch (ColumnNotFoundException e)
+            else
             {
-                MessageLog.LogError($"The data column couldn't be found when building the update statement: {e}");
-                throw new FileUpdateException("The Clob Column could not be found.", e);
+                try
+                {
+                    command.CommandText = table.BuildUpdateStatement(clobFile);
+                }
+                catch (ColumnNotFoundException e)
+                {
+                    MessageLog.LogError($"The data column couldn't be found when building the update statement: {e}");
+                    throw new FileUpdateException("The Clob Column could not be found.", e);
+                }
             }
 
             try
             {
-                this.AddFileDataParameter(command, fullpath, clobFile.ParentTable, clobFile.MimeType);
+                command.Parameters.Add(this.CreateFileDataParameter(fullpath, clobFile.ParentTable, clobFile.MimeType));
             }
             catch (IOException e)
             {
@@ -503,7 +518,8 @@ namespace LobsterModel
                 MessageLog.LogInfo($"Executing Update query: {command.CommandText}");
                 rowsAffected = command.ExecuteNonQuery();
 
-                if (rowsAffected != 1)
+                // The row check can't be relied upon when using a custom loader, as it may be in an anonymous block
+                if (rowsAffected != 1 && !usingCustomLoader)
                 {
                     trans.Rollback();
                     MessageLog.LogError($"In invalid number of rows ({rowsAffected}) were updated for command: {command.CommandText}");
@@ -525,14 +541,21 @@ namespace LobsterModel
         }
 
         /// <summary>
-        /// Adds the contents of the given file into the given command under the alias ":data"
+        /// Adds the contents of the given file into the given command under the alias ":clob"
         /// </summary>
         /// <param name="command">The command to add the data to.</param>
         /// <param name="fullpath">The file which will have its data bound to the query.</param>
         /// <param name="table">The table that the file will be added to.</param>
         /// <param name="mimeType">The mime type the file will be added as, if any.</param>
-        private void AddFileDataParameter(DbCommand command, string fullpath, Table table, string mimeType)
+        private OracleParameter CreateFileDataParameter(string fullpath, Table table, string mimeType)
         {
+            OracleParameter param = new OracleParameter();
+            param.ParameterName = "clob";
+
+            Column column = table.Columns.Find(
+                    x => x.ColumnPurpose == Column.Purpose.CLOB_DATA
+                        && (mimeType == null || x.MimeTypeList.Contains(mimeType)));
+
             // Wait for the file to unlock
             using (FileStream fs = Utils.WaitForFile(
                 fullpath,
@@ -540,13 +563,6 @@ namespace LobsterModel
                 FileAccess.Read,
                 FileShare.ReadWrite))
             {
-                Column column = table.Columns.Find(
-                    x => x.ColumnPurpose == Column.Purpose.CLOB_DATA
-                        && (mimeType == null || x.MimeTypeList.Contains(mimeType)));
-
-                DbParameter param = command.CreateParameter();
-                param.ParameterName = "data";
-
                 // Binary mode
                 if (column.DataType == Column.Datatype.BLOB)
                 {
@@ -568,9 +584,9 @@ namespace LobsterModel
                     OracleParameter op = (OracleParameter)param;
                     op.OracleDbType = column.DataType == Column.Datatype.XMLTYPE ? OracleDbType.XmlType : OracleDbType.Clob;
                 }
-
-                command.Parameters.Add(param);
             }
+
+            return param;
         }
 
         /// <summary>
@@ -581,7 +597,7 @@ namespace LobsterModel
         /// <param name="mimeType">The mimetype to insert the file as.</param>
         /// <param name="con">The Oracle connection to use.</param>
         /// <returns>True if the file was inserted successfully, otherwise false.</returns>
-        private DBClobFile InsertDatabaseClob(string fullpath, Table table, string mimeType, DbConnection con)
+        private DBClobFile InsertDatabaseClob(string fullpath, ClobDirectory clobDir, Table table, string mimeType, DbConnection con)
         {
             DbCommand command = con.CreateCommand();
 
@@ -589,8 +605,10 @@ namespace LobsterModel
             DbTransaction trans = con.BeginTransaction();
             string mnemonic = this.ConvertFilenameToMnemonic(fullpath, table, mimeType);
 
+            bool usingCustomLoader = clobDir.ClobType.LoaderStatement != null;
+
             // First insert the parent record in the table (if applicable)
-            if (table.ParentTable != null)
+            if (table.ParentTable != null && !usingCustomLoader)
             {
                 try
                 {
@@ -606,11 +624,27 @@ namespace LobsterModel
                 }
             }
 
+            command = con.CreateCommand();
+            if (usingCustomLoader)
+            {
+                //command.CommandText = string.Format("BEGIN {0} END;", File.ReadAllText(Path.Combine(clobDir.ClobType.ParentConnection.Config.CodeSource, clobDir.ClobType.LoaderFile)));
+                command.CommandText = clobDir.ClobType.LoaderStatement;
+
+                if (command.CommandText.Contains(":name"))
+                {
+                    command.Parameters.Add(new OracleParameter(":name", Path.GetFileName(fullpath)));
+                }
+            }
+            else
+            {
+                
+                command.CommandText = table.BuildInsertChildStatement(mnemonic, mimeType);
+            }
+
             try
             {
-                command = con.CreateCommand();
-                command.CommandText = table.BuildInsertChildStatement(mnemonic, mimeType);
-                this.AddFileDataParameter(command, fullpath, table, mimeType);
+
+                command.Parameters.Add(this.CreateFileDataParameter(fullpath, table, mimeType));
                 MessageLog.LogInfo($"Executing insert query: {command.CommandText}");
                 command.ExecuteNonQuery();
                 command.Dispose();
@@ -622,6 +656,7 @@ namespace LobsterModel
                 trans.Rollback();
                 MessageLog.LogError($"Error creating new clob when executing command: {command.CommandText} {e}");
                 throw new FileInsertException("An exception ocurred when attempting to insert a file into the child table.", e);
+
             }
 
             DBClobFile clobFile = new DBClobFile(table, mnemonic, mimeType, Path.GetFileName(fullpath));
