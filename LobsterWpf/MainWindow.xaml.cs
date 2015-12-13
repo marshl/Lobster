@@ -66,7 +66,6 @@ namespace LobsterWpf
             if (result.HasValue && result.Value)
             {
                 this.ConnectionContainer.DataContext = this.connectionView = new ConnectionView(this.Model.CurrentConnection);
-                this.clobTypeListBox.SelectedItem = null;
                 this.RepopulateFileListView();
             }
         }
@@ -302,6 +301,12 @@ namespace LobsterWpf
         {
             FileBackup fileBackup = ((Grid)((System.Windows.Controls.Button)sender).Parent).DataContext as FileBackup;
             this.OpenFileInExplorer(fileBackup.BackupFilename);
+        }
+
+        private void MenuItem_Click_2(object sender, RoutedEventArgs e)
+        {
+            this.Model.GetDatabaseFileLists();
+            this.RepopulateFileListView();
         }
     }
 }

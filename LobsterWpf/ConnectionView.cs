@@ -112,14 +112,14 @@ namespace LobsterWpf
             {
                 this.ClobTypes.Add(new ClobTypeView(clobDir.ClobType));
             }
-            
+
         }
 
         public void PopulateFileTreeForClobType(ClobType clobType)
         {
             this.RootFile = null;
 
-            DirectoryInfo rootDirInfo = new DirectoryInfo(clobType.Fullpath);
+            DirectoryInfo rootDirInfo = new DirectoryInfo(clobType.GetFullPath(this.connection));
             if (!rootDirInfo.Exists)
             {
                 return;

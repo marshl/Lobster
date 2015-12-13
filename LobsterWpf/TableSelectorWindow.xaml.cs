@@ -31,12 +31,17 @@ namespace LobsterWpf
 
         private void acceptButton_Click(object sender, RoutedEventArgs e)
         {
-
+            if (this.SelectedTable != null)
+            {
+                this.DialogResult = true;
+                this.Close();
+            }
         }
 
         private void cancelButton_Click(object sender, RoutedEventArgs e)
         {
-
+            this.DialogResult = false;
+            this.Close();
         }
     }
 }
