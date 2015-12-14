@@ -102,12 +102,12 @@ namespace LobsterWpf
                 return;
             }
 
-            ClobType clobType = this.Model.CurrentConnection.ClobDirectoryList[this.clobTypeListBox.SelectedIndex].ClobType;
+            ClobDirectory clobDir = this.Model.CurrentConnection.ClobDirectoryList[this.clobTypeListBox.SelectedIndex];
             this.connectionView = this.ConnectionContainer.DataContext as ConnectionView;
             if (connectionView != null)
             {
-                connectionView.PopulateFileTreeForClobType(clobType);
-                this.localFileTreeView.ItemsSource = connectionView.RootFile.Children;
+                connectionView.PopulateFileTreeForClobDirectory(clobDir);
+                this.localFileTreeView.ItemsSource = connectionView.RootFile?.Children;
             }
         }
 
@@ -306,6 +306,12 @@ namespace LobsterWpf
         private void MenuItem_Click_2(object sender, RoutedEventArgs e)
         {
             this.Model.GetDatabaseFileLists();
+            this.RepopulateFileListView();
+        }
+
+        private void OnToggleViewModeRadioClicked(object sender, RoutedEventArgs e)
+        {
+            this.connectionView.CurrentDisplayMode = ConnectionView.DisplayMode.LocalFiles;
             this.RepopulateFileListView();
         }
     }

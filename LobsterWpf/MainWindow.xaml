@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LobsterWpf"
         mc:Ignorable="d"
-        Title="Lobster" Height="600" Width="800" Loaded="Window_Loaded">
+        Title="Lobster" Height="600" Width="800" Loaded="Window_Loaded" Icon="Resources/Images/cartoon-lobster.ico">
     <Grid x:Name="ConnectionContainer">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -76,8 +76,8 @@
                         </TreeView.ItemTemplate>
                     </TreeView>
                     <StackPanel Grid.Row="1" Orientation="Horizontal">
-                        <RadioButton x:Name="LocalOnlyFilesRadio" Content="Local Files" Margin="5" HorizontalAlignment="Left"/>
-                        <RadioButton x:Name="databaseOnlyFilesRadio" Content="Database Files" Margin="5" HorizontalAlignment="Right"/>
+                        <RadioButton x:Name="LocalOnlyFilesRadio" Content="Local Files" Margin="5" HorizontalAlignment="Left" IsChecked="True" Checked="OnToggleViewModeRadioClicked"/>
+                        <RadioButton x:Name="databaseOnlyFilesRadio" Content="Database Files" Margin="5" HorizontalAlignment="Right" Checked="OnToggleViewModeRadioClicked"/>
                     </StackPanel>
                     <CheckBox x:Name="showReadOnlyFilesCheckbox" Grid.Row="2" Content="Show Readonly Files" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5" Checked="hideReadonlyCheckbox_Checked" Unchecked="hideReadonlyCheckbox_Unchecked" IsChecked="{Binding Path=ShowReadOnlyFiles, Mode=TwoWay}"/>
                 </Grid>

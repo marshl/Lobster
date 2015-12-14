@@ -41,16 +41,6 @@ namespace LobsterWpf
             this.FullName = path;
             this.parentConnectionView = connectionView;
 
-            /*try
-            {
-                ClobDirectory clobDir = this.parentConnectionView.connection.GetClobDirectoryForFile(this.FullName);
-                this.DatabaseFile = clobDir.GetDatabaseFileForFullpath(this.FullName);
-            }
-            catch (ClobFileLookupException)
-            {
-                this.DatabaseFile = null;
-            }*/
-
             FileInfo fileInfo = new FileInfo(path);
             if (fileInfo.Exists)
             {
@@ -73,7 +63,7 @@ namespace LobsterWpf
 
                 foreach (FileInfo file in dirInfo.GetFiles())
                 {
-                    if (this.parentConnectionView.ShowReadOnlyFiles || !this.IsReadOnly)
+                    if (this.parentConnectionView.ShowReadOnlyFiles || !file.IsReadOnly)
                     {
                         FileNodeView node = new FileNodeView(connectionView, file.FullName);
                         this.Children.Add(node);

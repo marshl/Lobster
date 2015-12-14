@@ -65,6 +65,12 @@ namespace LobsterWpf
         public ObservableCollection<ClobTypeView> ClobTypes { get; set; }
 
         private bool _isEnabled = true;
+        public enum DisplayMode
+        {
+            LocalFiles,
+            DatabaseFiles,
+        }
+
         public bool IsEnabled
         {
             get
@@ -92,6 +98,8 @@ namespace LobsterWpf
             }
         }
 
+        public DisplayMode CurrentDisplayMode { get; internal set; }
+
         // This method is called by the Set accessor of each property.
         // The CallerMemberName attribute that is applied to the optional propertyName
         // parameter causes the property name of the caller to be substituted as an argument.
@@ -115,11 +123,11 @@ namespace LobsterWpf
 
         }
 
-        public void PopulateFileTreeForClobType(ClobType clobType)
+        public void PopulateFileTreeForClobDirectory(ClobDirectory clobDir)
         {
             this.RootFile = null;
 
-            DirectoryInfo rootDirInfo = new DirectoryInfo(clobType.GetFullPath(this.connection));
+            DirectoryInfo rootDirInfo = new DirectoryInfo(clobDir.GetFullPath(this.connection));
             if (!rootDirInfo.Exists)
             {
                 return;
