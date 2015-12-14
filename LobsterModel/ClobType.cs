@@ -54,6 +54,9 @@ namespace LobsterModel
         [XmlElement("includeSubDirectories")]
         public bool IncludeSubDirectories { get; set; }
 
+        /// <summary>
+        /// Gets or sets the SQL statement that is used to update and insert files into the database.
+        /// </summary>
         [XmlElement("loaderStatement")]
         public string LoaderStatement { get; set; }
 
@@ -63,11 +66,6 @@ namespace LobsterModel
         /// </summary>
         [XmlArray("tables")]
         public List<Table> Tables { get; set; }
-
-        public string GetFullPath(DatabaseConnection connection )
-        {
-            return Path.GetFullPath(Path.Combine(connection.Config.CodeSource, this.Directory));
-        }
 
         /// <summary>
         /// Gets or sets the path of the file from where this ClobType was deserialised.
@@ -92,7 +90,6 @@ namespace LobsterModel
         /// <summary>
         /// Initializes values that cannot be set during deserialisation.
         /// </summary>
-        /// <param name="parentConnection">The DatabaseConnection to set as this ClobType's parent.</param>
         public void Initialise()
         {
             this.Tables.ForEach(x => x.Initialise());

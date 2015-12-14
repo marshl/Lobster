@@ -151,5 +151,17 @@ namespace LobsterModel.Properties {
                 this["LogSensitiveMessages"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("500")]
+        public int FileUpdateTimeoutMilliseconds {
+            get {
+                return ((int)(this["FileUpdateTimeoutMilliseconds"]));
+            }
+            set {
+                this["FileUpdateTimeoutMilliseconds"] = value;
+            }
+        }
     }
 }

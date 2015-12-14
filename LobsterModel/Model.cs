@@ -530,6 +530,7 @@ namespace LobsterModel
                 trans.Commit();
                 command.Dispose();
                 MessageLog.LogInfo($"Clob file update successful: {fullpath}");
+                clobFile.LastUpdatedTime = DateTime.Now;
                 return;
             }
             catch (Exception e) when (e is OracleException || e is InvalidOperationException)
@@ -637,7 +638,7 @@ namespace LobsterModel
             }
             else
             {
-                
+
                 command.CommandText = table.BuildInsertChildStatement(mnemonic, mimeType);
             }
 

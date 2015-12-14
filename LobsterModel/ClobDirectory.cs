@@ -54,6 +54,7 @@ namespace LobsterModel
         /// <summary>
         /// Gets all editable files within this directory, and stores them in the given list.
         /// </summary>
+        /// <param name="connection">The connection to get the unlocked files for.</param>
         /// <param name="workingFileList">The list of files to populate.</param>
         public void GetWorkingFiles(DatabaseConnection connection, ref List<string> workingFileList)
         {
@@ -76,12 +77,23 @@ namespace LobsterModel
         /// <summary>
         /// Returns whether the given file exists within the file system directory for this ClobDirectory.
         /// </summary>
+        /// <param name="connection">The connection parent of this directory.</param>
         /// <param name="fullpath">The file to test for.</param>
         /// <returns>Whether the file is in this directory or not.</returns>
         public bool IsLocalFileInDirectory(DatabaseConnection connection, string fullpath)
         {
-            DirectoryInfo dirInfo = new DirectoryInfo(this.ClobType.GetFullPath(connection));
+            DirectoryInfo dirInfo = new DirectoryInfo(this.GetFullPath(connection));
             return Array.Exists(dirInfo.GetFiles(".", SearchOption.AllDirectories), x => x.FullName.Equals(fullpath, StringComparison.OrdinalIgnoreCase));
+        }
+
+        /// <summary>
+        /// Gets the full path of the directory governed by this type.
+        /// </summary>
+        /// <param name="connection">The parent connection of this clob type.</param>
+        /// <returns>The full path of the directory.</returns>
+        public string GetFullPath(DatabaseConnection connection)
+        {
+            return Path.GetFullPath(Path.Combine(connection.Config.CodeSource, this.ClobType.Directory));
         }
     }
 }

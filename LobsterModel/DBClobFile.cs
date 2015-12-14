@@ -24,6 +24,8 @@
 
 namespace LobsterModel
 {
+    using System;
+
     /// <summary>
     /// A DBClobFile describes a row in a table on the database used by a ClobType.
     /// </summary>
@@ -64,6 +66,11 @@ namespace LobsterModel
         /// Gets the table that this file was pulled from.
         /// </summary>
         public Table ParentTable { get; }
+
+        /// <summary>
+        /// Gets or sets the last time that this file was updated.
+        /// </summary>
+        public DateTime LastUpdatedTime { get; set; } = DateTime.MinValue;
 
         /// <summary>
         /// Returns the column that data from this row should be pulled from, depending on the mnemonic.
