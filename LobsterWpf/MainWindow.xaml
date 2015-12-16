@@ -21,7 +21,7 @@
                     <MenuItem Header="_Exit" Click="MenuItem_Click_1" />
                 </MenuItem>
                 <MenuItem Header="_Connection" IsEnabled="{Binding IsEnabled, FallbackValue=false}">
-                    <MenuItem Header="Update Files Automatically" IsCheckable="True" IsChecked="{Binding Path=IsAutoClobEnabled, FallbackValue=True}"/>
+                    <MenuItem Header="Update Files Automatically" IsCheckable="True" IsChecked="{Binding Path=IsAutoUpdateEnabled, FallbackValue=True}"/>
                     <MenuItem Header="Requery Database" Click="MenuItem_Click_2"/>
                 </MenuItem>
             </Menu>

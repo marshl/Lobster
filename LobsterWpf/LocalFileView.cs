@@ -51,7 +51,7 @@ namespace LobsterWpf
             {
                 try
                 {
-                    ClobDirectory clobDir = this.parentConnectionView.connection.GetClobDirectoryForFile(this.FullName);
+                    ClobDirectory clobDir = this.parentConnectionView.Connection.GetClobDirectoryForFile(this.FullName);
                     return clobDir.GetDatabaseFileForFullpath(this.FullName);
                 }
                 catch (ClobFileLookupException)
@@ -163,7 +163,7 @@ namespace LobsterWpf
 
             if (!this.IsDirectory)
             {
-                List<FileBackup> fileBackups = this.parentConnectionView.connection.ParentModel.FileBackupLog.GetBackupsForFile(this.FullName);
+                List<FileBackup> fileBackups = this.parentConnectionView.Connection.ParentModel.FileBackupLog.GetBackupsForFile(this.FullName);
                 if (fileBackups != null)
                 {
                     this.FileBackupList = new ObservableCollection<FileBackup>(fileBackups.OrderByDescending(backup => backup.DateCreated));

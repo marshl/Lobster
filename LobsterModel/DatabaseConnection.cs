@@ -94,7 +94,7 @@ namespace LobsterModel
         /// <summary>
         /// Gets or sets a value indicating whether the database should be automatically updated when a file is changed.
         /// </summary>
-        public bool IsAutoClobEnabled { get; set; } = true;
+        public bool IsAutoUpdateEnabled { get; set; } = true;
 
         /// <summary>
         /// Returns the ClobDirectory that would contain the given fullpath, if applicable.
@@ -234,7 +234,7 @@ namespace LobsterModel
 
             if (e.ChangeType == WatcherChangeTypes.Changed)
             {
-                if (!this.IsAutoClobEnabled)
+                if (!this.IsAutoUpdateEnabled)
                 {
                     MessageLog.LogInfo($"Automatic clobbing is disabled, ignoring event.");
                     return;
