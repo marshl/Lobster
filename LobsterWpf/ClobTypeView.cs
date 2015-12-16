@@ -32,18 +32,18 @@ namespace LobsterWpf
     public class ClobTypeView
     {
         /// <summary>
-        /// The base clob type for this view.
-        /// </summary>
-        public ClobType clobType { get; }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="ClobTypeView"/> class.
         /// </summary>
-        /// <param name="ct">The ClobType to use as the model.</param>
-        public ClobTypeView(ClobType ct)
+        /// <param name="clobType">The ClobType to use as the model.</param>
+        public ClobTypeView(ClobType clobType)
         {
-            this.clobType = ct;
+            this.ClobType = clobType;
         }
+
+        /// <summary>
+        /// Gets the base clob type for this view.
+        /// </summary>
+        public ClobType ClobType { get; }
 
         /// <summary>
         /// Gets the name of the clob type.
@@ -52,7 +52,7 @@ namespace LobsterWpf
         {
             get
             {
-                return this.clobType.Name;
+                return this.ClobType.Name;
             }           
         }
 
@@ -63,7 +63,7 @@ namespace LobsterWpf
         {
             get
             {
-                return this.clobType.Directory;
+                return this.ClobType.Directory;
             }
         }
     }
