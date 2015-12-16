@@ -20,7 +20,7 @@ namespace LobsterWpf
         protected static string NormalFileUrl = @"Resources\Images\Generic_Document.ico";
         protected static string FileNotFoundUrl = @"Resources\Images\Annotate_Blocked_large.ico";
 
-        public abstract string GetFileSize();
+        public abstract string FileSize { get; }
 
         protected ObservableCollection<FileBackup> _fileBackupList;
         public ObservableCollection<FileBackup> FileBackupList
@@ -74,15 +74,7 @@ namespace LobsterWpf
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public string ImageUrl
-        {
-            get
-            {
-                return this.GetImageUrl();
-            }
-        }
-
-        protected abstract string GetImageUrl();
+        public abstract string ImageUrl { get; }
 
         public abstract bool IsReadOnly { get; }
 

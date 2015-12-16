@@ -1,23 +1,57 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Windows.Media;
-using LobsterModel;
-
+﻿//-----------------------------------------------------------------------
+// <copyright file="DatabaseFileView.cs" company="marshl">
+// Copyright 2015, Liam Marshall, marshl.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 namespace LobsterWpf
 {
+    using System.Diagnostics;
+    using System.IO;
+    using System.Windows.Media;
+    using LobsterModel;
+
+    /// <summary>
+    /// The view for a file that is on the database, and may also be found locally.
+    /// </summary>
     public class DatabaseFileView : FileNodeView
     {
+        /// <summary>
+        /// The underlying database file this view is working on.
+        /// </summary>
+        private DBClobFile databaseFile;
+
+        /// <summary>
+        /// The file path of the local file for this view.
+        /// </summary>
         private string localFilePath;
 
-        public DatabaseFileView(ConnectionView connection, DBClobFile dbClobFile, string localFile) : base(connection)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DatabaseFileView"/> class.
+        /// </summary>
+        /// <param name="connection">The parent connection of this file.</param>
+        /// <param name="databaseFile">The database file </param>
+        /// <param name="localFile">The local equivalent of this file, if it exists.</param>
+        public DatabaseFileView(ConnectionView connection, DBClobFile databaseFile, string localFile) : base(connection)
         {
-            this.databaseFile = dbClobFile;
+            Debug.Assert(databaseFile != null, "The database file must exist to create a view for it.");
+            this.databaseFile = databaseFile;
             this.localFilePath = localFile;
         }
 
+        /// <summary>
+        /// Gets a value indicating whether this file can be diffed with the local version.
+        /// </summary>
         public override bool CanBeDiffed
         {
             get
@@ -26,6 +60,9 @@ namespace LobsterWpf
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the file can be directly shown in explorer.
+        /// </summary>
         public override bool CanBeExploredTo
         {
             get
@@ -34,6 +71,9 @@ namespace LobsterWpf
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether this file is new and can be inserted into the database.
+        /// </summary>
         public override bool CanBeInserted
         {
             get
@@ -42,6 +82,9 @@ namespace LobsterWpf
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether this file can be used to update the database.
+        /// </summary>
         public override bool CanBeUpdated
         {
             get
@@ -50,7 +93,9 @@ namespace LobsterWpf
             }
         }
 
-        private DBClobFile databaseFile;
+        /// <summary>
+        /// Gets or sets the database file this view is used for.
+        /// </summary>
         public override DBClobFile DatabaseFile
         {
             get
@@ -65,6 +110,9 @@ namespace LobsterWpf
             }
         }
 
+        /// <summary>
+        /// Get sor sets the name of the local file.
+        /// </summary>
         public override string FullName
         {
             get
@@ -79,11 +127,14 @@ namespace LobsterWpf
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether th local file (if it exists) is read only.
+        /// </summary>
         public override bool IsReadOnly
         {
             get
             {
-                if ( this.localFilePath == null )
+                if (this.localFilePath == null)
                 {
                     return false;
                 }
@@ -92,6 +143,9 @@ namespace LobsterWpf
             }
         }
 
+        /// <summary>
+        /// Gets the name that should be displayed in the file list.
+        /// </summary>
         public override string Name
         {
             get
@@ -100,6 +154,9 @@ namespace LobsterWpf
             }
         }
 
+        /// <summary>
+        /// Gets the colour that should be used for the text of the Name in the file list.
+        /// </summary>
         public override string ForegroundColour
         {
             get
@@ -108,24 +165,39 @@ namespace LobsterWpf
             }
         }
 
-        public override string GetFileSize()
+        /// <summary>
+        /// Gets the image that should be displayed next to the name in the file list.
+        /// </summary>
+        public override string ImageUrl
         {
-            if ( this.databaseFile != null )
+            get
             {
-                return null;
+                return this.IsReadOnly ? FileNodeView.LockedFileUrl : FileNodeView.NormalFileUrl;
             }
-
-            return Utils.BytesToString(new FileInfo(this.FullName).Length);
         }
 
+        /// <summary>
+        /// Gets the size of the local file connecting to the database file, if it exists.
+        /// </summary>
+        public override string FileSize
+        {
+            get
+            {
+                if (this.databaseFile != null)
+                {
+                    return null;
+                }
+
+                return Utils.BytesToString(new FileInfo(this.FullName).Length);
+            }
+        }
+
+        /// <summary>
+        /// Performs a data refresh of this view, if necessary.
+        /// </summary>
         public override void Refresh()
         {
-
-        }
-
-        protected override string GetImageUrl()
-        {
-            return this.IsReadOnly ? LockedFileUrl : NormalFileUrl;
+            // Do nothing
         }
     }
 }

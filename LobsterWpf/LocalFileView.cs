@@ -133,27 +133,33 @@ namespace LobsterWpf
             this.Refresh();
         }
 
-        public override string GetFileSize()
+        public override string FileSize
         {
-            return this.IsDirectory ? null : Utils.BytesToString(new FileInfo(this.FullName).Length);
+            get
+            {
+                return this.IsDirectory ? null : Utils.BytesToString(new FileInfo(this.FullName).Length);
+            }
         }
 
 
-        protected override string GetImageUrl()
+        public override string ImageUrl
         {
-            if (this.IsDirectory)
+            get
             {
-                return this.Children?.Count > 0 ? FullDirectoryUrl : EmptyDirectoryUrl;
-            }
+                if (this.IsDirectory)
+                {
+                    return this.Children?.Count > 0 ? FullDirectoryUrl : EmptyDirectoryUrl;
+                }
 
-            try
-            {
-                return this.IsReadOnly ? LockedFileUrl : NormalFileUrl;
-            }
-            catch (IOException)
-            {
-                // In case the file was not found
-                return FileNotFoundUrl;
+                try
+                {
+                    return this.IsReadOnly ? LockedFileUrl : NormalFileUrl;
+                }
+                catch (IOException)
+                {
+                    // In case the file was not found
+                    return FileNotFoundUrl;
+                }
             }
         }
 
