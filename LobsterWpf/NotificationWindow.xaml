@@ -7,7 +7,6 @@
         mc:Ignorable="d" WindowStyle="None"
         Title="NotificationWindow" Width="300" SizeToContent="Height" AllowsTransparency="True" Background="Transparent" ShowInTaskbar="False" Topmost="True">
     <Grid RenderTransformOrigin="0,1" >
-
         <!-- Notification area -->
         <Border BorderThickness="1" Background="Azure" BorderBrush="Black" CornerRadius="10">
             <StackPanel Margin="15" Orientation="Horizontal">
@@ -16,11 +15,4 @@
             </StackPanel>
         </Border>
     </Grid>
-    <Window.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Resources.xaml" />
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-    </Window.Resources>
 </Window>

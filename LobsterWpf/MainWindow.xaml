@@ -59,7 +59,7 @@
                     <TreeView Name="localFileTreeView" ItemsSource="{Binding RootFile}" Grid.Row="0" SelectedItemChanged="localFileTreeView_SelectedItemChanged">
                         <TreeView.ItemTemplate>
                             <HierarchicalDataTemplate DataType="{x:Type local:FileNodeView}" ItemsSource="{Binding Children}">
-                                <HierarchicalDataTemplate.Resources>
+                                <!--<HierarchicalDataTemplate.Resources>
                                     <Style TargetType="{x:Type TextBlock}">
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsLocalOnly}" Value="True">
@@ -67,10 +67,10 @@
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
-                                </HierarchicalDataTemplate.Resources>
+                                </HierarchicalDataTemplate.Resources>-->
                                 <StackPanel Orientation="Horizontal">
                                     <Image Source="{Binding Path=ImageUrl}" Height="18"/>
-                                    <TextBlock Text="{Binding Path=Name}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding Path=Name}" Foreground="{Binding Path=ForegroundColour}"  VerticalAlignment="Center"/>
                                 </StackPanel>
                             </HierarchicalDataTemplate>
                         </TreeView.ItemTemplate>

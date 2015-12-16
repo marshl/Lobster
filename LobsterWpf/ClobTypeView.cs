@@ -34,7 +34,7 @@ namespace LobsterWpf
         /// <summary>
         /// The base clob type for this view.
         /// </summary>
-        private ClobType clobType;
+        public ClobType clobType { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ClobTypeView"/> class.

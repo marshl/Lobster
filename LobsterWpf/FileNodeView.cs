@@ -6,26 +6,28 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Media;
 using LobsterModel;
 
 namespace LobsterWpf
 {
-    class FileNodeView : INotifyPropertyChanged
+    public abstract class FileNodeView : INotifyPropertyChanged
     {
-        public string FileSize
-        {
-            get
-            {
-                return this.IsDirectory ? null : Utils.BytesToString(new FileInfo(this.FullName).Length);
-            }
-        }
+        protected static string FullDirectoryUrl = @"Resources\Images\Folder_stuffed.ico";
+        protected static string EmptyDirectoryUrl = @"Resources\Images\folder_open.ico";
+        protected static string LockedFileUrl = @"Resources\Images\SecurityLock.ico";
+        protected static string NormalFileUrl = @"Resources\Images\Generic_Document.ico";
+        protected static string FileNotFoundUrl = @"Resources\Images\Annotate_Blocked_large.ico";
 
-        private ObservableCollection<FileBackup> _fileBackupList;
+        public abstract string GetFileSize();
+
+        protected ObservableCollection<FileBackup> _fileBackupList;
         public ObservableCollection<FileBackup> FileBackupList
         {
             get
             {
+                Application.Current.FindResource("FolderImageSource");
                 return this._fileBackupList;
             }
             set
@@ -35,56 +37,15 @@ namespace LobsterWpf
             }
         }
 
-        private ConnectionView parentConnectionView;
-        public FileNodeView(ConnectionView connectionView, string path)
+        protected ConnectionView parentConnectionView;
+        public FileNodeView(ConnectionView connectionView)
         {
-            this.FullName = path;
             this.parentConnectionView = connectionView;
-
-            FileInfo fileInfo = new FileInfo(path);
-            if (fileInfo.Exists)
-            {
-                this.LastWriteTime = fileInfo.LastWriteTime;
-            }
-
-            DirectoryInfo dirInfo = new DirectoryInfo(path);
-            this.IsDirectory = dirInfo.Exists;
-
-            if (this.IsDirectory)
-            {
-                this.LastWriteTime = dirInfo.LastWriteTime;
-                this.Children = new ObservableCollection<FileNodeView>();
-
-                foreach (DirectoryInfo subDir in dirInfo.GetDirectories())
-                {
-                    FileNodeView node = new FileNodeView(connectionView, subDir.FullName);
-                    this.Children.Add(node);
-                }
-
-                foreach (FileInfo file in dirInfo.GetFiles())
-                {
-                    if (this.parentConnectionView.ShowReadOnlyFiles || !file.IsReadOnly)
-                    {
-                        FileNodeView node = new FileNodeView(connectionView, file.FullName);
-                        this.Children.Add(node);
-                    }
-                }
-            }
-
-            this.Refresh();
         }
 
-        public string FullName { get; }
+        public abstract string FullName { get; set; }
 
-        public string Name
-        {
-            get
-            {
-                return Path.GetFileName(this.FullName);
-            }
-        }
-
-        public bool IsDirectory { get; private set; }
+        public abstract string Name { get; }
 
         public ObservableCollection<FileNodeView> Children { get; set; }
 
@@ -103,7 +64,7 @@ namespace LobsterWpf
             }
         }
 
-        private void NotifyPropertyChanged(string propertyName = "")
+        protected void NotifyPropertyChanged(string propertyName)
         {
             if (PropertyChanged != null)
             {
@@ -117,111 +78,27 @@ namespace LobsterWpf
         {
             get
             {
-                if (this.IsDirectory)
-                {
-                    return this.Children?.Count > 0 ? @"Resources\Images\Folder_stuffed.ico" : @"Resources\Images\folder_open.ico";
-                }
-
-                try
-                {
-                    return this.IsReadOnly ? @"Resources\Images\SecurityLock.ico" : @"Resources\Images\Generic_Document.ico";
-                }
-                catch (IOException)
-                {
-                    // In case the file was not found
-                    return @"Resources\Images\Annotate_Blocked_large.ico";
-                }
+                return this.GetImageUrl();
             }
         }
 
-        public bool IsReadOnly
-        {
-            get
-            {
-                return (File.GetAttributes(this.FullName) & FileAttributes.ReadOnly) != 0;
-            }
-        }
+        protected abstract string GetImageUrl();
 
-        public void Refresh()
-        {
-            this.NotifyPropertyChanged("FileSize");
+        public abstract bool IsReadOnly { get; }
 
-            if (!this.IsDirectory)
-            {
-                List<FileBackup> fileBackups = this.parentConnectionView.connection.ParentModel.FileBackupLog.GetBackupsForFile(this.FullName);
-                if (fileBackups != null)
-                {
-                    this.FileBackupList = new ObservableCollection<FileBackup>(fileBackups.OrderByDescending(backup => backup.DateCreated));
-                }
-            }
-        }
+        public abstract void Refresh();
 
         //private DBClobFile databaseFile;
-        public DBClobFile DatabaseFile
-        {
-            get
-            {
-                try
-                {
-                    ClobDirectory clobDir = this.parentConnectionView.connection.GetClobDirectoryForFile(this.FullName);
-                    return clobDir.GetDatabaseFileForFullpath(this.FullName);
-                }
-                catch (ClobFileLookupException)
-                {
-                    return null;
-                }
-                //return this.databaseFile;
-            }
+        public abstract DBClobFile DatabaseFile { get; set; }
 
-            set
-            {
-                //this.databaseFile = value;
-                this.NotifyPropertyChanged("DatabaseFile");
-                this.NotifyPropertyChanged("IsLocalOnly");
-                this.NotifyPropertyChanged("CanBeUpdated");
-                this.NotifyPropertyChanged("CanBeDiffed");
-                this.NotifyPropertyChanged("CanBeInserted");
-            }
-        }
+        public abstract bool CanBeUpdated { get; }
 
-        public bool IsLocalOnly
-        {
-            get
-            {
-                return !this.IsDirectory && this.DatabaseFile == null;
-            }
-        }
+        public abstract bool CanBeDiffed { get; }
 
-        public bool CanBeUpdated
-        {
-            get
-            {
-                return !this.IsDirectory && this.DatabaseFile != null;
-            }
-        }
+        public abstract bool CanBeInserted { get; }
 
-        public bool CanBeDiffed
-        {
-            get
-            {
-                return !this.IsDirectory && this.DatabaseFile != null;
-            }
-        }
+        public abstract bool CanBeExploredTo { get; }
 
-        public bool CanBeInserted
-        {
-            get
-            {
-                return !this.IsDirectory && this.DatabaseFile == null;
-            }
-        }
-
-        public bool CanBeExploredTo
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public abstract string ForegroundColour { get; }
     }
 }

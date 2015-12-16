@@ -16,6 +16,7 @@
 //-----------------------------------------------------------------------
 namespace LobsterWpf
 {
+    using System;
     using System.Collections.ObjectModel;
     using System.ComponentModel;
     using System.IO;
@@ -24,7 +25,7 @@ namespace LobsterWpf
     /// <summary>
     /// The ViewModel for a model DatabaseConnection object.
     /// </summary>
-    class ConnectionView : INotifyPropertyChanged
+    public class ConnectionView : INotifyPropertyChanged
     {
         /// <summary>
         /// Gets the connection model for this view
@@ -98,7 +99,7 @@ namespace LobsterWpf
             }
         }
 
-        public DisplayMode CurrentDisplayMode { get; internal set; }
+        public DisplayMode CurrentDisplayMode { get; set; } = DisplayMode.LocalFiles;
 
         // This method is called by the Set accessor of each property.
         // The CallerMemberName attribute that is applied to the optional propertyName
@@ -133,7 +134,25 @@ namespace LobsterWpf
                 return;
             }
 
-            this.RootFile = new FileNodeView(this, rootDirInfo.FullName);
+            if (this.CurrentDisplayMode == DisplayMode.LocalFiles)
+            {
+                this.RootFile = new LocalFileView(this, rootDirInfo.FullName);
+            }
+            else if (this.CurrentDisplayMode == DisplayMode.DatabaseFiles)
+            {
+                this.RootFile = new DatabaseFileView(this, null,null);
+                this.RootFile.Children = new ObservableCollection<FileNodeView>();
+
+                DirectoryInfo dirInfo = new DirectoryInfo(clobDir.GetFullPath(this.connection));
+                FileInfo[] files = dirInfo.GetFiles(".", SearchOption.AllDirectories);
+              
+                foreach (DBClobFile dbFile in clobDir.DatabaseFileList)
+                {
+                    FileInfo fileInfo = Array.Find(files, x => x.Name.Equals(dbFile.Filename, StringComparison.OrdinalIgnoreCase));
+                    DatabaseFileView dbFileView = new DatabaseFileView(this, dbFile, fileInfo?.FullName);
+                    this.RootFile.Children.Add(dbFileView);
+                }
+            }
         }
     }
 }

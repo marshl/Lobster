@@ -97,7 +97,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="DatabaseFileView.cs" />
     <Compile Include="ImageConverter.cs" />
+    <Compile Include="LocalFileView.cs" />
     <Compile Include="TableSelectorWindow.xaml.cs">
       <DependentUpon>TableSelectorWindow.xaml</DependentUpon>
     </Compile>
@@ -259,9 +261,7 @@
     <Resource Include="Resources\Images\1549_Paper_clip_gray.ico" />
     <Resource Include="Resources\Images\Annotate_Blocked_large.ico" />
     <Resource Include="Resources\Images\Annotate_Complete.ico" />
-    <Content Include="Resources\Images\Annotate_Default.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Resource Include="Resources\Images\Annotate_Default.ico" />
     <Resource Include="Resources\Images\Annotate_Disabled.ico" />
     <Resource Include="Resources\Images\Annotate_Help.ico" />
     <Resource Include="Resources\Images\Annotate_HighPriority.ico" />

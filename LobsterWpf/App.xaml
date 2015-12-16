@@ -3,6 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:LobsterWpf" Exit="Application_Exit">
     <Application.Resources>
-         
+        <BitmapImage x:Key="FolderImageSource" UriSource="/Lobster;component/Resources/Images/folder_open.ico"/>
+        <BitmapImage x:Key="InsertImageSource" UriSource="/Lobster;component/Resources/Images/112_Plus_Green.ico"/>
+        <BitmapImage x:Key="MergeImageSource" UriSource="/Lobster;component/Resources/Images/041_Sort.ico"/>
+        <BitmapImage x:Key="PushImageSource" UriSource="/Lobster;component/Resources/Images/112_UpArrowShort_Orange.ico"/>
+        <BitmapImage x:Key="WarningImageSource" UriSource="/Lobster;component/Resources/Images/Annotate_Warning.ico"/>
+        <BitmapImage x:Key="SuccessImageSource" UriSource="/Lobster;component/Resources/Images/Annotate_Default.ico"/>
     </Application.Resources>
 </Application>

@@ -102,13 +102,15 @@ namespace LobsterWpf
                 return;
             }
 
-            ClobDirectory clobDir = this.Model.CurrentConnection.ClobDirectoryList[this.clobTypeListBox.SelectedIndex];
-            this.connectionView = this.ConnectionContainer.DataContext as ConnectionView;
-            if (connectionView != null)
+            if ( this.connectionView == null )
             {
-                connectionView.PopulateFileTreeForClobDirectory(clobDir);
-                this.localFileTreeView.ItemsSource = connectionView.RootFile?.Children;
+                return;
             }
+
+            ClobDirectory clobDir = this.Model.CurrentConnection.ClobDirectoryList[this.clobTypeListBox.SelectedIndex];
+
+            connectionView.PopulateFileTreeForClobDirectory(clobDir);
+            this.localFileTreeView.ItemsSource = connectionView.RootFile?.Children;
         }
 
         private void hideReadonlyCheckbox_Checked(object sender, RoutedEventArgs e)
@@ -311,7 +313,13 @@ namespace LobsterWpf
 
         private void OnToggleViewModeRadioClicked(object sender, RoutedEventArgs e)
         {
-            this.connectionView.CurrentDisplayMode = ConnectionView.DisplayMode.LocalFiles;
+            if (this.connectionView == null)
+            {
+                return;
+            }
+
+
+            this.connectionView.CurrentDisplayMode = this.LocalOnlyFilesRadio.IsChecked.Value ? ConnectionView.DisplayMode.LocalFiles : ConnectionView.DisplayMode.DatabaseFiles;
             this.RepopulateFileListView();
         }
     }

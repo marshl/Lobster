@@ -50,7 +50,7 @@ namespace LobsterWpf
             this.Message = message;
             this.DataContext = this;
 
-            this.ImageSource = (ImageSource)(result ? Resources["SuccessImageSource"] : Resources["WarningImageSource"]);
+            this.ImageSource = (ImageSource)(result ? Application.Current.FindResource("SuccessImageSource") : Application.Current.FindResource("WarningImageSource"));
 
             if (activeWindowList == null)
             {
@@ -74,24 +74,25 @@ namespace LobsterWpf
                 }
             }
 
+
+            System.Drawing.Rectangle workingArea = System.Windows.Forms.Screen.PrimaryScreen.WorkingArea;
+            this.Left = workingArea.Right - this.ActualWidth;
+            this.Top = workingArea.Top - this.ActualHeight * (this.windowIndex + 1);
+
             Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(() =>
             {
-                System.Drawing.Rectangle workingArea = System.Windows.Forms.Screen.PrimaryScreen.WorkingArea;
                 Matrix transform = PresentationSource.FromVisual(this).CompositionTarget.TransformFromDevice;
                 Point corner = transform.Transform(new Point(workingArea.Right, workingArea.Bottom));
-
-                this.Left = corner.X;
-                this.Top = corner.Y - this.ActualHeight * (this.windowIndex + 1);
 
                 TimeSpan slideDuration = new TimeSpan(0, 0, 0, 0, 250);
                 TimeSpan pauseDuration = new TimeSpan(0, 0, 0, 1, 0);
                 TimeSpan fadeDuration = new TimeSpan(0, 0, 0, 2, 0);
 
                 var sb = new Storyboard { Duration = new Duration(slideDuration + fadeDuration + pauseDuration) };
-                
+
                 var heightAnimation = new DoubleAnimationUsingKeyFrames();
                 var fadeAnimation = new DoubleAnimationUsingKeyFrames();
-                
+
                 heightAnimation.Duration = new Duration(slideDuration);
                 fadeAnimation.Duration = new Duration(fadeDuration);
 
