@@ -83,6 +83,8 @@ namespace LobsterWpf
             {
                 Matrix transform = PresentationSource.FromVisual(this).CompositionTarget.TransformFromDevice;
                 Point corner = transform.Transform(new Point(workingArea.Right, workingArea.Bottom));
+                this.Left = corner.X;
+                this.Top = corner.Y - this.ActualHeight * (this.windowIndex + 1);
 
                 TimeSpan slideDuration = new TimeSpan(0, 0, 0, 0, 250);
                 TimeSpan pauseDuration = new TimeSpan(0, 0, 0, 1, 0);
