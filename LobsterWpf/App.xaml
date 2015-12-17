@@ -9,5 +9,11 @@
         <BitmapImage x:Key="PushImageSource" UriSource="/Lobster;component/Resources/Images/112_UpArrowShort_Orange.ico"/>
         <BitmapImage x:Key="WarningImageSource" UriSource="/Lobster;component/Resources/Images/Annotate_Warning.ico"/>
         <BitmapImage x:Key="SuccessImageSource" UriSource="/Lobster;component/Resources/Images/Annotate_Default.ico"/>
+        
+        <BitmapImage x:Key="FullDirectoryImageSource" UriSource="/Lobster;component/Resources/Images/Folder_stuffed.ico"/>
+        <BitmapImage x:Key="EmptyDirectoryImageSource" UriSource="/Lobster;component/Resources/Images/folder_open.ico"/>
+        <BitmapImage x:Key="LockedFileImageSource" UriSource="/Lobster;component/Resources/Images/SecurityLock.ico"/>
+        <BitmapImage x:Key="NormalFileImageSource" UriSource="/Lobster;component/Resources/Images/Generic_Document.ico"/>
+        <BitmapImage x:Key="FileNotFoundImageSource" UriSource="/Lobster;component/Resources/Images/Annotate_Blocked_large.ico"/>
     </Application.Resources>
 </Application>

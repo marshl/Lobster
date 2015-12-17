@@ -133,10 +133,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Resources.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="TableSelectorWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -202,14 +198,10 @@
   <ItemGroup>
     <Resource Include="Resources\Images\cartoon-lobster-800px.png" />
     <Resource Include="Resources\Images\cartoon-lobster.ico" />
-    <Content Include="Resources\Images\SecurityLock.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Resource Include="Resources\Images\SecurityLock.ico" />
     <Resource Include="Resources\Images\008_Reminder.ico" />
     <Resource Include="Resources\Images\010_LowPriority.ico" />
-    <Content Include="Resources\Images\041_Sort.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Resource Include="Resources\Images\041_Sort.ico" />
     <Resource Include="Resources\Images\042b_AddCategory.ico" />
     <Resource Include="Resources\Images\075b_UpFolder.ico" />
     <Resource Include="Resources\Images\077_AddFile.ico" />
@@ -232,9 +224,7 @@
     <Resource Include="Resources\Images\112_LeftArrowShort_Green.ico" />
     <Resource Include="Resources\Images\112_LeftArrowShort_Grey.ico" />
     <Resource Include="Resources\Images\112_LeftArrowShort_Orange.ico" />
-    <Content Include="Resources\Images\112_Plus_Green.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Resource Include="Resources\Images\112_Plus_Green.ico" />
     <Resource Include="Resources\Images\112_Plus_Grey.ico" />
     <Resource Include="Resources\Images\112_Plus_Orange.ico" />
     <Resource Include="Resources\Images\112_RefreshArrow_Blue.ico" />
@@ -267,9 +257,7 @@
     <Resource Include="Resources\Images\Annotate_HighPriority.ico" />
     <Resource Include="Resources\Images\Annotate_QuestionBlue.ico" />
     <Resource Include="Resources\Images\Annotate_QuestionRed.ico" />
-    <Content Include="Resources\Images\Annotate_Warning.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Resource Include="Resources\Images\Annotate_Warning.ico" />
     <Resource Include="Resources\Images\autoList.ico" />
     <Resource Include="Resources\Images\Book_Green.ico" />
     <Resource Include="Resources\Images\Close.ico" />
@@ -281,9 +269,7 @@
     <Content Include="Resources\Images\folder.ico" />
     <Resource Include="Resources\Images\Folder_6221.ico" />
     <Resource Include="Resources\Images\Folder_6222.ico" />
-    <Content Include="Resources\Images\folder_open.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Resource Include="Resources\Images\folder_open.ico" />
     <Resource Include="Resources\Images\Folder_stuffed.ico" />
     <Resource Include="Resources\Images\GenericVSEditor_9905.ico" />
     <Resource Include="Resources\Images\Generic_Document.ico" />

@@ -163,26 +163,4 @@
             </StatusBar>
         </Grid>
     </Grid>
-    <Window.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Resources.xaml" />
-            </ResourceDictionary.MergedDictionaries>
-            <!--
-            <Style x:Key="grayedIfNotLogged" TargetType="Image">
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding StatusInfo.IsLogged}" Value="False">
-                        <Setter Property="Effect">
-                            <Setter.Value>
-                                <fx:GreyscaleEffect />
-                            </Setter.Value>
-                        </Setter>
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
-            -->
-        </ResourceDictionary>
-
-    </Window.Resources>
-
 </Window>

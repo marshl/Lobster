@@ -142,24 +142,30 @@ namespace LobsterWpf
         }
 
 
-        public override string ImageUrl
+        public override ImageSource ImageUrl
         {
             get
             {
+                string resourceName;
+
                 if (this.IsDirectory)
                 {
-                    return this.Children?.Count > 0 ? FullDirectoryUrl : EmptyDirectoryUrl;
+                    resourceName = this.Children?.Count > 0 ? "FullDirectoryImageSource" : "EmptyDirectoryImageSource";
+                }
+                else
+                {
+                    try
+                    {
+                        resourceName = this.IsReadOnly ? "LockedFileImageSource" : "NormalFileImageSource";
+                    }
+                    catch (IOException)
+                    {
+                        // In case the file was not found
+                        resourceName = "FileNotFoundImageSource";
+                    }
                 }
 
-                try
-                {
-                    return this.IsReadOnly ? LockedFileUrl : NormalFileUrl;
-                }
-                catch (IOException)
-                {
-                    // In case the file was not found
-                    return FileNotFoundUrl;
-                }
+                return (ImageSource)App.Current.FindResource(resourceName);
             }
         }
 

@@ -168,11 +168,12 @@ namespace LobsterWpf
         /// <summary>
         /// Gets the image that should be displayed next to the name in the file list.
         /// </summary>
-        public override string ImageUrl
+        public override ImageSource ImageUrl
         {
             get
             {
-                return this.IsReadOnly ? FileNodeView.LockedFileUrl : FileNodeView.NormalFileUrl;
+                string resourceName = this.IsReadOnly ? "LockedFileImageSource" : "NormalFileImageSource";
+                return (ImageSource)App.Current.FindResource(resourceName);
             }
         }
 
