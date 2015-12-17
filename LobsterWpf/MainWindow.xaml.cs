@@ -284,7 +284,7 @@ namespace LobsterWpf
 
         private void pushBackupButton_Click(object sender, EventArgs e)
         {
-            FileBackup fileBackup = ((Grid)((System.Windows.Controls.Button)sender).Parent).DataContext as FileBackup;
+            FileBackup fileBackup = ((FrameworkElement)sender).DataContext as FileBackup;
 
             try
             {
@@ -301,7 +301,7 @@ namespace LobsterWpf
 
         private void openBackupButton_Click(object sender, EventArgs e)
         {
-            FileBackup fileBackup = ((Grid)((System.Windows.Controls.Button)sender).Parent).DataContext as FileBackup;
+            FileBackup fileBackup = ((FrameworkElement)sender).DataContext as FileBackup;
             this.OpenFileInExplorer(fileBackup.BackupFilename);
         }
 
@@ -317,7 +317,6 @@ namespace LobsterWpf
             {
                 return;
             }
-
 
             this.connectionView.CurrentDisplayMode = this.LocalOnlyFilesRadio.IsChecked.Value ? ConnectionView.DisplayMode.LocalFiles : ConnectionView.DisplayMode.DatabaseFiles;
             this.RepopulateFileListView();

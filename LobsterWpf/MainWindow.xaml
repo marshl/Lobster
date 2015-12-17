@@ -107,28 +107,31 @@
                         </StackPanel>
                     </Button>
                 </StackPanel>
-                <StackPanel Grid.Column="2" DataContext="{Binding Path=SelectedFileNode}">
+                <StackPanel Grid.Column="2" DataContext="{Binding Path=SelectedFileNode}" Orientation="Vertical">
                     <TextBox>File History</TextBox>
-                    <ItemsControl  Name="fileHistoryListBox" ItemsSource="{Binding FileBackupList}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate DataType="FileBackup">
-                                <Grid Margin="5">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="1*"/>
-                                        <ColumnDefinition Width="1*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Text="{Binding DateCreated}" Grid.Column="0"/>
-                                    <Button Height="20" Click="pushBackupButton_Click" Grid.Column="1" Margin="5,0" Width="20">
-                                        <Image Source="{DynamicResource PushImageSource}"/>
-                                    </Button>
-                                    <Button Height="20" Click="openBackupButton_Click" Grid.Column="2" Margin="5,0" Width="20">
-                                        <Image Source="{DynamicResource FolderImageSource}"/>
-                                    </Button>
-                                </Grid>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                    <DataGrid Name="fileHistoryDataGrid" ItemsSource="{Binding FileBackupList}" AutoGenerateColumns="False" CanUserReorderColumns="False" CanUserSortColumns="False" GridLinesVisibility="Horizontal">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Date Created" Binding="{Binding DateCreated}"/>
+                            <DataGridTemplateColumn CanUserResize="False">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Height="25" Click="pushBackupButton_Click">
+                                            <Image Source="{DynamicResource PushImageSource}"/>
+                                        </Button>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn CanUserResize="False">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Height="25" Click="openBackupButton_Click">
+                                            <Image Source="{DynamicResource FolderImageSource}"/>
+                                        </Button>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
                 </StackPanel>
             </Grid>
         </Grid>

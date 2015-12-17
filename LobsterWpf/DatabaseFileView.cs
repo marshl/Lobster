@@ -16,8 +16,11 @@
 //-----------------------------------------------------------------------
 namespace LobsterWpf
 {
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Diagnostics;
     using System.IO;
+    using System.Linq;
     using System.Windows.Media;
     using LobsterModel;
 
@@ -44,7 +47,6 @@ namespace LobsterWpf
         /// <param name="localFile">The local equivalent of this file, if it exists.</param>
         public DatabaseFileView(ConnectionView connection, DBClobFile databaseFile, string localFile) : base(connection)
         {
-            Debug.Assert(databaseFile != null, "The database file must exist to create a view for it.");
             this.databaseFile = databaseFile;
             this.localFilePath = localFile;
         }
@@ -198,7 +200,11 @@ namespace LobsterWpf
         /// </summary>
         public override void Refresh()
         {
-            // Do nothing
+            List<FileBackup> fileBackups = this.parentConnectionView.Connection.ParentModel.FileBackupLog.GetBackupsForFile(this.FullName);
+            if (fileBackups != null)
+            {
+                this.FileBackupList = new ObservableCollection<FileBackup>(fileBackups.OrderByDescending(backup => backup.DateCreated));
+            }
         }
     }
 }

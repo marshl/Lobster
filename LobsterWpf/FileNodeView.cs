@@ -24,18 +24,13 @@ namespace LobsterWpf
     using LobsterModel;
 
     /// <summary>
-    /// 
+    /// An abstract node to display either a database or local file 
     /// </summary>
     public abstract class FileNodeView : INotifyPropertyChanged
     {
-        /*
-        protected static string FullDirectoryUrl = @"Resources\Images\Folder_stuffed.ico";
-        protected static string EmptyDirectoryUrl = @"Resources\Images\folder_open.ico";
-        protected static string LockedFileUrl = @"Resources\Images\SecurityLock.ico";
-        protected static string NormalFileUrl = @"Resources\Images\Generic_Document.ico";
-        protected static string FileNotFoundUrl = @"Resources\Images\Annotate_Blocked_large.ico";
-        */
-
+        /// <summary>
+        /// Gets a string representing the size of the local file, if it exists.
+        /// </summary>
         public abstract string FileSize { get; }
 
         protected ObservableCollection<FileBackup> _fileBackupList;
