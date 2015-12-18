@@ -60,7 +60,7 @@
                         <TreeView.ItemTemplate>
                             <HierarchicalDataTemplate DataType="{x:Type local:FileNodeView}" ItemsSource="{Binding Children}">
                                 <StackPanel Orientation="Horizontal">
-                                    <Image Source="{Binding Path=ImageUrl}" Height="18"/>
+                                    <Image Source="{Binding ImageUrl}" Height="18"/>
                                     <TextBlock Text="{Binding Path=Name}" Foreground="{Binding Path=ForegroundColour}"  VerticalAlignment="Center"/>
                                 </StackPanel>
                             </HierarchicalDataTemplate>

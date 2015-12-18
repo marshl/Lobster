@@ -51,7 +51,7 @@ namespace LobsterWpf
             {
                 try
                 {
-                    ClobDirectory clobDir = this.parentConnectionView.Connection.GetClobDirectoryForFile(this.FullName);
+                    ClobDirectory clobDir = this.ParentConnectionView.Connection.GetClobDirectoryForFile(this.FullName);
                     return clobDir.GetDatabaseFileForFullpath(this.FullName);
                 }
                 catch (ClobFileLookupException)
@@ -116,15 +116,15 @@ namespace LobsterWpf
 
                 foreach (DirectoryInfo subDir in dirInfo.GetDirectories())
                 {
-                    FileNodeView node = new LocalFileView(parentConnectionView, subDir.FullName);
+                    FileNodeView node = new LocalFileView(ParentConnectionView, subDir.FullName);
                     this.Children.Add(node);
                 }
 
                 foreach (FileInfo file in dirInfo.GetFiles())
                 {
-                    if (this.parentConnectionView.ShowReadOnlyFiles || !file.IsReadOnly)
+                    if (this.ParentConnectionView.ShowReadOnlyFiles || !file.IsReadOnly)
                     {
-                        FileNodeView node = new LocalFileView(this.parentConnectionView, file.FullName);
+                        FileNodeView node = new LocalFileView(this.ParentConnectionView, file.FullName);
                         this.Children.Add(node);
                     }
                 }
@@ -175,7 +175,7 @@ namespace LobsterWpf
 
             if (!this.IsDirectory)
             {
-                List<FileBackup> fileBackups = this.parentConnectionView.Connection.ParentModel.FileBackupLog.GetBackupsForFile(this.FullName);
+                List<FileBackup> fileBackups = this.ParentConnectionView.Connection.ParentModel.FileBackupLog.GetBackupsForFile(this.FullName);
                 if (fileBackups != null)
                 {
                     this.FileBackupList = new ObservableCollection<FileBackup>(fileBackups.OrderByDescending(backup => backup.DateCreated));

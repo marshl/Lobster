@@ -29,78 +29,152 @@ namespace LobsterWpf
     public abstract class FileNodeView : INotifyPropertyChanged
     {
         /// <summary>
-        /// Gets a string representing the size of the local file, if it exists.
+        /// The list of views of backup records (if the file is synchronised);
         /// </summary>
-        public abstract string FileSize { get; }
+        private ObservableCollection<FileBackup> fileBackupList;
 
-        protected ObservableCollection<FileBackup> _fileBackupList;
-        public ObservableCollection<FileBackup> FileBackupList
-        {
-            get
-            {
-                Application.Current.FindResource("FolderImageSource");
-                return this._fileBackupList;
-            }
-            set
-            {
-                this._fileBackupList = value;
-                this.NotifyPropertyChanged("FileBackupList");
-            }
-        }
+        /// <summary>
+        /// The connectionview that created this file.
+        /// </summary>
+        private ConnectionView parentConnectionView;
 
-        protected ConnectionView parentConnectionView;
+        /// <summary>
+        /// The last time the local file was written to.
+        /// </summary>
+        private DateTime lastWRiteTime;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FileNodeView"/> class.
+        /// </summary>
+        /// <param name="connectionView">The parent connetion of the file.</param>
         public FileNodeView(ConnectionView connectionView)
         {
             this.parentConnectionView = connectionView;
         }
 
-        public abstract string FullName { get; set; }
+        /// <summary>
+        /// The event for when a property is changed.
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
 
-        public abstract string Name { get; }
+        /// <summary>
+        /// Gets a string representing the size of the local file, if it exists.
+        /// </summary>
+        public abstract string FileSize { get; }
 
-        public ObservableCollection<FileNodeView> Children { get; set; }
-
-        private DateTime _lastWriteTime;
-        public DateTime LastWriteTime
+        /// <summary>
+        /// Gets or sets the collection of backup records.
+        /// </summary>
+        public ObservableCollection<FileBackup> FileBackupList
         {
             get
             {
-                return this._lastWriteTime;
+                Application.Current.FindResource("FolderImageSource");
+                return this.fileBackupList;
             }
 
             set
             {
-                this._lastWriteTime = value;
+                this.fileBackupList = value;
+                this.NotifyPropertyChanged("FileBackupList");
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the full path of the local file.
+        /// </summary>
+        public abstract string FullName { get; set; }
+
+        /// <summary>
+        /// Gets the text that will be displayed in the file tree view.
+        /// </summary>
+        public abstract string Name { get; }
+
+        /// <summary>
+        /// Gets or sets the child file nodes for this view.
+        /// </summary>
+        public ObservableCollection<FileNodeView> Children { get; set; }
+
+        /// <summary>
+        /// Gets the image source that is displayed next to this file in the file tree view.
+        /// </summary>
+        public abstract ImageSource ImageUrl { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the local file for this file is read only or not.
+        /// </summary>
+        public abstract bool IsReadOnly { get; }
+
+        /// <summary>
+        /// Gets or sets the database file.
+        /// </summary>
+        public abstract DBClobFile DatabaseFile { get; set; }
+
+        /// <summary>
+        /// Gets a value indicating whether this file can update the database with its local file.
+        /// </summary>
+        public abstract bool CanBeUpdated { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether this file can have its local and database files diffed.
+        /// </summary>
+        public abstract bool CanBeDiffed { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether this file can be inserted into the database or not.
+        /// </summary>
+        public abstract bool CanBeInserted { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether this file can be explored to or not.
+        /// </summary>
+        public abstract bool CanBeExploredTo { get; }
+
+        /// <summary>
+        /// Gets the colour to use for the Name of this file.
+        /// </summary>
+        public abstract string ForegroundColour { get; }
+
+        /// <summary>
+        /// Gets or sets the last trim the local file was written to.
+        /// </summary>
+        public DateTime LastWriteTime
+        {
+            get
+            {
+                return this.lastWRiteTime;
+            }
+
+            set
+            {
+                this.lastWRiteTime = value;
                 this.NotifyPropertyChanged("LastWriteTime");
             }
         }
 
-        protected void NotifyPropertyChanged(string propertyName)
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
+        /// <summary>
+        /// Gets the parent connection view of this file.
+        /// </summary>
+        protected ConnectionView ParentConnectionView { get; private set; }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public abstract ImageSource ImageUrl { get; }
-
-        public abstract bool IsReadOnly { get; }
-
+        /// <summary>
+        /// Resets aspects of this file.
+        /// </summary>
         public abstract void Refresh();
 
-        public abstract DBClobFile DatabaseFile { get; set; }
-
-        public abstract bool CanBeUpdated { get; }
-
-        public abstract bool CanBeDiffed { get; }
-
-        public abstract bool CanBeInserted { get; }
-
-        public abstract bool CanBeExploredTo { get; }
-
-        public abstract string ForegroundColour { get; }
+        /// <summary>
+        /// Implementation of the INotifyPropertyChange, to tell WPF when a data value has changed
+        /// </summary>
+        /// <param name="propertyName">The name of the property that has changed.</param>
+        /// <remarks>This method is called by the Set accessor of each property.
+        /// The CallerMemberName attribute that is applied to the optional propertyName
+        /// parameter causes the property name of the caller to be substituted as an argument.</remarks>
+        protected void NotifyPropertyChanged(string propertyName)
+        {
+            if (this.PropertyChanged != null)
+            {
+                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
     }
 }

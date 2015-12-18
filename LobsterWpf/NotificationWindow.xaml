@@ -10,7 +10,7 @@
         <!-- Notification area -->
         <Border BorderThickness="1" Background="Azure" BorderBrush="Black" CornerRadius="10">
             <StackPanel Margin="15" Orientation="Horizontal">
-                <Image Name="statusImage" Source="{Binding ImageSource, FallbackValue=SucessImageSource}" Width="54"/>
+                <Image Name="statusImage" Source="{Binding ImageSource}" Width="54"/>
                 <TextBlock TextWrapping="Wrap" Margin="5" Width="200" Text="{Binding Message, FallbackValue=MESSAGE}" VerticalAlignment="Center"/>
             </StackPanel>
         </Border>
