@@ -579,7 +579,11 @@ namespace LobsterModel
                     // Text mode
                     StreamReader sr = new StreamReader(fs);
                     string contents = sr.ReadToEnd();
-                    contents += this.GetClobFooterMessage(mimeType);
+
+                    if (Settings.Default.AppendFooterToDatabaseFiles)
+                    {
+                        contents += this.GetClobFooterMessage(mimeType);
+                    }
 
                     param.Value = contents;
                     OracleParameter op = (OracleParameter)param;

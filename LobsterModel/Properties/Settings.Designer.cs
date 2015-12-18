@@ -163,5 +163,17 @@ namespace LobsterModel.Properties {
                 this["FileUpdateTimeoutMilliseconds"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool AppendFooterToDatabaseFiles {
+            get {
+                return ((bool)(this["AppendFooterToDatabaseFiles"]));
+            }
+            set {
+                this["AppendFooterToDatabaseFiles"] = value;
+            }
+        }
     }
 }
