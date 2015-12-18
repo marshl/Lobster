@@ -184,7 +184,18 @@ namespace LobsterModel
         /// <param name="e">The event arguments.</param>
         private void OnFileChangeEvent(object sender, FileSystemEventArgs e)
         {
-            MessageLog.LogInfo($"File change event of type {e.ChangeType} for file {e.FullPath} with a write time of {File.GetLastWriteTime(e.FullPath).ToString("yyyy-MM-dd HH:mm:ss.fff")}");
+            Thread thread = new Thread(() => this.EnqueueFileEvent(sender, e));
+            thread.Start();
+        }
+
+        /// <summary>
+        /// Takes a single file event, and pushes it onto the event stack, before processing that event.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void EnqueueFileEvent(object sender, FileSystemEventArgs e)
+        {
+            MessageLog.LogInfo($"File change event of type {e.ChangeType} for file {e.FullPath} with a write time of " + File.GetLastWriteTime(e.FullPath).ToString("yyyy-MM-dd HH:mm:ss.fff"));
 
             lock (this.fileEventQueue)
             {
