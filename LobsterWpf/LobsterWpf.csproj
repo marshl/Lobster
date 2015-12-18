@@ -98,7 +98,6 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="DatabaseFileView.cs" />
-    <Compile Include="ImageConverter.cs" />
     <Compile Include="LocalFileView.cs" />
     <Compile Include="TableSelectorWindow.xaml.cs">
       <DependentUpon>TableSelectorWindow.xaml</DependentUpon>
