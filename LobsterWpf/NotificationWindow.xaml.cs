@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="NotificationWindow.cs" company="marshl">
+// <copyright file="NotificationWindow.xaml.cs" company="marshl">
 // Copyright 2015, Liam Marshall, marshl.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,17 +35,24 @@ namespace LobsterWpf
     /// </summary>
     public partial class NotificationWindow : Window
     {
+        /// <summary>
+        /// The positions of the currently active windows.
+        /// </summary>
         private static List<bool> activeWindowList;
 
+        /// <summary>
+        /// The position of this window.
+        /// </summary>
         private int windowIndex;
 
-        public string Message { get; set; }
-
-        public ImageSource ImageSource { get; set; }
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NotificationWindow"/> class.
+        /// </summary>
+        /// <param name="message">The message to use.</param>
+        /// <param name="result">Whether the event was a success or not.</param>
         public NotificationWindow(string message, bool result)
         {
-            InitializeComponent();
+            this.InitializeComponent();
 
             this.Message = message;
             this.DataContext = this;
@@ -57,7 +64,7 @@ namespace LobsterWpf
                 activeWindowList = new List<bool>();
             }
 
-            for (int i = 0; ; ++i)
+            for (int i = 0; true; ++i)
             {
                 if (activeWindowList.Count <= i)
                 {
@@ -74,17 +81,18 @@ namespace LobsterWpf
                 }
             }
 
-
             System.Drawing.Rectangle workingArea = System.Windows.Forms.Screen.PrimaryScreen.WorkingArea;
             this.Left = workingArea.Right - this.ActualWidth;
-            this.Top = workingArea.Top - this.ActualHeight * (this.windowIndex + 1);
+            this.Top = workingArea.Top - (this.ActualHeight * (this.windowIndex + 1));
 
-            Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(() =>
+            this.Dispatcher.BeginInvoke(
+                DispatcherPriority.ApplicationIdle,
+                new Action(() =>
             {
                 Matrix transform = PresentationSource.FromVisual(this).CompositionTarget.TransformFromDevice;
                 Point corner = transform.Transform(new Point(workingArea.Right, workingArea.Bottom));
                 this.Left = corner.X;
-                this.Top = corner.Y - this.ActualHeight * (this.windowIndex + 1);
+                this.Top = corner.Y - (this.ActualHeight * (this.windowIndex + 1));
 
                 TimeSpan slideDuration = new TimeSpan(0, 0, 0, 0, 250);
                 TimeSpan pauseDuration = new TimeSpan(0, 0, 0, 1, 0);
@@ -115,13 +123,27 @@ namespace LobsterWpf
                 sb.Completed += Storyboard_Completed;
 
                 sb.Begin();
-
             }));
         }
 
+        /// <summary>
+        /// Gets the text of the message to display in the window.
+        /// </summary>
+        public string Message { get; }
+
+        /// <summary>
+        /// Gets the source of the image displayed in the window.
+        /// </summary>
+        public ImageSource ImageSource { get; }
+
+        /// <summary>
+        /// The event for when the storyboard is completed.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
         private void Storyboard_Completed(object sender, EventArgs e)
         {
-            NotificationWindow.activeWindowList[windowIndex] = false;
+            NotificationWindow.activeWindowList[this.windowIndex] = false;
             this.Close();
         }
     }
