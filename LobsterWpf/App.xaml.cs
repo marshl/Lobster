@@ -65,7 +65,7 @@ namespace LobsterWpf
 
             MainWindow mainWindow = new MainWindow();
             this.model = new Model(mainWindow);
-            mainWindow.Model = this.model;
+            mainWindow.PrimaryModel = this.model;
             mainWindow.Show();
         }
 

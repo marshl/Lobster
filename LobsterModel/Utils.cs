@@ -25,6 +25,7 @@ namespace LobsterModel
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Threading;
@@ -226,6 +227,15 @@ namespace LobsterModel
             int place = Convert.ToInt32(Math.Floor(Math.Log(bytes, 1024)));
             double num = Math.Round(bytes / Math.Pow(1024, place), 1);
             return (Math.Sign(byteCount) * num).ToString() + " " + suf[place];
+        }
+
+        /// <summary>
+        /// Opens a file with the given name in explorer.
+        /// </summary>
+        /// <param name="fullName"></param>
+        public static void OpenFileInExplorer(string fullName)
+        {
+            Process.Start("explorer", $"/select,{fullName}");
         }
     }
 }
