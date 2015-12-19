@@ -232,7 +232,7 @@ namespace LobsterModel
         /// <summary>
         /// Opens a file with the given name in explorer.
         /// </summary>
-        /// <param name="fullName"></param>
+        /// <param name="fullName">The file to open in explorer.</param>
         public static void OpenFileInExplorer(string fullName)
         {
             Process.Start("explorer", $"/select,{fullName}");
