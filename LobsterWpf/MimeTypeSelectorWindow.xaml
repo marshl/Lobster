@@ -13,8 +13,8 @@
             <RowDefinition Height="31.333" />
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right" Margin="0,0.333,0,0" Width="160">
-            <Button x:Name="acceptButton" Content="Accept" HorizontalAlignment="Right" VerticalAlignment="Center" Width="75" Height="20" Margin="0,6,10,5" Click="acceptButton_Click"/>
-            <Button x:Name="cancelButton" Content="Cancel" HorizontalAlignment="Right" VerticalAlignment="Center" Width="75" Height="20" Margin="0,6,15,5" RenderTransformOrigin="0.5,0.5" Click="cancelButton_Click"/>
+            <Button x:Name="acceptButton" Content="Accept" HorizontalAlignment="Right" VerticalAlignment="Center" Width="75" Height="20" Margin="0,6,10,5" Click="AcceptButton_Click"/>
+            <Button x:Name="cancelButton" Content="Cancel" HorizontalAlignment="Right" VerticalAlignment="Center" Width="75" Height="20" Margin="0,6,15,5" RenderTransformOrigin="0.5,0.5" Click="CancelButton_Click"/>
         </StackPanel>
         <ListBox x:Name="mimeTypeListBox" HorizontalAlignment="Left" Grid.Row="1" Margin="10,5.333,0,4.667" Width="298"  ItemsSource="{Binding MimeTypeList}"/>
         <Label x:Name="label" Content="{Binding MessageLabel, FallbackValue=Label}" HorizontalAlignment="Left" HorizontalContentAlignment="Stretch" Margin="10,10,0,0" VerticalAlignment="Top"  Grid.Row="0"/>
