@@ -106,6 +106,27 @@ namespace LobsterModel
         }
 
         /// <summary>
+        /// Tests a connection configuration and returns true if a connection could be made.
+        /// </summary>
+        /// <param name="databaseConfig">The configuration file to test</param>
+        /// <param name="e">The exception that was raised, if any.</param>
+        /// <returns>True if the connection was successful, otherwise false.</returns>
+        public static bool TestConnection(DatabaseConfig databaseConfig, ref Exception e)
+        {
+            try
+            {
+                DbConnection con = OpenConnection(databaseConfig);
+                con.Close();
+                return true;
+            }
+            catch (ConnectToDatabaseException ex)
+            {
+                e = ex;
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Disposes this object.
         /// </summary>
         public void Dispose()

@@ -184,5 +184,38 @@ namespace LobsterWpf
                 MessageBox.Show($"An error occurred when attempting to connect to the database: \n{ex}");
             }
         }
+
+        /// <summary>
+        /// The event called when the new connection button is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void NewConnectionButton_Click(object sender, RoutedEventArgs e)
+        {
+            DatabaseConfig config = new DatabaseConfig();
+            DatabaseConfigView configView = new DatabaseConfigView(config);
+            EditConnectionWindow ecw = new EditConnectionWindow(configView);
+            bool? result = ecw.ShowDialog();
+        }
+
+        /// <summary>
+        /// The event for when the edit connection button is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void EditConnectionButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.connectionListBox.SelectedIndex == -1)
+            {
+                return;
+            }
+
+            DatabaseConfig config = this.DatabaseConfigList[this.connectionListBox.SelectedIndex];
+            DatabaseConfigView configView = new DatabaseConfigView(config);
+            EditConnectionWindow ecw = new EditConnectionWindow(configView);
+            bool? result = ecw.ShowDialog();
+
+            this.DatabaseConfigList = new ObservableCollection<DatabaseConfig>(this.model.GetConfigList());
+        }
     }
 }

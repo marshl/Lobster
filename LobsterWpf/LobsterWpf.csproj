@@ -97,12 +97,20 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="DatabaseConfigView.cs" />
     <Compile Include="DatabaseFileView.cs" />
+    <Compile Include="EditConnectionWindow.xaml.cs">
+      <DependentUpon>EditConnectionWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="LocalFileView.cs" />
     <Compile Include="TableSelectorWindow.xaml.cs">
       <DependentUpon>TableSelectorWindow.xaml</DependentUpon>
     </Compile>
     <Page Include="ConnectionListWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="EditConnectionWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -146,6 +154,7 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
+      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -167,9 +176,6 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LobsterModel\LobsterModel.csproj">
