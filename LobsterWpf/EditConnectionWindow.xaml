@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LobsterWpf"
         mc:Ignorable="d"
-        Title="EditConnectionWindow" Height="360" Width="330" MinHeight="360" MinWidth="330">
+        Title="EditConnectionWindow" Height="368" Width="368" MinHeight="368" MinWidth="368" Icon="Resources/Images/cartoon-lobster.ico">
   <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="Auto"/>
@@ -47,8 +47,7 @@
       <CheckBox Grid.Column="0" VerticalAlignment="Center" IsChecked="{Binding Path=UsePooling}"/>
       <Button Grid.Row="6" Grid.Column="1" Click="TestConnectionButton_Click">Test Connection</Button>
     </Grid>
-    
-    
+
     <Label Grid.Row="6" Grid.Column="0" Margin="5">CodeSource Directory:</Label>
     <Grid Grid.Row="6" Grid.Column="1" Margin="5">
       <Grid.ColumnDefinitions>
@@ -56,7 +55,7 @@
         <ColumnDefinition Width="Auto"/>
       </Grid.ColumnDefinitions>
       <TextBox Width="Auto" Grid.Column="0" Text="{Binding Path=CodeSource}"/>
-      <Button Grid.Row="6" Grid.Column="1" Width="25">. . .</Button>
+      <Button Grid.Row="6" Grid.Column="1" Width="25" Click="CodeSourceButton_Click">. . .</Button>
     </Grid>
 
     <Label Grid.Row="7" Grid.Column="0" Margin="5">ClobType Directory:</Label>
@@ -66,7 +65,7 @@
         <ColumnDefinition Width="Auto"/>
       </Grid.ColumnDefinitions>
       <TextBox Width="Auto" Grid.Column="0" Text="{Binding Path=ClobTypeDir}"/>
-      <Button Grid.Row="6" Grid.Column="1" Width="25">. . .</Button>
+      <Button Grid.Row="6" Grid.Column="1" Width="25" Click="ClobTypeButton_Click">. . .</Button>
     </Grid>
 
     <StackPanel Grid.Row="8" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5">

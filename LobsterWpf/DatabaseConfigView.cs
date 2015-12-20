@@ -167,7 +167,7 @@ namespace LobsterWpf
                 this.NotifyPropertyChanged("CodeSource");
             }
         }
-
+        
         /// <summary>
         /// Gets or sets a value indicating whether pooling is enabled or not. 
         /// When enabled, Oracle will remember new connections for a time, and reuse it if the same computer connects using the same connection string.
@@ -228,6 +228,36 @@ namespace LobsterWpf
         public bool TestConnection(ref Exception ex)
         {
             return Model.TestConnection(this.databaseConfig, ref ex);
+        }
+
+        /// <summary>
+        /// Opens a folder select dialog to let the user pick a new code source directory.
+        /// </summary>
+        public void SelectCodeSourceDirectory()
+        {
+            CommonOpenFileDialog dlg = new CommonOpenFileDialog();
+            dlg.IsFolderPicker = true;
+            dlg.InitialDirectory = this.CodeSource;
+            CommonFileDialogResult result = dlg.ShowDialog();
+            if (result == CommonFileDialogResult.Ok)
+            {
+                this.CodeSource = dlg.FileName;
+            }
+        }
+
+        /// <summary>
+        /// Opens a folder select dialog to let the user pick a new clob type directory.
+        /// </summary>
+        public void SelectClobTypeDirectory()
+        {
+            CommonOpenFileDialog dlg = new CommonOpenFileDialog();
+            dlg.IsFolderPicker = true;
+            dlg.InitialDirectory = this.ClobTypeDir;
+            CommonFileDialogResult result = dlg.ShowDialog();
+            if (result == CommonFileDialogResult.Ok)
+            {
+                this.ClobTypeDir = dlg.FileName;
+            }
         }
 
         /// <summary>

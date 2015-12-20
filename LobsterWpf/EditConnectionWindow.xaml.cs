@@ -55,7 +55,7 @@ namespace LobsterWpf
         /// The event that is called when the Ok button is clicked.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The vent arguments.</param>
+        /// <param name="e">The event arguments.</param>
         private void OkButton_Click(object sender, RoutedEventArgs e)
         {
             bool result = this.ConfigView.ApplyChanges();
@@ -71,7 +71,7 @@ namespace LobsterWpf
         /// The event that is called when the accept button is clicked.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The vent arguments.</param>
+        /// <param name="e">The event arguments.</param>
         private void AcceptButton_Click(object sender, RoutedEventArgs e)
         {
             bool result = this.ConfigView.ApplyChanges();
@@ -81,7 +81,7 @@ namespace LobsterWpf
         /// The event that is called when the cancel button is clicked.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The vent arguments.</param>
+        /// <param name="e">The event arguments.</param>
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
             this.DialogResult = false;
@@ -92,7 +92,7 @@ namespace LobsterWpf
         /// The event that is called when the test connection button is clicked.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The vent arguments.</param>
+        /// <param name="e">The event arguments.</param>
         private void TestConnectionButton_Click(object sender, RoutedEventArgs e)
         {
             Exception ex = null;
@@ -101,6 +101,26 @@ namespace LobsterWpf
             string message = result ? "Connection test successful" : "Connection test unsuccessful.\n" + ex;
 
             MessageBox.Show(message);
+        }
+
+        /// <summary>
+        /// The event that is called when the codesource button is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void CodeSourceButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.ConfigView.SelectCodeSourceDirectory();
+        }
+
+        /// <summary>
+        /// The event that is called when the clobtype button is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void ClobTypeButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.ConfigView.SelectClobTypeDirectory();
         }
     }
 }
