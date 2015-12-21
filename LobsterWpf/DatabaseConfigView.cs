@@ -271,6 +271,7 @@ namespace LobsterWpf
                 CommonSaveFileDialog dlg = new CommonSaveFileDialog();
                 dlg.Filters.Add(new CommonFileDialogFilter("eXtensible Markup Language", "*.xml"));
                 dlg.Title = "Save Lobster Connection As";
+                dlg.DefaultFileName = "NewConnection.xml";
                 CommonFileDialogResult result = dlg.ShowDialog();
                 if (result == CommonFileDialogResult.Ok)
                 {

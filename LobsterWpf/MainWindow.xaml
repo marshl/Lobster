@@ -31,9 +31,9 @@
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
-            <ListBox Name="clobTypeListBox" Grid.Column="0" Grid.Row="1" ItemsSource="{Binding ClobTypes}" SelectionChanged="ClobTypeListBox_SelectionChanged">
+            <ListBox Name="clobTypeListBox" Grid.Column="0" Grid.Row="1" ItemsSource="{Binding ClobDirectories}" SelectionChanged="ClobTypeListBox_SelectionChanged">
                 <ListBox.ItemTemplate>
-                    <DataTemplate DataType="ClobType">
+                    <DataTemplate DataType="ClobDirectoryView">
                         <StackPanel>
                             <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
                             <TextBlock Text="{Binding Directory}" FontStyle="Italic"/>

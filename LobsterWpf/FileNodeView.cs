@@ -155,7 +155,18 @@ namespace LobsterWpf
         /// <summary>
         /// Gets the parent connection view of this file.
         /// </summary>
-        protected ConnectionView ParentConnectionView { get; private set; }
+        protected ConnectionView ParentConnectionView
+        {
+            get
+            {
+                return this.parentConnectionView;
+            }
+
+            private set
+            {
+                this.parentConnectionView = value;
+            }
+        }
 
         /// <summary>
         /// Resets aspects of this file.

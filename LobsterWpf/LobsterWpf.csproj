@@ -97,6 +97,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ClobDirectoryView.cs" />
+    <Compile Include="ClobTypeListWindow.xaml.cs">
+      <DependentUpon>ClobTypeListWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="DatabaseConfigView.cs" />
     <Compile Include="DatabaseFileView.cs" />
     <Compile Include="EditConnectionWindow.xaml.cs">
@@ -106,6 +110,10 @@
     <Compile Include="TableSelectorWindow.xaml.cs">
       <DependentUpon>TableSelectorWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="ClobTypeListWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="ConnectionListWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

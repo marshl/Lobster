@@ -17,6 +17,7 @@
 namespace LobsterWpf
 {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
     using System.Media;
@@ -188,7 +189,6 @@ namespace LobsterWpf
         /// </summary>
         private void RepopulateFileListView()
         {
-            this.localFileTreeView.Items.Clear();
             if (this.clobTypeListBox.SelectedIndex == -1)
             {
                 return;
@@ -391,7 +391,9 @@ namespace LobsterWpf
         /// <param name="e">The event arguments.</param>
         private void RequeryDatabaseMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            this.PrimaryModel.GetDatabaseFileLists();
+            List<FileListRetrievalException> errorList = new List<FileListRetrievalException>();
+
+            this.PrimaryModel.GetDatabaseFileLists(ref errorList);
             this.RepopulateFileListView();
         }
 

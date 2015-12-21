@@ -44,11 +44,10 @@ namespace LobsterWpf
         public ConnectionView(DatabaseConnection con)
         {
             this.Connection = con;
-
-            this.ClobTypes = new ObservableCollection<ClobTypeView>();
+            
             foreach (ClobDirectory clobDir in con.ClobDirectoryList)
             {
-                this.ClobTypes.Add(new ClobTypeView(clobDir.ClobType));
+                this.ClobDirectories.Add(new ClobDirectoryView(clobDir));
             }
         }
 
@@ -111,7 +110,7 @@ namespace LobsterWpf
         /// <summary>
         /// Gets or sets the list of clob types currently found for this connection.
         /// </summary>
-        public ObservableCollection<ClobTypeView> ClobTypes { get; set; }
+        public ObservableCollection<ClobDirectoryView> ClobDirectories { get; set; } = new ObservableCollection<ClobDirectoryView>();
 
         /// <summary>
         /// Gets or sets a value indicating whether this connection is currently enabled.

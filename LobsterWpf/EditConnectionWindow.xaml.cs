@@ -18,17 +18,7 @@
 namespace LobsterWpf
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Windows;
-    using System.Windows.Controls;
-    using System.Windows.Data;
-    using System.Windows.Documents;
-    using System.Windows.Input;
-    using System.Windows.Media;
-    using System.Windows.Media.Imaging;
-    using System.Windows.Shapes;
 
     /// <summary>
     /// Interaction logic for EditConnectionWindow.xaml
@@ -121,6 +111,16 @@ namespace LobsterWpf
         private void ClobTypeButton_Click(object sender, RoutedEventArgs e)
         {
             this.ConfigView.SelectClobTypeDirectory();
+        }
+
+        /// <summary>
+        /// The event that is called when the edit clob type button is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void EditClobTypeButton_Click(object sender, RoutedEventArgs e)
+        {
+            // TODO:
         }
     }
 }

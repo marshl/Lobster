@@ -59,7 +59,7 @@ namespace LobsterWpf
 
                 foreach (FileInfo file in dirInfo.GetFiles())
                 {
-                    if (this.ParentConnectionView.ShowReadOnlyFiles || !file.IsReadOnly)
+                    if (connection.ShowReadOnlyFiles || !file.IsReadOnly)
                     {
                         FileNodeView node = new LocalFileView(this.ParentConnectionView, file.FullName);
                         this.Children.Add(node);

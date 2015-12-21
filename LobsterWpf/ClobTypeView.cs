@@ -24,46 +24,150 @@
 //-----------------------------------------------------------------------
 namespace LobsterWpf
 {
+    using System.Collections.Generic;
+    using System.ComponentModel;
     using LobsterModel;
 
     /// <summary>
     /// A view for a model clob type.
     /// </summary>
-    public class ClobTypeView
+    public class ClobTypeView : INotifyPropertyChanged
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ClobTypeView"/> class.
         /// </summary>
-        /// <param name="clobType">The ClobType to use as the model.</param>
+        /// <param name="clobType">The clob type to use for this view.</param>
         public ClobTypeView(ClobType clobType)
         {
-            this.ClobType = clobType;
+            this.ClobTypeObject = clobType;
         }
 
         /// <summary>
-        /// Gets the base clob type for this view.
+        /// The event to be raised when a property is changed.
         /// </summary>
-        public ClobType ClobType { get; }
+        public event PropertyChangedEventHandler PropertyChanged;
+        
+        /// <summary>
+        /// Gets the model ClobType for this view.
+        /// </summary>
+        public ClobType ClobTypeObject { get; }
 
         /// <summary>
-        /// Gets the name of the clob type.
+        /// Gets or sets the display name for this ClobType. This value has no functional impact, 
+        /// and is used for display purposes only.
         /// </summary>
         public string Name
         {
             get
             {
-                return this.ClobType.Name;
-            }           
+                return this.ClobTypeObject.Name;
+            }
+
+            set
+            {
+                this.ClobTypeObject.Name = value;
+                this.NotifyPropertyChanged("Name");
+            }
         }
 
         /// <summary>
-        /// Gets the directory name of the clob type.
+        /// Gets or sets the name of the directory in CodeSource to be used for this ClobType. Directory separators can be used.
         /// </summary>
         public string Directory
         {
             get
             {
-                return this.ClobType.Directory;
+                return this.ClobTypeObject.Directory;
+            }
+
+            set
+            {
+                this.ClobTypeObject.Directory = value;
+                this.NotifyPropertyChanged("Directory");
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether or not all subdirectories under the specified folder should also be used.
+        /// </summary>
+        public bool IncludeSubDirectories
+        {
+            get
+            {
+                return this.ClobTypeObject.IncludeSubDirectories;
+            }
+
+            set
+            {
+                this.ClobTypeObject.IncludeSubDirectories = value;
+                this.NotifyPropertyChanged("IncludeSubDirectories");
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the SQL statement that is used to update and insert files into the database.
+        /// </summary>
+        public string LoaderStatement
+        {
+            get
+            {
+                return this.ClobTypeObject.LoaderStatement;
+            }
+
+            set
+            {
+                this.ClobTypeObject.LoaderStatement = value;
+                this.NotifyPropertyChanged("LoaderStatement");
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the tables that files for this ClobType are stored in.
+        /// ClobTypes usually have only a single table, but if there is more than one, then the user will be asked which to use when inserting a new file.
+        /// </summary>
+        public List<Table> Tables
+        {
+            get
+            {
+                return this.ClobTypeObject.Tables;
+            }
+
+            set
+            {
+                this.ClobTypeObject.Tables = value;
+                this.NotifyPropertyChanged("Tables");
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the path of the file from where this ClobType was deserialised.
+        /// </summary>
+        public string FilePath
+        {
+            get
+            {
+                return this.ClobTypeObject.FilePath;
+            }
+
+            set
+            {
+                this.ClobTypeObject.FilePath = value;
+                this.NotifyPropertyChanged("FilePath");
+            }
+        }
+
+        /// <summary>
+        /// Implementation of the INotifyPropertyChange, to tell WPF when a data value has changed
+        /// </summary>
+        /// <param name="propertyName">The name of the property that has changed.</param>
+        /// <remarks>This method is called by the Set accessor of each property.
+        /// The CallerMemberName attribute that is applied to the optional propertyName
+        /// parameter causes the property name of the caller to be substituted as an argument.</remarks>
+        private void NotifyPropertyChanged(string propertyName = "")
+        {
+            if (this.PropertyChanged != null)
+            {
+                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
     }
