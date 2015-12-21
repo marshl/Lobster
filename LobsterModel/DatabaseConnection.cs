@@ -30,13 +30,13 @@ namespace LobsterModel
     using System.Xml;
     using System.Xml.Schema;
     using System.Xml.Serialization;
+    using Oracle.ManagedDataAccess.Client;
     using Properties;
 
     /// <summary>
     /// Used to define how a database should be connected to, and where the ClobTypes are stored for it.
     /// </summary>
-    [XmlType("DatabaseConfig")]
-    public class DatabaseConnection
+    public class DatabaseConnection : IDisposable
     {
         /// <summary>
         /// The file watcher for the entire CodeSource directory. 
@@ -58,12 +58,16 @@ namespace LobsterModel
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseConnection"/> class.
         /// </summary>
-        /// <param name="parentModel">The model that is parent to this connection.</param>
         /// <param name="config">The configuration file to base this connection off.</param>
-        public DatabaseConnection(Model parentModel, DatabaseConfig config)
+        /// <param name="eventListener">The event listener that events will be sent to when files are automatically updated.</param>
+        public DatabaseConnection(DatabaseConfig config, IModelEventListener eventListener)
         {
-            this.ParentModel = parentModel;
             this.Config = config;
+
+            this.EventListener = eventListener;
+            this.MimeTypeList = Utils.DeserialiseXmlFileUsingSchema<MimeTypeList>("LobsterSettings/MimeTypes.xml", null);
+
+            this.FileBackupLog = new BackupLog();
 
             this.fileWatcher = new FileSystemWatcher(this.Config.CodeSource);
             this.fileWatcher.IncludeSubdirectories = true;
@@ -77,14 +81,30 @@ namespace LobsterModel
         }
 
         /// <summary>
+        /// Gets the event listener that is sent messages whenever a change is made to the model due to a FileSystemEvent.
+        /// </summary>
+        public IModelEventListener EventListener { get; private set; }
+
+        /// <summary>
+        /// Gets the list of mime types that are used to translate from file names to database mnemonics and vice-sersa.
+        /// </summary>
+        public MimeTypeList MimeTypeList { get; }
+
+        /// <summary>
+        /// Gets the list of temporary files that have been downloaded so far.
+        /// These files are deleted when the model is disposed.
+        /// </summary>
+        public List<string> TempFileList { get; private set; } = new List<string>();
+
+        /// <summary>
+        /// Gets the backup log for this model. 
+        /// </summary>
+        public BackupLog FileBackupLog { get; }
+
+        /// <summary>
         /// Gets the configuration file for this connection.
         /// </summary>
         public DatabaseConfig Config { get; private set; }
-
-        /// <summary>
-        /// Gets the Lobster model that is the parent of this connection.
-        /// </summary>
-        public Model ParentModel { get; private set; }
 
         /// <summary>
         /// Gets the list of ClobDirectories for each ClobType located in directory in the configuration settings.
@@ -167,6 +187,25 @@ namespace LobsterModel
         }
 
         /// <summary>
+        /// Disposes this object.
+        /// </summary>
+        public void Dispose()
+        {
+            foreach (string filename in this.TempFileList)
+            {
+                try
+                {
+                    MessageLog.LogInfo($"Deleting temporary file {filename}");
+                    File.Delete(filename);
+                }
+                catch (IOException)
+                {
+                    MessageLog.LogInfo($"An error occurred when deleting temporary file {filename}");
+                }
+            }
+        }
+
+        /// <summary>
         /// The event raised when a file is renamed within the CodeSource directory.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
@@ -209,7 +248,7 @@ namespace LobsterModel
                 if (this.fileEventQueue.Count == 0)
                 {
                     MessageLog.LogInfo("Event stack populated.");
-                    this.ParentModel.EventListener.OnEventProcessingStart();
+                    this.EventListener.OnEventProcessingStart();
                 }
 
                 this.fileEventQueue.Add(e);
@@ -227,7 +266,7 @@ namespace LobsterModel
                     if (this.fileEventQueue.Count == 0)
                     {
                         MessageLog.LogInfo("Event stack empty.");
-                        this.ParentModel.EventListener.OnFileProcessingFinished();
+                        this.EventListener.OnFileProcessingFinished();
                     }
                 }
             }
@@ -289,14 +328,14 @@ namespace LobsterModel
                 MessageLog.LogInfo($"Auto-updating file {e.FullPath}");
                 try
                 {
-                    this.ParentModel.SendUpdateClobMessage(e.FullPath);
+                    Model.SendUpdateClobMessage(this, e.FullPath);
                 }
                 catch (FileUpdateException)
                 {
-                    this.ParentModel.EventListener.OnAutoUpdateComplete(e.FullPath, false);
+                    this.EventListener.OnAutoUpdateComplete(e.FullPath, false);
                 }
 
-                this.ParentModel.EventListener.OnAutoUpdateComplete(e.FullPath, true);
+                this.EventListener.OnAutoUpdateComplete(e.FullPath, true);
             }
             else
             {

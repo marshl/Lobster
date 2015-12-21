@@ -279,7 +279,7 @@
     <Resource Include="Resources\Images\delete.ico" />
     <Resource Include="Resources\Images\Favorites.ico" />
     <Resource Include="Resources\Images\FloppyDisk.ico" />
-    <Content Include="Resources\Images\folder.ico" />
+    <Resource Include="Resources\Images\folder.ico" />
     <Resource Include="Resources\Images\Folder_6221.ico" />
     <Resource Include="Resources\Images\Folder_6222.ico" />
     <Resource Include="Resources\Images\folder_open.ico" />

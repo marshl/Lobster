@@ -37,12 +37,7 @@ namespace LobsterWpf
         /// The message log for the duration of this app.
         /// </summary>
         private MessageLog log;
-
-        /// <summary>
-        /// The model for the duration of this app.
-        /// </summary>
-        private Model model;
-
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="App"/> class.
         /// </summary>
@@ -64,8 +59,6 @@ namespace LobsterWpf
             base.OnStartup(e);
 
             MainWindow mainWindow = new MainWindow();
-            this.model = new Model(mainWindow);
-            mainWindow.PrimaryModel = this.model;
             mainWindow.Show();
         }
 
@@ -101,7 +94,6 @@ namespace LobsterWpf
         /// <param name="e">The exit event arguments.</param>
         private void Application_Exit(object sender, ExitEventArgs e)
         {
-            this.model.Dispose();
             MessageLog.Close();
         }
     }

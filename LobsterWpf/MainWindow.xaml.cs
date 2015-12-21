@@ -53,11 +53,6 @@ namespace LobsterWpf
         private delegate void FileOperationDelegate(string filename, bool success);
 
         /// <summary>
-        /// Gets or sets the primary model 
-        /// </summary>
-        public Model PrimaryModel { get; set; }
-
-        /// <summary>
         /// The callback for when a automatic file update is completed.
         /// </summary>
         /// <param name="filename">The full name of the file that was updated.</param>
@@ -134,12 +129,12 @@ namespace LobsterWpf
         /// </summary>
         private void OpenConnectionDialog()
         {
-            ConnectionListWindow window = new ConnectionListWindow(this.PrimaryModel);
+            ConnectionListWindow window = new ConnectionListWindow(this);
             window.Owner = this;
             bool? result = window.ShowDialog();
             if (result.HasValue && result.Value)
             {
-                this.ConnectionContainer.DataContext = this.connectionView = new ConnectionView(this.PrimaryModel.CurrentConnection);
+                this.ConnectionContainer.DataContext = this.connectionView = new ConnectionView(window.DatabaseConnection);
                 this.RepopulateFileListView();
             }
         }
@@ -199,7 +194,7 @@ namespace LobsterWpf
                 return;
             }
 
-            ClobDirectory clobDir = this.PrimaryModel.CurrentConnection.ClobDirectoryList[this.clobTypeListBox.SelectedIndex];
+            ClobDirectory clobDir = this.connectionView.Connection.ClobDirectoryList[this.clobTypeListBox.SelectedIndex];
 
             this.connectionView.PopulateFileTreeForClobDirectory(clobDir);
             this.localFileTreeView.ItemsSource = this.connectionView.RootFile?.Children;
@@ -242,7 +237,7 @@ namespace LobsterWpf
 
                 try
                 {
-                    this.PrimaryModel.SendUpdateClobMessage(filename);
+                    Model.SendUpdateClobMessage(this.connectionView.Connection, filename);
                 }
                 catch (FileUpdateException)
                 {
@@ -271,7 +266,7 @@ namespace LobsterWpf
 
             try
             {
-                string downloadedFile = this.PrimaryModel.SendDownloadClobDataToFileMessage(filename);
+                string downloadedFile = Model.SendDownloadClobDataToFileMessage(this.connectionView.Connection, filename);
                 string args = string.Format(
                     Settings.Default.DiffProgramArguments,
                     downloadedFile,
@@ -312,7 +307,7 @@ namespace LobsterWpf
                 try
                 {
                     DBClobFile databaseFile = null;
-                    bool result = this.PrimaryModel.SendInsertClobMessage(filename, ref databaseFile);
+                    bool result = Model.SendInsertClobMessage(this.connectionView.Connection, filename, ref databaseFile);
 
                     if (result)
                     {
@@ -362,7 +357,7 @@ namespace LobsterWpf
 
             try
             {
-                this.PrimaryModel.UpdateClobWithExternalFile(fileBackup.OriginalFilename, fileBackup.BackupFilename);
+                Model.UpdateClobWithExternalFile(this.connectionView.Connection, fileBackup.OriginalFilename, fileBackup.BackupFilename);
             }
             catch (FileUpdateException)
             {
@@ -393,7 +388,7 @@ namespace LobsterWpf
         {
             List<FileListRetrievalException> errorList = new List<FileListRetrievalException>();
 
-            this.PrimaryModel.GetDatabaseFileLists(ref errorList);
+            Model.GetDatabaseFileLists(this.connectionView.Connection, ref errorList);
             this.RepopulateFileListView();
         }
 

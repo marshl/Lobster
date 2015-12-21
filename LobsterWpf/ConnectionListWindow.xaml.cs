@@ -36,26 +36,26 @@ namespace LobsterWpf
     public partial class ConnectionListWindow : Window, INotifyPropertyChanged
     {
         /// <summary>
-        /// The model for this connection window.
-        /// </summary>
-        private Model model;
-
-        /// <summary>
         /// The internal value for DatabaseConfigList.
         /// </summary>
         private ObservableCollection<DatabaseConfig> databaseConfigList;
 
         /// <summary>
+        /// The event listener that is used to populate new connections.
+        /// </summary>
+        private IModelEventListener eventListener;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ConnectionListWindow"/> class.
         /// </summary>
-        /// <param name="lobsterModel">The model to use for this connection window.</param>
-        public ConnectionListWindow(Model lobsterModel)
+        /// <param name="listener">The event listener sed to create new connections.</param>
+        public ConnectionListWindow(IModelEventListener listener)
         {
             this.InitializeComponent();
 
-            this.model = lobsterModel;
-            this.DatabaseConfigList = new ObservableCollection<DatabaseConfig>(this.model.GetConfigList());
+            this.DatabaseConfigList = new ObservableCollection<DatabaseConfig>(Model.GetConfigList());
             this.DataContext = this;
+            this.eventListener = listener;
         }
 
         /// <summary>
@@ -64,18 +64,23 @@ namespace LobsterWpf
         public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
+        /// Gets the connection that was made by the last connection call (acce
+        /// </summary>
+        public DatabaseConnection DatabaseConnection { get; private set; }
+
+        /// <summary>
         /// Gets or sets the directory that connections are found in.
         /// </summary>
         public string ConnectionDirectory
         {
             get
             {
-                return this.model.ConnectionDirectory;
+                return Model.ConnectionDirectory;
             }
 
             set
             {
-                this.model.ConnectionDirectory = value;
+                Model.ConnectionDirectory = value;
                 this.NotifyPropertyChanged("ConnectionDirectory");
             }
         }
@@ -146,7 +151,7 @@ namespace LobsterWpf
             if (result == CommonFileDialogResult.Ok)
             {
                 this.ConnectionDirectory = dlg.FileName;
-                this.DatabaseConfigList = new ObservableCollection<DatabaseConfig>(this.model.GetConfigList());
+                this.DatabaseConfigList = new ObservableCollection<DatabaseConfig>(Model.GetConfigList());
             }
         }
 
@@ -175,7 +180,7 @@ namespace LobsterWpf
         {
             try
             {
-                this.model.SetDatabaseConnection(config);
+                this.DatabaseConnection = Model.SetDatabaseConnection(config, this.eventListener);
                 this.DialogResult = true;
                 this.Close();
             }
@@ -215,7 +220,7 @@ namespace LobsterWpf
             EditConnectionWindow ecw = new EditConnectionWindow(configView);
             bool? result = ecw.ShowDialog();
 
-            this.DatabaseConfigList = new ObservableCollection<DatabaseConfig>(this.model.GetConfigList());
+            this.DatabaseConfigList = new ObservableCollection<DatabaseConfig>(Model.GetConfigList());
         }
     }
 }
