@@ -122,15 +122,14 @@ namespace LobsterModel
         /// Loads each of the xml files in the ClobTypeDir (if they are valid).
         /// </summary>
         /// <param name="errors">Any errors that are raised during loading.</param>
-        public void LoadClobTypes(out List<ClobTypeLoadException> errors)
+        public void LoadClobTypes(ref List<ClobTypeLoadException> errors)
         {
-            errors = new List<ClobTypeLoadException>();
-
             this.ClobDirectoryList = new List<ClobDirectory>();
             DirectoryInfo dirInfo = new DirectoryInfo(this.Config.ClobTypeDir);
             if (!dirInfo.Exists)
             {
-                MessageLog.LogWarning("The directory " + dirInfo + " could not be found when loading connection " + this.Config.Name);
+                MessageLog.LogWarning($"The directory {dirInfo} could not be found when loading connection {this.Config.Name}");
+                errors.Add(new ClobTypeLoadException($"The directory {dirInfo} could not be found when loading connection {this.Config.Name}"));
                 return;
             }
 

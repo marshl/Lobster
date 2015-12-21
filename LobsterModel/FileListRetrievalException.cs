@@ -24,7 +24,7 @@ namespace LobsterModel
     /// The exception for when an error occurs when attempting to get the list of files for a clob type.
     /// </summary>
     [Serializable]
-    internal class FileListRetrievalException : Exception
+    public class FileListRetrievalException : Exception
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FileListRetrievalException"/> class.

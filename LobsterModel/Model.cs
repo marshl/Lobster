@@ -326,16 +326,12 @@ namespace LobsterModel
 
             this.CurrentConnection = new DatabaseConnection(this, config);
 
-            List<ClobTypeLoadException> errors;
-            try
-            {
-                this.CurrentConnection.LoadClobTypes(out errors);
-                this.GetDatabaseFileLists();
-            }
-            catch (ColumnNotFoundException ex)
-            {
-                throw new SetConnectionException("An error occurred when retrieving the database file lists.", ex);
-            }
+            List<ClobTypeLoadException> errors = new List<ClobTypeLoadException>();
+            List<FileListRetrievalException> fileLoadErrors = new List<FileListRetrievalException>();
+           
+            this.CurrentConnection.LoadClobTypes(ref errors);
+            this.GetDatabaseFileLists(ref fileLoadErrors);
+            
 
             MessageLog.LogInfo("Connection change successful");
         }
@@ -413,7 +409,7 @@ namespace LobsterModel
         /// <summary>
         /// Queries the database for all files in all ClobDireectories and stores them in the directory.
         /// </summary>
-        public void GetDatabaseFileLists()
+        public void GetDatabaseFileLists(ref List<FileListRetrievalException> errorList)
         {
             DbConnection con = OpenConnection(this.CurrentConnection.Config);
             if (con == null)
@@ -422,16 +418,21 @@ namespace LobsterModel
                 return;
             }
 
-            try
+            foreach (ClobDirectory clobDir in this.CurrentConnection.ClobDirectoryList)
             {
-                foreach (ClobDirectory clobDir in this.CurrentConnection.ClobDirectoryList)
+                if (!Directory.Exists(clobDir.GetFullPath(this.CurrentConnection)))
+                {
+                    continue;
+                }
+
+                try
                 {
                     this.GetDatabaseFileListForDirectory(clobDir, con);
                 }
-            }
-            finally
-            {
-                con.Dispose();
+                catch (FileListRetrievalException ex)
+                {
+                    errorList.Add(ex);
+                }
             }
         }
 
@@ -771,13 +772,15 @@ namespace LobsterModel
         {
             clobDir.DatabaseFileList = new List<DBClobFile>();
             ClobType ct = clobDir.ClobType;
-            foreach (Table table in ct.Tables)
+            DbCommand command = con.CreateCommand();
+            try
             {
-                DbCommand command = con.CreateCommand();
-                command.CommandText = table.GetFileListCommand();
-                DbDataReader reader;
-                try
+                foreach (Table table in ct.Tables)
                 {
+
+                    command.CommandText = table.GetFileListCommand();
+                    DbDataReader reader;
+
                     reader = command.ExecuteReader();
                     while (reader.Read())
                     {
@@ -800,15 +803,16 @@ namespace LobsterModel
 
                     reader.Close();
                 }
-                catch (Exception e) when (e is InvalidOperationException || e is OracleException)
-                {
-                    command.Dispose();
-                    throw new FileListRetrievalException($"Error retrieving file lists from database for {clobDir.ClobType.Name} when executing command {command.CommandText}", e);
-                }
-                finally
-                {
-                    command.Dispose();
-                }
+            }
+            catch (Exception e) when (e is InvalidOperationException || e is OracleException || e is ColumnNotFoundException)
+            {
+                command.Dispose();
+                MessageLog.LogError($"Error retrieving file lists from database for {clobDir.ClobType.Name} when executing command {command.CommandText}: {e}");
+                throw new FileListRetrievalException($"Error retrieving file lists from database for {clobDir.ClobType.Name} when executing command {command.CommandText}", e);
+            }
+            finally
+            {
+                command.Dispose();
             }
         }
 
