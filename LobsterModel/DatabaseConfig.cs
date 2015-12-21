@@ -23,6 +23,7 @@
 namespace LobsterModel
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Xml;
     using System.Xml.Schema;
@@ -152,6 +153,31 @@ namespace LobsterModel
             other.FileLocation = this.FileLocation;
 
             return other;
+        }
+
+        /// <summary>
+        /// Loads each of the  <see cref="DatabaseConfig"/> files in the connection directory, and returns the list.
+        /// </summary>
+        /// <returns>All valid config files in the connection directory.</returns>
+        public static List<DatabaseConfig> GetConfigList()
+        {
+            List<DatabaseConfig> configList = new List<DatabaseConfig>();
+
+            if (!Model.IsConnectionDirectoryValid)
+            {
+                return configList;
+            }
+
+            foreach (string filename in Directory.GetFiles(Model.ConnectionDirectory, "*.xml"))
+            {
+                DatabaseConfig connection = DatabaseConfig.LoadDatabaseConfig(filename);
+                if (connection != null)
+                {
+                    configList.Add(connection);
+                }
+            }
+
+            return configList;
         }
     }
 }

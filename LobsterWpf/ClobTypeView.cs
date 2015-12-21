@@ -26,6 +26,7 @@ namespace LobsterWpf
 {
     using System.Collections.Generic;
     using System.ComponentModel;
+    using System.IO;
     using LobsterModel;
 
     /// <summary>
@@ -153,6 +154,14 @@ namespace LobsterWpf
             {
                 this.ClobTypeObject.FilePath = value;
                 this.NotifyPropertyChanged("FilePath");
+            }
+        }
+
+        public string Filename
+        {
+            get
+            {
+                return Path.GetFileName(this.FilePath);
             }
         }
 

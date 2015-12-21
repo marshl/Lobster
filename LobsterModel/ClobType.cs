@@ -26,7 +26,10 @@ namespace LobsterModel
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Xml;
+    using System.Xml.Schema;
     using System.Xml.Serialization;
+    using Properties;
 
     /// <summary>
     /// A ClobType defines a particular usage of the database. In its most common form, A ClobType contains a single table that maps to a single directory on the file system.
@@ -118,6 +121,49 @@ namespace LobsterModel
 
             copy.Initialise();
             return copy;
+        }
+
+        /// <summary>
+        /// Loads each of the  <see cref="DatabaseConfig"/> files in the connection directory, and returns the list.
+        /// </summary>
+        /// <returns>All valid config files in the connection directory.</returns>
+        public static List<ClobType> GetClobTypeList(string clobTypeDirectory)
+        {
+            List<ClobType> clobTypeList = new List<ClobType>();
+
+            if (!Model.IsConnectionDirectoryValid)
+            {
+                return clobTypeList;
+            }
+
+            foreach (string filename in System.IO.Directory.GetFiles(clobTypeDirectory, "*.xml"))
+            {
+                ClobType clobType = ClobType.LoadClobType(filename);
+                if ( clobType != null )
+                {
+                    clobTypeList.Add(clobType);
+                }
+            }
+
+            return clobTypeList;
+        }
+
+        public static ClobType LoadClobType(string fullpath)
+        {
+            MessageLog.LogInfo("Loading Database Config File " + fullpath);
+            ClobType clobType;
+            try
+            {
+                clobType = Utils.DeserialiseXmlFileUsingSchema<ClobType>(fullpath, Settings.Default.ClobTypeSchemaFilename);
+            }
+            catch (Exception e) when (e is FileNotFoundException || e is InvalidOperationException || e is XmlException || e is XmlSchemaValidationException || e is IOException)
+            {
+                MessageLog.LogError("An error occurred when loading the ClobType " + fullpath + ": " + e);
+                return null;
+            }
+
+            clobType.FilePath = fullpath;
+            return clobType;
         }
     }
 }

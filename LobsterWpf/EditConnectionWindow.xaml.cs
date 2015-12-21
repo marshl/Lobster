@@ -120,7 +120,8 @@ namespace LobsterWpf
         /// <param name="e">The event arguments.</param>
         private void EditClobTypeButton_Click(object sender, RoutedEventArgs e)
         {
-            // TODO:
+            ClobTypeListWindow window = new ClobTypeListWindow(this.ConfigView.ClobTypeDir);
+            bool? result = window.ShowDialog();
         }
     }
 }

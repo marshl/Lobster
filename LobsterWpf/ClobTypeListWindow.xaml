@@ -5,31 +5,34 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LobsterWpf"
         mc:Ignorable="d"
-        Title="ClobTypeListWindow" Height="300" Width="300">
+        Title="ClobTypeListWindow" Height="300" Width="300" MinWidth="300" MinHeight="300">
   <Grid>
-    <ListBox ItemsSource="{Binding DatabaseConfigList}">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+    <ListBox Grid.Row="0" ItemsSource="{Binding ClobTypeList}">
       <ListBox.ItemTemplate>
         <DataTemplate DataType="ClobTypeView">
           <StackPanel>
             <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
-            <TextBlock>
-              <TextBlock.Text>
-                <MultiBinding StringFormat="Host: {0}:{1}">
-                  <Binding Path="Host" />
-                  <Binding Path="Port" />
-                </MultiBinding>
-              </TextBlock.Text>
-            </TextBlock>
-            <TextBlock>
-              <TextBlock.Text>
-                <MultiBinding StringFormat="SID: {0}">
-                  <Binding Path="SID" />
-                </MultiBinding>
-              </TextBlock.Text>
-            </TextBlock>
+            <TextBlock Text="{Binding Filename}" FontStyle="Italic"/>
           </StackPanel>
         </DataTemplate>
       </ListBox.ItemTemplate>
     </ListBox>
+    <Grid Grid.Row="1">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition Width="*"/>
+      </Grid.ColumnDefinitions>
+
+      <StackPanel Grid.Column="0" Orientation="Horizontal">
+        <Button Margin="5" Width="75" HorizontalAlignment="Left">New</Button>
+        <Button Margin="5" Width="75" HorizontalAlignment="Left">Edit</Button>
+      </StackPanel>
+      <Button Grid.Column="1" Margin="5" Width="75" HorizontalAlignment="Right">Cancel</Button>
+    </Grid>
+    
   </Grid>
 </Window>

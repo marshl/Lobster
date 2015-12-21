@@ -16,6 +16,8 @@
 //-----------------------------------------------------------------------
 namespace LobsterWpf
 {
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Windows;
     using LobsterModel;
 
@@ -24,12 +26,41 @@ namespace LobsterWpf
     /// </summary>
     public partial class ClobTypeListWindow : Window
     {
+       
         /// <summary>
         /// Initializes a new instance of the <see cref="ClobTypeListWindow"/> class.
         /// </summary>
-        public ClobTypeListWindow()
+        /// <param name="directory">The directory that the clob types are stored in.</param>
+        public ClobTypeListWindow(string directory)
         {
             this.InitializeComponent();
+            this.ClobTypeDirectory = directory;
+            this.RefreshClobTypeList();
+            this.DataContext = this;
+        }
+
+        /// <summary>
+        /// The directory that the clob types for this window are stored in;
+        /// </summary>
+        public string ClobTypeDirectory { get; }
+
+        /// <summary>
+        /// The ClobType views used for display.
+        /// </summary>
+        public ObservableCollection<ClobTypeView> ClobTypeList { get; set; }
+
+        /// <summary>
+        /// Cleans the clob type list and refreshes it with new data.
+        /// </summary>
+        private void RefreshClobTypeList()
+        {
+            List<ClobType> clobTypes = ClobType.GetClobTypeList(this.ClobTypeDirectory);
+            this.ClobTypeList = new ObservableCollection<ClobTypeView>();
+            foreach (ClobType type in clobTypes)
+            {
+                ClobTypeView view = new ClobTypeView(type);
+                this.ClobTypeList.Add(view);
+            }
         }
     }
 }
