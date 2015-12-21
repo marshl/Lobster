@@ -134,28 +134,6 @@ namespace LobsterModel
         }
 
         /// <summary>
-        /// Creates a deep copy of this DatabaseConfig
-        /// </summary>
-        /// <returns>The newly created copy.</returns>
-        public object Clone()
-        {
-            DatabaseConfig other = new DatabaseConfig();
-            other.Name = this.Name;
-            other.Host = this.Host;
-            other.SID = this.SID;
-            other.Port = this.Port;
-            other.Username = this.Username;
-            other.Password = this.Password;
-            other.CodeSource = this.CodeSource;
-            other.UsePooling = this.UsePooling;
-            other.ClobTypeDir = this.ClobTypeDir;
-
-            other.FileLocation = this.FileLocation;
-
-            return other;
-        }
-
-        /// <summary>
         /// Loads each of the  <see cref="DatabaseConfig"/> files in the connection directory, and returns the list.
         /// </summary>
         /// <returns>All valid config files in the connection directory.</returns>
@@ -178,6 +156,28 @@ namespace LobsterModel
             }
 
             return configList;
+        }
+
+        /// <summary>
+        /// Creates a deep copy of this DatabaseConfig
+        /// </summary>
+        /// <returns>The newly created copy.</returns>
+        public object Clone()
+        {
+            DatabaseConfig other = new DatabaseConfig();
+            other.Name = this.Name;
+            other.Host = this.Host;
+            other.SID = this.SID;
+            other.Port = this.Port;
+            other.Username = this.Username;
+            other.Password = this.Password;
+            other.CodeSource = this.CodeSource;
+            other.UsePooling = this.UsePooling;
+            other.ClobTypeDir = this.ClobTypeDir;
+
+            other.FileLocation = this.FileLocation;
+
+            return other;
         }
     }
 }

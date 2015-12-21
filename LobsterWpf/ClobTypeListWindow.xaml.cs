@@ -26,7 +26,6 @@ namespace LobsterWpf
     /// </summary>
     public partial class ClobTypeListWindow : Window
     {
-       
         /// <summary>
         /// Initializes a new instance of the <see cref="ClobTypeListWindow"/> class.
         /// </summary>
@@ -40,14 +39,14 @@ namespace LobsterWpf
         }
 
         /// <summary>
-        /// The directory that the clob types for this window are stored in;
+        /// Gets the directory that the clob types for this window are stored in;
         /// </summary>
         public string ClobTypeDirectory { get; }
 
         /// <summary>
-        /// The ClobType views used for display.
+        /// Gets the ClobType views used for display.
         /// </summary>
-        public ObservableCollection<ClobTypeView> ClobTypeList { get; set; }
+        public ObservableCollection<ClobTypeView> ClobTypeList { get; private set; }
 
         /// <summary>
         /// Cleans the clob type list and refreshes it with new data.

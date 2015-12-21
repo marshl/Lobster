@@ -91,6 +91,55 @@ namespace LobsterModel
         }
 
         /// <summary>
+        /// Loads each of the  <see cref="DatabaseConfig"/> files in the connection directory, and returns the list.
+        /// </summary>
+        /// <param name="clobTypeDirectory">The directory to load the clob types from.</param>
+        /// <returns>All valid config files in the connection directory.</returns>
+        public static List<ClobType> GetClobTypeList(string clobTypeDirectory)
+        {
+            List<ClobType> clobTypeList = new List<ClobType>();
+
+            if (!Model.IsConnectionDirectoryValid)
+            {
+                return clobTypeList;
+            }
+
+            foreach (string filename in System.IO.Directory.GetFiles(clobTypeDirectory, "*.xml"))
+            {
+                ClobType clobType = ClobType.LoadClobType(filename);
+                if (clobType != null)
+                {
+                    clobTypeList.Add(clobType);
+                }
+            }
+
+            return clobTypeList;
+        }
+
+        /// <summary>
+        /// Loads the clob type with the given filepath and returns it.
+        /// </summary>
+        /// <param name="fullpath">The name of the file to load.</param>
+        /// <returns>The ClobType, if loaded successfully, otherwise null.</returns>
+        public static ClobType LoadClobType(string fullpath)
+        {
+            MessageLog.LogInfo("Loading Database Config File " + fullpath);
+            ClobType clobType;
+            try
+            {
+                clobType = Utils.DeserialiseXmlFileUsingSchema<ClobType>(fullpath, Settings.Default.ClobTypeSchemaFilename);
+            }
+            catch (Exception e) when (e is FileNotFoundException || e is InvalidOperationException || e is XmlException || e is XmlSchemaValidationException || e is IOException)
+            {
+                MessageLog.LogError("An error occurred when loading the ClobType " + fullpath + ": " + e);
+                return null;
+            }
+
+            clobType.FilePath = fullpath;
+            return clobType;
+        }
+
+        /// <summary>
         /// Initializes values that cannot be set during deserialisation.
         /// </summary>
         public void Initialise()
@@ -121,49 +170,6 @@ namespace LobsterModel
 
             copy.Initialise();
             return copy;
-        }
-
-        /// <summary>
-        /// Loads each of the  <see cref="DatabaseConfig"/> files in the connection directory, and returns the list.
-        /// </summary>
-        /// <returns>All valid config files in the connection directory.</returns>
-        public static List<ClobType> GetClobTypeList(string clobTypeDirectory)
-        {
-            List<ClobType> clobTypeList = new List<ClobType>();
-
-            if (!Model.IsConnectionDirectoryValid)
-            {
-                return clobTypeList;
-            }
-
-            foreach (string filename in System.IO.Directory.GetFiles(clobTypeDirectory, "*.xml"))
-            {
-                ClobType clobType = ClobType.LoadClobType(filename);
-                if ( clobType != null )
-                {
-                    clobTypeList.Add(clobType);
-                }
-            }
-
-            return clobTypeList;
-        }
-
-        public static ClobType LoadClobType(string fullpath)
-        {
-            MessageLog.LogInfo("Loading Database Config File " + fullpath);
-            ClobType clobType;
-            try
-            {
-                clobType = Utils.DeserialiseXmlFileUsingSchema<ClobType>(fullpath, Settings.Default.ClobTypeSchemaFilename);
-            }
-            catch (Exception e) when (e is FileNotFoundException || e is InvalidOperationException || e is XmlException || e is XmlSchemaValidationException || e is IOException)
-            {
-                MessageLog.LogError("An error occurred when loading the ClobType " + fullpath + ": " + e);
-                return null;
-            }
-
-            clobType.FilePath = fullpath;
-            return clobType;
         }
     }
 }

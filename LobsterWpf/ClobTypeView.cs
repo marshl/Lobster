@@ -157,6 +157,9 @@ namespace LobsterWpf
             }
         }
 
+        /// <summary>
+        /// Gets the filename of the the location where the clob type is stored.
+        /// </summary>
         public string Filename
         {
             get
