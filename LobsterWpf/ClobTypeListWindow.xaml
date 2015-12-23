@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LobsterWpf"
         mc:Ignorable="d"
-        Title="ClobTypeListWindow" Height="300" Width="300" MinWidth="300" MinHeight="300">
+        Title="ClobTypeListWindow" Height="300" Width="400" MinWidth="500" MinHeight="300">
   <Grid>
     <Grid.RowDefinitions>
       <RowDefinition Height="*"/>
@@ -30,6 +30,7 @@
       <StackPanel Grid.Column="0" Orientation="Horizontal">
         <Button Margin="5" Width="75" HorizontalAlignment="Left">New</Button>
         <Button Margin="5" Width="75" HorizontalAlignment="Left">Edit</Button>
+        <Button Margin="5" Width="75" HorizontalAlignment="Left">Delete</Button>
       </StackPanel>
       <Button Grid.Column="1" Margin="5" Width="75" HorizontalAlignment="Right">Cancel</Button>
     </Grid>

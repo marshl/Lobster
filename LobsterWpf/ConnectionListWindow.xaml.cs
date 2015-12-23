@@ -148,6 +148,7 @@ namespace LobsterWpf
             CommonOpenFileDialog dlg = new CommonOpenFileDialog();
             dlg.IsFolderPicker = true;
             CommonFileDialogResult result = dlg.ShowDialog();
+            this.Focus();
             if (result == CommonFileDialogResult.Ok)
             {
                 this.ConnectionDirectory = dlg.FileName;
@@ -200,6 +201,7 @@ namespace LobsterWpf
             DatabaseConfig config = new DatabaseConfig();
             DatabaseConfigView configView = new DatabaseConfigView(config);
             EditConnectionWindow ecw = new EditConnectionWindow(configView);
+            ecw.Owner = this;
             bool? result = ecw.ShowDialog();
         }
 

@@ -24,6 +24,7 @@
 //-----------------------------------------------------------------------
 namespace LobsterWpf
 {
+    using System;
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.IO;
@@ -91,7 +92,7 @@ namespace LobsterWpf
         /// <summary>
         /// Gets or sets a value indicating whether or not all subdirectories under the specified folder should also be used.
         /// </summary>
-        public bool IncludeSubDirectories
+        public bool IncludeSubdirectories
         {
             get
             {
@@ -181,6 +182,11 @@ namespace LobsterWpf
             {
                 this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
+        }
+
+        internal bool ApplyChanges()
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -49,7 +49,7 @@ namespace LobsterWpf
         private void OkButton_Click(object sender, RoutedEventArgs e)
         {
             bool result = this.ConfigView.ApplyChanges();
-
+            this.Focus();
             if (result)
             {
                 this.DialogResult = true;
@@ -58,13 +58,14 @@ namespace LobsterWpf
         }
 
         /// <summary>
-        /// The event that is called when the accept button is clicked.
+        /// The event that is called when the apply button is clicked.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">The event arguments.</param>
-        private void AcceptButton_Click(object sender, RoutedEventArgs e)
+        private void ApplyButton_Click(object sender, RoutedEventArgs e)
         {
             bool result = this.ConfigView.ApplyChanges();
+            this.Focus();
         }
 
         /// <summary>
@@ -101,6 +102,7 @@ namespace LobsterWpf
         private void CodeSourceButton_Click(object sender, RoutedEventArgs e)
         {
             this.ConfigView.SelectCodeSourceDirectory();
+            this.Focus();
         }
 
         /// <summary>
@@ -111,6 +113,7 @@ namespace LobsterWpf
         private void ClobTypeButton_Click(object sender, RoutedEventArgs e)
         {
             this.ConfigView.SelectClobTypeDirectory();
+            this.Focus();
         }
 
         /// <summary>
@@ -122,6 +125,7 @@ namespace LobsterWpf
         {
             ClobTypeListWindow window = new ClobTypeListWindow(this.ConfigView.ClobTypeDir);
             bool? result = window.ShowDialog();
+            this.Focus();
         }
     }
 }

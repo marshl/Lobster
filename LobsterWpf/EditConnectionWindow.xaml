@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LobsterWpf"
         mc:Ignorable="d"
-        Title="EditConnectionWindow" Height="435" Width="375" MinHeight="435" MinWidth="375" Icon="Resources/Images/cartoon-lobster.ico">
+        Title="EditConnectionWindow" Height="435" Width="375" MinHeight="435" MinWidth="375" Icon="Resources/Images/cartoon-lobster.ico" ShowInTaskbar="False">
   <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="Auto"/>
@@ -79,8 +79,8 @@
     
     <StackPanel Grid.Row="10" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5">
       <Button Margin="5" Width="75" Height="20" Click="OkButton_Click">OK</Button>
-      <Button Margin="5" Width="75" Height="20" Click="AcceptButton_Click">Accept</Button>
       <Button Margin="5" Width="75" Height="20" Click="CancelButton_Click">Cancel</Button>
+      <Button Margin="5" Width="75" Height="20" Click="ApplyButton_Click">Apply</Button>
     </StackPanel>
   </Grid>
 </Window>
