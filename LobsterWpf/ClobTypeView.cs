@@ -28,7 +28,9 @@ namespace LobsterWpf
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.IO;
+    using System.Windows;
     using LobsterModel;
+    using Microsoft.WindowsAPICodePack.Dialogs;
 
     /// <summary>
     /// A view for a model clob type.
@@ -184,9 +186,36 @@ namespace LobsterWpf
             }
         }
 
-        internal bool ApplyChanges()
+        public bool ApplyChanges()
         {
-            throw new NotImplementedException();
+            if (this.FilePath == null || !File.Exists(this.FilePath))
+            {
+                CommonSaveFileDialog dlg = new CommonSaveFileDialog();
+                dlg.Filters.Add(new CommonFileDialogFilter("eXtensible Markup Language", "*.xml"));
+                dlg.Title = "Save Clob Type As";
+                dlg.DefaultFileName = this.Name?.Replace(" ", string.Empty) + ".xml";
+                CommonFileDialogResult result = dlg.ShowDialog();
+                if (result == CommonFileDialogResult.Ok)
+                {
+                    this.FilePath = dlg.FileName;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            try
+            {
+                ClobType.Serialise(this.FilePath, this.ClobTypeObject);
+                return true;
+            }
+            catch (IOException ex)
+            {
+                MessageLog.LogError($"An error occurred when serialising ClobType {this.Name} to {this.FilePath}: {ex}");
+                MessageBox.Show($"An error occurred when saving the file: {ex.Message}");
+                return false;
+            }
         }
     }
 }

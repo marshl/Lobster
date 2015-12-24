@@ -5,27 +5,26 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LobsterWpf"
         mc:Ignorable="d"
-        Title="TableSelectorWindow" Height="300" Width="300" ResizeMode="NoResize" Icon="Resources/Images/cartoon-lobster.ico">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="42.667"/>
-            <RowDefinition/>
-            <RowDefinition Height="31.333" />
-        </Grid.RowDefinitions>
-        <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right" Margin="0,0.333,0,0" Width="160">
-            <Button x:Name="acceptButton" Content="Accept" HorizontalAlignment="Right" VerticalAlignment="Center" Width="75" Height="20" Margin="0,6,10,5" Click="AcceptButton_Click"/>
-            <Button x:Name="cancelButton" Content="Cancel" HorizontalAlignment="Right" VerticalAlignment="Center" Width="75" Height="20" Margin="0,6,15,5" RenderTransformOrigin="0.5,0.5" Click="CancelButton_Click"/>
-        </StackPanel>
-        <ListBox x:Name="tableListBox" HorizontalAlignment="Left" Grid.Row="1" Margin="10,5.333,0,4.333" Width="273" ItemsSource="{Binding TableList}">
-            <ListBox.ItemTemplate>
-                <DataTemplate DataType="Table">
-                    <StackPanel>
-                        <TextBlock Text="{Binding Fullname}"/>
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
-        <Label x:Name="label" Content="{Binding MessageLabel, FallbackValue=Label}" HorizontalAlignment="Left" HorizontalContentAlignment="Stretch" Margin="10,10,0,0" VerticalAlignment="Top"  Grid.Row="0"/>
-
-    </Grid>
+        Title="TableSelectorWindow" Height="300" Width="300" ResizeMode="NoResize" Icon="Resources/Images/cartoon-lobster.ico" ShowInTaskbar="False">
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition/>
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+    <Label x:Name="label" Content="{Binding MessageLabel, FallbackValue=Label}" HorizontalAlignment="Left" HorizontalContentAlignment="Stretch" Margin="5" VerticalAlignment="Top"  Grid.Row="0"/>
+    <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right" Margin="5">
+      <Button x:Name="acceptButton" Content="Accept" HorizontalAlignment="Right" VerticalAlignment="Center" Width="75"  Click="AcceptButton_Click"/>
+      <Button x:Name="cancelButton" Content="Cancel" HorizontalAlignment="Right" VerticalAlignment="Center" Width="75"  Margin="5,0,0,0" Click="CancelButton_Click"/>
+    </StackPanel>
+    <ListBox x:Name="tableListBox" HorizontalAlignment="Left" Grid.Row="1" ItemsSource="{Binding TableList}">
+      <ListBox.ItemTemplate>
+        <DataTemplate DataType="Table">
+          <StackPanel>
+            <TextBlock Text="{Binding Fullname}"/>
+          </StackPanel>
+        </DataTemplate>
+      </ListBox.ItemTemplate>
+    </ListBox>
+  </Grid>
 </Window>

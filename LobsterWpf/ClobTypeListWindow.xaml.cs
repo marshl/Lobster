@@ -18,6 +18,7 @@ namespace LobsterWpf
 {
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.IO;
     using System.Windows;
     using LobsterModel;
 
@@ -60,6 +61,51 @@ namespace LobsterWpf
                 ClobTypeView view = new ClobTypeView(type);
                 this.ClobTypeList.Add(view);
             }
+        }
+
+        private void NewButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void EditButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.clobTypeListBox.SelectedIndex == -1)
+            {
+                return;
+            }
+
+            ClobTypeView clobType = this.ClobTypeList[this.clobTypeListBox.SelectedIndex];
+            EditClobTypeWindow window = new EditClobTypeWindow(clobType.ClobTypeObject);
+            window.Owner = this;
+            bool? result = window.ShowDialog();
+            this.RefreshClobTypeList();
+        }
+
+        private void DeleteButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.clobTypeListBox.SelectedIndex == -1)
+            {
+                return;
+            }
+
+            ClobTypeView clobType = this.ClobTypeList[this.clobTypeListBox.SelectedIndex];
+            try
+            {
+                File.Delete(clobType.FilePath);
+                this.RefreshClobTypeList();
+            }
+            catch ( IOException ex)
+            {
+                MessageLog.LogError($"An IO exception occurred when deleting the ClobType file {clobType.FilePath}: {ex}");
+                MessageBox.Show($"A error occurred when deleting the file. Check the logs for more information.");
+            }
+        }
+
+        private void CancelButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.DialogResult = false;
+            this.Close();
         }
     }
 }

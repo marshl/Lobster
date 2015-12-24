@@ -218,7 +218,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Images\cartoon-lobster-800px.png" />
+    <SplashScreen Include="Resources\Images\cartoon-lobster-800px.png" />
     <Resource Include="Resources\Images\cartoon-lobster.ico" />
     <Resource Include="Resources\Images\SecurityLock.ico" />
     <Resource Include="Resources\Images\008_Reminder.ico" />
