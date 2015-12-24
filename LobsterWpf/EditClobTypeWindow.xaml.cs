@@ -1,4 +1,21 @@
-﻿namespace LobsterWpf
+﻿//-----------------------------------------------------------------------
+// <copyright file="EditClobTypeWindow.xaml.cs" company="marshl">
+// Copyright 2015, Liam Marshall, marshl.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
+
+namespace LobsterWpf
 {
     using System.Windows;
     using LobsterModel;
@@ -9,18 +26,27 @@
     public partial class EditClobTypeWindow : Window
     {
         /// <summary>
+        /// The directory that this clob type should be stored in (to be used when prompting for a new filename).
+        /// </summary>
+        private string initialDirectory;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="EditClobTypeWindow"/> class.
         /// </summary>
         /// <param name="clobType">The clob type to use as the view of this window.</param>
-        public EditClobTypeWindow(ClobType clobType)
+        /// <param name="initialDirectory">The initial directory to save to if this is for a new ClobType.</param>
+        public EditClobTypeWindow(ClobType clobType, string initialDirectory)
         {
-            InitializeComponent();
+            this.InitializeComponent();
 
+            this.initialDirectory = initialDirectory;
             this.ClobTypeView = new ClobTypeView(clobType);
-
             this.DataContext = this.ClobTypeView;
         }
 
+        /// <summary>
+        /// Gets the ClobTypeView that is used to store data for this window, creatd at construction time.
+        /// </summary>
         public ClobTypeView ClobTypeView { get; }
 
         /// <summary>
@@ -30,7 +56,7 @@
         /// <param name="e">The event arguments.</param>
         private void OkButton_Click(object sender, RoutedEventArgs e)
         {
-            bool result = this.ClobTypeView.ApplyChanges();
+            bool result = this.ClobTypeView.ApplyChanges(this.initialDirectory);
 
             if (result)
             {
@@ -46,7 +72,7 @@
         /// <param name="e">The event arguments.</param>
         private void ApplyButton_Click(object sender, RoutedEventArgs e)
         {
-            bool result = this.ClobTypeView.ApplyChanges();
+            bool result = this.ClobTypeView.ApplyChanges(this.initialDirectory);
         }
 
         /// <summary>

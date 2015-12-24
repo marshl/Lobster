@@ -63,11 +63,25 @@ namespace LobsterWpf
             }
         }
 
+        /// <summary>
+        /// The event that is called when the New button is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
         private void NewButton_Click(object sender, RoutedEventArgs e)
         {
-
+            ClobType clobType = new ClobType();
+            EditClobTypeWindow window = new EditClobTypeWindow(clobType, this.ClobTypeDirectory);
+            window.Owner = this;
+            bool? result = window.ShowDialog();
+            this.RefreshClobTypeList();
         }
 
+        /// <summary>
+        /// The event taht is called whhen the edit button is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
         private void EditButton_Click(object sender, RoutedEventArgs e)
         {
             if (this.clobTypeListBox.SelectedIndex == -1)
@@ -76,12 +90,17 @@ namespace LobsterWpf
             }
 
             ClobTypeView clobType = this.ClobTypeList[this.clobTypeListBox.SelectedIndex];
-            EditClobTypeWindow window = new EditClobTypeWindow(clobType.ClobTypeObject);
+            EditClobTypeWindow window = new EditClobTypeWindow(clobType.ClobTypeObject, this.ClobTypeDirectory);
             window.Owner = this;
             bool? result = window.ShowDialog();
             this.RefreshClobTypeList();
         }
 
+        /// <summary>
+        /// The event that is called when the Delete button is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
         private void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
             if (this.clobTypeListBox.SelectedIndex == -1)
@@ -95,13 +114,18 @@ namespace LobsterWpf
                 File.Delete(clobType.FilePath);
                 this.RefreshClobTypeList();
             }
-            catch ( IOException ex)
+            catch (IOException ex)
             {
                 MessageLog.LogError($"An IO exception occurred when deleting the ClobType file {clobType.FilePath}: {ex}");
                 MessageBox.Show($"A error occurred when deleting the file. Check the logs for more information.");
             }
         }
 
+        /// <summary>
+        /// The event that is called when the Cancel button is clicked, closing the window.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
             this.DialogResult = false;

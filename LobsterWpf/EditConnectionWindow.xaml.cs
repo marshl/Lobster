@@ -26,11 +26,18 @@ namespace LobsterWpf
     public partial class EditConnectionWindow : Window
     {
         /// <summary>
+        /// The directory that that the connection will initially be saved in if it is new.
+        /// </summary>
+        private string initialDirectory;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="EditConnectionWindow"/> class.
         /// </summary>
         /// <param name="configView">The configuration view this should use as the data source.</param>
-        public EditConnectionWindow(DatabaseConfigView configView)
+        /// <param name="initialDirectory">The initial directory to save to if saving a new DatabaseConfig.</param>
+        public EditConnectionWindow(DatabaseConfigView configView, string initialDirectory)
         {
+            this.initialDirectory = initialDirectory;
             this.ConfigView = configView;
             this.DataContext = this.ConfigView;
             this.InitializeComponent();
@@ -48,7 +55,7 @@ namespace LobsterWpf
         /// <param name="e">The event arguments.</param>
         private void OkButton_Click(object sender, RoutedEventArgs e)
         {
-            bool result = this.ConfigView.ApplyChanges();
+            bool result = this.ConfigView.ApplyChanges(this.initialDirectory);
             this.Focus();
             if (result)
             {
@@ -64,7 +71,7 @@ namespace LobsterWpf
         /// <param name="e">The event arguments.</param>
         private void ApplyButton_Click(object sender, RoutedEventArgs e)
         {
-            bool result = this.ConfigView.ApplyChanges();
+            bool result = this.ConfigView.ApplyChanges(this.initialDirectory);
             this.Focus();
         }
 

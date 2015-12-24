@@ -24,7 +24,6 @@
 //-----------------------------------------------------------------------
 namespace LobsterWpf
 {
-    using System;
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.IO;
@@ -172,21 +171,11 @@ namespace LobsterWpf
         }
 
         /// <summary>
-        /// Implementation of the INotifyPropertyChange, to tell WPF when a data value has changed
+        /// Saves this ClobType out to its file, prompting for a new file if it doesn't already have one.
         /// </summary>
-        /// <param name="propertyName">The name of the property that has changed.</param>
-        /// <remarks>This method is called by the Set accessor of each property.
-        /// The CallerMemberName attribute that is applied to the optional propertyName
-        /// parameter causes the property name of the caller to be substituted as an argument.</remarks>
-        private void NotifyPropertyChanged(string propertyName = "")
-        {
-            if (this.PropertyChanged != null)
-            {
-                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
-
-        public bool ApplyChanges()
+        /// <param name="initialDirectory">The directory to start in if this ClobType is new.</param>
+        /// <returns>True if the save was successful, otherwise false.</returns>
+        public bool ApplyChanges(string initialDirectory)
         {
             if (this.FilePath == null || !File.Exists(this.FilePath))
             {
@@ -194,6 +183,7 @@ namespace LobsterWpf
                 dlg.Filters.Add(new CommonFileDialogFilter("eXtensible Markup Language", "*.xml"));
                 dlg.Title = "Save Clob Type As";
                 dlg.DefaultFileName = this.Name?.Replace(" ", string.Empty) + ".xml";
+                dlg.InitialDirectory = initialDirectory;
                 CommonFileDialogResult result = dlg.ShowDialog();
                 if (result == CommonFileDialogResult.Ok)
                 {
@@ -215,6 +205,21 @@ namespace LobsterWpf
                 MessageLog.LogError($"An error occurred when serialising ClobType {this.Name} to {this.FilePath}: {ex}");
                 MessageBox.Show($"An error occurred when saving the file: {ex.Message}");
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Implementation of the INotifyPropertyChange, to tell WPF when a data value has changed
+        /// </summary>
+        /// <param name="propertyName">The name of the property that has changed.</param>
+        /// <remarks>This method is called by the Set accessor of each property.
+        /// The CallerMemberName attribute that is applied to the optional propertyName
+        /// parameter causes the property name of the caller to be substituted as an argument.</remarks>
+        private void NotifyPropertyChanged(string propertyName = "")
+        {
+            if (this.PropertyChanged != null)
+            {
+                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
     }

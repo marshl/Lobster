@@ -200,7 +200,7 @@ namespace LobsterWpf
         {
             DatabaseConfig config = new DatabaseConfig();
             DatabaseConfigView configView = new DatabaseConfigView(config);
-            EditConnectionWindow ecw = new EditConnectionWindow(configView);
+            EditConnectionWindow ecw = new EditConnectionWindow(configView, this.ConnectionDirectory);
             ecw.Owner = this;
             bool? result = ecw.ShowDialog();
         }
@@ -219,7 +219,7 @@ namespace LobsterWpf
 
             DatabaseConfig config = this.DatabaseConfigList[this.connectionListBox.SelectedIndex];
             DatabaseConfigView configView = new DatabaseConfigView(config);
-            EditConnectionWindow ecw = new EditConnectionWindow(configView);
+            EditConnectionWindow ecw = new EditConnectionWindow(configView, this.ConnectionDirectory);
             bool? result = ecw.ShowDialog();
 
             this.DatabaseConfigList = new ObservableCollection<DatabaseConfig>(DatabaseConfig.GetConfigList());

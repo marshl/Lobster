@@ -1,11 +1,34 @@
-﻿namespace LobsterWpf
+﻿//-----------------------------------------------------------------------
+// <copyright file="TableView.cs" company="marshl">
+// Copyright 2015, Liam Marshall, marshl.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
+namespace LobsterWpf
 {
     using System.Collections.Generic;
     using System.ComponentModel;
     using LobsterModel;
 
+    /// <summary>
+    /// The model-view of the LobserModel.Table
+    /// </summary>
     public class TableView : INotifyPropertyChanged
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TableView"/> class.
+        /// </summary>
+        /// <param name="table">The model table to use as a basis for this view.</param>
         public TableView(Table table)
         {
             this.TableObject = table;
@@ -16,6 +39,9 @@
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
+        /// <summary>
+        /// Gets the underlying Table object 
+        /// </summary>
         public Table TableObject { get; }
 
         /// <summary>

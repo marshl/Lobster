@@ -142,11 +142,19 @@ namespace LobsterModel
 
             T obj = new T();
             System.Xml.Serialization.XmlSerializer xmls = new System.Xml.Serialization.XmlSerializer(typeof(T));
-            using (StreamReader streamReader = new StreamReader(xmlFilename))
+
+            try
             {
-                XmlReader xmlReader = XmlReader.Create(streamReader, readerSettings);
-                obj = (T)xmls.Deserialize(xmlReader);
-                xmlReader.Close();
+                using (StreamReader streamReader = new StreamReader(xmlFilename))
+                {
+                    XmlReader xmlReader = XmlReader.Create(streamReader, readerSettings);
+                    obj = (T)xmls.Deserialize(xmlReader);
+                    xmlReader.Close();
+                }
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new XmlSchemaValidationException($"An exception occurred when deserialising {xmlFilename}", ex);
             }
 
             if (error)

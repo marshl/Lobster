@@ -263,15 +263,17 @@ namespace LobsterWpf
         /// <summary>
         /// Writes the database config out to file, prompting the user for the file to save to if not already set.
         /// </summary>
+        /// <param name="initialDirectory">The directory that the save file dialog will initially open t=to if a new file is made.</param>
         /// <returns>True if the changes could be applied, otherwise false.</returns>
-        public bool ApplyChanges()
+        public bool ApplyChanges(string initialDirectory)
         {
             if (this.databaseConfig.FileLocation == null || !File.Exists(this.databaseConfig.FileLocation))
             {
                 CommonSaveFileDialog dlg = new CommonSaveFileDialog();
                 dlg.Filters.Add(new CommonFileDialogFilter("eXtensible Markup Language", "*.xml"));
                 dlg.Title = "Save Lobster Connection As";
-                dlg.DefaultFileName = this.Name.Replace(" ", string.Empty) + "NewConnection.xml";
+                dlg.DefaultFileName = this.Name?.Replace(" ", string.Empty) + "NewConnection.xml";
+                dlg.InitialDirectory = initialDirectory;
                 CommonFileDialogResult result = dlg.ShowDialog();
                 if (result == CommonFileDialogResult.Ok)
                 {
