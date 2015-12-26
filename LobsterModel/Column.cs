@@ -107,8 +107,6 @@ namespace LobsterModel
         /// <summary>
         /// Gets or sets the name of this column as it appears in the database.
         /// </summary>
-        [DisplayName("Name")]
-        [Description("The name of this column")]
         [XmlElement("name")]
         public string Name { get; set; }
 
@@ -116,8 +114,6 @@ namespace LobsterModel
         /// Gets or sets the name of the sequence that this columns will call NEXTVAL on if this column has the ID purpose.
         /// Sequence names should not be put on a column that has any other purpose.
         /// </summary>
-        [DisplayName("Sequence")]
-        [Description("The name of the sequence for this column, if it exists.")]
         [XmlElement("sequence")]
         public string Sequence { get; set; }
 
@@ -125,8 +121,6 @@ namespace LobsterModel
         /// Gets or sets the purpose of the column is an enumeration that defines how the column will be used.
         /// When a column with a specific purpose is needed, it will be queried from the table column list.
         /// </summary>
-        [DisplayName("Purpose")]
-        [Description("How Lobster will use this column.")]
         [XmlElement("purpose")]
         public Purpose ColumnPurpose { get; set; }
 
@@ -135,8 +129,6 @@ namespace LobsterModel
         /// The DataType of a column should only be used if it has the CLOB_DATA purpose.
         /// A table can have multiple CLOB_DATA columns, but each must have a differnt DataType.
         /// </summary>
-        [DisplayName("Data Type")]
-        [Description("The data type of this column if it has the Clob_Data purpose.")]
         [XmlElement("dataType")]
         public Datatype? DataType { get; set; }
 
@@ -152,7 +144,6 @@ namespace LobsterModel
         /// Gets or sets the parent Table of this column.
         /// </summary>
         [XmlIgnore]
-        [Browsable(false)]
         public Table ParentTable { get; set; }
 
         /// <summary>

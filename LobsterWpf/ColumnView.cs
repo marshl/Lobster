@@ -17,12 +17,76 @@
 namespace LobsterWpf
 {
     using System.ComponentModel;
+    using LobsterModel;
 
     /// <summary>
     /// The mode-view for a LObsterMOdel.Column
     /// </summary>
     public class ColumnView : INotifyPropertyChanged
     {
+        public ColumnView(Column column)
+        {
+            this.BaseColumn = column;
+        }
+
+        public Column BaseColumn { get; }
+
+        public string Name
+        {
+            get
+            {
+                return this.BaseColumn.Name;
+            }
+
+            set
+            {
+                this.BaseColumn.Name = value;
+                this.NotifyPropertyChanged("Name");
+            }
+        }
+
+        public string Sequence
+        {
+            get
+            {
+                return this.BaseColumn.Sequence;
+            }
+
+            set
+            {
+                this.BaseColumn.Sequence = value;
+                this.NotifyPropertyChanged("Sequence");
+            }
+        }
+
+        public Column.Purpose ColumnPurpose
+        {
+            get
+            {
+                return this.BaseColumn.ColumnPurpose;
+            }
+
+            set
+            {
+                this.BaseColumn.ColumnPurpose = value;
+                this.NotifyPropertyChanged("ColumnPurpose");
+            }
+        }
+
+        public Column.Datatype? DataType
+        {
+            get
+            {
+                return this.BaseColumn.DataType;
+            }
+
+            set
+            {
+                this.BaseColumn.DataType = value;
+                this.NotifyPropertyChanged("DataType");
+            }
+        }
+
         /// <summary>
         /// The event to be raised when a property is changed.
         /// </summary>

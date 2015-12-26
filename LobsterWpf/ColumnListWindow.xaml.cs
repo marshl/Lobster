@@ -1,64 +1,46 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="TableListWindow.xaml.cs" company="marshl">
-// Copyright 2015, Liam Marshall, marshl.
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-// </copyright>
-//-----------------------------------------------------------------------
+﻿using System.Collections.ObjectModel;
+using System.Windows;
+using LobsterModel;
+
 namespace LobsterWpf
 {
-    using System.Collections.ObjectModel;
-    using System.Windows;
-    using LobsterModel;
-
     /// <summary>
-    /// Interaction logic for TableListWindow.xaml
+    /// Interaction logic for ColumnListWindow.xaml
     /// </summary>
-    public partial class TableListWindow : Window
+    public partial class ColumnListWindow : Window
     {
+
         /// <summary>
         /// Initializes a new instance of the <see cref="TableListWindow"/> class.
         /// </summary>
         /// <param name="clobType">The ClobType whose tables are being modified.</param>
-        public TableListWindow(ClobType clobType)
+        public ColumnListWindow(Table table)
         {
-            this.ClobTypeObject = clobType;
-            this.RefreshTableList();
+            this.BaseTable = table;
+            this.RefreshColumnList();
 
             this.InitializeComponent();
 
             this.DataContext = this;
         }
 
-        /// <summary>
-        /// Gets the underlying ClobType governing this table list.
-        /// </summary>
-        public ClobType ClobTypeObject { get; private set; }
+        public Table BaseTable { get; }
 
         /// <summary>
         /// Gets the tables views from the ClobType.
         /// </summary>
-        public ObservableCollection<TableView> TableList { get; private set; }
+        public ObservableCollection<ColumnView> ColumnList { get; private set; }
 
         /// <summary>
         /// Refreshes the list of tables with the tables in the clob type.
         /// </summary>
-        private void RefreshTableList()
+        private void RefreshColumnList()
         {
-            this.TableList = new ObservableCollection<TableView>();
-            foreach (Table table in this.ClobTypeObject.Tables)
+            this.ColumnList = new ObservableCollection<ColumnView>();
+            foreach (Column column in this.BaseTable.Columns)
             {
-                TableView tableView = new TableView(table);
-                this.TableList.Add(tableView);
+                ColumnView tableView = new ColumnView(column);
+                this.ColumnList.Add(tableView);
             }
         }
 
@@ -69,13 +51,13 @@ namespace LobsterWpf
         /// <param name="e">The event arguments.</param>
         private void NewButton_Click(object sender, RoutedEventArgs e)
         {
-            Table table = new Table();
-            EditTableWindow window = new EditTableWindow(table, true);
+            Column column = new Column();
+            EditColumnWindow window = new EditColumnWindow(column);
             window.Owner = this;
             bool? result = window.ShowDialog();
 
-            this.ClobTypeObject.Tables.Add(table);
-            this.RefreshTableList();
+            this.BaseTable.Columns.Add(column);
+            this.RefreshColumnList();
         }
 
         /// <summary>
@@ -85,14 +67,14 @@ namespace LobsterWpf
         /// <param name="e">The event arguments.</param>
         private void EditButton_Click(object sender, RoutedEventArgs e)
         {
-            TableView tableView = (TableView)this.tableListBox.SelectedItem;
+            ColumnView columnView = (ColumnView)this.columnListBox.SelectedItem;
 
-            if (tableView == null)
+            if (columnView == null)
             {
                 return;
             }
 
-            EditTableWindow window = new EditTableWindow(tableView.BaseTable, true);
+            EditColumnWindow window = new EditColumnWindow(columnView.BaseColumn);
             window.Owner = this;
             bool? result = window.ShowDialog();
         }
@@ -104,15 +86,15 @@ namespace LobsterWpf
         /// <param name="e">The event arguments.</param>
         private void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
-            TableView tableView = (TableView)this.tableListBox.SelectedItem;
+            ColumnView columnView = (ColumnView)this.columnListBox.SelectedItem;
 
-            if (tableView == null)
+            if (columnView == null)
             {
                 return;
             }
 
-            this.ClobTypeObject.Tables.Remove(tableView.BaseTable);
-            this.RefreshTableList();
+            this.BaseTable.Columns.Remove(columnView.BaseColumn);
+            this.RefreshColumnList();
         }
 
         /// <summary>

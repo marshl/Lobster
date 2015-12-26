@@ -65,5 +65,12 @@ namespace LobsterWpf
             window.Owner = this;
             bool? result = window.ShowDialog();
         }
+
+        private void ShowColumnsButton_Click(object sender, RoutedEventArgs e)
+        {
+            ColumnListWindow window = new ColumnListWindow(this.Table.BaseTable);
+            window.Owner = this;
+            bool? result = window.ShowDialog();
+        }
     }
 }

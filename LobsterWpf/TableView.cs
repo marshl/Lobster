@@ -31,7 +31,7 @@ namespace LobsterWpf
         /// <param name="table">The model table to use as a basis for this view.</param>
         public TableView(Table table)
         {
-            this.TableObject = table;
+            this.BaseTable = table;
         }
 
         /// <summary>
@@ -42,7 +42,7 @@ namespace LobsterWpf
         /// <summary>
         /// Gets the underlying Table object 
         /// </summary>
-        public Table TableObject { get; }
+        public Table BaseTable { get; }
 
         /// <summary>
         /// Gets or sets the schema/user that this table belongs to.
@@ -51,12 +51,12 @@ namespace LobsterWpf
         {
             get
             {
-                return this.TableObject.Schema;
+                return this.BaseTable.Schema;
             }
 
             set
             {
-                this.TableObject.Schema = value;
+                this.BaseTable.Schema = value;
                 this.NotifyPropertyChanged("Schema");
             }
         }
@@ -68,12 +68,12 @@ namespace LobsterWpf
         {
             get
             {
-                return this.TableObject.Name;
+                return this.BaseTable.Name;
             }
 
             set
             {
-                this.TableObject.Name = value;
+                this.BaseTable.Name = value;
                 this.NotifyPropertyChanged("Name");
             }
         }
@@ -86,12 +86,12 @@ namespace LobsterWpf
         {
             get
             {
-                return this.TableObject.DefaultExtension;
+                return this.BaseTable.DefaultExtension;
             }
 
             set
             {
-                this.TableObject.DefaultExtension = value;
+                this.BaseTable.DefaultExtension = value;
                 this.NotifyPropertyChanged("DefaultExtension");
             }
         }
@@ -103,12 +103,12 @@ namespace LobsterWpf
         {
             get
             {
-                return this.TableObject.Columns;
+                return this.BaseTable.Columns;
             }
 
             set
             {
-                this.TableObject.Columns = value;
+                this.BaseTable.Columns = value;
                 this.NotifyPropertyChanged("Columns");
             }
         }
@@ -120,12 +120,12 @@ namespace LobsterWpf
         {
             get
             {
-                return this.TableObject.ParentTable;
+                return this.BaseTable.ParentTable;
             }
 
             set
             {
-                this.TableObject.ParentTable = value;
+                this.BaseTable.ParentTable = value;
                 this.NotifyPropertyChanged("ParentTable");
             }
         }
@@ -148,7 +148,7 @@ namespace LobsterWpf
         }
 
         /// <summary>
-        /// Gets orsets a value indicating whether the parent table controls should be enabled or not.
+        /// Gets or sets a value indicating whether the parent table controls should be enabled or not.
         /// </summary>
         public bool CanHaveParentTable { get; set; }
 

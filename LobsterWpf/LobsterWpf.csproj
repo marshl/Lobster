@@ -101,11 +101,17 @@
     <Compile Include="ClobTypeListWindow.xaml.cs">
       <DependentUpon>ClobTypeListWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ColumnListWindow.xaml.cs">
+      <DependentUpon>ColumnListWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ColumnView.cs" />
     <Compile Include="DatabaseConfigView.cs" />
     <Compile Include="DatabaseFileView.cs" />
     <Compile Include="EditClobTypeWindow.xaml.cs">
       <DependentUpon>EditClobTypeWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="EditColumnWindow.xaml.cs">
+      <DependentUpon>EditColumnWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="EditConnectionWindow.xaml.cs">
       <DependentUpon>EditConnectionWindow.xaml</DependentUpon>
@@ -125,11 +131,19 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="ColumnListWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="ConnectionListWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="EditClobTypeWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="EditColumnWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
