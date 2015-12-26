@@ -28,9 +28,11 @@ namespace LobsterWpf
         /// Initializes a new instance of the <see cref="EditTableWindow"/> class.
         /// </summary>
         /// <param name="table">The model table to edit.</param>
-        public EditTableWindow(Table table)
+        /// <param name="showParentTableControls">Whether this view should allow the table to have a parent table added.</param>
+        public EditTableWindow(Table table, bool showParentTableControls)
         {
             this.Table = new TableView(table);
+            this.Table.CanHaveParentTable = showParentTableControls;
             this.DataContext = this.Table;
 
             this.InitializeComponent();
@@ -59,7 +61,7 @@ namespace LobsterWpf
         /// <param name="e">The event arguments.</param>
         private void EditParentTable_Click(object sender, RoutedEventArgs e)
         {
-            EditTableWindow window = new EditTableWindow(this.Table.ParentTable);
+            EditTableWindow window = new EditTableWindow(this.Table.ParentTable, false);
             window.Owner = this;
             bool? result = window.ShowDialog();
         }

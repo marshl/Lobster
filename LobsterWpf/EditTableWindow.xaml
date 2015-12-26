@@ -34,7 +34,7 @@
     <Button Grid.Row="3" Grid.Column="2" Margin="5" HorizontalAlignment="Left" Padding="2">Show Columns</Button>
 
     <Label Grid.Row="4" Grid.Column="0" Margin="5">Parent Table:</Label>
-    <CheckBox Grid.Row="4" Grid.Column="1" Margin="5" VerticalAlignment="Center" IsChecked="{Binding Path=HasParentTable}">Has Parent Table:</CheckBox>
+    <CheckBox Grid.Row="4" Grid.Column="1" Margin="5" VerticalAlignment="Center" IsChecked="{Binding Path=HasParentTable}" IsEnabled="{Binding Path=CanHaveParentTable}">Has Parent Table:</CheckBox>
     <Button Grid.Row="5" Grid.Column="1" Margin="5" HorizontalAlignment="Left" Padding="2" IsEnabled="{Binding Path=HasParentTable}" Click="EditParentTable_Click">Edit Parent Table</Button>
 
     <StackPanel Grid.Row="6" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5">

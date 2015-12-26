@@ -148,6 +148,11 @@ namespace LobsterWpf
         }
 
         /// <summary>
+        /// Gets orsets a value indicating whether the parent table controls should be enabled or not.
+        /// </summary>
+        public bool CanHaveParentTable { get; set; }
+
+        /// <summary>
         /// Implementation of the INotifyPropertyChange, to tell WPF when a data value has changed
         /// </summary>
         /// <param name="propertyName">The name of the property that has changed.</param>

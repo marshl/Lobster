@@ -70,7 +70,7 @@ namespace LobsterWpf
         private void NewButton_Click(object sender, RoutedEventArgs e)
         {
             Table table = new Table();
-            EditTableWindow window = new EditTableWindow(table);
+            EditTableWindow window = new EditTableWindow(table, true);
             window.Owner = this;
             bool? result = window.ShowDialog();
 
@@ -92,7 +92,7 @@ namespace LobsterWpf
                 return;
             }
 
-            EditTableWindow window = new EditTableWindow(tableView.TableObject);
+            EditTableWindow window = new EditTableWindow(tableView.TableObject, true);
             window.Owner = this;
             bool? result = window.ShowDialog();
         }
