@@ -86,6 +86,11 @@ namespace LobsterWpf
             this.Close();
         }
 
+        /// <summary>
+        /// The event called when the Show Tables button is clicked, opening a table list window with the tables for this clob type.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
         private void ShowTablesButton_Click(object sender, RoutedEventArgs e)
         {
             TableListWindow window = new TableListWindow(this.ClobTypeView.ClobTypeObject);

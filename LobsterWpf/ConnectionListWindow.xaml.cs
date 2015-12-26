@@ -225,6 +225,9 @@ namespace LobsterWpf
             this.LoadDatabaseConnections();
         }
 
+        /// <summary>
+        /// Loads the database connections from disk, and refreshes the connection list.
+        /// </summary>
         private void LoadDatabaseConnections()
         {
             this.DatabaseConfigList = new ObservableCollection<DatabaseConfig>(DatabaseConfig.GetConfigList());

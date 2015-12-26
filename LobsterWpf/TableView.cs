@@ -130,6 +130,9 @@ namespace LobsterWpf
             }
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this table has a parent table, creating a new table if set to true.
+        /// </summary>
         public bool HasParentTable
         {
             get
@@ -143,7 +146,6 @@ namespace LobsterWpf
                 this.NotifyPropertyChanged("HasParentTable");
             }
         }
-
 
         /// <summary>
         /// Implementation of the INotifyPropertyChange, to tell WPF when a data value has changed

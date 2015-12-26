@@ -24,6 +24,10 @@ namespace LobsterWpf
     /// </summary>
     public partial class EditTableWindow : Window
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EditTableWindow"/> class.
+        /// </summary>
+        /// <param name="table">The model table to edit.</param>
         public EditTableWindow(Table table)
         {
             this.Table = new TableView(table);
@@ -32,14 +36,27 @@ namespace LobsterWpf
             this.InitializeComponent();
         }
 
+        /// <summary>
+        /// Getst the table view for the table to edit.
+        /// </summary>
         public TableView Table { get; }
 
+        /// <summary>
+        /// The event called when the Ok button is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
         private void OkButton_Click(object sender, RoutedEventArgs e)
         {
             this.DialogResult = true;
             this.Close();
         }
 
+        /// <summary>
+        /// The event called when the Edit Parent Table button is clicked. Opens a dialog window where the parent table can be edited.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
         private void EditParentTable_Click(object sender, RoutedEventArgs e)
         {
             EditTableWindow window = new EditTableWindow(this.Table.ParentTable);
