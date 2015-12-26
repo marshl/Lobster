@@ -24,13 +24,28 @@ namespace LobsterWpf
     /// </summary>
     public class ColumnView : INotifyPropertyChanged
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ColumnView"/> class.
+        /// </summary>
+        /// <param name="column">The column to use as a base for this view.</param>
         public ColumnView(Column column)
         {
             this.BaseColumn = column;
         }
 
+        /// <summary>
+        /// The event to be raised when a property is changed.
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// Gets the base column for this view.
+        /// </summary>
         public Column BaseColumn { get; }
 
+        /// <summary>
+        /// Gets or sets the name of the column.
+        /// </summary>
         public string Name
         {
             get
@@ -45,6 +60,9 @@ namespace LobsterWpf
             }
         }
 
+        /// <summary>
+        /// Gets or sets the sequence of this column.
+        /// </summary>
         public string Sequence
         {
             get
@@ -59,6 +77,9 @@ namespace LobsterWpf
             }
         }
 
+        /// <summary>
+        /// Gets or sets the purpose of the column.
+        /// </summary>
         public Column.Purpose ColumnPurpose
         {
             get
@@ -73,6 +94,9 @@ namespace LobsterWpf
             }
         }
 
+        /// <summary>
+        /// Gets or sets the datatype of the column.
+        /// </summary>
         public Column.Datatype? DataType
         {
             get
@@ -86,11 +110,6 @@ namespace LobsterWpf
                 this.NotifyPropertyChanged("DataType");
             }
         }
-
-        /// <summary>
-        /// The event to be raised when a property is changed.
-        /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
         /// Implementation of the INotifyPropertyChange, to tell WPF when a data value has changed

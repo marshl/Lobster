@@ -28,6 +28,10 @@ namespace LobsterWpf
     /// </summary>
     public partial class EditColumnWindow : Window
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EditColumnWindow"/> class.
+        /// </summary>
+        /// <param name="column">The column to edit.</param>
         public EditColumnWindow(Column column)
         {
             this.BaseColumn = new ColumnView(column);
@@ -39,8 +43,16 @@ namespace LobsterWpf
             this.datatypeComboBox.ItemsSource = Enum.GetValues(typeof(Column.Datatype)).Cast<Column.Datatype>();
         }
 
+        /// <summary>
+        /// Gets the column being edited by this window.
+        /// </summary>
         public ColumnView BaseColumn { get; }
 
+        /// <summary>
+        /// The event that is called when the Ok button is clicked, closing the window.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
         private void OkButton_Click(object sender, RoutedEventArgs e)
         {
             this.DialogResult = true;

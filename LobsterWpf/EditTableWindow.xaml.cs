@@ -66,6 +66,11 @@ namespace LobsterWpf
             bool? result = window.ShowDialog();
         }
 
+        /// <summary>
+        /// The event that is called when the Show Columns button is clicked, opening a window with the list of columns.
+        /// </summary>
+        /// <param name="sender">The sender of th event,</param>
+        /// <param name="e">The event arguments.</param>
         private void ShowColumnsButton_Click(object sender, RoutedEventArgs e)
         {
             ColumnListWindow window = new ColumnListWindow(this.Table.BaseTable);
