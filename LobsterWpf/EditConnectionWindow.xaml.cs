@@ -131,6 +131,7 @@ namespace LobsterWpf
         private void EditClobTypeButton_Click(object sender, RoutedEventArgs e)
         {
             ClobTypeListWindow window = new ClobTypeListWindow(this.ConfigView.ClobTypeDir);
+            window.Owner = this;
             bool? result = window.ShowDialog();
             this.Focus();
         }

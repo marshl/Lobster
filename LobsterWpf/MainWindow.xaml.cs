@@ -72,6 +72,7 @@ namespace LobsterWpf
         bool IModelEventListener.PromptForTable(string filename, Table[] tables, ref Table table)
         {
             TableSelectorWindow tsw = new TableSelectorWindow(filename, tables);
+            tsw.Owner = this;
             bool? result = tsw.ShowDialog();
             if (result ?? false)
             {
@@ -91,6 +92,7 @@ namespace LobsterWpf
         bool IModelEventListener.PromptForMimeType(string filename, string[] mimeTypes, ref string mimeType)
         {
             MimeTypeSelectorWindow msw = new MimeTypeSelectorWindow(filename, mimeTypes);
+            msw.Owner = this;
             bool? result = msw.ShowDialog();
             if (result ?? false)
             {

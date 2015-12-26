@@ -130,6 +130,21 @@ namespace LobsterWpf
             }
         }
 
+        public bool HasParentTable
+        {
+            get
+            {
+                return this.ParentTable != null;
+            }
+
+            set
+            {
+                this.ParentTable = value ? new Table() : null;
+                this.NotifyPropertyChanged("HasParentTable");
+            }
+        }
+
+
         /// <summary>
         /// Implementation of the INotifyPropertyChange, to tell WPF when a data value has changed
         /// </summary>

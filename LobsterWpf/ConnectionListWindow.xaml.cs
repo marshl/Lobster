@@ -53,7 +53,7 @@ namespace LobsterWpf
         {
             this.InitializeComponent();
 
-            this.DatabaseConfigList = new ObservableCollection<DatabaseConfig>(DatabaseConfig.GetConfigList());
+            this.LoadDatabaseConnections();
             this.DataContext = this;
             this.eventListener = listener;
         }
@@ -152,7 +152,7 @@ namespace LobsterWpf
             if (result == CommonFileDialogResult.Ok)
             {
                 this.ConnectionDirectory = dlg.FileName;
-                this.DatabaseConfigList = new ObservableCollection<DatabaseConfig>(DatabaseConfig.GetConfigList());
+                this.LoadDatabaseConnections();
             }
         }
 
@@ -220,8 +220,13 @@ namespace LobsterWpf
             DatabaseConfig config = this.DatabaseConfigList[this.connectionListBox.SelectedIndex];
             DatabaseConfigView configView = new DatabaseConfigView(config);
             EditConnectionWindow ecw = new EditConnectionWindow(configView, this.ConnectionDirectory);
+            ecw.Owner = this;
             bool? result = ecw.ShowDialog();
+            this.LoadDatabaseConnections();
+        }
 
+        private void LoadDatabaseConnections()
+        {
             this.DatabaseConfigList = new ObservableCollection<DatabaseConfig>(DatabaseConfig.GetConfigList());
         }
     }
