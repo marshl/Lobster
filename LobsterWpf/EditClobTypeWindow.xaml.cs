@@ -85,5 +85,13 @@ namespace LobsterWpf
             this.DialogResult = false;
             this.Close();
         }
+
+        private void ShowTablesButton_Click(object sender, RoutedEventArgs e)
+        {
+            TableListWindow window = new TableListWindow(this.ClobTypeView.Tables);
+            window.Owner = this;
+            bool? result = window.ShowDialog();
+
+        }
     }
 }

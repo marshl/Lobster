@@ -110,7 +110,13 @@
     <Compile Include="EditConnectionWindow.xaml.cs">
       <DependentUpon>EditConnectionWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="EditTableWindow.xaml.cs">
+      <DependentUpon>EditTableWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="LocalFileView.cs" />
+    <Compile Include="TableListWindow.xaml.cs">
+      <DependentUpon>TableListWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="TableSelectorWindow.xaml.cs">
       <DependentUpon>TableSelectorWindow.xaml</DependentUpon>
     </Compile>
@@ -128,6 +134,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="EditConnectionWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="EditTableWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -154,6 +164,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="NotificationWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TableListWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
