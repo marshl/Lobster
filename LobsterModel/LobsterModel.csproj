@@ -61,6 +61,7 @@
     <Compile Include="MimeTypeNotFoundException.cs" />
     <Compile Include="Model.cs" />
     <Compile Include="SetConnectionException.cs" />
+    <Compile Include="SettingsView.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="DatabaseConfig.cs" />
     <Compile Include="DatabaseConnection.cs" />

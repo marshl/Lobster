@@ -23,6 +23,7 @@ namespace LobsterWpf
     using System.Linq;
     using System.Windows.Media;
     using LobsterModel;
+    using Properties;
 
     /// <summary>
     /// The view for a file that is on the database, and may also be found locally.
@@ -58,7 +59,13 @@ namespace LobsterWpf
         {
             get
             {
-                return this.localFilePath != null;
+                if (this.localFilePath == null)
+                {
+                    return false;
+                }
+
+                string extension = Path.GetExtension(this.localFilePath);
+                return Settings.Default.DiffableExtensions.Contains(extension);
             }
         }
 

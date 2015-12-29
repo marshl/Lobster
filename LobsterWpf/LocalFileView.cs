@@ -22,6 +22,7 @@ namespace LobsterWpf
     using System.Linq;
     using System.Windows.Media;
     using LobsterModel;
+    using Properties;
 
     /// <summary>
     /// A view representing a single local file, with a possible database file connection.
@@ -93,7 +94,13 @@ namespace LobsterWpf
         {
             get
             {
-                return !this.IsDirectory && this.DatabaseFile != null;
+                if (this.IsDirectory || this.DatabaseFile == null)
+                {
+                    return false;
+                }
+
+                string extension = Path.GetExtension(this.Name);
+                return Settings.Default.DiffableExtensions.Contains(extension);
             }
         }
 

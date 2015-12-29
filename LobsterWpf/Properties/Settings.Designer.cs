@@ -46,5 +46,26 @@ namespace LobsterWpf.Properties {
                 this["DiffProgramArguments"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute(@"<?xml version=""1.0"" encoding=""utf-16""?>
+<ArrayOfString xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+  <string>.html</string>
+  <string>.txt</string>
+  <string>.xml</string>
+  <string>.xmls</string>
+  <string>.xmlp</string>
+  <string>.js</string>
+  <string>.css</string>
+</ArrayOfString>")]
+        public global::System.Collections.Specialized.StringCollection DiffableExtensions {
+            get {
+                return ((global::System.Collections.Specialized.StringCollection)(this["DiffableExtensions"]));
+            }
+            set {
+                this["DiffableExtensions"] = value;
+            }
+        }
     }
 }

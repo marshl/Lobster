@@ -409,5 +409,17 @@ namespace LobsterWpf
             this.connectionView.CurrentDisplayMode = this.LocalOnlyFilesRadio.IsChecked.Value ? ConnectionView.DisplayMode.LocalFiles : ConnectionView.DisplayMode.DatabaseFiles;
             this.RepopulateFileListView();
         }
+        
+        /// <summary>
+        /// The event called when the settings button is clicked, opening a new settings window.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OptionsMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SettingsWindow window = new SettingsWindow();
+            window.Owner = this;
+            bool? result = window.ShowDialog();
+        }
     }
 }

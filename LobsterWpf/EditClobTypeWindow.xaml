@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LobsterWpf"
         mc:Ignorable="d"
-        Title="EditClobTypeWindow" Height="320" Width="300" MinHeight="320" MinWidth="300"  ShowInTaskbar="False">
+        Title="Edit Clob Type" Height="320" Width="300" MinHeight="320" MinWidth="300"  ShowInTaskbar="False">
   <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="Auto"/>
