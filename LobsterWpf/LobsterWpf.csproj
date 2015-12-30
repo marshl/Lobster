@@ -341,8 +341,12 @@
     <None Include="Resources\Images\Settings.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Audio\failure.wav" />
-    <Resource Include="Resources\Audio\success.wav" />
+    <Content Include="Resources\Audio\failure.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Audio\success.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

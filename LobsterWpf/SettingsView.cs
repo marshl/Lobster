@@ -90,5 +90,39 @@ namespace LobsterWpf
                 Settings.Default.Save();
             }
         }
+
+        /// <summary>
+        /// Gets or sets the path of the file used as a success sound effect.
+        /// </summary>
+        public string SuccessSoundFile
+        {
+            get
+            {
+                return Settings.Default.SuccessSoundFile;
+            }
+
+            set
+            {
+                Settings.Default.SuccessSoundFile = value;
+                Settings.Default.Save();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the path of the file used as a failure sound effect.
+        /// </summary>
+        public string FailureSoundFile
+        {
+            get
+            {
+                return Settings.Default.FailureSoundFile;
+            }
+
+            set
+            {
+                Settings.Default.FailureSoundFile = value;
+                Settings.Default.Save();
+            }
+        }
     }
 }

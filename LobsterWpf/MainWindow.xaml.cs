@@ -38,11 +38,24 @@ namespace LobsterWpf
         private ConnectionView connectionView;
 
         /// <summary>
+        /// The sound played when an automatic update is successful.
+        /// </summary>
+        private SoundPlayer successSound;
+
+        /// <summary>
+        /// The sound played when an automatic update fails.
+        /// </summary>
+        private SoundPlayer failureSound;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow"/> class.
         /// </summary>
         public MainWindow()
         {
             this.InitializeComponent();
+
+            this.successSound = new SoundPlayer("Resources/Audio/success.wav");
+            this.failureSound = new SoundPlayer("Resources/Audio/failure.wav");
         }
 
         /// <summary>
@@ -345,7 +358,15 @@ namespace LobsterWpf
             string message = "File update " + (success ? "succeeded" : "failed") + " for " + System.IO.Path.GetFileName(filename);
             NotificationWindow nw = new NotificationWindow(message, success);
             nw.Show();
-            SystemSounds.Question.Play();
+
+            try
+            {
+                (success ? this.successSound : this.failureSound).Play();
+            }
+            catch (FileNotFoundException ex)
+            {
+                MessageLog.LogError($"An error occurred when attempting to play a sound: {ex}");
+            }
         }
 
         /// <summary>

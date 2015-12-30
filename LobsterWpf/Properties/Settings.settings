@@ -20,5 +20,11 @@
   &lt;string&gt;.css&lt;/string&gt;
 &lt;/ArrayOfString&gt;</Value>
     </Setting>
+    <Setting Name="SuccessSoundFile" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Resources/Audio/success.wav</Value>
+    </Setting>
+    <Setting Name="FailureSoundFile" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Resources/Audio/failure.wav</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

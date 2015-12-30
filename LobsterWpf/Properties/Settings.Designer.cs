@@ -67,5 +67,29 @@ namespace LobsterWpf.Properties {
                 this["DiffableExtensions"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Resources/Audio/success.wav")]
+        public string SuccessSoundFile {
+            get {
+                return ((string)(this["SuccessSoundFile"]));
+            }
+            set {
+                this["SuccessSoundFile"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Resources/Audio/failure.wav")]
+        public string FailureSoundFile {
+            get {
+                return ((string)(this["FailureSoundFile"]));
+            }
+            set {
+                this["FailureSoundFile"] = value;
+            }
+        }
     }
 }
