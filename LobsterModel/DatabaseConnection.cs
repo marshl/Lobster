@@ -333,6 +333,7 @@ namespace LobsterModel
                 catch (FileUpdateException)
                 {
                     this.EventListener.OnAutoUpdateComplete(e.FullPath, false);
+                    return;
                 }
 
                 this.EventListener.OnAutoUpdateComplete(e.FullPath, true);
