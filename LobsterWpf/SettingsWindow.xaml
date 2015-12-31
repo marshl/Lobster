@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LobsterWpf"
         mc:Ignorable="d"
-        Title="Settings" Height="400" Width="300" MinHeight="400" MinWidth="300" ShowInTaskbar="False">
+        Title="Settings" Height="405" Width="350" MinHeight="405" MinWidth="350" ShowInTaskbar="False">
   <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="Auto"/>
@@ -52,7 +52,7 @@
     <TextBox Grid.Row="8" Grid.Column="1" Text="{Binding Path=FailureSoundFile}" Margin="5"/>
 
     <StackPanel Grid.Row="9" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5">
-      <Button Margin="5" Width="75" Height="20" Click="CloseButton_Click">Close</Button>
+      <Button Margin="10" Width="75" Height="20" Click="CloseButton_Click">Close</Button>
     </StackPanel>
   </Grid>
 </Window>

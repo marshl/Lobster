@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LobsterWpf"
         mc:Ignorable="d"
-        Title="Connections" Height="500" Width="500" Icon="Resources/Images/cartoon-lobster.ico" ShowInTaskbar="False">
+        Title="Connections" Height="500" Width="500" Icon="Resources/Images/cartoon-lobster.ico" ShowInTaskbar="False" Background="{StaticResource BackgroundKey}">
   <Grid>
     <Grid.RowDefinitions>
       <RowDefinition Height="35"/>
@@ -15,7 +15,7 @@
     </Grid.RowDefinitions>
     <DockPanel Grid.Row="0" VerticalAlignment="Center">
       <Label DockPanel.Dock="Left" VerticalAlignment="Center">Directory:</Label>
-          <Label x:Name="directoryLabel" VerticalAlignment="Center" Content="{Binding Path=ConnectionDirectory, FallbackValue='No directory selected'}" HorizontalAlignment="Left" Width="Auto"/>
+      <Label x:Name="directoryLabel" VerticalAlignment="Center" Content="{Binding Path=ConnectionDirectory, FallbackValue='No directory selected'}" HorizontalAlignment="Left" Width="Auto"/>
 
     </DockPanel>
     <Button x:Name="changeDirectoryButton" Grid.Row="1"  Content="Change Directory" HorizontalAlignment="Left" VerticalAlignment="Center" Width="108" Click="ChangeDirectoryButton_Click" Margin="5"/>

@@ -188,7 +188,7 @@ namespace LobsterWpf
         {
             get
             {
-                return (this.IsDirectory || this.DatabaseFile != null ? Colors.Black : Colors.LimeGreen).ToString();
+                return (this.IsDirectory || this.DatabaseFile != null ? Colors.White : Colors.LimeGreen).ToString();
             }
         }
 

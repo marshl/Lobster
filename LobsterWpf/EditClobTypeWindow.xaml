@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LobsterWpf"
         mc:Ignorable="d"
-        Title="Edit Clob Type" Height="320" Width="300" MinHeight="320" MinWidth="300"  ShowInTaskbar="False">
+        Title="Edit Clob Type" Height="345" Width="300" MinHeight="345" MinWidth="300"  ShowInTaskbar="False" Background="{StaticResource BackgroundKey}">
   <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="Auto"/>
@@ -33,7 +33,7 @@
     </StackPanel>
     
     <Label Grid.Row="3" Grid.Column="0" Margin="5">Tables:</Label>
-    <Button Grid.Row="3" Grid.Column="1" Width="75" HorizontalAlignment="Left" Margin="5" Click="ShowTablesButton_Click">Show Tables</Button>
+    <Button Grid.Row="3" Grid.Column="1" HorizontalAlignment="Left" Margin="5" Click="ShowTablesButton_Click">Show Tables</Button>
      
     <Label Grid.Row="4" Grid.Column="0" Margin="5">Loader Statement:</Label>
     <TextBox Grid.Row="5" Grid.ColumnSpan="2" MinHeight="50" Text="{Binding Path=LoaderStatement}" Margin="5"/>

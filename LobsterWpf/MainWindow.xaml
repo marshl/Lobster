@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LobsterWpf"
         mc:Ignorable="d"
-        Title="Lobster" Height="600" Width="800" Loaded="Window_Loaded" Icon="Resources/Images/cartoon-lobster.ico" MinWidth="640" MinHeight="480">
+        Title="Lobster" Height="600" Width="800" Loaded="Window_Loaded" Icon="Resources/Images/cartoon-lobster.ico" MinWidth="640" MinHeight="480" Background="{StaticResource BackgroundKey}">
   <Grid x:Name="ConnectionContainer">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto"/>
@@ -45,24 +45,23 @@
         </ListBox.ItemTemplate>
       </ListBox>
       <GridSplitter x:Name="gridSplitter" HorizontalAlignment="Left" Grid.Column="1" Width="5"/>
-      <Grid Background="#FFE5E5E5" Grid.Column="2" Margin="5,0,0,0">
+      <Grid Grid.Column="2" Margin="5,0,0,0" Background="{StaticResource BackgroundKey}">
         <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="50"/>
+          <ColumnDefinition Width="65"/>
           <ColumnDefinition Width="1*"/>
           <ColumnDefinition Width="1*"/>
         </Grid.ColumnDefinitions>
         <GridSplitter x:Name="gridSplitter1" HorizontalAlignment="Left" Width="5" Grid.Column="2"/>
-        <Grid Grid.Column="1">
+        <Grid Grid.Column="1" Background="{StaticResource BackgroundKey}">
           <Grid.RowDefinitions>
             <RowDefinition/>
-            <RowDefinition Height="25"/>
-            <RowDefinition Height="25"/>
+            <RowDefinition Height="35"/>
+            <RowDefinition Height="35"/>
           </Grid.RowDefinitions>
-
-          <TreeView Name="localFileTreeView" ItemsSource="{Binding RootFile}" Grid.Row="0" SelectedItemChanged="LocalFileTreeView_SelectedItemChanged">
+          <TreeView Grid.Row="0" Name="localFileTreeView" ItemsSource="{Binding RootFile}" SelectedItemChanged="LocalFileTreeView_SelectedItemChanged" Background="{StaticResource BackgroundKey}">
             <TreeView.ItemTemplate>
               <HierarchicalDataTemplate DataType="{x:Type local:FileNodeView}" ItemsSource="{Binding Children}">
-                <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Horizontal"  Background="{StaticResource BackgroundKey}">
                   <Image Source="{Binding ImageUrl}" Height="18"/>
                   <TextBlock Text="{Binding Path=Name}" Foreground="{Binding Path=ForegroundColour}"  VerticalAlignment="Center"/>
                 </StackPanel>
@@ -75,26 +74,26 @@
           </StackPanel>
           <CheckBox x:Name="showReadOnlyFilesCheckbox" Grid.Row="2" Content="Show Readonly Files" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5" Checked="HideReadonlyCheckbox_Toggled" Unchecked="HideReadonlyCheckbox_Toggled" IsChecked="{Binding Path=ShowReadOnlyFiles, Mode=TwoWay}"/>
         </Grid>
-        <StackPanel>
-          <Button x:Name="pushButton" Grid.Column="0" MaxHeight="50" Margin="0" Click="PushButton_Click" IsEnabled="{Binding Path=SelectedFileNode.CanBeUpdated, FallbackValue=false}">
+        <StackPanel Background="{StaticResource BackgroundKey}">
+          <Button x:Name="pushButton" Grid.Column="0" Height="65" Margin="0" Click="PushButton_Click" IsEnabled="{Binding Path=SelectedFileNode.CanBeUpdated, FallbackValue=false}">
             <StackPanel MaxHeight="50">
               <Image Source="{DynamicResource PushImageSource}" VerticalAlignment="Top" Height="30"/>
               <TextBlock HorizontalAlignment="Center" MinHeight="15" VerticalAlignment="Bottom">Push</TextBlock>
             </StackPanel>
           </Button>
-          <Button x:Name="diffButton" Grid.Column="0" MaxHeight="50" Click="DiffButton_Click" IsEnabled="{Binding Path=SelectedFileNode.CanBeDiffed, FallbackValue=false}">
+          <Button x:Name="diffButton" Grid.Column="0" Height="65" Click="DiffButton_Click" IsEnabled="{Binding Path=SelectedFileNode.CanBeDiffed, FallbackValue=false}">
             <StackPanel MaxHeight="50">
               <Image Source="{DynamicResource MergeImageSource}" VerticalAlignment="Top" Height="30"/>
               <TextBlock HorizontalAlignment="Center" MinHeight="15" VerticalAlignment="Bottom">Diff</TextBlock>
             </StackPanel>
           </Button>
-          <Button x:Name="exploreButton" Grid.Column="0" MaxHeight="50" Click="ExploreButton_Click" IsEnabled="{Binding Path=SelectedFileNode.CanBeExploredTo, FallbackValue=false}">
+          <Button x:Name="exploreButton" Grid.Column="0" Height="65" Click="ExploreButton_Click" IsEnabled="{Binding Path=SelectedFileNode.CanBeExploredTo, FallbackValue=false}">
             <StackPanel MaxHeight="50">
               <Image Source="{DynamicResource FolderImageSource}" VerticalAlignment="Top" Height="30"/>
               <TextBlock HorizontalAlignment="Center" MinHeight="15" VerticalAlignment="Bottom">Explore</TextBlock>
             </StackPanel>
           </Button>
-          <Button x:Name="insertButton" Grid.Column="0" MaxHeight="50" Click="InsertButton_Click" IsEnabled="{Binding Path=SelectedFileNode.CanBeInserted, FallbackValue=false}">
+          <Button x:Name="insertButton" Grid.Column="0" Height="65" Click="InsertButton_Click" IsEnabled="{Binding Path=SelectedFileNode.CanBeInserted, FallbackValue=false}">
             <StackPanel MaxHeight="50">
               <Image Source="{DynamicResource InsertImageSource}" VerticalAlignment="Top" Height="30"/>
               <TextBlock HorizontalAlignment="Center" MinHeight="15" VerticalAlignment="Bottom">Insert</TextBlock>
@@ -102,7 +101,7 @@
           </Button>
         </StackPanel>
         <GridSplitter x:Name="gridSplitter2" HorizontalAlignment="Left" Width="5" Grid.Column="2"/>
-        <DataGrid Grid.Column="2" Margin="5,0,0,0" Name="fileHistoryDataGrid" ItemsSource="{Binding SelectedFileNode.FileBackupList}" AutoGenerateColumns="False" CanUserReorderColumns="False" CanUserSortColumns="False" GridLinesVisibility="Horizontal" CanUserResizeRows="False">
+        <DataGrid Grid.Column="2" Margin="5,0,0,0" Name="fileHistoryDataGrid" ItemsSource="{Binding SelectedFileNode.FileBackupList}" AutoGenerateColumns="False" CanUserReorderColumns="False" CanUserSortColumns="False" GridLinesVisibility="Horizontal" CanUserResizeRows="False" Background="{StaticResource BackgroundKey}">
           <DataGrid.Columns>
             <DataGridTextColumn Header="Backup Date" Binding="{Binding DateCreated}"/>
             <DataGridTemplateColumn CanUserResize="False">
