@@ -522,11 +522,10 @@
     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
     <Setter Property="BorderThickness" Value="1" />
-    <Setter Property="Template">
+    <!--<Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="TreeViewItem">
           <Grid>
-            <!--
             <VisualStateManager.VisualStateGroups>
               <VisualStateGroup x:Name="CommonStates">
                 <VisualState x:Name="Normal" />
@@ -628,7 +627,7 @@
                 </VisualState>
                 <VisualState x:Name="Unfocused" />
               </VisualStateGroup>
-            </VisualStateManager.VisualStateGroups>-->
+            </VisualStateManager.VisualStateGroups>
             <Rectangle x:Name="Bd" Fill="{TemplateBinding Background}" />
             <Rectangle x:Name="BgSelected" Fill="{StaticResource ListBoxItemSelectedBackgroundBrush}" Stroke="{StaticResource ListBoxItemSelectedBorderBrush}" Visibility="Collapsed" />
             <ContentControl x:Name="contentControl" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Margin="{TemplateBinding Padding}" Foreground="{TemplateBinding Foreground}">
@@ -642,7 +641,7 @@
           </Grid>
         </ControlTemplate>
       </Setter.Value>
-    </Setter>
+    </Setter>-->
   </Style>
 
   <!-- ********************************** CheckBoxStyle **********************************-->

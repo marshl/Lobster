@@ -18,7 +18,7 @@
       <Label x:Name="directoryLabel" VerticalAlignment="Center" Content="{Binding Path=ConnectionDirectory, FallbackValue='No directory selected'}" HorizontalAlignment="Left" Width="Auto"/>
 
     </DockPanel>
-    <Button x:Name="changeDirectoryButton" Grid.Row="1"  Content="Change Directory" HorizontalAlignment="Left" VerticalAlignment="Center" Width="108" Click="ChangeDirectoryButton_Click" Margin="5"/>
+    <Button x:Name="changeDirectoryButton" Grid.Row="1"  Content="Change Directory" HorizontalAlignment="Left" VerticalAlignment="Center" Click="ChangeDirectoryButton_Click" Margin="5"/>
     <ListBox Grid.Row="2" Name="connectionListBox" ItemsSource="{Binding DatabaseConfigList}">
       <ListBox.ItemTemplate>
         <DataTemplate DataType="DatabaseConfig">

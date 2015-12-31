@@ -170,7 +170,7 @@ namespace LobsterWpf
         {
             get
             {
-                return (this.localFilePath != null ? Colors.Black : Colors.DodgerBlue).ToString();
+                return (this.localFilePath != null ? Colors.White : Colors.DodgerBlue).ToString();
             }
         }
 

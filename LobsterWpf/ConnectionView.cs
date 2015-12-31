@@ -44,7 +44,7 @@ namespace LobsterWpf
         public ConnectionView(DatabaseConnection con)
         {
             this.Connection = con;
-            
+
             foreach (ClobDirectory clobDir in con.ClobDirectoryList)
             {
                 this.ClobDirectories.Add(new ClobDirectoryView(clobDir));
@@ -186,6 +186,11 @@ namespace LobsterWpf
                 foreach (DBClobFile df in clobDir.DatabaseFileList)
                 {
                     FileInfo fileInfo = Array.Find(files, x => x.Name.Equals(df.Filename, StringComparison.OrdinalIgnoreCase));
+                    if (!this.ShowReadOnlyFiles && fileInfo != null && fileInfo.IsReadOnly)
+                    {
+                        continue;
+                    }
+
                     DatabaseFileView dfv = new DatabaseFileView(this, df, fileInfo?.FullName);
                     this.RootFile.Children.Add(dfv);
                 }
