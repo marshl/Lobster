@@ -22,8 +22,10 @@
 //-----------------------------------------------------------------------
 namespace LobsterWpf
 {
+    using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.ComponentModel;
+    using System.Linq;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Input;
@@ -38,7 +40,7 @@ namespace LobsterWpf
         /// <summary>
         /// The internal value for DatabaseConfigList.
         /// </summary>
-        private ObservableCollection<DatabaseConfig> databaseConfigList;
+        private ObservableCollection<DatabaseConfigView> databaseConfigList;
 
         /// <summary>
         /// The event listener that is used to populate new connections.
@@ -88,7 +90,7 @@ namespace LobsterWpf
         /// <summary>
         /// Gets or sets the list of configuation files for the current connection directory.
         /// </summary>
-        public ObservableCollection<DatabaseConfig> DatabaseConfigList
+        public ObservableCollection<DatabaseConfigView> DatabaseConfigList
         {
             get
             {
@@ -168,9 +170,9 @@ namespace LobsterWpf
                 return;
             }
 
-            DatabaseConfig config = this.DatabaseConfigList[this.connectionListBox.SelectedIndex];
+            DatabaseConfigView config = this.DatabaseConfigList[this.connectionListBox.SelectedIndex];
 
-            this.TryConnectWithConfig(config);
+            this.TryConnectWithConfig(config.BaseConfig);
         }
 
         /// <summary>
@@ -212,13 +214,12 @@ namespace LobsterWpf
         /// <param name="e">The event arguments.</param>
         private void EditConnectionButton_Click(object sender, RoutedEventArgs e)
         {
-            if (this.connectionListBox.SelectedIndex == -1)
+            DatabaseConfigView configView = (DatabaseConfigView)this.connectionListBox.SelectedItem;
+            if (configView == null)
             {
                 return;
             }
 
-            DatabaseConfig config = this.DatabaseConfigList[this.connectionListBox.SelectedIndex];
-            DatabaseConfigView configView = new DatabaseConfigView(config);
             EditConnectionWindow ecw = new EditConnectionWindow(configView, this.ConnectionDirectory);
             ecw.Owner = this;
             bool? result = ecw.ShowDialog();
@@ -230,7 +231,8 @@ namespace LobsterWpf
         /// </summary>
         private void LoadDatabaseConnections()
         {
-            this.DatabaseConfigList = new ObservableCollection<DatabaseConfig>(DatabaseConfig.GetConfigList());
+            List<DatabaseConfigView> configViews = (DatabaseConfig.GetConfigList().Select(item => new DatabaseConfigView(item)).ToList());
+            this.DatabaseConfigList = new ObservableCollection<DatabaseConfigView>(configViews);
         }
     }
 }

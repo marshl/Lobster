@@ -31,18 +31,18 @@ namespace LobsterWpf
     public class DatabaseConfigView : INotifyPropertyChanged
     {
         /// <summary>
-        /// The model object.
-        /// </summary>
-        private DatabaseConfig databaseConfig;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseConfigView"/> class.
         /// </summary>
         /// <param name="databaseConfig">The database config to use as the model of this view.</param>
         public DatabaseConfigView(DatabaseConfig databaseConfig)
         {
-            this.databaseConfig = databaseConfig;
+            this.BaseConfig = databaseConfig;
         }
+
+        /// <summary>
+        /// The model object.
+        /// </summary>
+        public DatabaseConfig BaseConfig { get; }
 
         /// <summary>
         /// The event to be raised when a property is changed.
@@ -56,12 +56,12 @@ namespace LobsterWpf
         {
             get
             {
-                return this.databaseConfig.Name;
+                return this.BaseConfig.Name;
             }
 
             set
             {
-                this.databaseConfig.Name = value;
+                this.BaseConfig.Name = value;
                 this.NotifyPropertyChanged("Name");
             }
         }
@@ -73,12 +73,12 @@ namespace LobsterWpf
         {
             get
             {
-                return this.databaseConfig.Host;
+                return this.BaseConfig.Host;
             }
 
             set
             {
-                this.databaseConfig.Host = value;
+                this.BaseConfig.Host = value;
                 this.NotifyPropertyChanged("Host");
             }
         }
@@ -90,12 +90,12 @@ namespace LobsterWpf
         {
             get
             {
-                return this.databaseConfig.Port;
+                return this.BaseConfig.Port;
             }
 
             set
             {
-                this.databaseConfig.Port = value;
+                this.BaseConfig.Port = value;
                 this.NotifyPropertyChanged("Port");
             }
         }
@@ -107,12 +107,12 @@ namespace LobsterWpf
         {
             get
             {
-                return this.databaseConfig.SID;
+                return this.BaseConfig.SID;
             }
 
             set
             {
-                this.databaseConfig.SID = value;
+                this.BaseConfig.SID = value;
                 this.NotifyPropertyChanged("SID");
             }
         }
@@ -124,12 +124,12 @@ namespace LobsterWpf
         {
             get
             {
-                return this.databaseConfig.Username;
+                return this.BaseConfig.Username;
             }
 
             set
             {
-                this.databaseConfig.Username = value;
+                this.BaseConfig.Username = value;
                 this.NotifyPropertyChanged("Username");
             }
         }
@@ -141,12 +141,12 @@ namespace LobsterWpf
         {
             get
             {
-                return this.databaseConfig.Password;
+                return this.BaseConfig.Password;
             }
 
             set
             {
-                this.databaseConfig.Password = value;
+                this.BaseConfig.Password = value;
                 this.NotifyPropertyChanged("Password");
             }
         }
@@ -158,12 +158,12 @@ namespace LobsterWpf
         {
             get
             {
-                return this.databaseConfig.CodeSource;
+                return this.BaseConfig.CodeSource;
             }
 
             set
             {
-                this.databaseConfig.CodeSource = value;
+                this.BaseConfig.CodeSource = value;
                 this.NotifyPropertyChanged("CodeSource");
             }
         }
@@ -176,12 +176,12 @@ namespace LobsterWpf
         {
             get
             {
-                return this.databaseConfig.UsePooling;
+                return this.BaseConfig.UsePooling;
             }
 
             set
             {
-                this.databaseConfig.UsePooling = value;
+                this.BaseConfig.UsePooling = value;
                 this.NotifyPropertyChanged("UsePooling");
             }
         }
@@ -193,12 +193,12 @@ namespace LobsterWpf
         {
             get
             {
-                return this.databaseConfig.ClobTypeDir;
+                return this.BaseConfig.ClobTypeDir;
             }
 
             set
             {
-                this.databaseConfig.ClobTypeDir = value;
+                this.BaseConfig.ClobTypeDir = value;
                 this.NotifyPropertyChanged("ClobTypeDir");
             }
         }
@@ -210,12 +210,12 @@ namespace LobsterWpf
         {
             get
             {
-                return this.databaseConfig.FileLocation;
+                return this.BaseConfig.FileLocation;
             }
 
             set
             {
-                this.databaseConfig.FileLocation = value;
+                this.BaseConfig.FileLocation = value;
                 this.NotifyPropertyChanged("FileLocation");
             }
         }
@@ -227,7 +227,7 @@ namespace LobsterWpf
         {
             get
             {
-                return this.databaseConfig.IsValid;
+                return this.BaseConfig.IsValid;
             }
         }
 
@@ -238,7 +238,7 @@ namespace LobsterWpf
         /// <returns>True if the connection test was successful, otherwise false.</returns>
         public bool TestConnection(ref Exception ex)
         {
-            return Model.TestConnection(this.databaseConfig, ref ex);
+            return Model.TestConnection(this.BaseConfig, ref ex);
         }
 
         /// <summary>
@@ -278,7 +278,7 @@ namespace LobsterWpf
         /// <returns>True if the changes could be applied, otherwise false.</returns>
         public bool ApplyChanges(string initialDirectory)
         {
-            if (this.databaseConfig.FileLocation == null || !File.Exists(this.databaseConfig.FileLocation))
+            if (this.BaseConfig.FileLocation == null || !File.Exists(this.BaseConfig.FileLocation))
             {
                 CommonSaveFileDialog dlg = new CommonSaveFileDialog();
                 dlg.Filters.Add(new CommonFileDialogFilter("eXtensible Markup Language", "*.xml"));
@@ -298,7 +298,7 @@ namespace LobsterWpf
 
             try
             {
-                DatabaseConfig.SerialiseToFile(this.FileLocation, this.databaseConfig);
+                DatabaseConfig.SerialiseToFile(this.FileLocation, this.BaseConfig);
                 return true;
             }
             catch (IOException)
