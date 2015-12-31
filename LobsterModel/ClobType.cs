@@ -36,7 +36,7 @@ namespace LobsterModel
     /// ClobTypes are stored as Xml files which are deserialized into this structure.
     /// </summary>
     [XmlType("clobtype")]
-    public class ClobType : ICloneable
+    public class ClobType : SerializableObject, ICloneable
     {
         /// <summary>
         /// Gets or sets the display name for this ClobType. This value has no functional impact, 
@@ -127,9 +127,15 @@ namespace LobsterModel
             ClobType clobType;
             try
             {
-                clobType = Utils.DeserialiseXmlFileUsingSchema<ClobType>(fullpath, Settings.Default.ClobTypeSchemaFilename);
+                string schema = Settings.Default.ClobTypeSchemaFilename;
+                bool result = Utils.DeserialiseXmlFileUsingSchema(fullpath, schema, out clobType);
+
+                if (!result)
+                {
+                    clobType.Name = Path.GetFileNameWithoutExtension(Path.GetFileName(fullpath));
+                }
             }
-            catch (Exception e) when (e is FileNotFoundException || e is InvalidOperationException || e is XmlException || e is XmlSchemaValidationException || e is IOException)
+            catch (Exception e) when (e is FileNotFoundException || e is InvalidOperationException || e is XmlException || e is IOException)
             {
                 MessageLog.LogError("An error occurred when loading the ClobType " + fullpath + ": " + e);
                 return null;

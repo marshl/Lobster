@@ -33,7 +33,7 @@ namespace LobsterModel
     /// <summary>
     /// Used to store information about a database connection, loaded directly from an XML file.
     /// </summary>
-    public class DatabaseConfig : ICloneable
+    public class DatabaseConfig : SerializableObject, ICloneable
     {
         /// <summary>
         /// Gets or sets the name of the connection. This is for display purposes only.
@@ -117,18 +117,23 @@ namespace LobsterModel
         /// <returns>The new <see cref="DatabaseConnection"/>.</returns>
         public static DatabaseConfig LoadDatabaseConfig(string fullpath)
         {
-            MessageLog.LogInfo("Loading Database Config File " + fullpath);
+            MessageLog.LogInfo($"Loading Database Config File {fullpath}");
             DatabaseConfig config;
+            string schema = Settings.Default.DatabaseConfigSchemaFilename;
             try
             {
-                config = Utils.DeserialiseXmlFileUsingSchema<DatabaseConfig>(fullpath, Settings.Default.DatabaseConfigSchemaFilename);
+                bool result = Utils.DeserialiseXmlFileUsingSchema(fullpath, schema, out config);
+                if (!result)
+                {
+                    config.Name = Path.GetFileNameWithoutExtension(Path.GetFileName(fullpath));
+                }
             }
             catch (Exception e) when (e is FileNotFoundException || e is InvalidOperationException || e is XmlException || e is XmlSchemaValidationException || e is IOException)
             {
-                MessageLog.LogError("An error occurred when loading the ClobType " + fullpath + ": " + e);
+                MessageLog.LogError($"An error occurred when loading the ClobType {fullpath}: {e}");
                 return null;
             }
-            
+
             config.FileLocation = fullpath;
             return config;
         }

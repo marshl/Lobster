@@ -112,10 +112,11 @@ namespace LobsterModel
         /// <param name="xmlFilename">The location of the xml file to parse.</param>
         /// <param name="schemaFilename">The location of the schema file to validate the XML with.</param>
         /// <returns>A new object of type T if it passes validation.</returns>
-        public static T DeserialiseXmlFileUsingSchema<T>(string xmlFilename, string schemaFilename) where T : new()
+        public static bool DeserialiseXmlFileUsingSchema<T>(string xmlFilename, string schemaFilename, out T result) where T : SerializableObject, new()
         {
-            bool error = false;
+            T obj = new T();
             XmlReaderSettings readerSettings = null;
+            List<ValidationEventArgs> validationEvents = new List<ValidationEventArgs>();
             if (schemaFilename != null)
             {
                 readerSettings = new XmlReaderSettings();
@@ -128,7 +129,6 @@ namespace LobsterModel
                 readerSettings.ValidationEventHandler += new ValidationEventHandler(
                 (o, e) =>
                 {
-                    error = true;
                     if (e.Severity == XmlSeverityType.Warning)
                     {
                         MessageLog.LogWarning(e.Message);
@@ -137,10 +137,11 @@ namespace LobsterModel
                     {
                         MessageLog.LogError(e.Message);
                     }
+
+                    validationEvents.Add(e);
                 });
             }
 
-            T obj = new T();
             System.Xml.Serialization.XmlSerializer xmls = new System.Xml.Serialization.XmlSerializer(typeof(T));
 
             try
@@ -150,55 +151,18 @@ namespace LobsterModel
                     XmlReader xmlReader = XmlReader.Create(streamReader, readerSettings);
                     obj = (T)xmls.Deserialize(xmlReader);
                     xmlReader.Close();
+                    obj.ErrorList = validationEvents.Select(item => item.Message).ToList();
+                    result = obj;
+                    return true;
                 }
             }
             catch (InvalidOperationException ex)
             {
-                throw new XmlSchemaValidationException($"An exception occurred when deserialising {xmlFilename}", ex);
+                obj = new T();
+                obj.ErrorList.Add(ex.Message);
+                result = obj;
+                return false;
             }
-
-            if (error)
-            {
-                throw new XmlSchemaValidationException("One or more validation errors occurred. Check the log for more information.");
-            }
-
-            return obj;
-        }
-
-        /// <summary>
-        /// Parses a text file with the format key=value and adds the values to a map. 
-        /// </summary>
-        /// <param name="filename">The name of the file to parse.</param>
-        /// <param name="outMap">The map to populate with the contents of the file.</param>
-        public static void LoadFileIntoMap(string filename, out Dictionary<string, string> outMap)
-        {
-            outMap = new Dictionary<string, string>();
-            StreamReader reader = new StreamReader(filename);
-            string line;
-            while ((line = reader.ReadLine()) != null)
-            {
-                line = line.Trim();
-
-                // Trim anything after a # (comments)
-                if (line.Contains('#'))
-                {
-                    line = line.Substring(line.IndexOf('#'));
-                }
-
-                // Ignore lines that do not contains an =
-                if (line.Length == 0 || !line.Contains('='))
-                {
-                    continue;
-                }
-
-                string[] split = line.Split('=');
-                string extension = split[0];
-                string type = split[1];
-
-                outMap.Add(extension, type);
-            }
-
-            reader.Close();
         }
 
         /// <summary>

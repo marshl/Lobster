@@ -65,7 +65,7 @@ namespace LobsterModel
             this.Config = config;
 
             this.EventListener = eventListener;
-            this.MimeTypeList = Utils.DeserialiseXmlFileUsingSchema<MimeTypeList>("LobsterSettings/MimeTypes.xml", null);
+            bool result = Utils.DeserialiseXmlFileUsingSchema<MimeTypeList>("LobsterSettings/MimeTypes.xml", null, out this.mimeTypeList);
 
             this.FileBackupLog = new BackupLog();
 
@@ -88,7 +88,19 @@ namespace LobsterModel
         /// <summary>
         /// Gets the list of mime types that are used to translate from file names to database mnemonics and vice-sersa.
         /// </summary>
-        public MimeTypeList MimeTypeList { get; }
+        /// 
+        private MimeTypeList mimeTypeList;
+        public MimeTypeList MimeTypeList
+        {
+            get
+            {
+                return this.mimeTypeList;
+            }
+            set
+            {
+                this.mimeTypeList = value;
+            }
+        }
 
         /// <summary>
         /// Gets the list of temporary files that have been downloaded so far.
@@ -153,24 +165,14 @@ namespace LobsterModel
                 return;
             }
 
-            foreach (FileInfo file in dirInfo.GetFiles("*.xml"))
+            List<ClobType> clobTypes = ClobType.GetClobTypeList(this.Config.ClobTypeDir);
+
+            foreach (ClobType clobType in clobTypes)
             {
-                try
-                {
-                    MessageLog.LogInfo("Loading ClobType file " + file.FullName);
-                    ClobType clobType = Utils.DeserialiseXmlFileUsingSchema<ClobType>(file.FullName, Settings.Default.ClobTypeSchemaFilename);
+                clobType.Initialise();
 
-                    clobType.Initialise();
-                    clobType.FilePath = file.FullName;
-
-                    ClobDirectory clobDir = new ClobDirectory(clobType);
-                    this.ClobDirectoryList.Add(clobDir);
-                }
-                catch (Exception e) when (e is InvalidOperationException || e is XmlException || e is XmlSchemaValidationException || e is IOException)
-                {
-                    errors.Add(new ClobTypeLoadException("ClobType load error", e));
-                    MessageLog.LogError($"An error occurred when loading the ClobType {file.Name} {e}");
-                }
+                ClobDirectory clobDir = new ClobDirectory(clobType);
+                this.ClobDirectoryList.Add(clobDir);
             }
         }
 

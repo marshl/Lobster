@@ -60,6 +60,7 @@
     <Compile Include="FileUpdateException.cs" />
     <Compile Include="MimeTypeNotFoundException.cs" />
     <Compile Include="Model.cs" />
+    <Compile Include="SerializableObject.cs" />
     <Compile Include="SetConnectionException.cs" />
     <Compile Include="SettingsView.cs" />
     <Compile Include="Utils.cs" />

@@ -221,6 +221,17 @@ namespace LobsterWpf
         }
 
         /// <summary>
+        /// Gets a value indicating whether the xml the config was loaded from was valid.
+        /// </summary>
+        public bool IsValid
+        {
+            get
+            {
+                return this.databaseConfig.IsValid;
+            }
+        }
+
+        /// <summary>
         /// Tests the connection.
         /// </summary>
         /// <param name="ex">The exception tha was raised during connection testing, if any.</param>

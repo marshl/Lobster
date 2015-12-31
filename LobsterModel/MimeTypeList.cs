@@ -29,7 +29,7 @@ namespace LobsterModel
     /// <summary>
     /// Deserialised from a file to store metedata about mime types.
     /// </summary>
-    public class MimeTypeList
+    public class MimeTypeList : SerializableObject
     {
         /// <summary>
         /// Gets or sets the list of different mime types.
