@@ -111,7 +111,8 @@ namespace LobsterModel
         /// <typeparam name="T">The type of the object to parse the file as, and the type returned.</typeparam>
         /// <param name="xmlFilename">The location of the xml file to parse.</param>
         /// <param name="schemaFilename">The location of the schema file to validate the XML with.</param>
-        /// <returns>A new object of type T if it passes validation.</returns>
+        /// <param name="result">A new object of type T if it passes validation.</param>
+        /// <returns>A value indicating whether the file deserialised successfully, otherwise false.</returns>
         public static bool DeserialiseXmlFileUsingSchema<T>(string xmlFilename, string schemaFilename, out T result) where T : SerializableObject, new()
         {
             T obj = new T();

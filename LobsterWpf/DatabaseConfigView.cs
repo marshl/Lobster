@@ -40,14 +40,14 @@ namespace LobsterWpf
         }
 
         /// <summary>
-        /// The model object.
-        /// </summary>
-        public DatabaseConfig BaseConfig { get; }
-
-        /// <summary>
         /// The event to be raised when a property is changed.
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// Gets the underlying model object.
+        /// </summary>
+        public DatabaseConfig BaseConfig { get; }
 
         /// <summary>
         /// Gets or sets the name of the connection. This is for display purposes only.

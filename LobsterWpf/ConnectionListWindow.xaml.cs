@@ -231,7 +231,7 @@ namespace LobsterWpf
         /// </summary>
         private void LoadDatabaseConnections()
         {
-            List<DatabaseConfigView> configViews = (DatabaseConfig.GetConfigList().Select(item => new DatabaseConfigView(item)).ToList());
+            List<DatabaseConfigView> configViews = DatabaseConfig.GetConfigList().Select(item => new DatabaseConfigView(item)).ToList();
             this.DatabaseConfigList = new ObservableCollection<DatabaseConfigView>(configViews);
         }
     }

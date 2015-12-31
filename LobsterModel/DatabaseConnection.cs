@@ -56,6 +56,11 @@ namespace LobsterModel
         private object fileEventProcessingSemaphore = new object();
 
         /// <summary>
+        /// The internal mime type list.
+        /// </summary>
+        private MimeTypeList mimeTypeList;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseConnection"/> class.
         /// </summary>
         /// <param name="config">The configuration file to base this connection off.</param>
@@ -86,16 +91,15 @@ namespace LobsterModel
         public IModelEventListener EventListener { get; private set; }
 
         /// <summary>
-        /// Gets the list of mime types that are used to translate from file names to database mnemonics and vice-sersa.
+        /// Gets o sets the list of mime types that are used to translate from file names to database mnemonics and vice-sersa.
         /// </summary>
-        /// 
-        private MimeTypeList mimeTypeList;
         public MimeTypeList MimeTypeList
         {
             get
             {
                 return this.mimeTypeList;
             }
+
             set
             {
                 this.mimeTypeList = value;
