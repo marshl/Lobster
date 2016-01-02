@@ -74,7 +74,15 @@ namespace LobsterModel
 
             this.FileBackupLog = new BackupLog();
 
-            this.fileWatcher = new FileSystemWatcher(this.Config.CodeSource);
+            try
+            {
+                this.fileWatcher = new FileSystemWatcher(this.Config.CodeSource);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new SetConnectionException("An error occurred when creating the FileSystemWatcher", ex);
+            }
+
             this.fileWatcher.IncludeSubdirectories = true;
             this.fileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.CreationTime | NotifyFilters.Attributes;
             this.fileWatcher.Changed += new FileSystemEventHandler(this.OnFileChangeEvent);
