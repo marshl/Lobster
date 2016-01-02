@@ -50,6 +50,16 @@ namespace LobsterWpf
         private IModelEventListener eventListener;
 
         /// <summary>
+        /// Whether the user is currently editing a config file or not.
+        /// </summary>
+        private bool isEditingConfig = false;
+
+        /// <summary>
+        /// Whether the config that the user is currently editing is new or not.
+        /// </summary>
+        private bool isEditingNewConfig = false;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ConnectionListWindow"/> class.
         /// </summary>
         /// <param name="listener">The event listener sed to create new connections.</param>
@@ -62,10 +72,14 @@ namespace LobsterWpf
             this.eventListener = listener;
         }
 
-        private bool isEditingConfig = false;
+        /// <summary>
+        /// The event for when a property is changed.
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
 
-        private bool isEdditingNewConfig = false;
-
+        /// <summary>
+        /// Gets or sets a value indicating whether the user is currently editing a config file or not.
+        /// </summary>
         public bool IsEditingConfig
         {
             get
@@ -79,7 +93,10 @@ namespace LobsterWpf
                 this.NotifyPropertyChanged("IsEditingConfig");
             }
         }
-        
+
+        /// <summary>
+        /// Gets a value indicating whether the edit button should be enabled or not.
+        /// </summary>
         public bool IsEditButtonEnabled
         {
             get
@@ -88,6 +105,9 @@ namespace LobsterWpf
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the config list is accessible to the user or not.
+        /// </summary>
         public bool IsListAccessible
         {
             get
@@ -96,6 +116,9 @@ namespace LobsterWpf
             }
         }
 
+        /// <summary>
+        /// Gets the <see cref="DatabaseConfigView"/> that is currently selected in the config list.
+        /// </summary>
         public DatabaseConfigView CurrentConfigView
         {
             get
@@ -103,11 +126,6 @@ namespace LobsterWpf
                 return this.connectionListBox.SelectedItem as DatabaseConfigView;
             }
         }
-
-        /// <summary>
-        /// The event for when a property is changed.
-        /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
         /// Gets the connection that was made by the last connection call (acce
@@ -174,16 +192,23 @@ namespace LobsterWpf
             }
         }
 
+        /// <summary>
+        /// Displays a prompt to the user, confirming that they want to cancel changes to the currently selected database config.
+        /// </summary>
+        /// <returns>True if the user is Ok with cancelling the changes, otherwise false.</returns>
         private bool ConfirmCancelChanges()
         {
-            MessageBoxResult result = MessageBox.Show("Cancel unsaved changes?", "Cancel", MessageBoxButton.OKCancel);
+            MessageBoxResult result = MessageBox.Show(
+                $"Are you sure you want to cancel any unsaved changes to {this.CurrentConfigView.Name}?",
+                "Cancel",
+                MessageBoxButton.OKCancel);
 
             if (result == MessageBoxResult.OK)
             {
-                if (this.isEdditingNewConfig)
+                if (this.isEditingNewConfig)
                 {
                     this.databaseConfigList.Remove(this.CurrentConfigView);
-                    this.isEdditingNewConfig = false;
+                    this.isEditingNewConfig = false;
                 }
             }
 
@@ -256,7 +281,7 @@ namespace LobsterWpf
             this.databaseConfigList.Add(configView);
             this.connectionListBox.SelectedItem = configView;
             this.IsEditingConfig = true;
-            this.isEdditingNewConfig = true;
+            this.isEditingNewConfig = true;
         }
 
         /// <summary>
@@ -316,11 +341,16 @@ namespace LobsterWpf
             this.Focus();
         }
 
+        /// <summary>
+        /// The event that is called when the Cancel button for the config settings is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments</param>
         private void CancelEditButton_Click(object sender, RoutedEventArgs e)
         {
             if (this.IsEditingConfig)
             {
-                if (!ConfirmCancelChanges())
+                if (!this.ConfirmCancelChanges())
                 {
                     return;
                 }
@@ -333,6 +363,11 @@ namespace LobsterWpf
             this.connectionListBox.SelectedIndex = selectedIndex;
         }
 
+        /// <summary>
+        /// The event that is called when the Close button is pressed, prompting the user for unsaved changes, then clsoing the window.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
             if (this.IsEditingConfig && !this.ConfirmCancelChanges())
@@ -343,22 +378,36 @@ namespace LobsterWpf
             this.Close();
         }
 
+        /// <summary>
+        /// The event that is called when the Save button for the config options panel is clicked, saving changes to the config.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
         private void SaveEditButton_Click(object sender, RoutedEventArgs e)
         {
-            Debug.Assert(this.IsEditingConfig);
+            Debug.Assert(this.IsEditingConfig, "The save button should be usable while not in edit mode");
             this.IsEditingConfig = false;
             bool result = this.CurrentConfigView.ApplyChanges(this.ConnectionDirectory);
         }
 
+        /// <summary>
+        /// The event that is called when the Edit button is clicked for the config options panel, 
+        /// starting an edit to the currently selected config.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
         private void StartEditButton_Click(object sender, RoutedEventArgs e)
         {
-            Debug.Assert(this.IsEditButtonEnabled);
-
             this.IsEditingConfig = true;
             this.NotifyPropertyChanged("IsEditButtonEnabled");
         }
 
-        private void connectionListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        /// <summary>
+        /// The event that is called when the selected item of the connection list box changes.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void ConnectionListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (this.IsEditingConfig)
             {

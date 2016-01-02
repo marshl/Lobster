@@ -30,7 +30,7 @@
         <RowDefinition Height="*"/>
         <RowDefinition Height="Auto"/>
       </Grid.RowDefinitions>
-      <ListBox Grid.Column="0" Grid.Row="0" Name="connectionListBox" ItemsSource="{Binding DatabaseConfigList}" SelectionChanged="connectionListBox_SelectionChanged" IsEnabled="{Binding Path=IsEditingConfig, Converter={StaticResource inverseBooleanConverter}}">
+      <ListBox Grid.Column="0" Grid.Row="0" Name="connectionListBox" ItemsSource="{Binding DatabaseConfigList}" SelectionChanged="ConnectionListBox_SelectionChanged" IsEnabled="{Binding Path=IsEditingConfig, Converter={StaticResource inverseBooleanConverter}}">
         <ListBox.ItemTemplate>
           <DataTemplate DataType="DatabaseConfig">
             <DataTemplate.Resources>
