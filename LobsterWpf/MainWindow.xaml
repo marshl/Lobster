@@ -37,6 +37,15 @@
       <ListBox Name="clobTypeListBox" Grid.Column="0" Grid.Row="1" ItemsSource="{Binding ClobDirectories}" SelectionChanged="ClobTypeListBox_SelectionChanged">
         <ListBox.ItemTemplate>
           <DataTemplate DataType="ClobDirectoryView">
+            <DataTemplate.Resources>
+              <Style TargetType="{x:Type TextBlock}">
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding DirectoryExists}" Value="False">
+                    <Setter Property="Foreground" Value="Red"/>
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </DataTemplate.Resources>
             <StackPanel>
               <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
               <TextBlock Text="{Binding Directory}" FontStyle="Italic"/>

@@ -47,7 +47,7 @@ namespace LobsterWpf
 
             foreach (ClobDirectory clobDir in con.ClobDirectoryList)
             {
-                this.ClobDirectories.Add(new ClobDirectoryView(clobDir));
+                this.ClobDirectories.Add(new ClobDirectoryView(this.Connection, clobDir));
             }
         }
 

@@ -58,7 +58,7 @@ namespace LobsterModel
         /// <param name="workingFileList">The list of files to populate.</param>
         public void GetWorkingFiles(DatabaseConnection connection, ref List<string> workingFileList)
         {
-            string directoryPath = Path.Combine(connection.Config.CodeSource, this.ClobType.Directory);
+            string directoryPath = this.GetFullPath(connection);
             string[] files = Directory.GetFiles(directoryPath, ".", SearchOption.AllDirectories);
             workingFileList.AddRange(files);
         }

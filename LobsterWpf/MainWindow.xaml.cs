@@ -209,9 +209,9 @@ namespace LobsterWpf
                 return;
             }
 
-            ClobDirectory clobDir = this.connectionView.Connection.ClobDirectoryList[this.clobTypeListBox.SelectedIndex];
+            ClobDirectoryView clobDirView = (ClobDirectoryView)this.clobTypeListBox.SelectedItem;
 
-            this.connectionView.PopulateFileTreeForClobDirectory(clobDir);
+            this.connectionView.PopulateFileTreeForClobDirectory(clobDirView.BaseClobDirectory);
             this.localFileTreeView.ItemsSource = this.connectionView.RootFile?.Children;
         }
 

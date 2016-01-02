@@ -75,10 +75,10 @@
     </Grid>
     <GroupBox Grid.Column="1" Grid.Row="1" DataContext="{Binding ElementName=connectionListBox, Path=SelectedItem}" Margin="5">
       <GroupBox.Header>
-        <TextBlock Text="{Binding Path=Name, FallbackValue='Clob Type'}"/>
+        <TextBlock Text="{Binding Path=Name, FallbackValue='Database Connection'}"/>
       </GroupBox.Header>
       <StackPanel Orientation="Vertical">
-        <Grid Margin="0,5,0,0" IsEnabled="{Binding Path=IsEditingConfig, RelativeSource={RelativeSource AncestorType=Window}}">
+        <Grid IsEnabled="{Binding Path=IsEditingConfig, RelativeSource={RelativeSource AncestorType=Window}}">
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>

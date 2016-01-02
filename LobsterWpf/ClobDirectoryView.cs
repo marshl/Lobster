@@ -16,6 +16,7 @@
 //-----------------------------------------------------------------------
 namespace LobsterWpf
 {
+    using System.IO;
     using LobsterModel;
 
     /// <summary>
@@ -27,15 +28,16 @@ namespace LobsterWpf
         /// Initializes a new instance of the <see cref="ClobDirectoryView"/> class.
         /// </summary>
         /// <param name="clobDirectory">The ClobDirectory to use as the model.</param>
-        public ClobDirectoryView(ClobDirectory clobDirectory)
+        public ClobDirectoryView(DatabaseConnection connection, ClobDirectory clobDirectory)
         {
-            this.ClobDir = clobDirectory;
+            this.BaseClobDirectory = clobDirectory;
+            this.DirectoryExists = System.IO.Directory.Exists(clobDirectory.GetFullPath(connection));
         }
 
         /// <summary>
         /// Gets the base clob directory for this view.
         /// </summary>
-        public ClobDirectory ClobDir { get; }
+        public ClobDirectory BaseClobDirectory { get; }
 
         /// <summary>
         /// Gets the name of the clob type of the clob directory.
@@ -44,7 +46,7 @@ namespace LobsterWpf
         {
             get
             {
-                return this.ClobDir.ClobType.Name;
+                return this.BaseClobDirectory.ClobType.Name;
             }
         }
 
@@ -55,8 +57,10 @@ namespace LobsterWpf
         {
             get
             {
-                return this.ClobDir.ClobType.Directory;
+                return this.BaseClobDirectory.ClobType.Directory;
             }
         }
+
+        public bool DirectoryExists { get; }
     }
 }
