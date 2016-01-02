@@ -4,73 +4,150 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LobsterWpf"
+        xmlns:l="clr-namespace:LobsterWpf"
         mc:Ignorable="d"
-        Title="Connections" Height="500" Width="500" Icon="Resources/Images/cartoon-lobster.ico" ShowInTaskbar="False" Background="{StaticResource BackgroundKey}">
+        Title="Connections" Height="600" Width="700" Icon="Resources/Images/cartoon-lobster.ico" ShowInTaskbar="False" Background="{StaticResource BackgroundKey}">
+  <Window.Resources>
+    <l:InverseBooleanConverter x:Key="inverseBooleanConverter" />
+  </Window.Resources>
   <Grid>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition/>
+      <ColumnDefinition/>
+    </Grid.ColumnDefinitions>
     <Grid.RowDefinitions>
-      <RowDefinition Height="35"/>
-      <RowDefinition Height="35"/>
+      <RowDefinition Height="Auto"/>
       <RowDefinition/>
-      <RowDefinition Height="35"/>
+      <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
-    <DockPanel Grid.Row="0" VerticalAlignment="Center">
+    <DockPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Center">
       <Label DockPanel.Dock="Left" VerticalAlignment="Center">Directory:</Label>
-      <Label x:Name="directoryLabel" VerticalAlignment="Center" Content="{Binding Path=ConnectionDirectory, FallbackValue='No directory selected'}" HorizontalAlignment="Left" Width="Auto"/>
-
+      <Label x:Name="directoryLabel" VerticalAlignment="Center" Content="{Binding Path=ConnectionDirectory, FallbackValue='No directory selected'}" HorizontalAlignment="Left"/>
+      <Button x:Name="changeDirectoryButton" Grid.Row="1"  Content="Change Directory" HorizontalAlignment="Right" VerticalAlignment="Center" Click="ChangeDirectoryButton_Click" Margin="5"/>
     </DockPanel>
-    <Button x:Name="changeDirectoryButton" Grid.Row="1"  Content="Change Directory" HorizontalAlignment="Left" VerticalAlignment="Center" Click="ChangeDirectoryButton_Click" Margin="5"/>
-    <ListBox Grid.Row="2" Name="connectionListBox" ItemsSource="{Binding DatabaseConfigList}">
-      <ListBox.ItemTemplate>
-        
-        <DataTemplate DataType="DatabaseConfig">
-          <DataTemplate.Resources>
-            <Style TargetType="{x:Type TextBlock}">
-              <Style.Triggers>
-                <DataTrigger Binding="{Binding IsValid}" Value="False">
-                  <Setter Property="Foreground" Value="Red"/>
-                </DataTrigger>
-              </Style.Triggers>
-            </Style>
-          </DataTemplate.Resources>
-          <StackPanel>
-            <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
-            <TextBlock Text="{Binding CodeSource}" FontStyle="Italic"/>
-            <TextBlock>
-              <TextBlock.Text>
-                <MultiBinding StringFormat="Host: {0}:{1}">
-                  <Binding Path="Host" />
-                  <Binding Path="Port" />
-                </MultiBinding>
-              </TextBlock.Text>
-            </TextBlock>
-            <TextBlock>
-              <TextBlock.Text>
-                <MultiBinding StringFormat="SID: {0}">
-                  <Binding Path="SID" />
-                </MultiBinding>
-              </TextBlock.Text>
-            </TextBlock>
-          </StackPanel>
-        </DataTemplate>
-      </ListBox.ItemTemplate>
-      <ListBox.ItemContainerStyle>
-        <Style TargetType="ListBoxItem">
-          <EventSetter Event="MouseDoubleClick" Handler="HandleDoubleClick"/>
-        </Style>
-      </ListBox.ItemContainerStyle>
-    </ListBox>
-    <Grid Grid.Row="3">
-      <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="*"/>
-        <ColumnDefinition Width="Auto"/>
-      </Grid.ColumnDefinitions>
-      <Button Name="newConnectionButton" Content="New Connection" HorizontalAlignment="Left" Margin="5" Grid.Column="0" Click="NewConnectionButton_Click"/>
-      <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-        <Button x:Name="connectButton" Content="Connect" HorizontalAlignment="Right" Margin="5" Grid.Row="3" Width="75" Click="ConnectButton_Click"/>
-        <Button x:Name="editConnectionButton" Content="Edit" HorizontalAlignment="Right" Margin="5" Grid.Row="3" Width="75" Click="EditConnectionButton_Click"/>
-        <Button x:Name="cancelButton" Content="Cancel" HorizontalAlignment="Right" Margin="5" Width="75" Click="CancelButton_Click"/>
-      </StackPanel>
-    </Grid>
+    <Grid Grid.Row="1" Grid.Column="0">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="*"/>
+        <RowDefinition Height="Auto"/>
+      </Grid.RowDefinitions>
+      <ListBox Grid.Column="0" Grid.Row="0" Name="connectionListBox" ItemsSource="{Binding DatabaseConfigList}" SelectionChanged="connectionListBox_SelectionChanged" IsEnabled="{Binding Path=IsEditingConfig, Converter={StaticResource inverseBooleanConverter}}">
+        <ListBox.ItemTemplate>
+          <DataTemplate DataType="DatabaseConfig">
+            <DataTemplate.Resources>
+              <Style TargetType="{x:Type TextBlock}">
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding IsValid}" Value="False">
+                    <Setter Property="Foreground" Value="Red"/>
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </DataTemplate.Resources>
+            <StackPanel>
+              <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+              <TextBlock Text="{Binding CodeSource}" FontStyle="Italic"/>
+              <TextBlock>
+                <TextBlock.Text>
+                  <MultiBinding StringFormat="Host: {0}:{1}">
+                    <Binding Path="Host" />
+                    <Binding Path="Port" />
+                  </MultiBinding>
+                </TextBlock.Text>
+              </TextBlock>
+              <TextBlock>
+                <TextBlock.Text>
+                  <MultiBinding StringFormat="SID: {0}">
+                    <Binding Path="SID" />
+                  </MultiBinding>
+                </TextBlock.Text>
+              </TextBlock>
+            </StackPanel>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+        <ListBox.ItemContainerStyle>
+          <Style TargetType="ListBoxItem">
+            <EventSetter Event="MouseDoubleClick" Handler="HandleDoubleClick"/>
+          </Style>
+        </ListBox.ItemContainerStyle>
+      </ListBox>
+      <Button Name="newConnectionButton" Content="New Connection" HorizontalAlignment="Left" Margin="5" Grid.Column="0" Grid.Row="1" Click="NewConnectionButton_Click"/>
 
+      <Button x:Name="connectButton" Content="Connect" HorizontalAlignment="Right" Margin="5" Grid.Row="3" Width="75" Click="ConnectButton_Click" IsEnabled="{Binding ElementName=connectionListBox, Path=SelectedItems.Count}"/>
+    </Grid>
+    <GroupBox Grid.Column="1" Grid.Row="1" DataContext="{Binding ElementName=connectionListBox, Path=SelectedItem}" Margin="5">
+      <GroupBox.Header>
+        <TextBlock Text="{Binding Path=Name, FallbackValue='Clob Type'}"/>
+      </GroupBox.Header>
+      <StackPanel Orientation="Vertical">
+        <Grid Margin="0,5,0,0" IsEnabled="{Binding Path=IsEditingConfig, RelativeSource={RelativeSource AncestorType=Window}}">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+          </Grid.ColumnDefinitions>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+          </Grid.RowDefinitions>
+          <Label Grid.Row="0" Grid.Column="0" Margin="3">Name:</Label>
+          <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Path=Name}" Margin="3"/>
+          <Label Grid.Row="1" Grid.Column="0" Margin="3">Host:</Label>
+          <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Path=Host}" Margin="3"/>
+          <Label Grid.Row="2" Grid.Column="0" Margin="3">Port:</Label>
+          <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Path=Port}" Margin="3"/>
+          <Label Grid.Row="3" Grid.Column="0" Margin="3">SID:</Label>
+          <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Path=SID}" Margin="3"/>
+          <Label Grid.Row="4" Grid.Column="0" Margin="3">Username:</Label>
+          <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Path=Username}" Margin="3"/>
+          <Label Grid.Row="5" Grid.Column="0" Margin="3">Password:</Label>
+          <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding Path=Password}" Margin="3"/>
+          <Label Grid.Row="6" Grid.Column="0" Margin="3">Pooling:</Label>
+          <Grid Grid.Row="6" Grid.Column="1" Margin="3">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*"/>
+              <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <CheckBox Grid.Column="0" VerticalAlignment="Center" IsChecked="{Binding Path=UsePooling}"/>
+            <Button Grid.Column="1" Click="TestConnectionButton_Click" Width="125">Test Connection</Button>
+          </Grid>
+          <Label Grid.Row="7" Grid.Column="0" Margin="3">CodeSource Directory:</Label>
+          <Grid Grid.Row="7" Grid.Column="1" Margin="3">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*"/>
+              <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Width="Auto" Grid.Column="0" Text="{Binding Path=CodeSource}"/>
+            <Button Grid.Column="1" Click="CodeSourceButton_Click" Margin="5,0,0,0">. . .</Button>
+          </Grid>
+          <Label Grid.Row="8" Grid.Column="0" Margin="3">ClobType Directory:</Label>
+          <Grid Grid.Row="8" Grid.Column="1" Margin="3">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*"/>
+              <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Width="Auto" Grid.Column="0" Text="{Binding Path=ClobTypeDir}"/>
+            <Button Grid.Column="1" Click="ClobTypeButton_Click" Margin="5,0,0,0">. . .</Button>
+          </Grid>
+          <StackPanel Grid.Row="9" Grid.Column="1" Margin="3">
+            <Button Width="100" HorizontalAlignment="Right" Click="EditClobTypeButton_Click">Clob Types</Button>
+          </StackPanel>
+        </Grid>
+        <StackPanel Grid.Row="10" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5">
+          <Button Margin="5" Width="75" Height="20" Click="StartEditButton_Click" IsEnabled="{Binding Path=IsEditButtonEnabled, RelativeSource={RelativeSource AncestorType=Window}}">Edit</Button>
+          <Button Margin="5" Width="75" Height="20" Click="SaveEditButton_Click" IsEnabled="{Binding Path=IsEditingConfig, RelativeSource={RelativeSource AncestorType=Window}}">Save</Button>
+          <Button Margin="5" Width="75" Height="20" Click="CancelEditButton_Click" IsEnabled="{Binding Path=IsEditingConfig, RelativeSource={RelativeSource AncestorType=Window}}">Cancel</Button>
+        </StackPanel>
+      </StackPanel>
+    </GroupBox>
+    <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
+      <Button x:Name="cancelButton" Content="Close" HorizontalAlignment="Right" Margin="5" Width="75" Click="CloseButton_Click"/>
+    </Grid>
   </Grid>
 </Window>

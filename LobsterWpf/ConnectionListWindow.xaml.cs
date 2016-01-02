@@ -22,9 +22,11 @@
 //-----------------------------------------------------------------------
 namespace LobsterWpf
 {
+    using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.ComponentModel;
+    using System.Diagnostics;
     using System.Linq;
     using System.Windows;
     using System.Windows.Controls;
@@ -58,6 +60,48 @@ namespace LobsterWpf
             this.LoadDatabaseConnections();
             this.DataContext = this;
             this.eventListener = listener;
+        }
+
+        private bool isEditingConfig = false;
+
+        private bool isEdditingNewConfig = false;
+
+        public bool IsEditingConfig
+        {
+            get
+            {
+                return this.isEditingConfig;
+            }
+
+            set
+            {
+                this.isEditingConfig = value;
+                this.NotifyPropertyChanged("IsEditingConfig");
+            }
+        }
+        
+        public bool IsEditButtonEnabled
+        {
+            get
+            {
+                return this.connectionListBox.SelectedItem != null && !this.IsEditingConfig;
+            }
+        }
+
+        public bool IsListAccessible
+        {
+            get
+            {
+                return !this.IsEditingConfig;
+            }
+        }
+
+        public DatabaseConfigView CurrentConfigView
+        {
+            get
+            {
+                return this.connectionListBox.SelectedItem as DatabaseConfigView;
+            }
         }
 
         /// <summary>
@@ -111,8 +155,8 @@ namespace LobsterWpf
         /// <param name="e">The event arguments.</param>
         protected void HandleDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            DatabaseConfig config = ((ListBoxItem)sender).Content as DatabaseConfig;
-            this.TryConnectWithConfig(config);
+            DatabaseConfigView configView = ((ListBoxItem)sender).Content as DatabaseConfigView;
+            this.TryConnectWithConfig(configView.BaseConfig);
         }
 
         /// <summary>
@@ -130,14 +174,20 @@ namespace LobsterWpf
             }
         }
 
-        /// <summary>
-        /// The event for when the cancel button is clicked.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments.</param>
-        private void CancelButton_Click(object sender, RoutedEventArgs e)
+        private bool ConfirmCancelChanges()
         {
-            this.Close();
+            MessageBoxResult result = MessageBox.Show("Cancel unsaved changes?", "Cancel", MessageBoxButton.OKCancel);
+
+            if (result == MessageBoxResult.OK)
+            {
+                if (this.isEdditingNewConfig)
+                {
+                    this.databaseConfigList.Remove(this.CurrentConfigView);
+                    this.isEdditingNewConfig = false;
+                }
+            }
+
+            return result == MessageBoxResult.OK;
         }
 
         /// <summary>
@@ -202,28 +252,11 @@ namespace LobsterWpf
         {
             DatabaseConfig config = new DatabaseConfig();
             DatabaseConfigView configView = new DatabaseConfigView(config);
-            EditConnectionWindow ecw = new EditConnectionWindow(configView, this.ConnectionDirectory);
-            ecw.Owner = this;
-            bool? result = ecw.ShowDialog();
-        }
 
-        /// <summary>
-        /// The event for when the edit connection button is clicked.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments.</param>
-        private void EditConnectionButton_Click(object sender, RoutedEventArgs e)
-        {
-            DatabaseConfigView configView = (DatabaseConfigView)this.connectionListBox.SelectedItem;
-            if (configView == null)
-            {
-                return;
-            }
-
-            EditConnectionWindow ecw = new EditConnectionWindow(configView, this.ConnectionDirectory);
-            ecw.Owner = this;
-            bool? result = ecw.ShowDialog();
-            this.LoadDatabaseConnections();
+            this.databaseConfigList.Add(configView);
+            this.connectionListBox.SelectedItem = configView;
+            this.IsEditingConfig = true;
+            this.isEdditingNewConfig = true;
         }
 
         /// <summary>
@@ -233,6 +266,107 @@ namespace LobsterWpf
         {
             List<DatabaseConfigView> configViews = DatabaseConfig.GetConfigList().Select(item => new DatabaseConfigView(item)).ToList();
             this.DatabaseConfigList = new ObservableCollection<DatabaseConfigView>(configViews);
+        }
+
+        /// <summary>
+        /// The event that is called when the test connection button is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void TestConnectionButton_Click(object sender, RoutedEventArgs e)
+        {
+            Exception ex = null;
+            bool result = this.CurrentConfigView.TestConnection(ref ex);
+            string message = result ? "Connection test successful" : "Connection test unsuccessful.\n" + ex;
+            MessageBox.Show(message);
+        }
+
+        /// <summary>
+        /// The event that is called when the codesource button is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void CodeSourceButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.CurrentConfigView.SelectCodeSourceDirectory();
+            this.Focus();
+        }
+
+        /// <summary>
+        /// The event that is called when the clobtype button is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void ClobTypeButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.CurrentConfigView.SelectClobTypeDirectory();
+            this.Focus();
+        }
+
+        /// <summary>
+        /// The event that is called when the edit clob type button is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void EditClobTypeButton_Click(object sender, RoutedEventArgs e)
+        {
+            ClobTypeListWindow window = new ClobTypeListWindow(this.CurrentConfigView.ClobTypeDir);
+            window.Owner = this;
+            bool? result = window.ShowDialog();
+            this.Focus();
+        }
+
+        private void CancelEditButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.IsEditingConfig)
+            {
+                if (!ConfirmCancelChanges())
+                {
+                    return;
+                }
+            }
+
+            this.IsEditingConfig = false;
+            this.NotifyPropertyChanged("IsEditButtonEnabled");
+            int selectedIndex = this.connectionListBox.SelectedIndex;
+            this.LoadDatabaseConnections();
+            this.connectionListBox.SelectedIndex = selectedIndex;
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.IsEditingConfig && !this.ConfirmCancelChanges())
+            {
+                return;
+            }
+
+            this.Close();
+        }
+
+        private void SaveEditButton_Click(object sender, RoutedEventArgs e)
+        {
+            Debug.Assert(this.IsEditingConfig);
+            this.IsEditingConfig = false;
+            bool result = this.CurrentConfigView.ApplyChanges(this.ConnectionDirectory);
+        }
+
+        private void StartEditButton_Click(object sender, RoutedEventArgs e)
+        {
+            Debug.Assert(this.IsEditButtonEnabled);
+
+            this.IsEditingConfig = true;
+            this.NotifyPropertyChanged("IsEditButtonEnabled");
+        }
+
+        private void connectionListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (this.IsEditingConfig)
+            {
+                e.Handled = true;
+                return;
+            }
+
+            this.NotifyPropertyChanged("IsEditButtonEnabled");
         }
     }
 }

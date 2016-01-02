@@ -131,6 +131,7 @@
     <Compile Include="EditTableWindow.xaml.cs">
       <DependentUpon>EditTableWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="InverseBooleanConverter.cs" />
     <Compile Include="LocalFileView.cs" />
     <Compile Include="SettingsView.cs" />
     <Compile Include="SettingsWindow.xaml.cs">
