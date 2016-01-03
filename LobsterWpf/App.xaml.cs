@@ -37,7 +37,7 @@ namespace LobsterWpf
         /// The message log for the duration of this app.
         /// </summary>
         private MessageLog log;
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="App"/> class.
         /// </summary>

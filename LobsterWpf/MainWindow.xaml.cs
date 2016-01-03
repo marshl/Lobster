@@ -171,6 +171,13 @@ namespace LobsterWpf
         /// <param name="e">The event arguments.</param>
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            bool result = GitHubUpdater.RunUpdateCheck("marshl", "lobster");
+            if ( result )
+            {
+                this.Close();
+                return;
+            }
+
             this.OpenConnectionDialog();
         }
 
