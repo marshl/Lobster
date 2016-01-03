@@ -128,8 +128,8 @@ if not errorlevel 1 (
     goto :loop
 )
 
-xcopy /s/e/y {source} {destination}
-call {destination}/Lobster.exe
+xcopy /s/e/y ""{source}"" ""{destination}""
+call ""{destination}/Lobster.exe""
 ";
 
             using (StreamWriter stream = new StreamWriter(filepath))
