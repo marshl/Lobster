@@ -1,71 +1,51 @@
-> *"Sh! sh!" they hissed, when they heard his voice ...*
-> *But in the end, when Bilbo actually began to stamp in the floor,* 
-> *and screamed out light!' at the top of his thrill voice, Thorin gave*
-> *way*
-> 
-> [ _The Hobbit_, XIII: "Not At Home"]
-
-##Lobster##
-
-### The Database File Synchroniser###
+##Lobster - Database File Synchroniser###
 
 Lobster a file synchronisation program for Oracle databases, designed to automatically push files into the database when local changes are made.
 
-###Configuring Lobster
+###Installation Guide
+1) Download and extract the latest Lobster release
 
-After downloading and unzipping the latest release of Lobster, you should first open up the LobsterSettings directory. Within  you will see the following files
+2) Run Lobster.exe
 
-    media/
-    ClobType.xsd
-    DatabaseConfig.xsd
-    MimeTypes.xml
+3) Lobster will automatically open the Connection List window. It is here that all the different databases Lobster can connect to are displayed. To connect Lobster to a database, a new database configuration needs to be created.
 
-Along with these directories create by Lobster, there are two other important ones that Lobster needs to operator: the Database Connections directory, and one or more Clob Type directories.  The media directory is where the success and fail sounds are located, which you can modify if you want to. The ClobType.xsd, DatabaseConfig.xsd and MimeTypes files are related to the ClobTypes and DatabaseConnections directories, and will explored in further detail below.
+4) First a place must be chosen to store the configuration files. All connection files are stored in a single directory, and cannot be distributed as they contain sensitive information, such as database passwords. Click "Change Directory" and a folder selector dialog will be opened. Create a new directory in a place of your choosing and select that as your Database Connection folder.
 
-Database Connections
---------------------------
-When Lobster is first started, you will prompted to choose a Database Connection directory. Inside that directory you should put a connection file for each database that you want Lobster to be able to connect to. Each file contains a database host, SID, username and password required to connect to the database, and therefore should never be placed into version control.  Database Connection files are modifiable within Lobster itself, or they can be edited manually. Here an example connection file:
+5) Now create a new Database Connection configuration file by clicking the "New Connection" and fill in the following details of the database on the right hand side. To test the currant settings, click "Test Connection".
 
-```xml
-    <?xml version="1.0" encoding="utf-8"?>
-    <DatabaseConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-      <name>Home Database</name>
-      <host>127.0.0.1</host>
-      <port>11521</port>
-      <sid>liamdb</sid>
-      <username>promotemgr</username>
-      <password>password</password>
-      <codeSource>C:\IconWS\trunk\CodeSource</codeSource>
-      <usePooling>true</usePooling>
-      <clobTypeDir>C:\IconWS\trunk\LobsterClobTypes</clobTypeDir>
-    </DatabaseConfig>
-```
+**Name**: The name of the database (this is used for display purposes only).
 
-**Name**: This is the name of the database, and has no impact on  how Lobster connects to it, but this string is used for display purposes.
+**Host**: The host of the database server. Entries in the hostnames file can also be used.
 
-**Host**: The host location of the database server, in this case it is on the local machine. Entries in the hostnames file can also be used.
-
-**Port**: The port that the server listens on. This will usually be the Oracle default of 1521.
+**Port**: The port that the server listens on.
 
 **SID**: The Oracle System ID of the database to connect to.
 
 **Username**: The name of the user to connect as. It is important to connect as a user with the privileges to access every table that could be modified by Lobster, such as xviewmgr.
 
-**Password**: The password of the user to connect as. This is stored as free text, and is why DatabaseConnection files should be stored securely.
+**Password**: The password of the user to connect with.
 
-**CodeSource**: This is the location of the CodeSource directory that is used for this database. If it is invalid, Lobster will prompt you as it starts up.
+**CodeSource**: This is the location of the CodeSource directory that is used for this database.
 
 **UsePooling**: If pooling is enabled, when Lobster connects to the Oracle database Oracle will remember the connection for a time, and reuse it if the same computer connects using the same connection string. This can improve Lobster connection performance slightly, but will decrease server performance if the maximum number of connections is low.
 
-**ClobTypeDir**: ClobTypes are Lobster specific Xml files for describing the different tables located on the database and the rules that govern them (further description below). These files should be stored in a single directory alongside the CodeSource directory and can be version controlled as they contain no security information.
+**ClobTypeDir**: Ignore this for now.
 
-###DatabaseConnection.xsd
+6) Lastly the ClobType Directory for the connection needs to be set. A ClobType is a Lobster specific Xml file that basically describes how fies from a single local directory in the CodeSource folder are mapped to the rows in a single table on the database. It can get more complex then that, as a ClobType could operate on more than one table, or multiple directories, but that is the basic idea. These files can be stored in a single directory and can be references by more than one Database Connection. For example, PharmCIS Dev and PharmCIS SIT can use the same ClobTypes.
 
-Database Connection files are automatically validated using the DatabaseConnection.xsd schema. If your file fails to load, check the schema for detailed information about how a Database Connection file should be formatted or check the logs for the exact validation error..
+I have already created the ClobTypes for ICON and for PharmCIS, and are located in the svn directories /ICONWS/trunk/LobsterClobTypes and /PharmCIS/LobsterClobTypes respectively. Checkout the necessary ClobType directory to your machine and set the ClobType Directory in Lobster to that location.
 
-Clob Types
--------------
+7) Click "Save" to save the database configuration out to file. make sure you save it in the Database Connection directory chosen earlier so Lobster will load it next time it is run.
+
+8) All of this setup is saved, so you won't have to do anything the next time Lobster starts except choosing the config to use and connecting with it. To do that, just click "Connect".
+
+###Using Lobster
+
+Once you have chosen a connection, you will see the main Lobster screen, divided into three columns. The first column shows the ClobTypes for the current connection, selecting one of these will populate the central column with the files found in the directory for that type. These files can be displayed in two ways, controlled by the radio buttons below the list: local mode and database mode. In local mode, the file pane shows the files that are found locally, with those that aren't found on the database highlighted green. In database mode, the list shows all the files on the database, with those that are database only highlighted in blue. Readonly files can be hidden so only the files you are currently working on are shown.
+When you select a file in the centre column, buttons to push, diff, explore and insert the file can be enabled. Push updates the database with the contents of the local file. This is done automatically when the file is changed by another program, but it can be done manually here. Diff opens the local and database versions of the file in a merging program of your choosing. Explpre opens the location of the file in Windows Explorer. Insert creates a new row in the database table for the file if it isn't in the database yet.
+The right hand column shows the backup log for the currently selected file. When a file is pushed to the database, either automatically or manually, a backup copy of the database data is saved locally before it is overriden with the local data. The backup log can be used to push a previous version in place of the current version.
+
+###Creating Your Own ClobType
 Clob Types are Lobsters specific Xml files for describing the different tables located on the database and the rules that govern how files will stored within them. Every Database Connection file specifies where the ClobTypes for that connection is stored (which unlike Database Connections can be stored in version control).
 Here is an example for FoxModules:
 ```xml
@@ -149,33 +129,3 @@ Name: The name of the table
 **MimeTypes**: The mime type list is used exclusively by columns with the CLOB_DATA purpose. It defines which mime types can be used by this column. So for the FoxModules table, which stores text CLOB data in one column, and binary BLOB data in another, each column has a distinct list of mime types accepted by that column. A mime type should not appear in multiple columns, but no warning will be raised if it does. However an error will be raised if you specify a mime type that does not appear in any CLOB_DATA columns.
 
 **Sequence**: if this element is attached to an ID column, then the sequence with this name will be automatically incremented and used when inserting data into this table.
-
-###ClobType.xsd
-
-The ClobType.xsd file is used to validate all Clob Type files. If Lobster warns you that there are errors in your Clob Type file, review the log for the exact problems and check the schema for a technical description of how to write a Clob Type file.
-
-###Using Lobster
-Please take everything beyond this point with a pinch of salt, as I haven't nailed down the UI of Lobster yet, and it may change without updates to this readme.
-
-When you start Lobster you will first see a list that shows all the connection files that Lobster found in the specified DatabaseConnections folder. Lobster can only be connected to one database at at time, and it is here where you select which database to connect to.
-
-Select your database connection, and then click Connect
-
-If the connection is successful, you will be moved to the second tab. Here you will see two panes. The left pane is the a tree view representation of the folders in the CodeSource directory that have a ClobType associated with them.
-
-If you select one of the folders, the right hand pane will then display all files associated with that folder. A file can be in one of three states:
-
- - **Synchronised**: A synchronised file is one that is both on the local computer and on the database, and has successfully been connected by Lobster. Saving any changes to a synchronised file will automatically push those changes to the database.
- - **Local Only**: Local only files are files that do not have a counterpart on the database. These files can be inserted using the Insert button. Once a local-only file has been inserted, it will become synchronised.
- - **Database Only**: A database only file is one that does not have a local counterpart. These files may have been deleted your folder, from the repository itself, or they may have been automatically created by FOX.
-
-The third tab is the Working File List. Any files that are not marked as read-only will appear here. This includes files that are synchronised, as well as files that are local-only.
-
-Both the Tree View tab and the Working Files tab have the same set of actions in the action ribbon. Those  actions are:
-
- - **Refresh**: This button re-queries the database and re-parses the local file system for files. The local directories are automatically re-parsed when any modifications to them are made, but this action can be used if there are new files on the database.
- - **Insert**: This button is only enabled when a local-only file is selected. It creates a new row in the table for that file's Clob Type and inserts the file data. If the Clob Type has more than one table, Lobster will ask which table you want to insert into. If the Clob Type uses mime-types, then Lobster will ask which mime-type this file should be inserted as.
- - **Reclob**: This button is only enabled when a synchronised file is selected. It updates the file data in the row that corresponds to that file with the data stored locally. This action is called automatically whenever the file is modified, but this action can force and update if the file is locked, although you will be prompted.
- - **Explore**: This button is only enabled for files that are located locally (local-only or synchronised). It opens a new instance of Windows Explorer in the directory of the folder, with the file selected.
- - **Diff**: This button is only enabled when a synchronised file is selected. It opens a new instance your specified merging program (TortoiseMerge by default) with the local version and database versions of the file displayed. If the file has been last updated by Clobber or Lobster, there will be a comment at the end of the file specifying when and by who.
- - **Pull**: This button is only enabled for files that are database-only. It pulls down a copy of the file into a temporary location and executes it with the default application.
