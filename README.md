@@ -1,17 +1,15 @@
-##Lobster - Database File Synchroniser###
+##Lobster
 
 Lobster a file synchronisation program for Oracle databases, designed to automatically push files into the database when local changes are made.
 
 ###Installation Guide
-1) Download and extract the latest Lobster release
+1) Download and extract the latest Lobster release, then run Lobster.exe
 
-2) Run Lobster.exe
+2) Lobster will automatically open the Connection List window. It is here that all the different databases Lobster can connect to are displayed. To connect Lobster to a database, a new database configuration needs to be created.
 
-3) Lobster will automatically open the Connection List window. It is here that all the different databases Lobster can connect to are displayed. To connect Lobster to a database, a new database configuration needs to be created.
+3) First a place must be chosen to store the configuration files. All connection files are stored in a single directory, and cannot be distributed as they contain sensitive information, such as database passwords. Click "Change Directory" and a folder selector dialog will be opened. Create a new directory in a place of your choosing and select that as your Database Connection folder.
 
-4) First a place must be chosen to store the configuration files. All connection files are stored in a single directory, and cannot be distributed as they contain sensitive information, such as database passwords. Click "Change Directory" and a folder selector dialog will be opened. Create a new directory in a place of your choosing and select that as your Database Connection folder.
-
-5) Now create a new Database Connection configuration file by clicking the "New Connection" and fill in the following details of the database on the right hand side. To test the currant settings, click "Test Connection".
+4) Now create a new Database Connection configuration file by clicking the "New Connection" and fill in the following details of the database on the right hand side. To test the currant settings, click "Test Connection".
 
 **Name**: The name of the database (this is used for display purposes only).
 
@@ -31,18 +29,20 @@ Lobster a file synchronisation program for Oracle databases, designed to automat
 
 **ClobTypeDir**: Ignore this for now.
 
-6) Lastly the ClobType Directory for the connection needs to be set. A ClobType is a Lobster specific Xml file that basically describes how fies from a single local directory in the CodeSource folder are mapped to the rows in a single table on the database. It can get more complex then that, as a ClobType could operate on more than one table, or multiple directories, but that is the basic idea. These files can be stored in a single directory and can be references by more than one Database Connection. For example, PharmCIS Dev and PharmCIS SIT can use the same ClobTypes.
+5) Lastly the ClobType Directory for the connection needs to be set. A ClobType is a Lobster specific Xml file that basically describes how fies from a single local directory in the CodeSource folder are mapped to the rows in a single table on the database. It can get more complex then that, as a ClobType could operate on more than one table, or multiple directories, but that is the basic idea. These files can be stored in a single directory and can be references by more than one Database Connection. For example, PharmCIS Dev and PharmCIS SIT can use the same ClobTypes.
 
 I have already created the ClobTypes for ICON and for PharmCIS, and are located in the svn directories /ICONWS/trunk/LobsterClobTypes and /PharmCIS/LobsterClobTypes respectively. Checkout the necessary ClobType directory to your machine and set the ClobType Directory in Lobster to that location.
 
-7) Click "Save" to save the database configuration out to file. make sure you save it in the Database Connection directory chosen earlier so Lobster will load it next time it is run.
+6) Click "Save" to save the database configuration out to file. making sure that it is saved in the Database Connection directory that waschosen earlier so that it will be displayed in the connection list the next time Lobster is run.
 
-8) All of this setup is saved, so you won't have to do anything the next time Lobster starts except choosing the config to use and connecting with it. To do that, just click "Connect".
+7) All of this setup is saved, so you won't have to do anything the next time Lobster starts except choosing the config to use and connecting with it. To do that, just click "Connect".
 
 ###Using Lobster
 
 Once you have chosen a connection, you will see the main Lobster screen, divided into three columns. The first column shows the ClobTypes for the current connection, selecting one of these will populate the central column with the files found in the directory for that type. These files can be displayed in two ways, controlled by the radio buttons below the list: local mode and database mode. In local mode, the file pane shows the files that are found locally, with those that aren't found on the database highlighted green. In database mode, the list shows all the files on the database, with those that are database only highlighted in blue. Readonly files can be hidden so only the files you are currently working on are shown.
+
 When you select a file in the centre column, buttons to push, diff, explore and insert the file can be enabled. Push updates the database with the contents of the local file. This is done automatically when the file is changed by another program, but it can be done manually here. Diff opens the local and database versions of the file in a merging program of your choosing. Explpre opens the location of the file in Windows Explorer. Insert creates a new row in the database table for the file if it isn't in the database yet.
+
 The right hand column shows the backup log for the currently selected file. When a file is pushed to the database, either automatically or manually, a backup copy of the database data is saved locally before it is overriden with the local data. The backup log can be used to push a previous version in place of the current version.
 
 ###Creating Your Own ClobType
