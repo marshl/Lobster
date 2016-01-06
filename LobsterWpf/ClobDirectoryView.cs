@@ -27,6 +27,7 @@ namespace LobsterWpf
         /// <summary>
         /// Initializes a new instance of the <see cref="ClobDirectoryView"/> class.
         /// </summary>
+        /// <param name="connection">The parent database connection of this directory.</param>
         /// <param name="clobDirectory">The ClobDirectory to use as the model.</param>
         public ClobDirectoryView(DatabaseConnection connection, ClobDirectory clobDirectory)
         {
@@ -61,6 +62,9 @@ namespace LobsterWpf
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the directory of this clob directory exists on the files system or not.
+        /// </summary>
         public bool DirectoryExists { get; }
     }
 }

@@ -19,11 +19,14 @@ namespace LobsterWpf
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Drawing;
     using System.IO;
     using System.Media;
+    using System.Reflection;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Forms;
+    using System.Windows.Media;
     using LobsterModel;
     using Properties;
 
@@ -48,14 +51,19 @@ namespace LobsterWpf
         private SoundPlayer failureSound;
 
         /// <summary>
+        /// The system tray icon that can be used to minimise and maximise the window.
+        /// </summary>
+        private NotifyIcon notifyIcon;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow"/> class.
         /// </summary>
         public MainWindow()
         {
             this.InitializeComponent();
 
-            this.successSound = new SoundPlayer("Resources/Audio/success.wav");
-            this.failureSound = new SoundPlayer("Resources/Audio/failure.wav");
+            this.successSound = new SoundPlayer(Path.Combine(Environment.CurrentDirectory, @"Resources\Audio\success.wav"));
+            this.failureSound = new SoundPlayer(Path.Combine(Environment.CurrentDirectory, @"Resources\Audio\failure.wav"));
         }
 
         /// <summary>
@@ -140,6 +148,28 @@ namespace LobsterWpf
         }
 
         /// <summary>
+        /// The method that is called when the window is initialised.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void Window_Initialized(object sender, EventArgs e)
+        {
+            try
+            {
+                Assembly assembly = Assembly.GetExecutingAssembly();
+                Icon icon = new Icon("Resources/Images/cartoon-lobster.ico");
+
+                this.notifyIcon = new NotifyIcon();
+                this.notifyIcon.Click += new EventHandler(this.NotifyIcon_Click);
+                this.notifyIcon.Icon = icon;
+            }
+            catch (IOException)
+            {
+                // Swallow icon not found exception
+            }
+        }
+
+        /// <summary>
         /// Opens a connection dialog window.
         /// </summary>
         private void OpenConnectionDialog()
@@ -172,13 +202,14 @@ namespace LobsterWpf
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             bool result = GitHubUpdater.RunUpdateCheck("marshl", "lobster");
-            if ( result )
+            if (result)
             {
                 this.Close();
                 return;
             }
 
             this.OpenConnectionDialog();
+            this.notifyIcon.Visible = true;
         }
 
         /// <summary>
@@ -437,7 +468,7 @@ namespace LobsterWpf
             this.connectionView.CurrentDisplayMode = this.LocalOnlyFilesRadio.IsChecked.Value ? ConnectionView.DisplayMode.LocalFiles : ConnectionView.DisplayMode.DatabaseFiles;
             this.RepopulateFileListView();
         }
-        
+
         /// <summary>
         /// The event called when the settings button is clicked, opening a new settings window.
         /// </summary>
@@ -448,6 +479,36 @@ namespace LobsterWpf
             SettingsWindow window = new SettingsWindow();
             window.Owner = this;
             bool? result = window.ShowDialog();
+        }
+
+        /// <summary>
+        /// The event that is called when the tray icon is clicked, toggling the display of the window.
+        /// </summary>
+        /// <param name="sender">Tjhe sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void NotifyIcon_Click(object sender, EventArgs e)
+        {
+            if (this.WindowState != WindowState.Minimized)
+            {
+                this.WindowState = WindowState.Minimized;
+            }
+            else
+            {
+                this.WindowState = WindowState.Normal;
+            }
+        }
+
+        /// <summary>
+        /// The event that is called when the state of the window is changed.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">Th event arguments.</param>
+        private void Window_StateChanged(object sender, EventArgs e)
+        {
+            if (this.notifyIcon != null)
+            {
+                this.ShowInTaskbar = this.WindowState != WindowState.Minimized;
+            }
         }
     }
 }

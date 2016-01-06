@@ -27,7 +27,6 @@ namespace LobsterWpf
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
-    using System.IO.Compression;
     using System.Net;
     using System.Reflection;
     using System.Text.RegularExpressions;
@@ -51,12 +50,11 @@ namespace LobsterWpf
         public static bool RunUpdateCheck(string user, string repo)
         {
             RestClient restClient = new RestClient("https://api.github.com");
-            var restRequest = new RestRequest("/repos/" + user + "/" + repo + "/releases/latest", Method.GET);
+            var restRequest = new RestRequest($"/repos/{user}/{repo}/releases/latest", Method.GET);
             IRestResponse response = restClient.Execute(restRequest);
             if (response.StatusCode != HttpStatusCode.OK)
             {
-                MessageLog.LogWarning("An error occured when attempting to query GitHub: Http Status Code "
-                    + response.StatusCode);
+                MessageLog.LogWarning($"An error occured when attempting to query GitHub: Http Status Code {response.StatusCode}");
                 return false;
             }
 
@@ -101,7 +99,7 @@ namespace LobsterWpf
                     client.DownloadFile(downloadUrl, sourceFile);
                 }
 
-                MessageLog.LogInfo($"Extract file from {sourceFile} to {destinationPath}");
+                MessageLog.LogInfo($"Extracting file from {sourceFile} to {destinationPath}");
                 ZipFile zipFile = ZipFile.Read(sourceFile);
                 zipFile.ExtractAll(destinationPath, ExtractExistingFileAction.OverwriteSilently);
 
@@ -116,11 +114,17 @@ namespace LobsterWpf
             return false;
         }
 
+        /// <summary>
+        /// Creates a .bat script that, when executed, will copy the contents of the update over the top of the current installation.
+        /// </summary>
+        /// <param name="source">Where the program is currently located.</param>
+        /// <param name="destination">The the new copy of the program is located.</param>
+        /// <returns>The file location of the .bat script.</returns>
         public static string CreateAutoUpdateScript(string source, string destination)
         {
             MessageLog.LogInfo("Creating batch script.");
-            string filepath = $"{Path.GetTempPath()}\\lobster_update.bat";
-            string contents = $@"
+            string scriptFilePath = $"{Path.GetTempPath()}\\lobster_update.bat";
+            string scriptContents = $@"
 :loop
 tasklist | find ""Lobster.exe"" >nul
 if not errorlevel 1 (
@@ -132,13 +136,13 @@ xcopy /s/e/y ""{source}"" ""{destination}""
 call ""{destination}/Lobster.exe""
 ";
 
-            using (StreamWriter stream = new StreamWriter(filepath))
+            using (StreamWriter stream = new StreamWriter(scriptFilePath))
             {
-                stream.Write(contents);
+                stream.Write(scriptContents);
             }
 
-            MessageLog.LogInfo($"Batch script {filepath} created");
-            return filepath;
+            MessageLog.LogInfo($"Batch script {scriptFilePath} created with contents:\n{scriptContents}");
+            return scriptFilePath;
         }
 
         /// <summary>
@@ -176,6 +180,9 @@ call ""{destination}/Lobster.exe""
             [JsonProperty("url")]
             public string Url { get; set; }
 
+            /// <summary>
+            /// Gets or sets the Url that the asset can be downloaded from.
+            /// </summary>
             [JsonProperty("browser_download_url")]
             public string BrowserDownloadUrl { get; set; }
         }

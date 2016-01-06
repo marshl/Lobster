@@ -99,7 +99,7 @@ namespace LobsterModel
         public IModelEventListener EventListener { get; private set; }
 
         /// <summary>
-        /// Gets o sets the list of mime types that are used to translate from file names to database mnemonics and vice-sersa.
+        /// Gets or sets the list of mime types that are used to translate from file names to database mnemonics and vice-sersa.
         /// </summary>
         public MimeTypeList MimeTypeList
         {

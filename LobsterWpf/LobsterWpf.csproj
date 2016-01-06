@@ -298,7 +298,9 @@
   </ItemGroup>
   <ItemGroup>
     <SplashScreen Include="Resources\Images\cartoon-lobster-800px.png" />
-    <Resource Include="Resources\Images\cartoon-lobster.ico" />
+    <Content Include="Resources\Images\cartoon-lobster.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Resource Include="Resources\Images\SecurityLock.ico" />
     <None Include="Resources\Images\008_Reminder.ico" />
     <None Include="Resources\Images\010_LowPriority.ico" />
