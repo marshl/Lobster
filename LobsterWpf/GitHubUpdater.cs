@@ -104,6 +104,8 @@ namespace LobsterWpf
                 zipFile.ExtractAll(destinationPath, ExtractExistingFileAction.OverwriteSilently);
 
                 string dirName = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                // Go up one directory
+                dirName = new DirectoryInfo(dirName).Parent.FullName;
                 string script = CreateAutoUpdateScript(destinationPath, dirName);
 
                 MessageLog.LogInfo($"Starting batch script {script}");
@@ -133,7 +135,7 @@ if not errorlevel 1 (
 )
 
 xcopy /s/e/y ""{source}"" ""{destination}""
-call ""{destination}/Lobster.exe""
+call ""{destination}\Lobster.exe""
 ";
 
             using (StreamWriter stream = new StreamWriter(scriptFilePath))
