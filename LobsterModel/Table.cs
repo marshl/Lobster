@@ -64,6 +64,22 @@ namespace LobsterModel
         [XmlArray("columns")]
         public List<Column> Columns { get; set; }
 
+        [XmlElement("customStatements")]
+        public CustomStatementBlock CustomStatements { get; set; }
+
+        public class CustomStatementBlock
+        {
+            [XmlElement("upsertStatement")]
+            public string UpsertStatement { get; set; }
+
+            [XmlElement("fileListStatement")]
+            public string FileListStatement { get; set; }
+
+            [XmlElement("downloadStatement")]
+            public string DownloadStatement { get; set; }
+        }
+
+
         /// <summary>
         /// Gets or sets the parent table of this table, if this table is part of a parent-child relationship.
         /// </summary>
@@ -274,7 +290,7 @@ namespace LobsterModel
                     + $" FROM {pt.FullName} p"
                     + $" JOIN {this.FullName} c"
                     + $" ON c.{foreignKeyCol.Name} = p.{parentIDCol.Name}"
-                    + $" WHERE p.{parentMnemCol.Name} = '{clobFile.Mnemonic}'";
+                    + $" WHERE p.{parentMnemCol.Name} = :mnemonic";
             }
             else
             {
@@ -282,7 +298,7 @@ namespace LobsterModel
                 return
                     $"SELECT t.{clobCol.Name}"
                     + $" FROM {this.FullName} t"
-                    + $" WHERE t.{mnemCol.Name} = '{clobFile.Mnemonic}'";
+                    + $" WHERE t.{mnemCol.Name} = :mnemonic";
             }
         }
 

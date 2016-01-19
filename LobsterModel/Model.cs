@@ -110,7 +110,7 @@ namespace LobsterModel
                 Model.UpdateDatabaseClob(databaseConnection, sourceFilename, clobFile, clobDir, oracleConnection);
                 oracleConnection.Dispose();
             }
-            catch (Exception ex) when (ex is ConnectToDatabaseException || ex is ClobFileLookupException)
+            catch (Exception ex) when (ex is ConnectToDatabaseException || ex is ClobFileLookupException || ex is FileDownloadException)
             {
                 throw new FileUpdateException("An error occurred when connecting to the database.", ex);
             }
@@ -255,7 +255,7 @@ namespace LobsterModel
 
             databaseConnection.LoadClobTypes(ref errors);
             Model.GetDatabaseFileLists(databaseConnection, ref fileLoadErrors);
-            
+
             MessageLog.LogInfo("Connection change successful");
 
             return databaseConnection;
@@ -298,7 +298,7 @@ namespace LobsterModel
         /// </summary>
         /// <param name="databaseConnection">The connection to make the file with.</param>
         /// <param name="mnemonic">The database mnemonic.</param>
-        /// <param name="table">The table the mnemonic is from.</param>
+        /// <param name="table">The table the mnemonic is from (can be null).</param>
         /// <param name="mimeType">The mime type of the database file, if applicable.</param>
         /// <returns>The name as converted from the mnemonic.</returns>
         public static string ConvertMnemonicToFilename(DatabaseConnection databaseConnection, string mnemonic, Table table, string mimeType)
@@ -314,9 +314,9 @@ namespace LobsterModel
 
             // Assume xml data types for tables without a datatype column, or a prefix
             Column mimeTypeColumn;
-            if (!table.TryGetColumnWithPurpose(Column.Purpose.MIME_TYPE, out mimeTypeColumn) || prefix == null)
+            if (table == null || !table.TryGetColumnWithPurpose(Column.Purpose.MIME_TYPE, out mimeTypeColumn) || prefix == null)
             {
-                filename += table.DefaultExtension ?? ".xml";
+                filename += table?.DefaultExtension ?? ".xml";
             }
             else
             {
@@ -436,10 +436,10 @@ namespace LobsterModel
             DbCommand command = oracleConnection.CreateCommand();
             Table table = clobFile.ParentTable;
 
-            bool usingCustomLoader = clobDir.ClobType.LoaderStatement != null;
+            bool usingCustomLoader = table.CustomStatements?.UpsertStatement != null;
             if (usingCustomLoader)
             {
-                command.CommandText = clobDir.ClobType.LoaderStatement;
+                command.CommandText = table.CustomStatements.UpsertStatement;
 
                 if (command.CommandText.Contains(":name"))
                 {
@@ -569,7 +569,7 @@ namespace LobsterModel
             DbTransaction trans = oracleConnection.BeginTransaction();
             string mnemonic = Model.ConvertFilenameToMnemonic(databaseConnection, fullpath, table, mimeType);
 
-            bool usingCustomLoader = clobDir.ClobType.LoaderStatement != null;
+            bool usingCustomLoader = table.CustomStatements?.UpsertStatement != null;
 
             // First insert the parent record in the table (if applicable)
             if (table.ParentTable != null && !usingCustomLoader)
@@ -591,7 +591,7 @@ namespace LobsterModel
             command = oracleConnection.CreateCommand();
             if (usingCustomLoader)
             {
-                command.CommandText = clobDir.ClobType.LoaderStatement;
+                command.CommandText = table.CustomStatements.UpsertStatement;
 
                 if (command.CommandText.Contains(":name"))
                 {
@@ -633,14 +633,22 @@ namespace LobsterModel
         /// <param name="filename">The filepath to download the data into.</param>
         private static void DownloadClobDataToFile(DatabaseConnection databaseConnection, DBClobFile clobFile, OracleConnection oracleConnection, string filename)
         {
-            DbCommand command = oracleConnection.CreateCommand();
+            OracleCommand command = oracleConnection.CreateCommand();
 
             Table table = clobFile.ParentTable;
             Column column;
             try
             {
                 column = clobFile.GetDataColumn();
-                command.CommandText = table.BuildGetDataCommand(clobFile);
+                if (table.CustomStatements?.DownloadStatement != null)
+                {
+                    command.CommandText = table.CustomStatements.DownloadStatement;
+                }
+                else
+                {
+                    command.CommandText = table.BuildGetDataCommand(clobFile);
+                }
+                command.Parameters.Add("mnemonic", clobFile.Mnemonic);
             }
             catch (ColumnNotFoundException e)
             {
@@ -689,7 +697,7 @@ namespace LobsterModel
                     throw new FileDownloadException($"Too many rows were found for the given command {command.CommandText}");
                 }
             }
-            catch (Exception e) when (e is InvalidOperationException || e is OracleNullValueException || e is IOException)
+            catch (Exception e) when (e is InvalidOperationException || e is OracleException || e is OracleNullValueException || e is IOException)
             {
                 MessageLog.LogError($"Error retrieving data when executing command {command.CommandText} {e}");
                 throw new FileDownloadException($"An exception ocurred when executing the command {command.CommandText}");
@@ -707,41 +715,55 @@ namespace LobsterModel
             clobDir.DatabaseFileList = new List<DBClobFile>();
             ClobType ct = clobDir.ClobType;
             OracleCommand oracleCommand = oracleConnection.CreateCommand();
-            try
+
+            foreach (Table table in ct.Tables)
             {
-                foreach (Table table in ct.Tables)
+                if (table.CustomStatements?.FileListStatement != null)
+                {
+                    oracleCommand.CommandText = table.CustomStatements.FileListStatement;
+                }
+                else
                 {
                     oracleCommand.CommandText = table.GetFileListCommand();
-                    DbDataReader reader;
+                }
 
-                    reader = oracleCommand.ExecuteReader();
-                    while (reader.Read())
+                ProcessFileList(databaseConnection, clobDir, oracleCommand, table);
+            }
+        }
+
+        private static void ProcessFileList(DatabaseConnection databaseConnection, ClobDirectory clobDirectory, OracleCommand oracleCommand, Table table)
+        {
+            try
+            {
+                DbDataReader reader;
+
+                reader = oracleCommand.ExecuteReader();
+                while (reader.Read())
+                {
+                    string mnemonic = reader.GetString(0);
+                    string mimeType = null;
+
+                    if (reader.FieldCount > 1)
                     {
-                        string mnemonic = reader.GetString(0);
-                        Column mimeTypeCol;
-                        string mimeType = null;
-                        if (table.TryGetColumnWithPurpose(Column.Purpose.MIME_TYPE, out mimeTypeCol))
-                        {
-                            mimeType = reader.GetString(1);
-                        }
-
-                        DBClobFile databaseFile = new DBClobFile(
-                            parentTable: table,
-                            mnemonic: mnemonic,
-                            mimetype: mimeType,
-                            filename: Model.ConvertMnemonicToFilename(databaseConnection, mnemonic, table, mimeType));
-
-                        clobDir.DatabaseFileList.Add(databaseFile);
+                        mimeType = reader.GetString(1);
                     }
 
-                    reader.Close();
+                    DBClobFile databaseFile = new DBClobFile(
+                        parentTable: table,
+                        mnemonic: mnemonic,
+                        mimetype: mimeType,
+                        filename: Model.ConvertMnemonicToFilename(databaseConnection, mnemonic, table, mimeType));
+
+                    clobDirectory.DatabaseFileList.Add(databaseFile);
                 }
+
+                reader.Close();
             }
             catch (Exception e) when (e is InvalidOperationException || e is OracleException || e is ColumnNotFoundException)
             {
                 oracleCommand.Dispose();
-                MessageLog.LogError($"Error retrieving file lists from database for {clobDir.ClobType.Name} when executing command {oracleCommand.CommandText}: {e}");
-                throw new FileListRetrievalException($"Error retrieving file lists from database for {clobDir.ClobType.Name} when executing command {oracleCommand.CommandText}", e);
+                MessageLog.LogError($"Error retrieving file lists from database for {clobDirectory.ClobType.Name} when executing command {oracleCommand.CommandText}: {e}");
+                throw new FileListRetrievalException($"Error retrieving file lists from database for {clobDirectory.ClobType.Name} when executing command {oracleCommand.CommandText}", e);
             }
             finally
             {
