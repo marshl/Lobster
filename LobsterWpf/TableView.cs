@@ -147,6 +147,62 @@ namespace LobsterWpf
             }
         }
 
+        public bool UsesCustomStatements
+        {
+            get
+            {
+                return this.BaseTable.CustomStatements != null;
+            }
+
+            set
+            {
+                this.BaseTable.CustomStatements = value ? new Table.CustomStatementBlock() : null;
+                this.NotifyPropertyChanged("UsesCustomStatements");
+            }
+        }
+
+        public string UpsertStatement
+        {
+            get
+            {
+                return this.BaseTable.CustomStatements?.UpsertStatement;
+            }
+
+            set
+            {
+                this.BaseTable.CustomStatements.UpsertStatement = value;
+                this.NotifyPropertyChanged("UpsertStatement");
+            }
+        }
+
+        public string FileListStatement
+        {
+            get
+            {
+                return this.BaseTable.CustomStatements?.FileListStatement;
+            }
+
+            set
+            {
+                this.BaseTable.CustomStatements.FileListStatement = value;
+                this.NotifyPropertyChanged("FileListStatement");
+            }
+        }
+
+        public string DownloadStatement
+        {
+            get
+            {
+                return this.BaseTable.CustomStatements?.DownloadStatement;
+            }
+
+            set
+            {
+                this.BaseTable.CustomStatements.DownloadStatement = value;
+                this.NotifyPropertyChanged("DownloadStatement");
+            }
+        }
+
         /// <summary>
         /// Gets or sets a value indicating whether the parent table controls should be enabled or not.
         /// </summary>

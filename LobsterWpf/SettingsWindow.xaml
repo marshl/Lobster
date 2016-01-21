@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LobsterWpf"
         mc:Ignorable="d"
-        Title="Settings" Height="405" Width="350" MinHeight="405" MinWidth="350" ShowInTaskbar="False">
+        Title="Settings" Height="405" Width="350" MinHeight="405" MinWidth="350" ShowInTaskbar="False" Background="{StaticResource BackgroundKey}" >
   <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="Auto"/>

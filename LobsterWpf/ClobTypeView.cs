@@ -110,7 +110,7 @@ namespace LobsterWpf
         /// <summary>
         /// Gets or sets the SQL statement that is used to update and insert files into the database.
         /// </summary>
-        public string LoaderStatement
+        /*public string LoaderStatement
         {
             get
             {
@@ -122,7 +122,7 @@ namespace LobsterWpf
                 this.ClobTypeObject.LoaderStatement = value;
                 this.NotifyPropertyChanged("LoaderStatement");
             }
-        }
+        }*/
 
         /// <summary>
         /// Gets or sets the tables that files for this ClobType are stored in.

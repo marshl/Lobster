@@ -5,40 +5,65 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LobsterWpf"
         mc:Ignorable="d"
-        Title="EditTableWindow" Height="325" Width="300" MinHeight="325" MinWidth="300" ShowInTaskbar="False" Background="{StaticResource BackgroundKey}">
+        Title="EditTableWindow" Height="659.935" Width="373.799" MinHeight="325" MinWidth="300" ShowInTaskbar="False" Background="{StaticResource BackgroundKey}">
+  <ScrollViewer>
     <Grid>
-    <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="Auto"/>
-      <ColumnDefinition Width="*"/>
-    </Grid.ColumnDefinitions>
-    <Grid.RowDefinitions>
-      <RowDefinition Height="Auto"/>
-      <RowDefinition Height="Auto"/>
-      <RowDefinition Height="Auto"/>
-      <RowDefinition Height="Auto"/>
-      <RowDefinition Height="Auto"/>
-      <RowDefinition Height="Auto"/>
-      <RowDefinition Height="*"/>
-    </Grid.RowDefinitions>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition Width="*"/>
+      </Grid.ColumnDefinitions>
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="*"/>
+      </Grid.RowDefinitions>
 
-    <Label Grid.Row="0" Grid.Column="0" Margin="5">Schema:</Label>
-    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Path=Schema}" Margin="5"/>
+      <Label Grid.Row="0" Grid.Column="0" Margin="5">Schema:</Label>
+      <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Path=Schema}" Margin="5"/>
 
-    <Label Grid.Row="1" Grid.Column="0" Margin="5">Name:</Label>
-    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Path=Name}" Margin="5"/>
+      <Label Grid.Row="1" Grid.Column="0" Margin="5">Name:</Label>
+      <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Path=Name}" Margin="5"/>
 
-    <Label Grid.Row="2" Grid.Column="0" Margin="5">Default Extension:</Label>
-    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Path=DefaultExtension}" Margin="5"/>
+      <Label Grid.Row="2" Grid.Column="0" Margin="5">Default Extension:</Label>
+      <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Path=DefaultExtension}" Margin="5"/>
 
-    <Label Grid.Row="3" Grid.Column="0" Margin="5">Columns: </Label>
-    <Button Grid.Row="3" Grid.Column="2" Margin="5" HorizontalAlignment="Left" Padding="5" Click="ShowColumnsButton_Click">Show Columns</Button>
+      <Label Grid.Row="3" Grid.Column="0" Margin="5">Columns:</Label>
+      <Button Grid.Row="3" Grid.Column="2" Margin="5" HorizontalAlignment="Left" Padding="5" Click="ShowColumnsButton_Click">Show Columns</Button>
 
-    <Label Grid.Row="4" Grid.Column="0" Margin="5">Parent Table:</Label>
-    <CheckBox Grid.Row="4" Grid.Column="1" Margin="5" VerticalAlignment="Center" IsChecked="{Binding Path=HasParentTable}" IsEnabled="{Binding Path=CanHaveParentTable}">Has Parent Table:</CheckBox>
-    <Button Grid.Row="5" Grid.Column="1" Margin="5" HorizontalAlignment="Left" Padding="2" IsEnabled="{Binding Path=HasParentTable}" Click="EditParentTable_Click">Edit Parent Table</Button>
+      <Label Grid.Row="4" Grid.Column="0" Margin="5">Parent Table:</Label>
+      <CheckBox Grid.Row="4" Grid.Column="1" Margin="5" VerticalAlignment="Center" IsChecked="{Binding Path=HasParentTable}" IsEnabled="{Binding Path=CanHaveParentTable}">Has Parent Table:</CheckBox>
+      <Button Grid.Row="5" Grid.Column="1" Margin="5" HorizontalAlignment="Left" Padding="2" IsEnabled="{Binding Path=HasParentTable}" Click="EditParentTable_Click">Edit Parent Table</Button>
 
-    <StackPanel Grid.Row="6" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5">
-      <Button Margin="5" Width="75" Height="20" Click="OkButton_Click">OK</Button>
-    </StackPanel>
-  </Grid>
+      <StackPanel Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal">
+        <Label Margin="5">Uses Custom Statements:</Label>
+        <CheckBox Margin="5" VerticalAlignment="Center" IsChecked="{Binding Path=UsesCustomStatements}"/>
+      </StackPanel>
+
+      <StackPanel Orientation="Vertical" Grid.Row="7" Grid.ColumnSpan="2" IsEnabled="{Binding Path=UsesCustomStatements}">
+        <Label Margin="5,5,5,0">Update/Insert Statement:</Label>
+        <TextBox MinHeight="50" Text="{Binding Path=UpsertStatement}"/>
+
+        <Label Margin="5,5,5,0">File List Statement:</Label>
+        <TextBox MinHeight="50" Text="{Binding Path=FileListStatement}"/>
+
+        <Label Margin="5,5,5,0">Download Statement:</Label>
+        <TextBox MinHeight="50" Text="{Binding Path=DownloadStatement}"/>
+      </StackPanel>
+
+      <StackPanel Grid.Row="8" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5">
+        <Button Margin="5" Width="75" Height="20" Click="OkButton_Click">OK</Button>
+      </StackPanel>
+    </Grid>
+  </ScrollViewer>
 </Window>

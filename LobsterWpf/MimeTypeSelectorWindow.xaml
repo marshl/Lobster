@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LobsterWpf"
         mc:Ignorable="d"
-        Title="MimeTypeSelectorWindow" Height="261.572" Width="324.455" ShowInTaskbar="False" ResizeMode="NoResize" Icon="Resources/Images/cartoon-lobster.ico">
+        Title="MimeTypeSelectorWindow" Height="261.572" Width="324.455" ShowInTaskbar="False" ResizeMode="NoResize" Icon="Resources/Images/cartoon-lobster.ico" Background="{StaticResource BackgroundKey}" >
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="42.667"/>

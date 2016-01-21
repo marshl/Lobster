@@ -5,15 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LobsterWpf"
         mc:Ignorable="d"
-        Title="Edit Clob Type" Height="345" Width="300" MinHeight="345" MinWidth="300"  ShowInTaskbar="False" Background="{StaticResource BackgroundKey}">
+        Title="Edit Clob Type" Height="245" Width="400" MinHeight="245" MinWidth="400" Background="{StaticResource BackgroundKey}" ShowInTaskbar="False">
   <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="Auto"/>
       <ColumnDefinition Width="*"/>
     </Grid.ColumnDefinitions>
     <Grid.RowDefinitions>
-      <RowDefinition Height="Auto"/>
-      <RowDefinition Height="Auto"/>
       <RowDefinition Height="Auto"/>
       <RowDefinition Height="Auto"/>
       <RowDefinition Height="Auto"/>
@@ -34,11 +32,8 @@
     
     <Label Grid.Row="3" Grid.Column="0" Margin="5">Tables:</Label>
     <Button Grid.Row="3" Grid.Column="1" HorizontalAlignment="Left" Margin="5" Click="ShowTablesButton_Click">Show Tables</Button>
-     
-    <Label Grid.Row="4" Grid.Column="0" Margin="5">Loader Statement:</Label>
-    <TextBox Grid.Row="5" Grid.ColumnSpan="2" MinHeight="50" Text="{Binding Path=LoaderStatement}" Margin="5"/>
 
-    <StackPanel Grid.Row="6" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5">
+    <StackPanel Grid.Row="4" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5">
       <Button Margin="5" Width="75" Height="20" Click="OkButton_Click">OK</Button>
       <Button Margin="5" Width="75" Height="20" Click="CancelButton_Click">Cancel</Button>
       <Button Margin="5" Width="75" Height="20" Click="ApplyButton_Click">Apply</Button>
