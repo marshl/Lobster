@@ -510,5 +510,10 @@ namespace LobsterWpf
                 this.ShowInTaskbar = this.WindowState != WindowState.Minimized;
             }
         }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            this.notifyIcon.Dispose();
+        }
     }
 }
