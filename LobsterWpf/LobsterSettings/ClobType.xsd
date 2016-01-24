@@ -23,6 +23,7 @@
       <xs:element minOccurs="0" maxOccurs="1" name="defaultExtension" type="xs:string"/>
       <xs:element minOccurs="1" maxOccurs="1" name="columns" type="ArrayOfColumn" />
       <xs:element minOccurs="0" maxOccurs="1" name="parentTable" type="table" />
+      <xs:element minOccurs="0" maxOccurs="1" name="customStatements" type="CustomStatements" />
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="ArrayOfColumn">
@@ -37,6 +38,13 @@
       <xs:element minOccurs="0" maxOccurs="1" name="dataType" nillable="true" type="Datatype" />
       <xs:element minOccurs="0" maxOccurs="1" name="mimeTypes" type="ArrayOfString" />
       <xs:element minOccurs="0" maxOccurs="1" name="sequence" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="CustomStatements">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="1" name="upsertStatement" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="fileListStatement" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="downloadStatement" type="xs:string" />
     </xs:sequence>
   </xs:complexType>
   <xs:simpleType name="Purpose">
