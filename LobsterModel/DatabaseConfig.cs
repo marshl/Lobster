@@ -85,6 +85,12 @@ namespace LobsterModel
         public bool UsePooling { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the user can enable automatic file updates when a file is modified.
+        /// </summary>
+        [XmlElement("allowAutoUpdates")]
+        public bool AllowAutoUpdates { get; set; } = true;
+
+        /// <summary>
         /// Gets or sets the directory name where ClobTypes are stored.
         /// </summary>
         [XmlElement("clobTypeDir")]

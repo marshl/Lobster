@@ -68,6 +68,7 @@ namespace LobsterModel
         public DatabaseConnection(DatabaseConfig config, IModelEventListener eventListener)
         {
             this.Config = config;
+            this.IsAutoUpdateEnabled = this.Config.AllowAutoUpdates;
 
             this.EventListener = eventListener;
             bool result = Utils.DeserialiseXmlFileUsingSchema<MimeTypeList>("LobsterSettings/MimeTypes.xml", null, out this.mimeTypeList);
@@ -138,7 +139,7 @@ namespace LobsterModel
         /// <summary>
         /// Gets or sets a value indicating whether the database should be automatically updated when a file is changed.
         /// </summary>
-        public bool IsAutoUpdateEnabled { get; set; } = true;
+        public bool IsAutoUpdateEnabled { get; set; }
 
         /// <summary>
         /// Returns the ClobDirectory that would contain the given fullpath, if applicable.

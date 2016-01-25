@@ -187,6 +187,23 @@ namespace LobsterWpf
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether files in the connection can be automatically clobbed when updated.
+        /// </summary>
+        public bool AllowAutoUpdates
+        {
+            get
+            {
+                return this.BaseConfig.AllowAutoUpdates;
+            }
+
+            set
+            {
+                this.BaseConfig.AllowAutoUpdates = value;
+                this.NotifyPropertyChanged("AllowAutoUpdates");
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the directory name where ClobTypes are stored.
         /// </summary>
         public string ClobTypeDir

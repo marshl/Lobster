@@ -143,7 +143,7 @@ namespace LobsterWpf
             set
             {
                 this.Connection.IsAutoUpdateEnabled = value;
-                this.NotifyPropertyChanged("IsAutoClobEnabled");
+                this.NotifyPropertyChanged("IsAutoUpdateEnabled");
             }
         }
 

@@ -94,6 +94,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
           </Grid.RowDefinitions>
           <Label Grid.Row="0" Grid.Column="0" Margin="3">Name:</Label>
@@ -108,17 +109,23 @@
           <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Path=Username}" Margin="3"/>
           <Label Grid.Row="5" Grid.Column="0" Margin="3">Password:</Label>
           <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding Path=Password}" Margin="3"/>
-          <Label Grid.Row="6" Grid.Column="0" Margin="3">Pooling:</Label>
-          <Grid Grid.Row="6" Grid.Column="1" Margin="3">
+          
+          <Grid Grid.Row="6" Margin="3" Grid.ColumnSpan="2">
             <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto"/>
               <ColumnDefinition Width="*"/>
               <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <CheckBox Grid.Column="0" VerticalAlignment="Center" IsChecked="{Binding Path=UsePooling}"/>
-            <Button Grid.Column="1" Click="TestConnectionButton_Click" Width="125">Test Connection</Button>
+            <Label Grid.Column="0" Margin="3">Pool Connection:</Label>
+            <CheckBox Grid.Column="1" VerticalContentAlignment="Center" IsChecked="{Binding Path=UsePooling}"/>
+            <Button Grid.Column="2" Click="TestConnectionButton_Click" Width="125">Test Connection</Button>
           </Grid>
-          <Label Grid.Row="7" Grid.Column="0" Margin="3">CodeSource Directory:</Label>
-          <Grid Grid.Row="7" Grid.Column="1" Margin="3">
+          <StackPanel Orientation="Horizontal" Grid.Row="7" Grid.ColumnSpan="2">
+            <Label Grid.Column="0" Margin="5" >Allow Automatic Updates:</Label>
+            <CheckBox Grid.Column="1" VerticalContentAlignment="Center" IsChecked="{Binding Path=AllowAutomaticUpdates}"/>
+          </StackPanel>
+          <Label Grid.Row="8" Grid.Column="0" Margin="3">CodeSource Directory:</Label>
+          <Grid Grid.Row="8" Grid.Column="1" Margin="3">
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="*"/>
               <ColumnDefinition Width="Auto"/>
@@ -126,8 +133,8 @@
             <TextBox Width="Auto" Grid.Column="0" Text="{Binding Path=CodeSource}"/>
             <Button Grid.Column="1" Click="CodeSourceButton_Click" Margin="5,0,0,0">. . .</Button>
           </Grid>
-          <Label Grid.Row="8" Grid.Column="0" Margin="3">ClobType Directory:</Label>
-          <Grid Grid.Row="8" Grid.Column="1" Margin="3">
+          <Label Grid.Row="9" Grid.Column="0" Margin="3">ClobType Directory:</Label>
+          <Grid Grid.Row="9" Grid.Column="1" Margin="3">
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="*"/>
               <ColumnDefinition Width="Auto"/>
@@ -135,7 +142,7 @@
             <TextBox Width="Auto" Grid.Column="0" Text="{Binding Path=ClobTypeDir}"/>
             <Button Grid.Column="1" Click="ClobTypeButton_Click" Margin="5,0,0,0">. . .</Button>
           </Grid>
-          <StackPanel Grid.Row="9" Grid.Column="1" Margin="3">
+          <StackPanel Grid.Row="10" Grid.Column="1" Margin="3">
             <Button Width="100" HorizontalAlignment="Right" Click="EditClobTypeButton_Click">Clob Types</Button>
           </StackPanel>
         </Grid>

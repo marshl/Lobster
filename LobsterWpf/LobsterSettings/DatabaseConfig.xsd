@@ -11,6 +11,7 @@
       <xs:element minOccurs="1" maxOccurs="1" name="password" type="xs:string" />
       <xs:element minOccurs="1" maxOccurs="1" name="codeSource" type="xs:string" />
       <xs:element minOccurs="1" maxOccurs="1" name="usePooling" type="xs:boolean" />
+      <xs:element minOccurs="0" maxOccurs="1" name="allowAutoUpdates" type="xs:boolean" default="true"/>
       <xs:element minOccurs="1" maxOccurs="1" name="clobTypeDir" type="xs:string" />
     </xs:sequence>
   </xs:complexType>
