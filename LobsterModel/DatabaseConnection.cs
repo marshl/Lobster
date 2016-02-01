@@ -68,7 +68,7 @@ namespace LobsterModel
         public DatabaseConnection(DatabaseConfig config, IModelEventListener eventListener)
         {
             this.Config = config;
-            this.IsAutoUpdateEnabled = this.Config.AllowAutoUpdates;
+            this.IsAutoUpdateEnabled = this.Config.AllowAutomaticUpdates;
 
             this.EventListener = eventListener;
             bool result = Utils.DeserialiseXmlFileUsingSchema<MimeTypeList>("LobsterSettings/MimeTypes.xml", null, out this.mimeTypeList);

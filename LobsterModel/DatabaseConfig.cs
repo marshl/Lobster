@@ -88,7 +88,7 @@ namespace LobsterModel
         /// Gets or sets a value indicating whether the user can enable automatic file updates when a file is modified.
         /// </summary>
         [XmlElement("allowAutoUpdates")]
-        public bool AllowAutoUpdates { get; set; } = true;
+        public bool AllowAutomaticUpdates { get; set; } = true;
 
         /// <summary>
         /// Gets or sets the directory name where ClobTypes are stored.

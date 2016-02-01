@@ -117,7 +117,7 @@ namespace LobsterModel
         /// <returns>The ClobType, if loaded successfully, otherwise null.</returns>
         public static ClobType LoadClobType(string fullpath)
         {
-            MessageLog.LogInfo("Loading Database Config File " + fullpath);
+            MessageLog.LogInfo($"Loading Database Config File {fullpath}");
             ClobType clobType;
             try
             {
@@ -131,7 +131,7 @@ namespace LobsterModel
             }
             catch (Exception e) when (e is FileNotFoundException || e is InvalidOperationException || e is XmlException || e is IOException)
             {
-                MessageLog.LogError("An error occurred when loading the ClobType " + fullpath + ": " + e);
+                MessageLog.LogError($"An error occurred when loading the ClobType {fullpath}: {e}");
                 return null;
             }
 
