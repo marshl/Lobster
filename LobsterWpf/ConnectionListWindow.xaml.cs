@@ -350,7 +350,7 @@ namespace LobsterWpf
         {
             if (this.IsEditingConfig)
             {
-                if (!this.ConfirmCancelChanges())
+                if (this.CurrentConfigView.ChangesMade && !this.ConfirmCancelChanges())
                 {
                     return;
                 }

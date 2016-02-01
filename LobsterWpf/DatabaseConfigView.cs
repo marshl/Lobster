@@ -17,11 +17,8 @@
 namespace LobsterWpf
 {
     using System;
-    using System.Collections.Generic;
     using System.ComponentModel;
     using System.IO;
-    using System.Linq;
-    using System.Text;
     using LobsterModel;
     using Microsoft.WindowsAPICodePack.Dialogs;
 
@@ -49,6 +46,8 @@ namespace LobsterWpf
         /// </summary>
         public DatabaseConfig BaseConfig { get; }
 
+        public bool ChangesMade { get; set; } = false;
+
         /// <summary>
         /// Gets or sets the name of the connection. This is for display purposes only.
         /// </summary>
@@ -63,6 +62,7 @@ namespace LobsterWpf
             {
                 this.BaseConfig.Name = value;
                 this.NotifyPropertyChanged("Name");
+                this.ChangesMade = true;
             }
         }
 
@@ -80,6 +80,7 @@ namespace LobsterWpf
             {
                 this.BaseConfig.Host = value;
                 this.NotifyPropertyChanged("Host");
+                this.ChangesMade = true;
             }
         }
 
@@ -97,6 +98,7 @@ namespace LobsterWpf
             {
                 this.BaseConfig.Port = value;
                 this.NotifyPropertyChanged("Port");
+                this.ChangesMade = true;
             }
         }
 
@@ -114,6 +116,7 @@ namespace LobsterWpf
             {
                 this.BaseConfig.SID = value;
                 this.NotifyPropertyChanged("SID");
+                this.ChangesMade = true;
             }
         }
 
@@ -131,6 +134,7 @@ namespace LobsterWpf
             {
                 this.BaseConfig.Username = value;
                 this.NotifyPropertyChanged("Username");
+                this.ChangesMade = true;
             }
         }
 
@@ -148,6 +152,7 @@ namespace LobsterWpf
             {
                 this.BaseConfig.Password = value;
                 this.NotifyPropertyChanged("Password");
+                this.ChangesMade = true;
             }
         }
 
@@ -165,6 +170,7 @@ namespace LobsterWpf
             {
                 this.BaseConfig.CodeSource = value;
                 this.NotifyPropertyChanged("CodeSource");
+                this.ChangesMade = true;
             }
         }
         
@@ -183,23 +189,25 @@ namespace LobsterWpf
             {
                 this.BaseConfig.UsePooling = value;
                 this.NotifyPropertyChanged("UsePooling");
+                this.ChangesMade = true;
             }
         }
 
         /// <summary>
         /// Gets or sets a value indicating whether files in the connection can be automatically clobbed when updated.
         /// </summary>
-        public bool AllowAutoUpdates
+        public bool AllowAutomaticUpdates
         {
             get
             {
-                return this.BaseConfig.AllowAutoUpdates;
+                return this.BaseConfig.AllowAutomaticUpdates;
             }
 
             set
             {
-                this.BaseConfig.AllowAutoUpdates = value;
-                this.NotifyPropertyChanged("AllowAutoUpdates");
+                this.BaseConfig.AllowAutomaticUpdates = value;
+                this.NotifyPropertyChanged("AllowAutomaticUpdates");
+                this.ChangesMade = true;
             }
         }
 
@@ -217,6 +225,7 @@ namespace LobsterWpf
             {
                 this.BaseConfig.ClobTypeDir = value;
                 this.NotifyPropertyChanged("ClobTypeDir");
+                this.ChangesMade = true;
             }
         }
 
@@ -234,6 +243,7 @@ namespace LobsterWpf
             {
                 this.BaseConfig.FileLocation = value;
                 this.NotifyPropertyChanged("FileLocation");
+                this.ChangesMade = true;
             }
         }
 
