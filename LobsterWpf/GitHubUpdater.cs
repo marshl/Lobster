@@ -126,9 +126,10 @@ namespace LobsterWpf
         {
             MessageLog.LogInfo("Creating batch script.");
             string scriptFilePath = $"{Path.GetTempPath()}\\lobster_update.bat";
+            int processID = Process.GetCurrentProcess().Id;
             string scriptContents = $@"
 :loop
-tasklist | find ""Lobster.exe"" >nul
+tasklist | find "" {processID} "" >nul
 if not errorlevel 1 (
     timeout /t 1 >nul
     goto :loop
