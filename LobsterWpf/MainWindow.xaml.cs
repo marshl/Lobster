@@ -23,6 +23,7 @@ namespace LobsterWpf
     using System.IO;
     using System.Media;
     using System.Reflection;
+    using System.Threading;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Forms;
@@ -201,15 +202,21 @@ namespace LobsterWpf
         /// <param name="e">The event arguments.</param>
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            Thread thread = new Thread(() => this.UpdateCheck());
+            thread.Start();
+
+            this.OpenConnectionDialog();
+            this.notifyIcon.Visible = true;
+        }
+
+        private void UpdateCheck()
+        {
             bool result = GitHubUpdater.RunUpdateCheck("marshl", "lobster");
             if (result)
             {
                 this.Close();
                 return;
             }
-
-            this.OpenConnectionDialog();
-            this.notifyIcon.Visible = true;
         }
 
         /// <summary>
