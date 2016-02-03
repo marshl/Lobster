@@ -404,21 +404,8 @@ namespace LobsterModel
         /// <param name="fullpath">The path of the file as it exists locally.</param>
         private static void BackupClobFile(DatabaseConnection databaseConnection, OracleConnection oracleConnection, DBClobFile clobFile, string fullpath)
         {
-            DirectoryInfo backupDir = new DirectoryInfo(Settings.Default.BackupDirectory);
-            if (!backupDir.Exists)
-            {
-                backupDir.Create();
-            }
-
-            string tempName = string.Format("{0:yyyy-MM-dd_HH-mm-ss}", DateTime.Now)
-                + Path.GetFileName(fullpath);
-            string backupFilename = Path.GetFullPath(Path.Combine(Settings.Default.BackupDirectory, tempName));
-
-            if (!File.Exists(backupFilename))
-            {
-                Model.DownloadClobDataToFile(databaseConnection, clobFile, oracleConnection, backupFilename);
-                databaseConnection.FileBackupLog.AddBackup(fullpath, backupFilename);
-            }
+            FileInfo backupFile = BackupLog.AddBackup(databaseConnection.Config.CodeSource, fullpath);
+            Model.DownloadClobDataToFile(databaseConnection, clobFile, oracleConnection, backupFile.FullName);
         }
 
         /// <summary>

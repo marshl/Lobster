@@ -242,7 +242,7 @@ namespace LobsterWpf
 
             if (!this.IsDirectory)
             {
-                List<FileBackup> fileBackups = this.ParentConnectionView.Connection.FileBackupLog.GetBackupsForFile(this.FullName);
+                List<FileBackup> fileBackups = BackupLog.GetBackupsForFile(this.ParentConnectionView.Connection.Config.CodeSource, this.FullName);
                 if (fileBackups != null)
                 {
                     this.FileBackupList = new ObservableCollection<FileBackup>(fileBackups.OrderByDescending(backup => backup.DateCreated));

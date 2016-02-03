@@ -73,8 +73,6 @@ namespace LobsterModel
             this.EventListener = eventListener;
             bool result = Utils.DeserialiseXmlFileUsingSchema<MimeTypeList>("LobsterSettings/MimeTypes.xml", null, out this.mimeTypeList);
 
-            this.FileBackupLog = new BackupLog();
-
             try
             {
                 this.fileWatcher = new FileSystemWatcher(this.Config.CodeSource);
@@ -120,11 +118,6 @@ namespace LobsterModel
         /// These files are deleted when the model is disposed.
         /// </summary>
         public List<string> TempFileList { get; private set; } = new List<string>();
-
-        /// <summary>
-        /// Gets the backup log for this model. 
-        /// </summary>
-        public BackupLog FileBackupLog { get; }
 
         /// <summary>
         /// Gets the configuration file for this connection.

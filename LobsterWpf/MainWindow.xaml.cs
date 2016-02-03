@@ -425,7 +425,7 @@ namespace LobsterWpf
 
             try
             {
-                Model.UpdateClobWithExternalFile(this.connectionView.Connection, fileBackup.OriginalFilename, fileBackup.BackupFilename);
+                Model.UpdateClobWithExternalFile(this.connectionView.Connection, fileBackup.BackupFilename, fileBackup.OriginalFilename);
             }
             catch (FileUpdateException)
             {

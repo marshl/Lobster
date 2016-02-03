@@ -28,36 +28,62 @@ namespace LobsterModel
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Text;
+    using Properties;
 
     /// <summary>
     /// The log for when a backup file is created.
     /// </summary>
-    public class BackupLog
+    public static class BackupLog
     {
         /// <summary>
         /// The mapping of local files to their backups.
         /// </summary>
-        private Dictionary<string, List<FileBackup>> backupDictionary = new Dictionary<string, List<FileBackup>>();
+        //private Dictionary<string, FileBackup> backupDictionary = new Dictionary<string, FileBackup>();
 
         /// <summary>
         /// Adds a backup for the given local file and backup file.
         /// </summary>
         /// <param name="originalFilename">The original file.</param>
         /// <param name="backupFilename">The backed up file.</param>
-        public void AddBackup(string originalFilename, string backupFilename)
+        public static FileInfo AddBackup(string startingDirectory, string originalFilename)
         {
-            FileBackup file = new FileBackup(originalFilename, backupFilename);
+            //FileBackup fileBackup;
+            //if (!this.backupDictionary.TryGetValue(originalFilename, out fileBackup))
+            //{
 
-            List<FileBackup> files = this.GetBackupsForFile(originalFilename);
-            if (files == null)
+            DirectoryInfo dirInfo = GetBackupDirectoryForFile(startingDirectory, originalFilename);
+            if (!dirInfo.Exists)
             {
-                files = new List<FileBackup>();
-                this.backupDictionary.Add(originalFilename, files);
+                dirInfo.Create();
+            }
+            //fileBackup = new FileBackup(originalFilename, dirInfo.FullName);
+            // }
+
+            string filename = string.Format("{0:yyyy-MM-dd_HH-mm-ss}", DateTime.Now) + Path.GetExtension(originalFilename);
+            string fullpath = Path.Combine(dirInfo.FullName, filename);
+            return new FileInfo(fullpath);
+
+            //return fileBackup.CreateBackup();
+        }
+
+        private static DirectoryInfo GetBackupDirectoryForFile(string startingDirectory, string filename)
+        {
+            DirectoryInfo backupDir = new DirectoryInfo(Settings.Default.BackupDirectory);
+            if (!backupDir.Exists)
+            {
+                backupDir.Create();
             }
 
-            files.Add(file);
+            Uri baseUri = new Uri(startingDirectory);
+            Uri fileUri = new Uri(filename);
+            Uri relativeUri = baseUri.MakeRelativeUri(fileUri);
+            //Uri backupDirectory = new Uri(new Uri(backupDir.FullName), relativeUri);
+            string backupDirectory = Path.Combine(backupDir.FullName, relativeUri.OriginalString);
+            DirectoryInfo dirInfo = new DirectoryInfo(backupDirectory);
+            return dirInfo;
         }
 
         /// <summary>
@@ -65,10 +91,21 @@ namespace LobsterModel
         /// </summary>
         /// <param name="filename">The file to find the backups for.</param>
         /// <returns>The list of backups for the given file.</returns>
-        public List<FileBackup> GetBackupsForFile(string filename)
+        public static List<FileBackup> GetBackupsForFile(string startingDirectory, string filename)
         {
-            List<FileBackup> result;
-            this.backupDictionary.TryGetValue(filename, out result);
+            DirectoryInfo dirInfo = GetBackupDirectoryForFile(startingDirectory, filename);
+            List<FileBackup> result = new List<FileBackup>();
+            if ( !dirInfo.Exists)
+            {
+                return result;
+            }
+
+            foreach (FileInfo child in dirInfo.GetFiles())
+            {
+                result.Add(new FileBackup(filename, child.FullName));
+            }
+            
+            ///this.backupDictionary.TryGetValue(filename, out result);
             return result;
         }
     }
