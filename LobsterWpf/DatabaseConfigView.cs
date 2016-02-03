@@ -46,6 +46,9 @@ namespace LobsterWpf
         /// </summary>
         public DatabaseConfig BaseConfig { get; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether changes have been made to any of the fields in this config.
+        /// </summary>
         public bool ChangesMade { get; set; } = false;
 
         /// <summary>

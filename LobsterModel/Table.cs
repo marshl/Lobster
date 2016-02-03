@@ -64,21 +64,11 @@ namespace LobsterModel
         [XmlArray("columns")]
         public List<Column> Columns { get; set; }
 
+        /// <summary>
+        /// Gets or sets the custom statements to override automated SQL construction.
+        /// </summary>
         [XmlElement("customStatements")]
         public CustomStatementBlock CustomStatements { get; set; }
-
-        public class CustomStatementBlock
-        {
-            [XmlElement("upsertStatement")]
-            public string UpsertStatement { get; set; }
-
-            [XmlElement("fileListStatement")]
-            public string FileListStatement { get; set; }
-
-            [XmlElement("downloadStatement")]
-            public string DownloadStatement { get; set; }
-        }
-
 
         /// <summary>
         /// Gets or sets the parent table of this table, if this table is part of a parent-child relationship.
@@ -384,6 +374,30 @@ namespace LobsterModel
             }
 
             return c;
+        }
+
+        /// <summary>
+        /// The custom SQL statements used to override Lobster automated SQL functionality.
+        /// </summary>
+        public class CustomStatementBlock
+        {
+            /// <summary>
+            /// Gets or sets the SQL statement used to insert or update a single file into the database.
+            /// </summary>
+            [XmlElement("upsertStatement")]
+            public string UpsertStatement { get; set; }
+
+            /// <summary>
+            /// Gets or sets the SQL statement used to get all the files in this table on the database.
+            /// </summary>
+            [XmlElement("fileListStatement")]
+            public string FileListStatement { get; set; }
+
+            /// <summary>
+            /// Gets or sets the SQL statement used to download a single file from the database.
+            /// </summary>
+            [XmlElement("downloadStatement")]
+            public string DownloadStatement { get; set; }
         }
     }
 }

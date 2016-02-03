@@ -147,6 +147,9 @@ namespace LobsterWpf
             }
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the the base config has custom statements or not.
+        /// </summary>
         public bool UsesCustomStatements
         {
             get
@@ -161,6 +164,9 @@ namespace LobsterWpf
             }
         }
 
+        /// <summary>
+        /// Gets or sets the override SQL statement to use to insert or update a file into the table.
+        /// </summary>
         public string UpsertStatement
         {
             get
@@ -175,6 +181,9 @@ namespace LobsterWpf
             }
         }
 
+        /// <summary>
+        /// Gets or sets the override SQL statement to use to find all rows in the table.
+        /// </summary>
         public string FileListStatement
         {
             get
@@ -189,6 +198,9 @@ namespace LobsterWpf
             }
         }
 
+        /// <summary>
+        /// Gets or sets the override SQL statement to use when downloading a single file.
+        /// </summary>
         public string DownloadStatement
         {
             get

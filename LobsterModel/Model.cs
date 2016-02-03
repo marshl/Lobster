@@ -635,6 +635,7 @@ namespace LobsterModel
                 {
                     command.CommandText = table.BuildGetDataCommand(clobFile);
                 }
+
                 command.Parameters.Add("mnemonic", clobFile.Mnemonic);
             }
             catch (ColumnNotFoundException e)
@@ -718,6 +719,13 @@ namespace LobsterModel
             }
         }
 
+        /// <summary>
+        /// Process the given SQL command to get files for a clob directory.
+        /// </summary>
+        /// <param name="databaseConnection">The connection to use.</param>
+        /// <param name="clobDirectory">The clob directory to add the file to.</param>
+        /// <param name="oracleCommand">The command to execut.</param>
+        /// <param name="table">The table to insert with.</param>
         private static void ProcessFileList(DatabaseConnection databaseConnection, ClobDirectory clobDirectory, OracleCommand oracleCommand, Table table)
         {
             try

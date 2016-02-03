@@ -209,6 +209,9 @@ namespace LobsterWpf
             this.notifyIcon.Visible = true;
         }
 
+        /// <summary>
+        /// PErforms an update check, and closes the program if an update is found.
+        /// </summary>
         private void UpdateCheck()
         {
             bool result = GitHubUpdater.RunUpdateCheck("marshl", "lobster");
@@ -518,6 +521,11 @@ namespace LobsterWpf
             }
         }
 
+        /// <summary>
+        /// The event that is raised when the window is closed.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             this.notifyIcon.Dispose();

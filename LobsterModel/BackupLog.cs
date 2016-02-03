@@ -28,6 +28,7 @@ namespace LobsterModel
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Text;
@@ -39,38 +40,57 @@ namespace LobsterModel
     public static class BackupLog
     {
         /// <summary>
-        /// The mapping of local files to their backups.
-        /// </summary>
-        //private Dictionary<string, FileBackup> backupDictionary = new Dictionary<string, FileBackup>();
-
-        /// <summary>
         /// Adds a backup for the given local file and backup file.
         /// </summary>
-        /// <param name="originalFilename">The original file.</param>
-        /// <param name="backupFilename">The backed up file.</param>
+        /// <param name="startingDirectory">The root directory of the CodeSource folder.</param>
+        /// <param name="originalFilename">The file to backup.</param>
+        /// <returns>The file where the backup can be stored (not created).</returns>
         public static FileInfo AddBackup(string startingDirectory, string originalFilename)
         {
-            //FileBackup fileBackup;
-            //if (!this.backupDictionary.TryGetValue(originalFilename, out fileBackup))
-            //{
-
             DirectoryInfo dirInfo = GetBackupDirectoryForFile(startingDirectory, originalFilename);
             if (!dirInfo.Exists)
             {
                 dirInfo.Create();
             }
-            //fileBackup = new FileBackup(originalFilename, dirInfo.FullName);
-            // }
 
             string filename = string.Format("{0:yyyy-MM-dd_HH-mm-ss}", DateTime.Now) + Path.GetExtension(originalFilename);
             string fullpath = Path.Combine(dirInfo.FullName, filename);
             return new FileInfo(fullpath);
-
-            //return fileBackup.CreateBackup();
         }
 
+        /// <summary>
+        /// Gets a list of backups for the given filename.
+        /// </summary>
+        /// <param name="rootDirectory">The root directory of thte CodeSource folder.</param>
+        /// <param name="filename">The file to find the backups for.</param>
+        /// <returns>The list of backups for the given file.</returns>
+        public static List<FileBackup> GetBackupsForFile(string rootDirectory, string filename)
+        {
+            DirectoryInfo dirInfo = GetBackupDirectoryForFile(rootDirectory, filename);
+            List<FileBackup> result = new List<FileBackup>();
+            if (!dirInfo.Exists)
+            {
+                return result;
+            }
+
+            foreach (FileInfo child in dirInfo.GetFiles())
+            {
+                result.Add(new FileBackup(filename, child.FullName));
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Finds the directory that would be used to store backups for the given file.
+        /// This does not create the directory if it doesn't already exist.
+        /// </summary>
+        /// <param name="startingDirectory">The CodeSource directory the file is stored under.</param>
+        /// <param name="filename">The file that is being backed up.</param>
+        /// <returns>The directory where the backup would be stored.</returns>
         private static DirectoryInfo GetBackupDirectoryForFile(string startingDirectory, string filename)
         {
+            Debug.Assert(new Uri(filename).IsBaseOf(new Uri(startingDirectory)), "The file must be a child of the starting directory.");
             DirectoryInfo backupDir = new DirectoryInfo(Settings.Default.BackupDirectory);
             if (!backupDir.Exists)
             {
@@ -80,33 +100,9 @@ namespace LobsterModel
             Uri baseUri = new Uri(startingDirectory);
             Uri fileUri = new Uri(filename);
             Uri relativeUri = baseUri.MakeRelativeUri(fileUri);
-            //Uri backupDirectory = new Uri(new Uri(backupDir.FullName), relativeUri);
             string backupDirectory = Path.Combine(backupDir.FullName, relativeUri.OriginalString);
             DirectoryInfo dirInfo = new DirectoryInfo(backupDirectory);
             return dirInfo;
-        }
-
-        /// <summary>
-        /// Gets a list of backups for the given filename.
-        /// </summary>
-        /// <param name="filename">The file to find the backups for.</param>
-        /// <returns>The list of backups for the given file.</returns>
-        public static List<FileBackup> GetBackupsForFile(string startingDirectory, string filename)
-        {
-            DirectoryInfo dirInfo = GetBackupDirectoryForFile(startingDirectory, filename);
-            List<FileBackup> result = new List<FileBackup>();
-            if ( !dirInfo.Exists)
-            {
-                return result;
-            }
-
-            foreach (FileInfo child in dirInfo.GetFiles())
-            {
-                result.Add(new FileBackup(filename, child.FullName));
-            }
-            
-            ///this.backupDictionary.TryGetValue(filename, out result);
-            return result;
         }
     }
 }

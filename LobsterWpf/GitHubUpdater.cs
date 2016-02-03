@@ -104,6 +104,7 @@ namespace LobsterWpf
                 zipFile.ExtractAll(destinationPath, ExtractExistingFileAction.OverwriteSilently);
 
                 string dirName = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                
                 // Go up one directory
                 dirName = new DirectoryInfo(dirName).Parent.FullName;
                 string script = CreateAutoUpdateScript(destinationPath, dirName);
