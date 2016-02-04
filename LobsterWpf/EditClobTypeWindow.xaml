@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LobsterWpf"
         mc:Ignorable="d"
-        Title="Edit Clob Type" Height="245" Width="400" MinHeight="245" MinWidth="400" Background="{StaticResource BackgroundKey}" ShowInTaskbar="False">
+        Title="Edit Clob Type" Height="245" Width="400" MinHeight="245" MinWidth="400" Background="{StaticResource BackgroundKey}" ShowInTaskbar="False" Icon="Resources/Images/cartoon-lobster.ico" >
   <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="Auto"/>

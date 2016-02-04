@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:LobsterWpf"
         xmlns:l="clr-namespace:LobsterWpf"
         mc:Ignorable="d"
-        Title="Connections" Height="600" Width="700" Icon="Resources/Images/cartoon-lobster.ico" ShowInTaskbar="False" Background="{StaticResource BackgroundKey}">
+        Title="Connections" Height="600" Width="700" Icon="Resources/Images/cartoon-lobster.ico" ShowInTaskbar="False" Background="{StaticResource BackgroundKey}" Icon="Resources/Images/cartoon-lobster.ico" >
   <Window.Resources>
     <l:InverseBooleanConverter x:Key="inverseBooleanConverter" />
   </Window.Resources>

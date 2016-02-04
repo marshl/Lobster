@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LobsterWpf"
         mc:Ignorable="d"
-       Title="Edit Column" Height="200" Width="300" MinWidth="300" MinHeight="200" ShowInTaskbar="False" Background="{StaticResource BackgroundKey}">
+       Title="Edit Column" Height="200" Width="300" MinWidth="300" MinHeight="200" ShowInTaskbar="False" Background="{StaticResource BackgroundKey}" Icon="Resources/Images/cartoon-lobster.ico" >
   <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="Auto"/>

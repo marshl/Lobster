@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LobsterWpf"
         mc:Ignorable="d"
-        Title="TableSelectorWindow" Height="300" Width="300" ResizeMode="NoResize" Icon="Resources/Images/cartoon-lobster.ico" ShowInTaskbar="False" Background="{StaticResource BackgroundKey}" >
+        Title="TableSelectorWindow" Height="300" Width="300" ResizeMode="NoResize" Icon="Resources/Images/cartoon-lobster.ico" ShowInTaskbar="False" Background="{StaticResource BackgroundKey}">
   <Grid>
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto"/>
