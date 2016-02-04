@@ -45,7 +45,9 @@ namespace LobsterModel
         /// <summary>
         /// The file stream this logger writes to.
         /// </summary>
-        private StreamWriter outStream;
+        private FileStream outStream;
+
+        private StreamWriter streamWriter;
 
         /// <summary>
         /// Prevents a default instance of the <see cref="MessageLog"/> class from being created.
@@ -55,9 +57,9 @@ namespace LobsterModel
             MessageLog.instance = this;
 
             this.MessageList = new List<Message>();
-
-            this.outStream = new StreamWriter(Settings.Default.LogFilename, true);
-            this.outStream.WriteLine();
+            this.outStream = new FileStream(Settings.Default.LogFilename, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
+            this.streamWriter = new StreamWriter(outStream);
+            this.streamWriter.WriteLine();
 
             MessageLog.LogInfo($"Starting Lobster (build {Utils.RetrieveLinkerTimestamp()})");
         }
@@ -147,10 +149,10 @@ namespace LobsterModel
 
             if (messageType != Message.TYPE.SENSITIVE || Settings.Default.LogSensitiveMessages)
             {
-                lock (this.outStream.BaseStream)
+                lock (this.outStream)
                 {
-                    this.outStream.WriteLine(msg.ToString());
-                    this.outStream.Flush();
+                    this.streamWriter.WriteLine(msg.ToString());
+                    this.streamWriter.Flush();
                 }
             }
         }
