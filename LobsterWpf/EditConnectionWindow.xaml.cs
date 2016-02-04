@@ -23,6 +23,7 @@ namespace LobsterWpf
     /// <summary>
     /// Interaction logic for EditConnectionWindow.xaml
     /// </summary>
+    [Obsolete]
     public partial class EditConnectionWindow : Window
     {
         /// <summary>
