@@ -90,7 +90,7 @@ namespace LobsterModel
         /// <returns>The directory where the backup would be stored.</returns>
         private static DirectoryInfo GetBackupDirectoryForFile(string startingDirectory, string filename)
         {
-            Debug.Assert(new Uri(filename).IsBaseOf(new Uri(startingDirectory)), "The file must be a child of the starting directory.");
+            Debug.Assert(new Uri(startingDirectory).IsBaseOf(new Uri(filename)), "The file must be a child of the starting directory.");
             DirectoryInfo backupDir = new DirectoryInfo(Settings.Default.BackupDirectory);
             if (!backupDir.Exists)
             {
