@@ -46,7 +46,7 @@ namespace LobsterWpf
         /// <param name="connection">The parent connection of this file.</param>
         /// <param name="databaseFile">The database file </param>
         /// <param name="localFile">The local equivalent of this file, if it exists.</param>
-        public DatabaseFileView(ConnectionView connection, DBClobFile databaseFile, string localFile) : base(connection)
+        public DatabaseFileView(ConnectionView connection, FileNodeView parentNode, DBClobFile databaseFile, string localFile) : base(connection, parentNode)
         {
             this.databaseFile = databaseFile;
             this.localFilePath = localFile;

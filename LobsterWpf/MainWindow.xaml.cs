@@ -186,6 +186,7 @@ namespace LobsterWpf
                 }
 
                 this.ConnectionContainer.DataContext = this.connectionView = new ConnectionView(window.DatabaseConnection);
+                this.connectionView.SelectedFileNode = null;
                 this.RepopulateFileListView();
             }
         }
@@ -265,7 +266,6 @@ namespace LobsterWpf
             ClobDirectoryView clobDirView = (ClobDirectoryView)this.clobTypeListBox.SelectedItem;
 
             this.connectionView.PopulateFileTreeForClobDirectory(clobDirView.BaseClobDirectory);
-            this.localFileTreeView.ItemsSource = this.connectionView.RootFile?.Children;
         }
 
         /// <summary>

@@ -47,8 +47,9 @@ namespace LobsterWpf
         /// Initializes a new instance of the <see cref="FileNodeView"/> class.
         /// </summary>
         /// <param name="connectionView">The parent connetion of the file.</param>
-        public FileNodeView(ConnectionView connectionView)
+        public FileNodeView(ConnectionView connectionView, FileNodeView parentNode)
         {
+            this.ParentNode = parentNode;
             this.parentConnectionView = connectionView;
         }
 
@@ -185,6 +186,45 @@ namespace LobsterWpf
             if (this.PropertyChanged != null)
             {
                 this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        private bool isExpanded = false;
+
+        public FileNodeView ParentNode { get; }
+
+        /// <summary>
+        /// Gets/sets whether the TreeViewItem 
+        /// associated with this object is expanded.
+        /// </summary>
+        public bool IsExpanded
+        {
+            get
+            {
+                return this.isExpanded;
+            }
+            set
+            {
+                if (value != this.isExpanded)
+                {
+                    this.isExpanded = value;
+                    this.NotifyPropertyChanged("IsExpanded");
+
+                    if (this.isExpanded)
+                    {
+                        this.parentConnectionView.ExpandedDirectoryNames.Add(this.FullName);
+                    }
+                    else
+                    {
+                        this.parentConnectionView.ExpandedDirectoryNames.Remove(this.FullName);
+                    }
+                }
+
+                // Expand all the way up to the root.
+                /*if (isExpanded && this.ParentNode != null)
+                {
+                    this.ParentNode.IsExpanded = true;
+                }*/
             }
         }
     }
