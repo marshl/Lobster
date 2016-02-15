@@ -1,0 +1,24 @@
+﻿<Window x:Class="LobsterWpf.MessageListWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:LobsterWpf"
+        mc:Ignorable="d"
+        Title="MessageListWindow" Height="300" Width="300" Background="{StaticResource BackgroundKey}" Icon="Resources/Images/cartoon-lobster.ico" Closed="Window_Closed">
+  <Grid>
+    <ListBox Grid.Column="0" Grid.Row="0" ItemsSource="{Binding MessageList}">
+      <ListBox.ItemTemplate>
+        <DataTemplate DataType="MessageView">
+          <StackPanel Orientation="Horizontal">
+            <Image Source="{Binding ImageUrl}" Height="24"/>
+            <StackPanel Orientation="Vertical" Margin="4,0,0,0">
+              <TextBlock Text="{Binding Text}" FontWeight="Bold"/>
+              <TextBlock Text="{Binding DateCreated}" FontStyle="Italic"/>
+            </StackPanel>
+          </StackPanel>
+        </DataTemplate>
+      </ListBox.ItemTemplate>
+    </ListBox>
+  </Grid>
+</Window>

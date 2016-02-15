@@ -9,6 +9,8 @@
       <BitmapImage x:Key="MergeImageSource" UriSource="/Lobster;component/Resources/Images/041_Sort.ico"/>
       <BitmapImage x:Key="PushImageSource" UriSource="/Lobster;component/Resources/Images/112_UpArrowShort_Orange.ico"/>
       <BitmapImage x:Key="WarningImageSource" UriSource="/Lobster;component/Resources/Images/Annotate_Warning.ico"/>
+      <BitmapImage x:Key="PriorityImageSource" UriSource="/Lobster;component/Resources/Images/Annotate_HighPriority.ico"/>
+      <BitmapImage x:Key="InfoImageSource" UriSource="/Lobster;component/Resources/Images/Annotate_info.ico"/>
       <BitmapImage x:Key="SuccessImageSource" UriSource="/Lobster;component/Resources/Images/Annotate_Default.ico"/>
       <BitmapImage x:Key="FullDirectoryImageSource" UriSource="/Lobster;component/Resources/Images/Folder_stuffed.ico"/>
       <BitmapImage x:Key="EmptyDirectoryImageSource" UriSource="/Lobster;component/Resources/Images/folder_open.ico"/>

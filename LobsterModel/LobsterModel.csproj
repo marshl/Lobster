@@ -58,6 +58,7 @@
     <Compile Include="FileInsertException.cs" />
     <Compile Include="FileListRetrievalException.cs" />
     <Compile Include="FileUpdateException.cs" />
+    <Compile Include="IMessageLogEventListener.cs" />
     <Compile Include="MimeTypeNotFoundException.cs" />
     <Compile Include="Model.cs" />
     <Compile Include="SerializableObject.cs" />

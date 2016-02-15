@@ -40,7 +40,7 @@ namespace LobsterModel
         /// <summary>
         /// The instance of this logger.
         /// </summary>
-        private static MessageLog instance;
+        public static MessageLog Instance { get; private set; }
 
         /// <summary>
         /// The file stream this logger writes to.
@@ -49,12 +49,14 @@ namespace LobsterModel
 
         private StreamWriter streamWriter;
 
+        public IMessageLogEventListener EventListener { get; set; }
+
         /// <summary>
         /// Prevents a default instance of the <see cref="MessageLog"/> class from being created.
         /// </summary>
         private MessageLog()
         {
-            MessageLog.instance = this;
+            MessageLog.Instance = this;
 
             this.MessageList = new List<Message>();
             this.outStream = new FileStream(Settings.Default.LogFilename, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
@@ -75,12 +77,12 @@ namespace LobsterModel
         /// <returns>The old instance of the log if it exists. Otherwise the new instance.</returns>
         public static MessageLog Initialise()
         {
-            if (instance == null)
+            if (Instance == null)
             {
-                instance = new MessageLog();
+                Instance = new MessageLog();
             }
 
-            return instance;
+            return Instance;
         }
 
         /// <summary>
@@ -88,7 +90,7 @@ namespace LobsterModel
         /// </summary>
         public static void Flush()
         {
-            MessageLog.instance.outStream.Flush();
+            MessageLog.Instance.outStream.Flush();
         }
 
         /// <summary>
@@ -97,7 +99,7 @@ namespace LobsterModel
         /// <param name="message">The text of the message to create.</param>
         public static void LogWarning(string message)
         {
-            MessageLog.instance.InternalLog(Message.TYPE.WARNING, message);
+            MessageLog.Instance.InternalLog(Message.TYPE.WARNING, message);
         }
 
         /// <summary>
@@ -106,7 +108,7 @@ namespace LobsterModel
         /// <param name="message">The text of the message to create.</param>
         public static void LogError(string message)
         {
-            MessageLog.instance.InternalLog(Message.TYPE.ERROR, message);
+            MessageLog.Instance.InternalLog(Message.TYPE.ERROR, message);
         }
 
         /// <summary>
@@ -115,7 +117,7 @@ namespace LobsterModel
         /// <param name="message">The text of the message to create.</param>
         public static void LogInfo(string message)
         {
-            MessageLog.instance.InternalLog(Message.TYPE.INFO, message);
+            MessageLog.Instance.InternalLog(Message.TYPE.INFO, message);
         }
 
         /// <summary>
@@ -124,7 +126,7 @@ namespace LobsterModel
         /// <param name="message">The text of the message to create.</param>
         public static void LogSensitive(string message)
         {
-            MessageLog.instance.InternalLog(Message.TYPE.SENSITIVE, message);
+            MessageLog.Instance.InternalLog(Message.TYPE.SENSITIVE, message);
         }
 
         /// <summary>
@@ -133,8 +135,8 @@ namespace LobsterModel
         public static void Close()
         {
             MessageLog.LogInfo("Lobster Stopped");
-            instance.outStream.Close();
-            instance = null;
+            Instance.outStream.Close();
+            Instance = null;
         }
 
         /// <summary>
@@ -154,6 +156,11 @@ namespace LobsterModel
                     this.streamWriter.WriteLine(msg.ToString());
                     this.streamWriter.Flush();
                 }
+            }
+
+            if ( this.EventListener != null )
+            {
+                this.EventListener.OnNewMessage(msg);
             }
         }
 
@@ -204,17 +211,17 @@ namespace LobsterModel
             /// <summary>
             /// Gets the text of this message.
             /// </summary>
-            public string Text { get; private set; }
+            public string Text { get; }
 
             /// <summary>
             /// Gets the date that this message was created.
             /// </summary>
-            public DateTime DateCreated { get; private set; }
+            public DateTime DateCreated { get; }
 
             /// <summary>
             /// Gets the type of this message.
             /// </summary>
-            public TYPE MessageType { get; private set; }
+            public TYPE MessageType { get; }
 
             /// <summary>
             /// Override forthe ToString() method, returning the message formatted as {Date} [{Type}]: {Text}

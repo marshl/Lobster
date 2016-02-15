@@ -40,6 +40,7 @@ namespace LobsterModel
         {
             this.OriginalFilename = originalFIlename;
             this.BackupFilename = backupFilename;
+            this.DateCreated = new FileInfo(this.BackupFilename).LastWriteTime;
         }
 
         /// <summary>
@@ -55,12 +56,6 @@ namespace LobsterModel
         /// <summary>
         /// Gets the time the backup was created.
         /// </summary>
-        public DateTime DateCreated
-        {
-            get
-            {
-                return new FileInfo(this.BackupFilename).LastWriteTime;
-            }
-        }
+        public DateTime DateCreated { get; }
     }
 }

@@ -55,7 +55,7 @@ namespace LobsterWpf
         /// The system tray icon that can be used to minimise and maximise the window.
         /// </summary>
         private NotifyIcon notifyIcon;
-
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow"/> class.
         /// </summary>
@@ -492,6 +492,24 @@ namespace LobsterWpf
         }
 
         /// <summary>
+        /// The event called when the settings button is clicked, opening a new settings window.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void MessagesMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (MessageListWindow.Instance != null)
+            {
+                MessageListWindow.Instance.BringIntoView();
+            }
+            else
+            {
+                MessageListWindow window = new MessageListWindow();
+                window.Show();
+            }
+        }
+        
+        /// <summary>
         /// The event that is called when the tray icon is clicked, toggling the display of the window.
         /// </summary>
         /// <param name="sender">Tjhe sender of the event.</param>
@@ -529,6 +547,10 @@ namespace LobsterWpf
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             this.notifyIcon.Dispose();
+            if (MessageListWindow.Instance != null)
+            {
+                MessageListWindow.Instance.Close();
+            }
         }
     }
 }

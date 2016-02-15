@@ -26,6 +26,7 @@
         </MenuItem>
         <MenuItem Header="_View">
           <MenuItem Header="_Options" Click="OptionsMenuItem_Click"/>
+          <MenuItem Header="_Messages" Click="MessagesMenuItem_Click"/>
         </MenuItem>
       </Menu>
     </Grid>

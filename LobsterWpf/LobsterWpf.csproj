@@ -146,6 +146,12 @@
     <Compile Include="GitHubUpdater.cs" />
     <Compile Include="InverseBooleanConverter.cs" />
     <Compile Include="LocalFileView.cs" />
+    <Compile Include="MessageListView.cs" />
+    <Compile Include="MessageListWindow.xaml.cs">
+      <DependentUpon>MessageListWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MessageLogView.cs" />
+    <Compile Include="MessageView.cs" />
     <Compile Include="SettingsView.cs" />
     <Compile Include="SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
@@ -203,6 +209,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="MessageListWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MimeTypeSelectorWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -298,6 +308,7 @@
   </ItemGroup>
   <ItemGroup>
     <SplashScreen Include="Resources\Images\cartoon-lobster-800px.png" />
+    <Resource Include="Resources\Images\Annotate_info.ico" />
     <Content Include="Resources\Images\cartoon-lobster.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -356,7 +367,7 @@
     <None Include="Resources\Images\Annotate_Complete.ico" />
     <Resource Include="Resources\Images\Annotate_Default.ico" />
     <None Include="Resources\Images\Annotate_Disabled.ico" />
-    <None Include="Resources\Images\Annotate_Help.ico" />
+    <Resource Include="Resources\Images\Annotate_Help.ico" />
     <None Include="Resources\Images\Annotate_HighPriority.ico" />
     <None Include="Resources\Images\Annotate_QuestionBlue.ico" />
     <None Include="Resources\Images\Annotate_QuestionRed.ico" />
