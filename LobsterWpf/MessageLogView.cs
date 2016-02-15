@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="filename.cs" company="marshl">
+// <copyright file="MessageLogView.cs" company="marshl">
 // Copyright 2016, Liam Marshall, marshl.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,30 +22,50 @@ namespace LobsterWpf
     using System.Linq;
     using LobsterModel;
 
+    /// <summary>
+    /// The view of the LobsterModel.MessageLog
+    /// </summary>
     public class MessageLogView : IMessageLogEventListener, IDisposable, INotifyPropertyChanged
     {
-        //public MessageListView MessageList { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MessageLogView"/> class.
+        /// </summary>
+        public MessageLogView()
+        {
+            MessageLog.Instance.EventListener = this;
+        }
 
+        /// <summary>
+        /// The event to be raised when a property is changed.
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// Gets the list of message views of the underlying log.
+        /// </summary>
         public List<MessageView> MessageList
         {
             get
             {
-                return this.messageLog.MessageList.Select(item => new MessageView(item)).ToList();
+                return MessageLog.Instance.MessageList.Select(item => new MessageView(item)).ToList();
             }
         }
 
-        private MessageLog messageLog;
-
-        public MessageLogView()
-        {
-            this.messageLog = MessageLog.Instance;
-            this.messageLog.EventListener = this;
-            //this.MessageList = new MessageListView(this.messageLog);
-        }
-
+        /// <summary>
+        /// The event that is raised when the underlying message log changes its state.
+        /// </summary>
+        /// <param name="msg">The message that caused the log to change state.</param>
         void IMessageLogEventListener.OnNewMessage(MessageLog.Message msg)
         {
             this.NotifyPropertyChanged("MessageList");
+        }
+
+        /// <summary>
+        /// Overloads the dispose method.
+        /// </summary>
+        public void Dispose()
+        {
+            MessageLog.Instance.EventListener = null;
         }
 
         /// <summary>
@@ -62,15 +82,5 @@ namespace LobsterWpf
                 this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
-
-        public void Dispose()
-        {
-            this.messageLog.EventListener = null;
-        }
-
-        /// <summary>
-        /// The event to be raised when a property is changed.
-        /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
     }
 }
