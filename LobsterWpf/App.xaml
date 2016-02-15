@@ -20,6 +20,7 @@
       <SolidColorBrush x:Key="BackgroundKey" Color="#FF181818" />
       <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="Themes/MetroDark/MetroDark.MSControls.Core.Implicit.xaml" />
+        <!--<ResourceDictionary Source="WpfThemes/ExpressionDark.xaml"/>-->
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Application.Resources>
