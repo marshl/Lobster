@@ -17,6 +17,7 @@
 namespace LobsterWpf
 {
     using System;
+    using System.Diagnostics;
     using System.Windows;
 
     /// <summary>
@@ -24,19 +25,28 @@ namespace LobsterWpf
     /// </summary>
     public partial class MessageListWindow : Window
     {
-        public static MessageListWindow Instance { get; private set; }
-
-        public MessageLogView LogView { get; set; }
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MessageListWindow"/> class.
+        /// </summary>
         public MessageListWindow()
         {
+            Debug.Assert(MessageListWindow.Instance != null, "There can only be one instance of the MessageListWindow class active at once.");
             MessageListWindow.Instance = this;
-            InitializeComponent();
+            this.InitializeComponent();
 
             this.LogView = new MessageLogView();
-
             this.DataContext = this.LogView;
         }
+
+        /// <summary>
+        /// Gets the instance of this window. There can only be one MessageListWindow active at a time.
+        /// </summary>
+        public static MessageListWindow Instance { get; private set; }
+
+        /// <summary>
+        /// Gets the data context MessageLogView of this window.
+        /// </summary>
+        public MessageLogView LogView { get; }
 
         /// <summary>
         /// The event that is called when the window is closed.
