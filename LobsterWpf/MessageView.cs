@@ -1,6 +1,5 @@
-﻿
-//-----------------------------------------------------------------------
-// <copyright file="filename.cs" company="marshl">
+﻿//-----------------------------------------------------------------------
+// <copyright file="MessageView.cs" company="marshl">
 // Copyright 2016, Liam Marshall, marshl.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,17 +14,26 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
-
 namespace LobsterWpf
 {
     using System;
     using System.Windows.Media;
     using LobsterModel;
 
+    /// <summary>
+    /// The view of a particular MessageLog.Message.
+    /// </summary>
     public class MessageView
     {
+        /// <summary>
+        /// The underlying MessageLog.Message for this view.
+        /// </summary>
         private MessageLog.Message baseMessage;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MessageView"/> class.
+        /// </summary>
+        /// <param name="message">The message to use as the basis for this view.</param>
         public MessageView(MessageLog.Message message)
         {
             this.baseMessage = message;
@@ -53,6 +61,9 @@ namespace LobsterWpf
             }
         }
 
+        /// <summary>
+        /// Gets the ImageSource to use for the icon of this message, depending on the type of message.
+        /// </summary>
         public ImageSource ImageUrl
         {
             get
