@@ -30,7 +30,7 @@ namespace LobsterWpf
         /// </summary>
         public MessageListWindow()
         {
-            Debug.Assert(MessageListWindow.Instance != null, "There can only be one instance of the MessageListWindow class active at once.");
+            Debug.Assert(MessageListWindow.Instance == null, "There can only be one instance of the MessageListWindow class active at once.");
             MessageListWindow.Instance = this;
             this.InitializeComponent();
 
