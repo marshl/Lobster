@@ -180,6 +180,11 @@ namespace LobsterWpf
             bool? result = window.ShowDialog();
             if (result.HasValue && result.Value)
             {
+                if ( this.connectionView != null )
+                {
+                    this.connectionView.Dispose();
+                }
+
                 this.ConnectionContainer.DataContext = this.connectionView = new ConnectionView(window.DatabaseConnection);
                 this.RepopulateFileListView();
             }

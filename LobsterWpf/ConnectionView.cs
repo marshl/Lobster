@@ -25,7 +25,7 @@ namespace LobsterWpf
     /// <summary>
     /// The ViewModel for a model DatabaseConnection object.
     /// </summary>
-    public class ConnectionView : INotifyPropertyChanged
+    public class ConnectionView : INotifyPropertyChanged, IDisposable
     {
         /// <summary>
         /// The file that is currently selected in the file tree view.
@@ -210,6 +210,11 @@ namespace LobsterWpf
             {
                 this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
+        }
+
+        public void Dispose()
+        {
+            this.Connection.Dispose();
         }
     }
 }

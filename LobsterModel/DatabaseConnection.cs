@@ -199,6 +199,7 @@ namespace LobsterModel
         /// </summary>
         public void Dispose()
         {
+            this.fileWatcher.Dispose();
             foreach (string filename in this.TempFileList)
             {
                 try
