@@ -117,6 +117,14 @@ namespace LobsterWpf
             }
         }
 
+        public override bool CanBePulled
+        {
+            get
+            {
+                return !this.IsDirectory && this.DatabaseFile != null;
+            }
+        }
+
         /// <summary>
         /// Gets a value indicating whether this file can be explored to or not.
         /// </summary>

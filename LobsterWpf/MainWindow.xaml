@@ -96,6 +96,12 @@
               <TextBlock HorizontalAlignment="Center" MinHeight="15" VerticalAlignment="Bottom">Push</TextBlock>
             </StackPanel>
           </Button>
+          <Button Grid.Column="0" Height="65" Click="PullButton_Click" IsEnabled="{Binding Path=SelectedFileNode.CanBePulled, FallbackValue=false}">
+            <StackPanel MaxHeight="50">
+              <Image Source="{DynamicResource PullImageSource}" VerticalAlignment="Top" Height="30"/>
+              <TextBlock HorizontalAlignment="Center" MinHeight="15" VerticalAlignment="Bottom">Pull</TextBlock>
+            </StackPanel>
+          </Button>
           <Button x:Name="diffButton" Grid.Column="0" Height="65" Click="DiffButton_Click" IsEnabled="{Binding Path=SelectedFileNode.CanBeDiffed, FallbackValue=false}">
             <StackPanel MaxHeight="50">
               <Image Source="{DynamicResource MergeImageSource}" VerticalAlignment="Top" Height="30"/>

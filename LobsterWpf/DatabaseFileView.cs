@@ -91,6 +91,14 @@ namespace LobsterWpf
             }
         }
 
+        public override bool CanBePulled
+        {
+            get
+            {
+                return true;
+            }
+        }
+
         /// <summary>
         /// Gets a value indicating whether this file can be used to update the database.
         /// </summary>

@@ -55,7 +55,7 @@ namespace LobsterWpf
         /// The system tray icon that can be used to minimise and maximise the window.
         /// </summary>
         private NotifyIcon notifyIcon;
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow"/> class.
         /// </summary>
@@ -181,7 +181,7 @@ namespace LobsterWpf
             bool? result = window.ShowDialog();
             if (result.HasValue && result.Value)
             {
-                if ( this.connectionView != null )
+                if (this.connectionView != null)
                 {
                     this.connectionView.Dispose();
                 }
@@ -291,36 +291,56 @@ namespace LobsterWpf
         /// <param name="e">The event arguments.</param>
         private void PushButton_Click(object sender, RoutedEventArgs e)
         {
-            if (this.connectionView.SelectedFileNode != null)
+            if (this.connectionView.SelectedFileNode == null)
             {
-                string filename = this.connectionView.SelectedFileNode.FullName;
+                return;
+            }
+            string filename = this.connectionView.SelectedFileNode.FullName;
 
-                FileInfo fi = new FileInfo(filename);
-                if (fi.IsReadOnly)
-                {
-                    MessageBoxResult result = System.Windows.MessageBox.Show(
-                        $"{this.connectionView.SelectedFileNode.Name} is locked. Are you sure you want to clob it?",
-                        "File is Locked",
-                        MessageBoxButton.OKCancel);
+            FileInfo fi = new FileInfo(filename);
+            if (fi.IsReadOnly)
+            {
+                MessageBoxResult result = System.Windows.MessageBox.Show(
+                    $"{this.connectionView.SelectedFileNode.Name} is locked. Are you sure you want to clob it?",
+                    "File is Locked",
+                    MessageBoxButton.OKCancel);
 
-                    if (result != MessageBoxResult.OK)
-                    {
-                        return;
-                    }
-                }
-
-                try
+                if (result != MessageBoxResult.OK)
                 {
-                    Model.SendUpdateClobMessage(this.connectionView.Connection, filename);
-                }
-                catch (FileUpdateException)
-                {
-                    this.DisplayUpdateNotification(filename, false);
                     return;
                 }
+            }
 
-                this.DisplayUpdateNotification(filename, true);
-                this.connectionView.SelectedFileNode.Refresh();
+            try
+            {
+                Model.SendUpdateClobMessage(this.connectionView.Connection, filename);
+            }
+            catch (FileUpdateException)
+            {
+                this.DisplayUpdateNotification(filename, false);
+                return;
+            }
+
+            this.DisplayUpdateNotification(filename, true);
+            this.connectionView.SelectedFileNode.Refresh();
+
+        }
+
+        private void PullButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.connectionView.SelectedFileNode == null)
+            {
+                return;
+            }
+            string filename = this.connectionView.SelectedFileNode.FullName;
+            try
+            {
+                string resultPath = Model.SendDownloadClobDataToFileMessage(this.connectionView.Connection, filename);
+                Process.Start(resultPath);
+            }
+            catch (FileDownloadException ex)
+            {
+                System.Windows.MessageBox.Show($"The file download failed: {ex}");
             }
         }
 
@@ -519,7 +539,7 @@ namespace LobsterWpf
                 window.Show();
             }
         }
-        
+
         /// <summary>
         /// The event that is called when the tray icon is clicked, toggling the display of the window.
         /// </summary>

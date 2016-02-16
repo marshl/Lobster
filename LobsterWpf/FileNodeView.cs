@@ -126,6 +126,8 @@ namespace LobsterWpf
         /// </summary>
         public abstract bool CanBeInserted { get; }
 
+        public abstract bool CanBePulled { get; }
+
         /// <summary>
         /// Gets a value indicating whether this file can be explored to or not.
         /// </summary>

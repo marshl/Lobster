@@ -342,7 +342,7 @@
     </Content>
     <Resource Include="Resources\Images\SecurityLock.ico" />
     <None Include="Resources\Images\008_Reminder.ico" />
-    <None Include="Resources\Images\010_LowPriority.ico" />
+    <Resource Include="Resources\Images\010_LowPriority.ico" />
     <Resource Include="Resources\Images\041_Sort.ico" />
     <None Include="Resources\Images\042b_AddCategory.ico" />
     <None Include="Resources\Images\075b_UpFolder.ico" />

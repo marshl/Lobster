@@ -8,6 +8,7 @@
       <BitmapImage x:Key="InsertImageSource" UriSource="/Lobster;component/Resources/Images/112_Plus_Green.ico"/>
       <BitmapImage x:Key="MergeImageSource" UriSource="/Lobster;component/Resources/Images/041_Sort.ico"/>
       <BitmapImage x:Key="PushImageSource" UriSource="/Lobster;component/Resources/Images/112_UpArrowShort_Orange.ico"/>
+      <BitmapImage x:Key="PullImageSource" UriSource="/Lobster;component/Resources/Images/010_LowPriority.ico"/>
       <BitmapImage x:Key="WarningImageSource" UriSource="/Lobster;component/Resources/Images/Annotate_Warning.ico"/>
       <BitmapImage x:Key="PriorityImageSource" UriSource="/Lobster;component/Resources/Images/Annotate_HighPriority.ico"/>
       <BitmapImage x:Key="InfoImageSource" UriSource="/Lobster;component/Resources/Images/Annotate_info.ico"/>
