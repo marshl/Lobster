@@ -137,7 +137,7 @@ if not errorlevel 1 (
 )
 
 xcopy /s/e/y ""{source}"" ""{destination}""
-call ""{destination}\Lobster.exe""
+call ""{Assembly.GetExecutingAssembly().Location}""
 ";
 
             using (StreamWriter stream = new StreamWriter(scriptFilePath))
