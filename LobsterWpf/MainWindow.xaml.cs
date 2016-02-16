@@ -74,6 +74,8 @@ namespace LobsterWpf
         /// <param name="success">Whether the operation was a success or not.</param>
         private delegate void FileOperationDelegate(string filename, bool success);
 
+        private delegate void ExitProgramDelegate();
+
         /// <summary>
         /// The callback for when a automatic file update is completed.
         /// </summary>
@@ -157,7 +159,6 @@ namespace LobsterWpf
         {
             try
             {
-                Assembly assembly = Assembly.GetExecutingAssembly();
                 Icon icon = new Icon("Resources/Images/cartoon-lobster.ico");
 
                 this.notifyIcon = new NotifyIcon();
@@ -223,9 +224,14 @@ namespace LobsterWpf
             bool result = GitHubUpdater.RunUpdateCheck("marshl", "lobster");
             if (result)
             {
-                this.Close();
+                this.Dispatcher.Invoke(new ExitProgramDelegate(this.ExitProgram));
                 return;
             }
+        }
+
+        private void ExitProgram()
+        {
+            this.Close();
         }
 
         /// <summary>
