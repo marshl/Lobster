@@ -18,6 +18,7 @@ namespace LobsterWpf
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.ComponentModel;
     using System.Linq;
     using LobsterModel;
@@ -33,6 +34,9 @@ namespace LobsterWpf
         public MessageLogView()
         {
             MessageLog.Instance.EventListener = this;
+
+            var viewList = MessageLog.Instance.MessageList.Select(item => new MessageView(item)).ToList();
+            this.messageList = new ObservableCollection<MessageView>(viewList);
         }
 
         /// <summary>
@@ -40,14 +44,24 @@ namespace LobsterWpf
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
+        private ObservableCollection<MessageView> messageList;
         /// <summary>
         /// Gets the list of message views of the underlying log.
         /// </summary>
-        public List<MessageView> MessageList
+        public ObservableCollection<MessageView> MessageList
         {
             get
             {
-                return MessageLog.Instance.MessageList.Select(item => new MessageView(item)).ToList();
+                return this.messageList;
+            }
+
+            set
+            {
+                lock (this.messageList)
+                {
+                    this.messageList = value;
+                    this.NotifyPropertyChanged("MessageList");
+                }
             }
         }
 
@@ -57,6 +71,11 @@ namespace LobsterWpf
         /// <param name="msg">The message that caused the log to change state.</param>
         void IMessageLogEventListener.OnNewMessage(MessageLog.Message msg)
         {
+            App.Current.Dispatcher.Invoke((Action)delegate
+            {
+                this.MessageList.Add(new MessageView(msg));
+            });
+
             this.NotifyPropertyChanged("MessageList");
         }
 
