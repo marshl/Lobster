@@ -175,5 +175,17 @@ namespace LobsterModel.Properties {
                 this["AppendFooterToDatabaseFiles"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool LogFileEvents {
+            get {
+                return ((bool)(this["LogFileEvents"]));
+            }
+            set {
+                this["LogFileEvents"] = value;
+            }
+        }
     }
 }

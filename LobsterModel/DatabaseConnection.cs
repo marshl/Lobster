@@ -242,7 +242,10 @@ namespace LobsterModel
         /// <param name="e">The event arguments.</param>
         private void EnqueueFileEvent(object sender, FileSystemEventArgs e)
         {
-            MessageLog.LogInfo($"File change event of type {e.ChangeType} for file {e.FullPath} with a write time of " + File.GetLastWriteTime(e.FullPath).ToString("yyyy-MM-dd HH:mm:ss.fff"));
+            if (Settings.Default.LogFileEvents)
+            {
+                MessageLog.LogInfo($"File change event of type {e.ChangeType} for file {e.FullPath} with a write time of " + File.GetLastWriteTime(e.FullPath).ToString("yyyy-MM-dd HH:mm:ss.fff"));
+            }
 
             lock (this.fileEventQueue)
             {
@@ -250,23 +253,39 @@ namespace LobsterModel
                 // This often occurs, as most programs invoke several file change events when saving.
                 if (this.fileEventQueue.Find(x => x.FullPath.Equals(e.FullPath, StringComparison.OrdinalIgnoreCase)) != null)
                 {
-                    MessageLog.LogInfo("Ignoring event, as it is already in the list.");
+                    if (Settings.Default.LogFileEvents)
+                    {
+                        MessageLog.LogInfo("Ignoring event, as it is already in the list.");
+                    }
+
                     return;
                 }
 
                 if (this.fileEventQueue.Count == 0)
                 {
-                    MessageLog.LogInfo("Event stack populated.");
+                    if (Settings.Default.LogFileEvents)
+                    {
+                        MessageLog.LogInfo("Event stack populated.");
+                    }
+
                     this.EventListener.OnEventProcessingStart();
                 }
 
                 this.fileEventQueue.Add(e);
             }
 
-            MessageLog.LogInfo("Awaiting semaphore...");
+            if (Settings.Default.LogFileEvents)
+            {
+                MessageLog.LogInfo("Awaiting semaphore...");
+            }
+
             lock (this.fileEventProcessingSemaphore)
             {
-                MessageLog.LogInfo("Lock achieved, processing event.");
+                if (Settings.Default.LogFileEvents)
+                {
+                    MessageLog.LogInfo("Lock achieved, processing event.");
+                }
+
                 this.ProcessFileEvent(e);
 
                 lock (this.fileEventQueue)
@@ -274,7 +293,11 @@ namespace LobsterModel
                     this.fileEventQueue.Remove(e);
                     if (this.fileEventQueue.Count == 0)
                     {
-                        MessageLog.LogInfo("Event stack empty.");
+                        if (Settings.Default.LogFileEvents)
+                        {
+                            MessageLog.LogInfo("Event stack empty.");
+                        }
+
                         this.EventListener.OnFileProcessingFinished();
                     }
                 }
@@ -287,26 +310,42 @@ namespace LobsterModel
         /// <param name="e">The event to process.</param>
         private void ProcessFileEvent(FileSystemEventArgs e)
         {
-            MessageLog.LogInfo($"Processing file event of type {e.ChangeType} for file {e.FullPath}");
+            if (Settings.Default.LogFileEvents)
+            {
+                MessageLog.LogInfo($"Processing file event of type {e.ChangeType} for file {e.FullPath}");
+            }
+
             FileInfo fileInfo = new FileInfo(e.FullPath);
 
             if (e.ChangeType == WatcherChangeTypes.Changed)
             {
                 if (!this.IsAutoUpdateEnabled)
                 {
-                    MessageLog.LogInfo($"Automatic clobbing is disabled, ignoring event.");
+                    if (Settings.Default.LogFileEvents)
+                    {
+                        MessageLog.LogInfo($"Automatic clobbing is disabled, ignoring event.");
+                    }
+
                     return;
                 }
 
                 if (!fileInfo.Exists)
                 {
-                    MessageLog.LogInfo($"File could not be found {e.FullPath}");
+                    if (Settings.Default.LogFileEvents)
+                    {
+                        MessageLog.LogInfo($"File could not be found {e.FullPath}");
+                    }
+
                     return;
                 }
 
                 if (fileInfo.IsReadOnly)
                 {
-                    MessageLog.LogInfo($"File is read only and will be skipped {e.FullPath}");
+                    if (Settings.Default.LogFileEvents)
+                    {
+                        MessageLog.LogInfo($"File is read only and will be skipped {e.FullPath}");
+                    }
+
                     return;
                 }
 
@@ -317,24 +356,40 @@ namespace LobsterModel
                 }
                 catch (Exception ex) when (ex is ClobFileLookupException)
                 {
-                    MessageLog.LogInfo($"The file does not belong to any ClobDirectory and will be skipped {e.FullPath}");
+                    if (Settings.Default.LogFileEvents)
+                    {
+                        MessageLog.LogInfo($"The file does not belong to any ClobDirectory and will be skipped {e.FullPath}");
+                    }
+
                     return;
                 }
 
                 DBClobFile clobFile = clobDir.GetDatabaseFileForFullpath(e.FullPath);
                 if (clobFile == null)
                 {
-                    MessageLog.LogInfo($"The file does not have a DBClobFile and will be skipped {e.FullPath}");
+                    if (Settings.Default.LogFileEvents)
+                    {
+                        MessageLog.LogInfo($"The file does not have a DBClobFile and will be skipped {e.FullPath}");
+                    }
+
                     return;
                 }
 
                 if (clobFile.LastUpdatedTime.AddMilliseconds(Settings.Default.FileUpdateTimeoutMilliseconds) > DateTime.Now)
                 {
-                    MessageLog.LogInfo("The file was updated within the cooldown period, and will be skipped.");
+                    if (Settings.Default.LogFileEvents)
+                    {
+                        MessageLog.LogInfo("The file was updated within the cooldown period, and will be skipped.");
+                    }
+
                     return;
                 }
 
-                MessageLog.LogInfo($"Auto-updating file {e.FullPath}");
+                if (Settings.Default.LogFileEvents)
+                {
+                    MessageLog.LogInfo($"Auto-updating file {e.FullPath}");
+                }
+
                 try
                 {
                     Model.SendUpdateClobMessage(this, e.FullPath);
@@ -349,7 +404,10 @@ namespace LobsterModel
             }
             else
             {
-                MessageLog.LogInfo($"Unsupported change type {e.ChangeType} for {e.FullPath}");
+                if (Settings.Default.LogFileEvents)
+                {
+                    MessageLog.LogInfo($"Unsupported change type {e.ChangeType} for {e.FullPath}");
+                }
             }
         }
     }
