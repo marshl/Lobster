@@ -5,18 +5,27 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LobsterWpf"
         mc:Ignorable="d"
-        Title="MessageListWindow" Height="300" Width="300" Background="{StaticResource BackgroundKey}" Icon="Resources/Images/cartoon-lobster.ico" Closed="Window_Closed">
+        Title="MessageListWindow" Height="300" Width="600" Background="{StaticResource BackgroundKey}" Icon="Resources/Images/cartoon-lobster.ico" Closed="Window_Closed">
   <Grid>
-    <ListBox Grid.Column="0" Grid.Row="0" ItemsSource="{Binding MessageList}">
+    <ListBox Grid.Column="0" Grid.Row="0" ItemsSource="{Binding MessageList}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+      <ListBox.ItemContainerStyle>
+        <Style TargetType="{x:Type ListBoxItem}">
+          <Setter Property="Focusable" Value="False"/>
+        </Style>
+      </ListBox.ItemContainerStyle>
       <ListBox.ItemTemplate>
         <DataTemplate DataType="MessageView">
-          <StackPanel Orientation="Horizontal">
-            <Image Source="{Binding ImageUrl}" Height="24"/>
-            <StackPanel Orientation="Vertical" Margin="4,0,0,0">
-              <TextBlock Text="{Binding Text}" FontWeight="Bold"/>
-              <TextBlock Text="{Binding DateCreated}" FontStyle="Italic"/>
+          <Grid>
+            <Grid.RowDefinitions>
+              <RowDefinition/>
+              <RowDefinition/>
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0" Orientation="Horizontal">
+              <Image Source="{Binding ImageUrl}" Height="24" Margin="0,0,10,0"/>
+              <TextBlock Text="{Binding DateCreated}"/>
             </StackPanel>
-          </StackPanel>
+            <TextBlock Grid.Row="1" Text="{Binding Text}" TextWrapping="Wrap" FontSize="12"/>
+          </Grid>
         </DataTemplate>
       </ListBox.ItemTemplate>
     </ListBox>
