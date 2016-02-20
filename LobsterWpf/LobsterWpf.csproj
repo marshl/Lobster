@@ -137,9 +137,6 @@
     <Compile Include="EditColumnWindow.xaml.cs">
       <DependentUpon>EditColumnWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="EditConnectionWindow.xaml.cs">
-      <DependentUpon>EditConnectionWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="EditTableWindow.xaml.cs">
       <DependentUpon>EditTableWindow.xaml</DependentUpon>
     </Compile>
@@ -179,10 +176,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="EditColumnWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="EditConnectionWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
