@@ -146,7 +146,6 @@
     <Compile Include="GitHubUpdater.cs" />
     <Compile Include="InverseBooleanConverter.cs" />
     <Compile Include="LocalFileView.cs" />
-    <Compile Include="MessageListView.cs" />
     <Compile Include="MessageListWindow.xaml.cs">
       <DependentUpon>MessageListWindow.xaml</DependentUpon>
     </Compile>

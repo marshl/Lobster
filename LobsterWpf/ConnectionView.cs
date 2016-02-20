@@ -47,14 +47,11 @@ namespace LobsterWpf
             this.Connection = con;
             this.ExpandedDirectoryNames = new List<string>();
 
-
             foreach (ClobDirectory clobDir in con.ClobDirectoryList)
             {
                 this.ClobDirectories.Add(new ClobDirectoryView(this.Connection, clobDir));
             }
         }
-
-        public List<string> ExpandedDirectoryNames { get;}
 
         /// <summary>
         /// The event to be raised when a property is changed.
@@ -78,12 +75,14 @@ namespace LobsterWpf
         }
 
         /// <summary>
-        /// Gets the connection model for this view
+        /// Gets the list of directory names that have been expanded.
         /// </summary>
-        public DatabaseConnection Connection
-        {
-            get;
-        }
+        public List<string> ExpandedDirectoryNames { get; }
+
+        /// <summary>
+        /// Gets the connection model for this view.
+        /// </summary>
+        public DatabaseConnection Connection { get; }
 
         /// <summary>
         /// Gets or sets the root level file for the currently selected clob directory.
@@ -177,11 +176,11 @@ namespace LobsterWpf
 
             if (this.CurrentDisplayMode == DisplayMode.LocalFiles)
             {
-                this.RootFile = new LocalFileView(connection:this, parentNode:null, filename:rootDirInfo.FullName);
+                this.RootFile = new LocalFileView(connection: this, filename: rootDirInfo.FullName);
             }
             else if (this.CurrentDisplayMode == DisplayMode.DatabaseFiles)
             {
-                this.RootFile = new DatabaseFileView(this, null, null, null);
+                this.RootFile = new DatabaseFileView(this, null, null);
                 this.RootFile.Children = new ObservableCollection<FileNodeView>();
 
                 DirectoryInfo dirInfo = new DirectoryInfo(clobDir.GetFullPath(this.Connection));
@@ -195,12 +194,20 @@ namespace LobsterWpf
                         continue;
                     }
 
-                    DatabaseFileView dfv = new DatabaseFileView(this, this.RootFile, df, fileInfo?.FullName);
+                    DatabaseFileView dfv = new DatabaseFileView(this, df, fileInfo?.FullName);
                     this.RootFile.Children.Add(dfv);
                 }
             }
 
             this.NotifyPropertyChanged("RootFile");
+        }
+
+        /// <summary>
+        /// Disposes of the connection for this view.
+        /// </summary>
+        public void Dispose()
+        {
+            this.Connection.Dispose();
         }
 
         /// <summary>
@@ -216,11 +223,6 @@ namespace LobsterWpf
             {
                 this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
-        }
-
-        public void Dispose()
-        {
-            this.Connection.Dispose();
         }
     }
 }

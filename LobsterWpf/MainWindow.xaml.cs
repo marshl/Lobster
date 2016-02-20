@@ -74,8 +74,6 @@ namespace LobsterWpf
         /// <param name="success">Whether the operation was a success or not.</param>
         private delegate void FileOperationDelegate(string filename, bool success);
 
-        private delegate void ExitProgramDelegate();
-
         /// <summary>
         /// The callback for when a automatic file update is completed.
         /// </summary>
@@ -224,14 +222,12 @@ namespace LobsterWpf
             bool result = GitHubUpdater.RunUpdateCheck("marshl", "lobster");
             if (result)
             {
-                this.Dispatcher.Invoke(new ExitProgramDelegate(this.ExitProgram));
+                this.Dispatcher.Invoke((Action)delegate
+                {
+                    this.Close();
+                });
                 return;
             }
-        }
-
-        private void ExitProgram()
-        {
-            this.Close();
         }
 
         /// <summary>
@@ -295,6 +291,7 @@ namespace LobsterWpf
             {
                 return;
             }
+
             string filename = this.connectionView.SelectedFileNode.FullName;
 
             FileInfo fi = new FileInfo(filename);
@@ -323,16 +320,22 @@ namespace LobsterWpf
 
             this.DisplayUpdateNotification(filename, true);
             this.connectionView.SelectedFileNode.Refresh();
-
         }
 
+        /// <summary>
+        /// The event that is called when the pull file button is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
         private void PullButton_Click(object sender, RoutedEventArgs e)
         {
             if (this.connectionView.SelectedFileNode == null)
             {
                 return;
             }
+
             string filename = this.connectionView.SelectedFileNode.FullName;
+
             try
             {
                 string resultPath = Model.SendDownloadClobDataToFileMessage(this.connectionView.Connection, filename);

@@ -34,7 +34,7 @@ namespace LobsterWpf
         /// </summary>
         /// <param name="connection">The parent connection of this file view.</param>
         /// <param name="filename">The full path of the file this view will represent.</param>
-        public LocalFileView(ConnectionView connection, FileNodeView parentNode, string filename) : base(connection, parentNode)
+        public LocalFileView(ConnectionView connection, string filename) : base(connection)
         {
             this.FullName = filename;
 
@@ -54,7 +54,7 @@ namespace LobsterWpf
 
                 foreach (DirectoryInfo subDir in dirInfo.GetDirectories())
                 {
-                    FileNodeView node = new LocalFileView(ParentConnectionView, this, subDir.FullName);
+                    FileNodeView node = new LocalFileView(ParentConnectionView, subDir.FullName);
                     this.Children.Add(node);
                 }
 
@@ -62,7 +62,7 @@ namespace LobsterWpf
                 {
                     if (connection.ShowReadOnlyFiles || !file.IsReadOnly)
                     {
-                        FileNodeView node = new LocalFileView(this.ParentConnectionView, this, file.FullName);
+                        FileNodeView node = new LocalFileView(this.ParentConnectionView, file.FullName);
                         this.Children.Add(node);
                     }
                 }
@@ -117,6 +117,9 @@ namespace LobsterWpf
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether this file can be downloaded from the database
+        /// </summary>
         public override bool CanBePulled
         {
             get

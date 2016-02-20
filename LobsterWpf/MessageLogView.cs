@@ -17,7 +17,6 @@
 namespace LobsterWpf
 {
     using System;
-    using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.ComponentModel;
     using System.Linq;
@@ -28,6 +27,11 @@ namespace LobsterWpf
     /// </summary>
     public class MessageLogView : IMessageLogEventListener, IDisposable, INotifyPropertyChanged
     {
+        /// <summary>
+        /// The viiews of the messages for this view.
+        /// </summary>
+        private ObservableCollection<MessageView> messageList;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MessageLogView"/> class.
         /// </summary>
@@ -44,9 +48,8 @@ namespace LobsterWpf
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private ObservableCollection<MessageView> messageList;
         /// <summary>
-        /// Gets the list of message views of the underlying log.
+        /// Gets or sets the list of message views of the underlying log.
         /// </summary>
         public ObservableCollection<MessageView> MessageList
         {

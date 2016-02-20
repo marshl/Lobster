@@ -38,18 +38,14 @@ namespace LobsterModel
     public class MessageLog
     {
         /// <summary>
-        /// The instance of this logger.
-        /// </summary>
-        public static MessageLog Instance { get; private set; }
-
-        /// <summary>
         /// The file stream this logger writes to.
         /// </summary>
         private FileStream outStream;
 
+        /// <summary>
+        /// The writer of the stream the messages are written to.
+        /// </summary>
         private StreamWriter streamWriter;
-
-        public IMessageLogEventListener EventListener { get; set; }
 
         /// <summary>
         /// Prevents a default instance of the <see cref="MessageLog"/> class from being created.
@@ -60,16 +56,26 @@ namespace LobsterModel
 
             this.MessageList = new List<Message>();
             this.outStream = new FileStream(Settings.Default.LogFilename, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
-            this.streamWriter = new StreamWriter(outStream);
+            this.streamWriter = new StreamWriter(this.outStream);
             this.streamWriter.WriteLine();
 
             MessageLog.LogInfo($"Starting Lobster (build {Utils.RetrieveLinkerTimestamp()})");
         }
-        
+
+        /// <summary>
+        /// Gets the instance of this logger.
+        /// </summary>
+        public static MessageLog Instance { get; private set; }
+
         /// <summary>
         /// Gets the messages that have been created by this program since startup.
         /// </summary>
         public List<Message> MessageList { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the listener of events this log raises (such as when a new message is received).
+        /// </summary>
+        public IMessageLogEventListener EventListener { get; set; }
 
         /// <summary>
         /// Initalizes a new instance of the <see cref="MessageLog"/> class.
@@ -158,7 +164,7 @@ namespace LobsterModel
                 }
             }
 
-            if ( this.EventListener != null )
+            if (this.EventListener != null)
             {
                 this.EventListener.OnNewMessage(msg);
             }

@@ -44,12 +44,16 @@ namespace LobsterWpf
         private DateTime lastWRiteTime;
 
         /// <summary>
+        /// Whether or not the tree view item this node represents has been expanded.
+        /// </summary>
+        private bool isExpanded = false;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="FileNodeView"/> class.
         /// </summary>
         /// <param name="connectionView">The parent connetion of the file.</param>
-        public FileNodeView(ConnectionView connectionView, FileNodeView parentNode)
+        public FileNodeView(ConnectionView connectionView)
         {
-            this.ParentNode = parentNode;
             this.parentConnectionView = connectionView;
         }
 
@@ -126,6 +130,9 @@ namespace LobsterWpf
         /// </summary>
         public abstract bool CanBeInserted { get; }
 
+        /// <summary>
+        /// Gets a value indicating whether this file can be downloaded from the database.
+        /// </summary>
         public abstract bool CanBePulled { get; }
 
         /// <summary>
@@ -152,6 +159,35 @@ namespace LobsterWpf
             {
                 this.lastWRiteTime = value;
                 this.NotifyPropertyChanged("LastWriteTime");
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the TreeViewItem associated with this object is expanded.
+        /// </summary>
+        public bool IsExpanded
+        {
+            get
+            {
+                return this.isExpanded;
+            }
+
+            set
+            {
+                if (value != this.isExpanded)
+                {
+                    this.isExpanded = value;
+                    this.NotifyPropertyChanged("IsExpanded");
+
+                    if (this.isExpanded)
+                    {
+                        this.parentConnectionView.ExpandedDirectoryNames.Add(this.FullName);
+                    }
+                    else
+                    {
+                        this.parentConnectionView.ExpandedDirectoryNames.Remove(this.FullName);
+                    }
+                }
             }
         }
 
@@ -188,45 +224,6 @@ namespace LobsterWpf
             if (this.PropertyChanged != null)
             {
                 this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
-
-        private bool isExpanded = false;
-
-        public FileNodeView ParentNode { get; }
-
-        /// <summary>
-        /// Gets/sets whether the TreeViewItem 
-        /// associated with this object is expanded.
-        /// </summary>
-        public bool IsExpanded
-        {
-            get
-            {
-                return this.isExpanded;
-            }
-            set
-            {
-                if (value != this.isExpanded)
-                {
-                    this.isExpanded = value;
-                    this.NotifyPropertyChanged("IsExpanded");
-
-                    if (this.isExpanded)
-                    {
-                        this.parentConnectionView.ExpandedDirectoryNames.Add(this.FullName);
-                    }
-                    else
-                    {
-                        this.parentConnectionView.ExpandedDirectoryNames.Remove(this.FullName);
-                    }
-                }
-
-                // Expand all the way up to the root.
-                /*if (isExpanded && this.ParentNode != null)
-                {
-                    this.ParentNode.IsExpanded = true;
-                }*/
             }
         }
     }
