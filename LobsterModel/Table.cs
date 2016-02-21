@@ -35,45 +35,38 @@ namespace LobsterModel
     /// Rperesents a single SQL table in the database. Used to build commands for 
     /// inserting, updating and querying values from this table.
     /// </summary>
-    [DisplayName("Table")]
-    [XmlType("table")]
     public class Table : ICloneable
     {
         /// <summary>
         /// Gets or sets the schema/user that this table belongs to.
         /// </summary>
-        [XmlElement("schema")]
         public string Schema { get; set; }
 
         /// <summary>
         /// Gets or sets the name of this table in the database.
         /// </summary>
-        [XmlElement("name")]
         public string Name { get; set; }
 
         /// <summary>
         /// Gets or sets the extension that will be added to the mnemonic to create the guesstimate local file name. 
         /// If the default extension is not set, then .xml will be used
         /// </summary>
-        [XmlElement("defaultExtension")]
         public string DefaultExtension { get; set; }
 
         /// <summary>
         /// Gets or sets the columns in this table that Lobster needs.
         /// </summary>
-        [XmlArray("columns")]
+        [XmlArray]
         public List<Column> Columns { get; set; }
 
         /// <summary>
         /// Gets or sets the custom statements to override automated SQL construction.
         /// </summary>
-        [XmlElement("customStatements")]
         public CustomStatementBlock CustomStatements { get; set; }
 
         /// <summary>
         /// Gets or sets the parent table of this table, if this table is part of a parent-child relationship.
         /// </summary>
-        [XmlElement("parentTable")]
         public Table ParentTable { get; set; }
 
         /// <summary>
@@ -384,19 +377,16 @@ namespace LobsterModel
             /// <summary>
             /// Gets or sets the SQL statement used to insert or update a single file into the database.
             /// </summary>
-            [XmlElement("upsertStatement")]
             public string UpsertStatement { get; set; }
 
             /// <summary>
             /// Gets or sets the SQL statement used to get all the files in this table on the database.
             /// </summary>
-            [XmlElement("fileListStatement")]
             public string FileListStatement { get; set; }
 
             /// <summary>
             /// Gets or sets the SQL statement used to download a single file from the database.
             /// </summary>
-            [XmlElement("downloadStatement")]
             public string DownloadStatement { get; set; }
         }
     }

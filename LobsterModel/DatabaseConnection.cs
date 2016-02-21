@@ -65,10 +65,11 @@ namespace LobsterModel
         /// </summary>
         /// <param name="config">The configuration file to base this connection off.</param>
         /// <param name="eventListener">The event listener that events will be sent to when files are automatically updated.</param>
-        public DatabaseConnection(DatabaseConfig config, IModelEventListener eventListener)
+        public DatabaseConnection(DatabaseConfig config, string password, IModelEventListener eventListener)
         {
             this.Config = config;
             this.IsAutoUpdateEnabled = this.Config.AllowAutomaticUpdates;
+            this.Password = password;
 
             this.EventListener = eventListener;
             bool result = Utils.DeserialiseXmlFileUsingSchema<MimeTypeList>("LobsterSettings/MimeTypes.xml", null, out this.mimeTypeList);
@@ -134,6 +135,8 @@ namespace LobsterModel
         /// </summary>
         public bool IsAutoUpdateEnabled { get; set; }
 
+        public string Password { get; }
+
         /// <summary>
         /// Returns the ClobDirectory that would contain the given fullpath, if applicable.
         /// Whether the file exists or not is irrelevent, only that it would be contained in the returned ClobDirectory.
@@ -163,7 +166,8 @@ namespace LobsterModel
         public void LoadClobTypes(ref List<ClobTypeLoadException> errors)
         {
             this.ClobDirectoryList = new List<ClobDirectory>();
-            DirectoryInfo dirInfo = new DirectoryInfo(this.Config.ClobTypeDir);
+
+            DirectoryInfo dirInfo = new DirectoryInfo(this.Config.ClobTypeDirectory);
             if (!dirInfo.Exists)
             {
                 MessageLog.LogWarning($"The directory {dirInfo} could not be found when loading connection {this.Config.Name}");
@@ -171,7 +175,7 @@ namespace LobsterModel
                 return;
             }
 
-            List<ClobType> clobTypes = ClobType.GetClobTypeList(this.Config.ClobTypeDir);
+            List<ClobType> clobTypes = ClobType.GetClobTypeList(this.Config.ClobTypeDirectory);
 
             foreach (ClobType clobType in clobTypes)
             {

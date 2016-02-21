@@ -25,18 +25,6 @@ namespace LobsterModel.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string ConnectionDir {
-            get {
-                return ((string)(this["ConnectionDir"]));
-            }
-            set {
-                this["ConnectionDir"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("LobsterSettings")]
         public string SettingsDirectory {
             get {
@@ -185,6 +173,41 @@ namespace LobsterModel.Properties {
             }
             set {
                 this["LogFileEvents"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("LobsterTypes")]
+        public string ClobTypeDirectoryName {
+            get {
+                return ((string)(this["ClobTypeDirectoryName"]));
+            }
+            set {
+                this["ClobTypeDirectoryName"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("LobsterConnection.xml")]
+        public string DatabaseConfigFileName {
+            get {
+                return ((string)(this["DatabaseConfigFileName"]));
+            }
+            set {
+                this["DatabaseConfigFileName"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Collections.Specialized.StringCollection CodeSourceDirectories {
+            get {
+                return ((global::System.Collections.Specialized.StringCollection)(this["CodeSourceDirectories"]));
+            }
+            set {
+                this["CodeSourceDirectories"] = value;
             }
         }
     }

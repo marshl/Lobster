@@ -2,9 +2,6 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="LobsterModel.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="ConnectionDir" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
     <Setting Name="SettingsDirectory" Type="System.String" Scope="User">
       <Value Profile="(Default)">LobsterSettings</Value>
     </Setting>
@@ -49,6 +46,15 @@
     </Setting>
     <Setting Name="LogFileEvents" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="ClobTypeDirectoryName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">LobsterTypes</Value>
+    </Setting>
+    <Setting Name="DatabaseConfigFileName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">LobsterConnection.xml</Value>
+    </Setting>
+    <Setting Name="CodeSourceDirectories" Type="System.Collections.Specialized.StringCollection" Scope="User">
+      <Value Profile="(Default)" />
     </Setting>
   </Settings>
 </SettingsFile>

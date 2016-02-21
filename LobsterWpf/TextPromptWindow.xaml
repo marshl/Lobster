@@ -1,0 +1,19 @@
+﻿<Window x:Class="LobsterWpf.TextPromptWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:LobsterWpf"
+        mc:Ignorable="d"
+        Title="TextPromptWindow" Height="140.333" Width="323.333" ShowInTaskbar="False" ResizeMode="NoResize" Icon="Resources/Images/cartoon-lobster.ico" Background="{StaticResource BackgroundKey}">
+  <Grid>
+    <StackPanel Orientation="Vertical">
+      <Label>Please enter your password:</Label>
+      <PasswordBox Name="textField" KeyDown="textField_KeyDown"/>
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+        <Button Width="100" Margin="5" Click="OkButton_Click">Ok</Button>
+        <Button Width="100" Margin="5" Click="CancelButton_Click">Cancel</Button>
+      </StackPanel>
+    </StackPanel>
+  </Grid>
+</Window>

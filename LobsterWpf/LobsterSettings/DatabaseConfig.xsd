@@ -3,16 +3,13 @@
   <xs:element name="DatabaseConfig" nillable="true" type="DatabaseConfig" />
   <xs:complexType name="DatabaseConfig">
     <xs:sequence>
-      <xs:element minOccurs="1" maxOccurs="1" name="name" type="xs:string" />
-      <xs:element minOccurs="1" maxOccurs="1" name="host" type="xs:string" />
-      <xs:element minOccurs="1" maxOccurs="1" name="port" type="xs:string" />
-      <xs:element minOccurs="1" maxOccurs="1" name="sid" type="xs:string" />
-      <xs:element minOccurs="1" maxOccurs="1" name="username" type="xs:string" />
-      <xs:element minOccurs="1" maxOccurs="1" name="password" type="xs:string" />
-      <xs:element minOccurs="1" maxOccurs="1" name="codeSource" type="xs:string" />
-      <xs:element minOccurs="1" maxOccurs="1" name="usePooling" type="xs:boolean" />
-      <xs:element minOccurs="0" maxOccurs="1" name="allowAutoUpdates" type="xs:boolean" default="true"/>
-      <xs:element minOccurs="1" maxOccurs="1" name="clobTypeDir" type="xs:string" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Name" type="xs:string" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Host" type="xs:string" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Port" type="xs:string" />
+      <xs:element minOccurs="1" maxOccurs="1" name="SID" type="xs:string" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Username" type="xs:string" />
+      <xs:element minOccurs="1" maxOccurs="1" name="UsePooling" type="xs:boolean" />
+      <xs:element minOccurs="0" maxOccurs="1" name="AllowAutomaticUpdates" type="xs:boolean" default="true"/>
     </xs:sequence>
   </xs:complexType>
 </xs:schema>

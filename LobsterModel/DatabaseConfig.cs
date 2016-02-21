@@ -38,69 +38,78 @@ namespace LobsterModel
         /// <summary>
         /// Gets or sets the name of the connection. This is for display purposes only.
         /// </summary>
-        [XmlElement("name")]
         public string Name { get; set; }
 
         /// <summary>
         /// Gets or sets the host of the database.
         /// </summary>
-        [XmlElement("host")]
         public string Host { get; set; }
 
         /// <summary>
         /// Gets or sets the port the database is listening on. Usually 1521 for Oracle.
         /// </summary>
-        [XmlElement("port")]
         public string Port { get; set; }
 
         /// <summary>
         /// Gets or sets the Oracle System ID of the database.
         /// </summary>
-        [XmlElement("sid")]
         public string SID { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the user/schema to connect as.
         /// </summary>
-        [XmlElement("username")]
         public string Username { get; set; }
 
-        /// <summary>
+        /*/// <summary>
         /// Gets or sets the password to connect with.
         /// </summary>
         [XmlElement("password")]
-        public string Password { get; set; }
+        public string Password { get; set; }*/
 
         /// <summary>
         /// Gets or sets the location of the CodeSource directory that is used for this database.
         /// </summary>
-        [XmlElement("codeSource")]
-        public string CodeSource { get; set; }
+        //[XmlElement("codeSource")]
+        //public string CodeSource { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether pooling is enabled or not. 
         /// When enabled, Oracle will remember new connections for a time, and reuse it if the same computer connects using the same connection string.
         /// </summary>
-        [XmlElement("usePooling")]
         public bool UsePooling { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the user can enable automatic file updates when a file is modified.
         /// </summary>
-        [XmlElement("allowAutoUpdates")]
         public bool AllowAutomaticUpdates { get; set; } = true;
 
         /// <summary>
         /// Gets or sets the directory name where ClobTypes are stored.
         /// </summary>
-        [XmlElement("clobTypeDir")]
-        public string ClobTypeDir { get; set; }
+        //[XmlElement("clobTypeDir")]
+        //public string ClobTypeDir { get; set; }
 
         /// <summary>
         /// Gets or sets the file from which this DatabaseConfig was loaded.
         /// </summary>
         [XmlIgnore]
         public string FileLocation { get; set; }
+
+        public string CodeSource
+        {
+            get
+            {
+                return Path.GetDirectoryName(this.FileLocation);
+            }
+        }
+
+        public string ClobTypeDirectory
+        {
+            get
+            {
+                return Path.Combine(this.CodeSource, Settings.Default.ClobTypeDirectoryName);
+            }
+        }
 
         /// <summary>
         /// Writes a <see cref="DatabaseConfig"/> out to file.
@@ -152,7 +161,7 @@ namespace LobsterModel
         {
             List<DatabaseConfig> configList = new List<DatabaseConfig>();
 
-            if (!Model.IsConnectionDirectoryValid)
+            /*if (!Model.IsConnectionDirectoryValid)
             {
                 return configList;
             }
@@ -164,7 +173,37 @@ namespace LobsterModel
                 {
                     configList.Add(connection);
                 }
+            }*/
+
+
+            if (Settings.Default.CodeSourceDirectories == null || Settings.Default.CodeSourceDirectories.Count == 0)
+            {
+                return configList;
             }
+
+            List<string> invalidDirectories = new List<string>();
+            foreach (string directoryName in Settings.Default.CodeSourceDirectories)
+            {
+                string configFile = Path.Combine(directoryName, Settings.Default.DatabaseConfigFileName);
+                if (!File.Exists(configFile))
+                {
+                    invalidDirectories.Add(directoryName);
+                    continue;
+                }
+
+                DatabaseConfig connection = DatabaseConfig.LoadDatabaseConfig(configFile);
+                if (connection != null)
+                {
+                    configList.Add(connection);
+                }
+            }
+
+            foreach (string str in invalidDirectories)
+            {
+                Settings.Default.CodeSourceDirectories.Remove(str);
+            }
+
+            Settings.Default.Save();
 
             return configList;
         }
@@ -181,10 +220,7 @@ namespace LobsterModel
             other.SID = this.SID;
             other.Port = this.Port;
             other.Username = this.Username;
-            other.Password = this.Password;
-            other.CodeSource = this.CodeSource;
             other.UsePooling = this.UsePooling;
-            other.ClobTypeDir = this.ClobTypeDir;
 
             other.FileLocation = this.FileLocation;
 

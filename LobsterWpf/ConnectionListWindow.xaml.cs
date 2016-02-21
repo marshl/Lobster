@@ -27,6 +27,7 @@ namespace LobsterWpf
     using System.Collections.ObjectModel;
     using System.ComponentModel;
     using System.Diagnostics;
+    using System.IO;
     using System.Linq;
     using System.Windows;
     using System.Windows.Controls;
@@ -135,7 +136,7 @@ namespace LobsterWpf
         /// <summary>
         /// Gets or sets the directory that connections are found in.
         /// </summary>
-        public string ConnectionDirectory
+        /*public string ConnectionDirectory
         {
             get
             {
@@ -147,7 +148,7 @@ namespace LobsterWpf
                 Model.ConnectionDirectory = value;
                 this.NotifyPropertyChanged("ConnectionDirectory");
             }
-        }
+        }*/
 
         /// <summary>
         /// Gets or sets the list of configuation files for the current connection directory.
@@ -220,7 +221,7 @@ namespace LobsterWpf
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">The routed event arguments.</param>
-        private void ChangeDirectoryButton_Click(object sender, RoutedEventArgs e)
+        /*private void ChangeDirectoryButton_Click(object sender, RoutedEventArgs e)
         {
             CommonOpenFileDialog dlg = new CommonOpenFileDialog();
             dlg.IsFolderPicker = true;
@@ -231,7 +232,7 @@ namespace LobsterWpf
                 this.ConnectionDirectory = dlg.FileName;
                 this.LoadDatabaseConnections();
             }
-        }
+        }*/
 
         /// <summary>
         /// The event when the connection button is clicked.
@@ -250,15 +251,35 @@ namespace LobsterWpf
             this.TryConnectWithConfig(config.BaseConfig);
         }
 
+        private void RemoveConnectionButton_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult result = MessageBox.Show("Are you sure you want to forget this connection? (This will not affect any files on disk)", "Confirm", MessageBoxButton.OKCancel);
+
+            if (result == MessageBoxResult.OK)
+            {
+                Model.RemoveCodeSource(this.CurrentConfigView.BaseConfig.CodeSource);
+                this.databaseConfigList.Remove(this.CurrentConfigView);
+            }
+        }
+
         /// <summary>
         /// Attempts to change the current connection to the input config. If successful, the window is closed.
         /// </summary>
         /// <param name="config">The config to connect with.</param>
         private void TryConnectWithConfig(DatabaseConfig config)
         {
+            TextPromptWindow win = new TextPromptWindow();
+            win.ShowDialog();
+            if (!(win.DialogResult ?? false))
+            {
+                return;
+            }
+
+            string password = win.textField.Password;
+
             try
             {
-                this.DatabaseConnection = Model.SetDatabaseConnection(config, this.eventListener);
+                this.DatabaseConnection = Model.SetDatabaseConnection(config, password, this.eventListener);
                 this.DialogResult = true;
                 this.Close();
             }
@@ -275,13 +296,60 @@ namespace LobsterWpf
         /// <param name="e">The event arguments.</param>
         private void NewConnectionButton_Click(object sender, RoutedEventArgs e)
         {
-            DatabaseConfig config = new DatabaseConfig();
-            DatabaseConfigView configView = new DatabaseConfigView(config);
+            CommonOpenFileDialog dlg = new CommonOpenFileDialog();
+            dlg.IsFolderPicker = true;
+            CommonFileDialogResult result = dlg.ShowDialog();
+            if (result != CommonFileDialogResult.Ok)
+            {
+                return;
+            }
+            string errorMessage = null;
+            if ( !Model.ValidateNewCodeSourceLocation(dlg.FileName, ref errorMessage))
+            {
+                MessageBox.Show(errorMessage);
+                return;
+            }
+
+            DatabaseConfig databaseConfig = null;
+            if ( !Model.InitialiseCodeSourceDirectory(dlg.FileName, ref databaseConfig))
+            {
+                return;
+            }
+            
+            DatabaseConfigView configView = new DatabaseConfigView(databaseConfig);
 
             this.databaseConfigList.Add(configView);
             this.connectionListBox.SelectedItem = configView;
             this.IsEditingConfig = true;
             this.isEditingNewConfig = true;
+        }
+
+
+        /// <summary>
+        /// The event called when the new connection button is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void AddExistingButton_Click(object sender, RoutedEventArgs e)
+        {
+            CommonOpenFileDialog dlg = new CommonOpenFileDialog();
+            dlg.IsFolderPicker = true;
+            CommonFileDialogResult result = dlg.ShowDialog();
+            if (result != CommonFileDialogResult.Ok)
+            {
+                return;
+            }
+
+            string errorMessage = null;
+            if (!Model.ValidateCodeSourceLocation(dlg.FileName, ref errorMessage))
+            {
+                MessageBox.Show(errorMessage);
+                return;
+            }
+
+            Model.AddCodeSourceDirectory(dlg.FileName);
+
+            this.LoadDatabaseConnections();
         }
 
         /// <summary>
@@ -300,8 +368,16 @@ namespace LobsterWpf
         /// <param name="e">The event arguments.</param>
         private void TestConnectionButton_Click(object sender, RoutedEventArgs e)
         {
+            TextPromptWindow win = new TextPromptWindow();
+            win.ShowDialog();
+            if (!win.DialogResult ?? false)
+            {
+                return;
+            }
+            string password = win.textField.Password;
+
             Exception ex = null;
-            bool result = this.CurrentConfigView.TestConnection(ref ex);
+            bool result = this.CurrentConfigView.TestConnection(password, ref ex);
             string message = result ? "Connection test successful" : "Connection test unsuccessful.\n" + ex;
             MessageBox.Show(message);
         }
@@ -311,22 +387,22 @@ namespace LobsterWpf
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">The event arguments.</param>
-        private void CodeSourceButton_Click(object sender, RoutedEventArgs e)
+        /*private void CodeSourceButton_Click(object sender, RoutedEventArgs e)
         {
             this.CurrentConfigView.SelectCodeSourceDirectory();
             this.Focus();
-        }
+        }*/
 
         /// <summary>
         /// The event that is called when the clobtype button is clicked.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">The event arguments.</param>
-        private void ClobTypeButton_Click(object sender, RoutedEventArgs e)
+        /*private void ClobTypeButton_Click(object sender, RoutedEventArgs e)
         {
             this.CurrentConfigView.SelectClobTypeDirectory();
             this.Focus();
-        }
+        }*/
 
         /// <summary>
         /// The event that is called when the edit clob type button is clicked.
@@ -335,7 +411,7 @@ namespace LobsterWpf
         /// <param name="e">The event arguments.</param>
         private void EditClobTypeButton_Click(object sender, RoutedEventArgs e)
         {
-            ClobTypeListWindow window = new ClobTypeListWindow(this.CurrentConfigView.ClobTypeDir);
+            ClobTypeListWindow window = new ClobTypeListWindow(this.CurrentConfigView.ClobTypeDirectory);
             window.Owner = this;
             bool? result = window.ShowDialog();
             this.Focus();
@@ -387,7 +463,7 @@ namespace LobsterWpf
         {
             Debug.Assert(this.IsEditingConfig, "The save button should be usable while not in edit mode");
             this.IsEditingConfig = false;
-            bool result = this.CurrentConfigView.ApplyChanges(this.ConnectionDirectory);
+            bool result = this.CurrentConfigView.ApplyChanges();
         }
 
         /// <summary>

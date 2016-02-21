@@ -42,18 +42,18 @@ namespace LobsterModel
         /// <summary>
         /// Gets a value indicating whether the currently set connection directory is valid or not.
         /// </summary>
-        public static bool IsConnectionDirectoryValid
+        /*public static bool IsConnectionDirectoryValid
         {
             get
             {
                 return Settings.Default.ConnectionDir != null && Directory.Exists(Settings.Default.ConnectionDir);
             }
-        }
+        }*/
 
         /// <summary>
         /// Gets or sets the directory where connection files are stored.
         /// </summary>
-        public static string ConnectionDirectory
+        /*public static string ConnectionDirectory
         {
             get
             {
@@ -65,7 +65,7 @@ namespace LobsterModel
                 Settings.Default.ConnectionDir = value;
                 Settings.Default.Save();
             }
-        }
+        }*/
 
         /// <summary>
         /// Tests a connection configuration and returns true if a connection could be made.
@@ -73,11 +73,11 @@ namespace LobsterModel
         /// <param name="databaseConfig">The configuration file to test</param>
         /// <param name="e">The exception that was raised, if any.</param>
         /// <returns>True if the connection was successful, otherwise false.</returns>
-        public static bool TestConnection(DatabaseConfig databaseConfig, ref Exception e)
+        public static bool TestConnection(DatabaseConfig databaseConfig, string password, ref Exception e)
         {
             try
             {
-                DbConnection con = OpenConnection(databaseConfig);
+                DbConnection con = Model.OpenConnection(databaseConfig, password);
                 con.Close();
                 return true;
             }
@@ -98,7 +98,7 @@ namespace LobsterModel
         {
             try
             {
-                OracleConnection oracleConnection = Model.OpenConnection(databaseConnection.Config);
+                OracleConnection oracleConnection = Model.OpenConnection(databaseConnection.Config, databaseConnection.Password);
                 ClobDirectory clobDir = databaseConnection.GetClobDirectoryForFile(targetFilename);
                 DBClobFile clobFile = clobDir?.GetDatabaseFileForFullpath(targetFilename);
 
@@ -166,7 +166,7 @@ namespace LobsterModel
                 }
             }
 
-            OracleConnection oracleConnection = OpenConnection(databaseConnection.Config);
+            OracleConnection oracleConnection = OpenConnection(databaseConnection.Config, databaseConnection.Password);
             try
             {
                 DBClobFile databaseFile = Model.InsertDatabaseClob(databaseConnection, fullpath, clobDir, table, mimeType, oracleConnection);
@@ -189,7 +189,7 @@ namespace LobsterModel
         /// <returns>The path of the resulting file.</returns>
         public static string SendDownloadClobDataToFileMessage(DatabaseConnection databaseConnection, string fullpath)
         {
-            OracleConnection oracleConnection = OpenConnection(databaseConnection.Config);
+            OracleConnection oracleConnection = OpenConnection(databaseConnection.Config, databaseConnection.Password);
             if (oracleConnection == null)
             {
                 return null;
@@ -224,18 +224,29 @@ namespace LobsterModel
             }
         }
 
+        public static bool RemoveCodeSource(string directoryName)
+        {
+            if (Settings.Default.CodeSourceDirectories == null || !Settings.Default.CodeSourceDirectories.Contains(directoryName))
+            {
+                return false;
+            }
+
+            Settings.Default.CodeSourceDirectories.Remove(directoryName);
+            return true;
+        }
+
         /// <summary>
         /// Sets the current connection to the given connection, if able.
         /// </summary>
         /// <param name="config">The connection to open.</param>
         /// <param name="eventListener">The event listener that will be used to populate the connection wtih.</param>
         /// <returns>The successfully created database connection.</returns>
-        public static DatabaseConnection SetDatabaseConnection(DatabaseConfig config, IModelEventListener eventListener)
+        public static DatabaseConnection SetDatabaseConnection(DatabaseConfig config, string password, IModelEventListener eventListener)
         {
             MessageLog.LogInfo($"Changing connection to {config.Name}");
             try
             {
-                DbConnection con = OpenConnection(config);
+                DbConnection con = Model.OpenConnection(config, password);
                 con.Close();
             }
             catch (ConnectToDatabaseException ex)
@@ -243,12 +254,12 @@ namespace LobsterModel
                 throw new SetConnectionException("A test connection could not be made to the database", ex);
             }
 
-            if (config.ClobTypeDir == null || !Directory.Exists(config.ClobTypeDir))
+            if (config.ClobTypeDirectory == null || !Directory.Exists(config.ClobTypeDirectory))
             {
-                throw new SetConnectionException($"The clob type directory {config.ClobTypeDir} could not be found.");
+                throw new SetConnectionException($"The clob type directory {config.ClobTypeDirectory} could not be found.");
             }
 
-            DatabaseConnection databaseConnection = new DatabaseConnection(config, eventListener);
+            DatabaseConnection databaseConnection = new DatabaseConnection(config, password, eventListener);
 
             List<ClobTypeLoadException> errors = new List<ClobTypeLoadException>();
             List<FileListRetrievalException> fileLoadErrors = new List<FileListRetrievalException>();
@@ -259,6 +270,102 @@ namespace LobsterModel
             MessageLog.LogInfo("Connection change successful");
 
             return databaseConnection;
+        }
+
+        public static bool InitialiseCodeSourceDirectory(string directory, ref DatabaseConfig newConfig)
+        {
+            try
+            {
+                Directory.CreateDirectory(Path.Combine(directory, Settings.Default.ClobTypeDirectoryName));
+                newConfig = new DatabaseConfig();
+                string configFile = Path.Combine(directory, Settings.Default.DatabaseConfigFileName);
+                DatabaseConfig.SerialiseToFile(configFile, newConfig);
+                newConfig.FileLocation = configFile;
+
+                if (!AddCodeSourceDirectory(directory))
+                {
+                    return false;
+                }
+
+                return true;
+            }
+            catch (IOException)
+            {
+                return false;
+            }
+        }
+
+        public static bool AddCodeSourceDirectory(string directoryName)
+        {
+            if (Settings.Default.CodeSourceDirectories == null)
+            {
+                Settings.Default.CodeSourceDirectories = new System.Collections.Specialized.StringCollection();
+            }
+            else if (Settings.Default.CodeSourceDirectories.Contains(directoryName))
+            {
+                return false;
+            }
+
+            Settings.Default.CodeSourceDirectories.Add(directoryName);
+            Settings.Default.Save();
+            return true;
+        }
+
+        public static bool ValidateCodeSourceLocation(string folderName, ref string errorMessage)
+        {
+            if (Settings.Default.CodeSourceDirectories != null && Settings.Default.CodeSourceDirectories.Contains(folderName))
+            {
+                errorMessage = $"The chosen directory \"{folderName}\" has already been used.";
+                return false;
+            }
+
+            DirectoryInfo dirInfo = new DirectoryInfo(folderName);
+            if (!dirInfo.Exists)
+            {
+                errorMessage = $"The chosen directory \"{folderName}\" does not exist, or is not a directory";
+                return false;
+            }
+
+            DirectoryInfo lobsterTypeFolder = new DirectoryInfo(Path.Combine(folderName, Settings.Default.ClobTypeDirectoryName));
+            if (!lobsterTypeFolder.Exists)
+            {
+                errorMessage = $"The chosen folder must contain a directory named \"{Settings.Default.ClobTypeDirectoryName}\"";
+                return false;
+            }
+
+            FileInfo configFile = new FileInfo(Path.Combine(dirInfo.FullName, Settings.Default.DatabaseConfigFileName));
+            if (!configFile.Exists)
+            {
+                errorMessage = $"The chosen folder must contain a file named \"{Settings.Default.DatabaseConfigFileName}\"";
+                return false;
+            }
+
+            return true;
+        }
+
+        public static bool ValidateNewCodeSourceLocation(string folderName, ref string errorMessage)
+        {
+            if (Settings.Default.CodeSourceDirectories != null && Settings.Default.CodeSourceDirectories.Contains(folderName))
+            {
+                errorMessage = $"The chosen directory \"{folderName}\" has already been used.";
+                return false;
+            }
+
+            DirectoryInfo dirInfo = new DirectoryInfo(folderName);
+            if (!dirInfo.Exists)
+            {
+                errorMessage = $"The chosen directory \"{folderName}\" does not exist, or is not a directory";
+                return false;
+            }
+
+            FileInfo configFile = new FileInfo(Path.Combine(folderName, Settings.Default.DatabaseConfigFileName));
+            if (configFile.Exists)
+            {
+                errorMessage = $"The chosen folder already contains a file named \"{Settings.Default.DatabaseConfigFileName}\"";
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -340,7 +447,7 @@ namespace LobsterModel
         /// <param name="errorList">The list of errors that were encountered when getting the database files.</param>
         public static void GetDatabaseFileLists(DatabaseConnection databaseConnection, ref List<FileListRetrievalException> errorList)
         {
-            OracleConnection oracleConnection = OpenConnection(databaseConnection.Config);
+            OracleConnection oracleConnection = OpenConnection(databaseConnection.Config, databaseConnection.Password);
             if (oracleConnection == null)
             {
                 MessageLog.LogError("Connection failed, cannot diff files with database.");
@@ -370,13 +477,13 @@ namespace LobsterModel
         /// </summary>
         /// <param name="config">The connection configuration settings to use.</param>
         /// <returns>A new connectionif it opened successfully, otherwise null.</returns>
-        private static OracleConnection OpenConnection(DatabaseConfig config)
+        private static OracleConnection OpenConnection(DatabaseConfig config, string password)
         {
             try
             {
                 OracleConnection con = new OracleConnection();
                 con.ConnectionString = "User Id=" + config.Username
-                    + (string.IsNullOrEmpty(config.Password) ? null : ";Password=" + config.Password)
+                    + (string.IsNullOrEmpty(password) ? null : ";Password=" + password)
                     + ";Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)("
                     + $"HOST={config.Host})"
                     + $"(PORT={config.Port})))(CONNECT_DATA="

@@ -159,6 +159,9 @@
       <DependentUpon>TableSelectorWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="TableView.cs" />
+    <Compile Include="TextPromptWindow.xaml.cs">
+      <DependentUpon>TextPromptWindow.xaml</DependentUpon>
+    </Compile>
     <Page Include="ClobTypeListWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -222,6 +225,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="TableSelectorWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TextPromptWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

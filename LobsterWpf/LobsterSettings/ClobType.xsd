@@ -1,50 +1,50 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xs:schema elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
-  <xs:element name="clobtype" nillable="true" type="clobtype" />
-  <xs:complexType name="clobtype">
+  <xs:element name="ClobType" nillable="true" type="ClobType" />
+  <xs:complexType name="ClobType">
     <xs:sequence>
-      <xs:element minOccurs="1" maxOccurs="1" name="name" type="xs:string" />
-      <xs:element minOccurs="0" maxOccurs="1" name="enabled" type="xs:boolean" />
-      <xs:element minOccurs="1" maxOccurs="1" name="directory" type="xs:string" />
-      <xs:element minOccurs="1" maxOccurs="1" name="includeSubDirectories" type="xs:boolean" />
-      <xs:element minOccurs="0" maxOccurs="1" name="loaderStatement" type="xs:string" />
-      <xs:element minOccurs="1" maxOccurs="1" name="tables" type="ArrayOfTable" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Name" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="Enabled" type="xs:boolean" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Directory" type="xs:string" />
+      <xs:element minOccurs="1" maxOccurs="1" name="IncludeSubDirectories" type="xs:boolean" />
+      <xs:element minOccurs="0" maxOccurs="1" name="LoaderStatement" type="xs:string" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Tables" type="ArrayOfTable" />
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="ArrayOfTable">
     <xs:sequence>
-      <xs:element minOccurs="1" maxOccurs="unbounded" name="table" nillable="true" type="table" />
+      <xs:element minOccurs="1" maxOccurs="unbounded" name="Table" nillable="true" type="Table" />
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="table">
+  <xs:complexType name="Table">
     <xs:sequence>
-      <xs:element minOccurs="1" maxOccurs="1" name="schema" type="xs:string" />
-      <xs:element minOccurs="1" maxOccurs="1" name="name" type="xs:string" />
-      <xs:element minOccurs="0" maxOccurs="1" name="defaultExtension" type="xs:string"/>
-      <xs:element minOccurs="1" maxOccurs="1" name="columns" type="ArrayOfColumn" />
-      <xs:element minOccurs="0" maxOccurs="1" name="parentTable" type="table" />
-      <xs:element minOccurs="0" maxOccurs="1" name="customStatements" type="CustomStatements" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Schema" type="xs:string" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Name" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="DefaultExtension" type="xs:string"/>
+      <xs:element minOccurs="1" maxOccurs="1" name="Columns" type="ArrayOfColumn" />
+      <xs:element minOccurs="0" maxOccurs="1" name="ParentTable" type="Table" />
+      <xs:element minOccurs="0" maxOccurs="1" name="CustomStatements" type="CustomStatements" />
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="ArrayOfColumn">
     <xs:sequence>
-      <xs:element minOccurs="1" maxOccurs="unbounded" name="column" nillable="true" type="column" />
+      <xs:element minOccurs="1" maxOccurs="unbounded" name="Column" nillable="true" type="Column" />
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="column">
+  <xs:complexType name="Column">
     <xs:sequence>
-      <xs:element minOccurs="1" maxOccurs="1" name="name" type="xs:string" />
-      <xs:element minOccurs="1" maxOccurs="1" name="purpose" type="Purpose" />
-      <xs:element minOccurs="0" maxOccurs="1" name="dataType" nillable="true" type="Datatype" />
-      <xs:element minOccurs="0" maxOccurs="1" name="mimeTypes" type="ArrayOfString" />
-      <xs:element minOccurs="0" maxOccurs="1" name="sequence" type="xs:string" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Name" type="xs:string" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Purpose" type="Purpose" />
+      <xs:element minOccurs="0" maxOccurs="1" name="DataType" nillable="true" type="DataType" />
+      <xs:element minOccurs="0" maxOccurs="1" name="MimeTypes" type="ArrayOfString" />
+      <xs:element minOccurs="0" maxOccurs="1" name="Sequence" type="xs:string" />
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="CustomStatements">
     <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="1" name="upsertStatement" type="xs:string" />
-      <xs:element minOccurs="0" maxOccurs="1" name="fileListStatement" type="xs:string" />
-      <xs:element minOccurs="0" maxOccurs="1" name="downloadStatement" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="UpsertStatement" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="FileListStatement" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="DownloadStatement" type="xs:string" />
     </xs:sequence>
   </xs:complexType>
   <xs:simpleType name="Purpose">
@@ -58,7 +58,7 @@
       <xs:enumeration value="FULL_NAME" />
     </xs:restriction>
   </xs:simpleType>
-  <xs:simpleType name="Datatype">
+  <xs:simpleType name="DataType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="CLOB" />
       <xs:enumeration value="BLOB" />
@@ -67,7 +67,7 @@
   </xs:simpleType>
   <xs:complexType name="ArrayOfString">
     <xs:sequence>
-      <xs:element minOccurs="1" maxOccurs="unbounded" name="string" nillable="false" type="xs:string" />
+      <xs:element minOccurs="1" maxOccurs="unbounded" name="String" nillable="false" type="xs:string" />
     </xs:sequence>
   </xs:complexType>
 </xs:schema>

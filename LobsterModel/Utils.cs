@@ -157,7 +157,7 @@ namespace LobsterModel
                     return true;
                 }
             }
-            catch (InvalidOperationException ex)
+            catch (Exception ex ) when ( ex is InvalidOperationException || ex is UnauthorizedAccessException)
             {
                 obj = new T();
                 obj.ErrorList.Add(ex.Message);

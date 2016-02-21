@@ -144,7 +144,7 @@ namespace LobsterWpf
         /// <summary>
         /// Gets or sets the password to connect with.
         /// </summary>
-        public string Password
+        /*public string Password
         {
             get
             {
@@ -157,12 +157,12 @@ namespace LobsterWpf
                 this.NotifyPropertyChanged("Password");
                 this.ChangesMade = true;
             }
-        }
+        }*/
 
         /// <summary>
         /// Gets or sets the location of the CodeSource directory that is used for this database.
         /// </summary>
-        public string CodeSource
+        /*public string CodeSource
         {
             get
             {
@@ -175,8 +175,8 @@ namespace LobsterWpf
                 this.NotifyPropertyChanged("CodeSource");
                 this.ChangesMade = true;
             }
-        }
-        
+        }*/
+
         /// <summary>
         /// Gets or sets a value indicating whether pooling is enabled or not. 
         /// When enabled, Oracle will remember new connections for a time, and reuse it if the same computer connects using the same connection string.
@@ -217,7 +217,7 @@ namespace LobsterWpf
         /// <summary>
         /// Gets or sets the directory name where ClobTypes are stored.
         /// </summary>
-        public string ClobTypeDir
+        /*public string ClobTypeDir
         {
             get
             {
@@ -230,6 +230,15 @@ namespace LobsterWpf
                 this.NotifyPropertyChanged("ClobTypeDir");
                 this.ChangesMade = true;
             }
+        }*/
+
+        public string ClobTypeDirectory
+        {
+            get
+            {
+                return this.BaseConfig.ClobTypeDirectory;
+            }
+
         }
 
         /// <summary>
@@ -266,15 +275,15 @@ namespace LobsterWpf
         /// </summary>
         /// <param name="ex">The exception tha was raised during connection testing, if any.</param>
         /// <returns>True if the connection test was successful, otherwise false.</returns>
-        public bool TestConnection(ref Exception ex)
+        public bool TestConnection(string password, ref Exception ex)
         {
-            return Model.TestConnection(this.BaseConfig, ref ex);
+            return Model.TestConnection(this.BaseConfig, password, ref ex);
         }
 
         /// <summary>
         /// Opens a folder select dialog to let the user pick a new code source directory.
         /// </summary>
-        public void SelectCodeSourceDirectory()
+        /*public void SelectCodeSourceDirectory()
         {
             CommonOpenFileDialog dlg = new CommonOpenFileDialog();
             dlg.IsFolderPicker = true;
@@ -284,12 +293,12 @@ namespace LobsterWpf
             {
                 this.CodeSource = dlg.FileName;
             }
-        }
+        }*/
 
         /// <summary>
         /// Opens a folder select dialog to let the user pick a new clob type directory.
         /// </summary>
-        public void SelectClobTypeDirectory()
+        /*public void SelectClobTypeDirectory()
         {
             CommonOpenFileDialog dlg = new CommonOpenFileDialog();
             dlg.IsFolderPicker = true;
@@ -299,14 +308,14 @@ namespace LobsterWpf
             {
                 this.ClobTypeDir = dlg.FileName;
             }
-        }
+        }*/
 
         /// <summary>
         /// Writes the database config out to file, prompting the user for the file to save to if not already set.
         /// </summary>
         /// <param name="initialDirectory">The directory that the save file dialog will initially open t=to if a new file is made.</param>
         /// <returns>True if the changes could be applied, otherwise false.</returns>
-        public bool ApplyChanges(string initialDirectory)
+        public bool ApplyChanges()
         {
             if (this.BaseConfig.FileLocation == null || !File.Exists(this.BaseConfig.FileLocation))
             {
@@ -314,7 +323,7 @@ namespace LobsterWpf
                 dlg.Filters.Add(new CommonFileDialogFilter("eXtensible Markup Language", "*.xml"));
                 dlg.Title = "Save Lobster Connection As";
                 dlg.DefaultFileName = string.IsNullOrEmpty(this.Name) ? "NewConnection.xml" : this.Name.Replace(" ", string.Empty) + ".xml";
-                dlg.InitialDirectory = initialDirectory;
+                
                 CommonFileDialogResult result = dlg.ShowDialog();
                 if (result == CommonFileDialogResult.Ok)
                 {

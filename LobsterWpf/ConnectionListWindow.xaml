@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:LobsterWpf"
         xmlns:l="clr-namespace:LobsterWpf"
         mc:Ignorable="d"
-        Title="Connections" Height="600" Width="700" Icon="Resources/Images/cartoon-lobster.ico" ShowInTaskbar="False" Background="{StaticResource BackgroundKey}" >
+        Title="Connections" Height="485" Width="700" Icon="Resources/Images/cartoon-lobster.ico" ShowInTaskbar="False" Background="{StaticResource BackgroundKey}" >
   <Window.Resources>
     <l:InverseBooleanConverter x:Key="inverseBooleanConverter" />
   </Window.Resources>
@@ -20,17 +20,24 @@
       <RowDefinition/>
       <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
+    <!--
     <DockPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Center">
       <Label DockPanel.Dock="Left" VerticalAlignment="Center">Directory:</Label>
       <Label x:Name="directoryLabel" VerticalAlignment="Center" Content="{Binding Path=ConnectionDirectory, FallbackValue='No directory selected'}" HorizontalAlignment="Left"/>
       <Button x:Name="changeDirectoryButton" Grid.Row="1"  Content="Change Directory" HorizontalAlignment="Right" VerticalAlignment="Center" Click="ChangeDirectoryButton_Click" Margin="5"/>
     </DockPanel>
+    -->
     <Grid Grid.Row="1" Grid.Column="0">
       <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>
         <RowDefinition Height="*"/>
         <RowDefinition Height="Auto"/>
       </Grid.RowDefinitions>
-      <ListBox Grid.Column="0" Grid.Row="0" Name="connectionListBox" ItemsSource="{Binding DatabaseConfigList}" SelectionChanged="ConnectionListBox_SelectionChanged" IsEnabled="{Binding Path=IsEditingConfig, Converter={StaticResource inverseBooleanConverter}}">
+      <StackPanel Grid.Row="0" Orientation="Horizontal">
+        <Button Content="Create Connection" HorizontalAlignment="Left" Margin="5" Click="NewConnectionButton_Click"/>
+        <Button Content="Add Existing Connection" HorizontalAlignment="Left" Margin="5" Click="AddExistingButton_Click"/>
+      </StackPanel>
+      <ListBox Grid.Row="1" Name="connectionListBox" ItemsSource="{Binding DatabaseConfigList}" SelectionChanged="ConnectionListBox_SelectionChanged" IsEnabled="{Binding Path=IsEditingConfig, Converter={StaticResource inverseBooleanConverter}}">
         <ListBox.ItemTemplate>
           <DataTemplate DataType="DatabaseConfig">
             <DataTemplate.Resources>
@@ -44,7 +51,7 @@
             </DataTemplate.Resources>
             <StackPanel>
               <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
-              <TextBlock Text="{Binding CodeSource}" FontStyle="Italic"/>
+              <TextBlock Text="{Binding FileLocation}" FontStyle="Italic"/>
               <TextBlock>
                 <TextBlock.Text>
                   <MultiBinding StringFormat="Host: {0}:{1}">
@@ -69,9 +76,12 @@
           </Style>
         </ListBox.ItemContainerStyle>
       </ListBox>
-      <Button Name="newConnectionButton" Content="New Connection" HorizontalAlignment="Left" Margin="5" Grid.Column="0" Grid.Row="1" Click="NewConnectionButton_Click"/>
+      <StackPanel Orientation="Horizontal" Grid.Row="2">
 
-      <Button x:Name="connectButton" Content="Connect" HorizontalAlignment="Right" Margin="5" Grid.Row="3" Width="75" Click="ConnectButton_Click" IsEnabled="{Binding ElementName=connectionListBox, Path=SelectedItems.Count}"/>
+
+        <Button Content="Connect" Margin="5" Width="100" Click="ConnectButton_Click" IsEnabled="{Binding ElementName=connectionListBox, Path=SelectedItems.Count}"/>
+        <Button Content="Remove" Margin="5" Width="100" Click="RemoveConnectionButton_Click" IsEnabled="{Binding ElementName=connectionListBox, Path=SelectedItems.Count}"/>
+      </StackPanel>
     </Grid>
     <GroupBox Grid.Column="1" Grid.Row="1" DataContext="{Binding ElementName=connectionListBox, Path=SelectedItem}" Margin="5">
       <GroupBox.Header>
@@ -107,9 +117,9 @@
           <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Path=SID}" Margin="3"/>
           <Label Grid.Row="4" Grid.Column="0" Margin="3">Username:</Label>
           <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Path=Username}" Margin="3"/>
-          <Label Grid.Row="5" Grid.Column="0" Margin="3">Password:</Label>
-          <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding Path=Password}" Margin="3"/>
-          
+          <!--<Label Grid.Row="5" Grid.Column="0" Margin="3">Password:</Label>
+          <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding Path=Password}" Margin="3"/>-->
+
           <Grid Grid.Row="6" Margin="3" Grid.ColumnSpan="2">
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="Auto"/>
@@ -124,24 +134,24 @@
             <Label Grid.Column="0" Margin="5" >Allow Automatic Updates:</Label>
             <CheckBox Grid.Column="1" VerticalContentAlignment="Center" IsChecked="{Binding Path=AllowAutomaticUpdates}"/>
           </StackPanel>
-          <Label Grid.Row="8" Grid.Column="0" Margin="3">CodeSource Directory:</Label>
-          <Grid Grid.Row="8" Grid.Column="1" Margin="3">
+          <!--<Label Grid.Row="8" Grid.Column="0" Margin="3">CodeSource Directory:</Label>-->
+          <!--<Grid Grid.Row="8" Grid.Column="1" Margin="3">
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="*"/>
               <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <TextBox Width="Auto" Grid.Column="0" Text="{Binding Path=CodeSource}"/>
             <Button Grid.Column="1" Click="CodeSourceButton_Click" Margin="5,0,0,0">. . .</Button>
-          </Grid>
-          <Label Grid.Row="9" Grid.Column="0" Margin="3">ClobType Directory:</Label>
-          <Grid Grid.Row="9" Grid.Column="1" Margin="3">
+          </Grid>-->
+          <!--<Label Grid.Row="9" Grid.Column="0" Margin="3">ClobType Directory:</Label>-->
+          <!--<Grid Grid.Row="9" Grid.Column="1" Margin="3">
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="*"/>
               <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <TextBox Width="Auto" Grid.Column="0" Text="{Binding Path=ClobTypeDir}"/>
             <Button Grid.Column="1" Click="ClobTypeButton_Click" Margin="5,0,0,0">. . .</Button>
-          </Grid>
+          </Grid>-->
           <StackPanel Grid.Row="10" Grid.Column="1" Margin="3">
             <Button Width="100" HorizontalAlignment="Right" Click="EditClobTypeButton_Click">Clob Types</Button>
           </StackPanel>

@@ -35,33 +35,29 @@ namespace LobsterModel
     /// A ClobType defines a particular usage of the database. In its most common form, A ClobType contains a single table that maps to a single directory on the file system.
     /// ClobTypes are stored as Xml files which are deserialized into this structure.
     /// </summary>
-    [XmlType("clobtype")]
     public class ClobType : SerializableObject, ICloneable
     {
         /// <summary>
         /// Gets or sets the display name for this ClobType. This value has no functional impact, 
         /// and is used for display purposes only.
         /// </summary>
-        [XmlElement("name")]
         public string Name { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the directory in CodeSource to be used for this ClobType. Directory separators can be used.
         /// </summary>
-        [XmlElement("directory")]
         public string Directory { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether or not all subdirectories under the specified folder should also be used.
         /// </summary>
-        [XmlElement("includeSubDirectories")]
         public bool IncludeSubDirectories { get; set; }
 
         /// <summary>
         /// Gets or sets the tables that files for this ClobType are stored in.
         /// ClobTypes usually have only a single table, but if there is more than one, then the user will be asked which to use when inserting a new file.
         /// </summary>
-        [XmlArray("tables")]
+        [XmlArray]
         public List<Table> Tables { get; set; }
 
         /// <summary>
@@ -93,14 +89,16 @@ namespace LobsterModel
         {
             List<ClobType> clobTypeList = new List<ClobType>();
 
-            if (!Model.IsConnectionDirectoryValid)
+            DirectoryInfo dir = new DirectoryInfo(clobTypeDirectory);
+
+            if (!dir.Exists)
             {
                 return clobTypeList;
             }
 
-            foreach (string filename in System.IO.Directory.GetFiles(clobTypeDirectory, "*.xml"))
+            foreach (FileInfo filename in dir.GetFiles("*.xml"))
             {
-                ClobType clobType = ClobType.LoadClobType(filename);
+                ClobType clobType = ClobType.LoadClobType(filename.FullName);
                 if (clobType != null)
                 {
                     clobTypeList.Add(clobType);

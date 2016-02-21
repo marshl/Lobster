@@ -33,7 +33,6 @@ namespace LobsterModel
     /// <summary>
     /// A ClobType table contains a number of columns that are required to use the table. Each column has a different purpose describing how it affects the table.
     /// </summary>
-    [XmlType(TypeName = "column")]
     public class Column : ICloneable
     {
         /// <summary>
@@ -107,21 +106,19 @@ namespace LobsterModel
         /// <summary>
         /// Gets or sets the name of this column as it appears in the database.
         /// </summary>
-        [XmlElement("name")]
         public string Name { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the sequence that this columns will call NEXTVAL on if this column has the ID purpose.
         /// Sequence names should not be put on a column that has any other purpose.
         /// </summary>
-        [XmlElement("sequence")]
         public string Sequence { get; set; }
 
         /// <summary>
         /// Gets or sets the purpose of the column is an enumeration that defines how the column will be used.
         /// When a column with a specific purpose is needed, it will be queried from the table column list.
         /// </summary>
-        [XmlElement("purpose")]
+        [XmlElement("Purpose")]
         public Purpose ColumnPurpose { get; set; }
 
         /// <summary>
@@ -129,7 +126,6 @@ namespace LobsterModel
         /// The DataType of a column should only be used if it has the CLOB_DATA purpose.
         /// A table can have multiple CLOB_DATA columns, but each must have a differnt DataType.
         /// </summary>
-        [XmlElement("dataType")]
         public Datatype? DataType { get; set; }
 
         /// <summary>
@@ -137,7 +133,7 @@ namespace LobsterModel
         /// If a table with multiple CLOB_DATA columns has a new file inserted, then the column with the matching data type will be used.
         /// Information on the Editor attribute can be found here: http://stackoverflow.com/questions/6307006/how-can-i-use-a-winforms-propertygrid-to-edit-a-list-of-strings
         /// </summary>
-        [XmlArray("mimeTypes")]
+        [XmlArray("MimeTypes")]
         public List<string> MimeTypeList { get; set; }
 
         /// <summary>
@@ -149,6 +145,7 @@ namespace LobsterModel
         /// <summary>
         /// Gets the complete name of this column, including the name of the parent table, and the schema the table is in.
         /// </summary>
+        [XmlIgnore]
         public string FullName
         {
             get

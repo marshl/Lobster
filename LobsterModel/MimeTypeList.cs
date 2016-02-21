@@ -34,7 +34,7 @@ namespace LobsterModel
         /// <summary>
         /// Gets or sets the list of different mime types.
         /// </summary>
-        [XmlArray("mimeTypes")]
+        [XmlArray]
         public List<MimeType> MimeTypes { get; set; }
 
         /// <summary>
@@ -45,19 +45,16 @@ namespace LobsterModel
             /// <summary>
             /// Gets or sets the name of the mime type (e.g. text/js)
             /// </summary>
-            [XmlElement("name")]
             public string Name { get; set; }
 
             /// <summary>
             /// Gets or sets the prefix as the database uses the mime type (e.g. img/)
             /// </summary>
-            [XmlElement("prefix")]
             public string Prefix { get; set; }
 
             /// <summary>
             /// Gets or sets the file extension that would be used by files of this mime type (e.g. .png).
             /// </summary>
-            [XmlElement("extension")]
             public string Extension { get; set; }
         }
     }
