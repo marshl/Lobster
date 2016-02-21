@@ -76,6 +76,11 @@ namespace LobsterWpf
             DateTime latestRelease = new DateTime(year, month, day);
             DateTime linkerDate = Utils.RetrieveLinkerTimestamp();
 
+            if ( MessageLog.Instance == null )
+            {
+                return false;
+            }
+
             MessageLog.LogInfo($"Release comparison: local={linkerDate} github={latestRelease}");
 
             if (latestRelease > linkerDate)
