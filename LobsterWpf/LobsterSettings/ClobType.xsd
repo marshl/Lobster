@@ -67,7 +67,7 @@
   </xs:simpleType>
   <xs:complexType name="ArrayOfString">
     <xs:sequence>
-      <xs:element minOccurs="1" maxOccurs="unbounded" name="String" nillable="false" type="xs:string" />
+      <xs:element minOccurs="1" maxOccurs="unbounded" name="string" nillable="false" type="xs:string" />
     </xs:sequence>
   </xs:complexType>
 </xs:schema>
