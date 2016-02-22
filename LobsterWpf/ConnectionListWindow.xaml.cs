@@ -462,8 +462,16 @@ namespace LobsterWpf
         private void SaveEditButton_Click(object sender, RoutedEventArgs e)
         {
             Debug.Assert(this.IsEditingConfig, "The save button should be usable while not in edit mode");
-            this.IsEditingConfig = false;
+            
             bool result = this.CurrentConfigView.ApplyChanges();
+            if (!result)
+            {
+                MessageBox.Show("Changes could not be saved.");
+            }
+            else
+            {
+                this.IsEditingConfig = false;
+            }
         }
 
         /// <summary>

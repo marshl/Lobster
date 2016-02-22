@@ -323,7 +323,7 @@ namespace LobsterWpf
                 dlg.Filters.Add(new CommonFileDialogFilter("eXtensible Markup Language", "*.xml"));
                 dlg.Title = "Save Lobster Connection As";
                 dlg.DefaultFileName = string.IsNullOrEmpty(this.Name) ? "NewConnection.xml" : this.Name.Replace(" ", string.Empty) + ".xml";
-                
+
                 CommonFileDialogResult result = dlg.ShowDialog();
                 if (result == CommonFileDialogResult.Ok)
                 {
@@ -340,7 +340,7 @@ namespace LobsterWpf
                 DatabaseConfig.SerialiseToFile(this.FileLocation, this.BaseConfig);
                 return true;
             }
-            catch (IOException)
+            catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
             {
                 return false;
             }
