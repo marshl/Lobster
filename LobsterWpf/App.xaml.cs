@@ -73,7 +73,7 @@ namespace LobsterWpf
             {
                 Exception e = (Exception)args.ExceptionObject;
                 MessageLog.LogError($"Unhandled Exception {e}");
-                MessageBox.Show(@"An unhandled exception has occurred. Please forward a copy of your Lobster log to you nearest Lobster representative.");
+                MessageBox.Show(@"An unhandled exception has occurred. Please add an issue to the Lobster GitHub repo, with a copy of the log file attached. (Remove any passwords in the file beforehand)");
             }
             catch
             {
