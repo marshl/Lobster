@@ -1,5 +1,9 @@
+##Release 2.3.1.0
+ - Fixed a crash caused by inserting files with a mime types that has no prefix (such as a module):
+ - Fixed a crash that would occur if the user attempts to save database configuration to a readonly file;
+ - Changed the unhandled exception message;
 ##Release 2.3.0.0
- - Overhauled the configuration setup to be stored in the CodeSource directory;
+ - Changed the configuration storage to place the DatabaseConfig and ClobTypes in the CodeSource directory (breaking change);
  - Fixed casing in the Xml files (breaking change);
  - Improved the layout of the Message window;
  - Changed the message log view to more efficiently update the UI when a new message is logged;
