@@ -391,7 +391,7 @@ namespace LobsterModel
                     throw new MimeTypeNotFoundException($"Unknown mime-to-prefix key {mimeType}");
                 }
 
-                if (mt.Prefix.Length > 0)
+                if (!String.IsNullOrEmpty(mt.Prefix))
                 {
                     mnemonic = $"{mt.Prefix}/{mnemonic}";
                 }
