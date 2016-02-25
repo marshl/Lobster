@@ -82,7 +82,7 @@ namespace LobsterWpf
         /// <summary>
         /// Gets the connection model for this view.
         /// </summary>
-        public DatabaseConnection Connection { get; }
+        public DatabaseConnection Connection { get; private set; }
 
         /// <summary>
         /// Gets or sets the root level file for the currently selected clob directory.
@@ -207,7 +207,22 @@ namespace LobsterWpf
         /// </summary>
         public void Dispose()
         {
-            this.Connection.Dispose();
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if(!disposing)
+            {
+                return;
+            }
+
+            if( this.Connection != null)
+            {
+                this.Connection.Dispose();
+                this.Connection = null;
+            }
         }
 
         /// <summary>

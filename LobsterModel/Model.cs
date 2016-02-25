@@ -27,6 +27,7 @@ namespace LobsterModel
     using System;
     using System.Collections.Generic;
     using System.Data.Common;
+    using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Linq;
     using System.Net.Sockets;
@@ -71,6 +72,7 @@ namespace LobsterModel
         /// Tests a connection configuration and returns true if a connection could be made.
         /// </summary>
         /// <param name="databaseConfig">The configuration file to test</param>
+        /// <param name="password">The password to connect to the database with.</param>
         /// <param name="e">The exception that was raised, if any.</param>
         /// <returns>True if the connection was successful, otherwise false.</returns>
         public static bool TestConnection(DatabaseConfig databaseConfig, string password, ref Exception e)
@@ -224,21 +226,11 @@ namespace LobsterModel
             }
         }
 
-        public static bool RemoveCodeSource(string directoryName)
-        {
-            if (Settings.Default.CodeSourceDirectories == null || !Settings.Default.CodeSourceDirectories.Contains(directoryName))
-            {
-                return false;
-            }
-
-            Settings.Default.CodeSourceDirectories.Remove(directoryName);
-            return true;
-        }
-
         /// <summary>
         /// Sets the current connection to the given connection, if able.
         /// </summary>
         /// <param name="config">The connection to open.</param>
+        /// <param name="password">The password to connect to the database with.</param>
         /// <param name="eventListener">The event listener that will be used to populate the connection wtih.</param>
         /// <returns>The successfully created database connection.</returns>
         public static DatabaseConnection SetDatabaseConnection(DatabaseConfig config, string password, IModelEventListener eventListener)
@@ -272,6 +264,12 @@ namespace LobsterModel
             return databaseConnection;
         }
 
+        /// <summary>
+        /// INitialises the given directory with the necessary configuration files and folders.
+        /// </summary>
+        /// <param name="directory">The directory to initialise.</param>
+        /// <param name="newConfig">The database configuration file that is created.</param>
+        /// <returns>True if the directory was set up  correctly, false if there was an issue setting it up, or if the directory already has them.</returns>
         public static bool InitialiseCodeSourceDirectory(string directory, ref DatabaseConfig newConfig)
         {
             try
@@ -289,12 +287,17 @@ namespace LobsterModel
 
                 return true;
             }
-            catch (IOException)
+            catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
             {
                 return false;
             }
         }
 
+        /// <summary>
+        /// Adds the given directory to the CodeSource dirctory list.
+        /// </summary>
+        /// <param name="directoryName">The directory to add.</param>
+        /// <returns>True if the directory is new and was added ok, false if the directory was already being used.</returns>
         public static bool AddCodeSourceDirectory(string directoryName)
         {
             if (Settings.Default.CodeSourceDirectories == null)
@@ -311,57 +314,85 @@ namespace LobsterModel
             return true;
         }
 
-        public static bool ValidateCodeSourceLocation(string folderName, ref string errorMessage)
+        /// <summary>
+        /// Removes the CodeSource folder with the given name from the known list.
+        /// </summary>
+        /// <param name="directoryName">The  name of the directory to remove.</param>
+        /// <returns>True if the directory already exists and was removed, otherwise false.</returns>
+        public static bool RemoveCodeSource(string directoryName)
         {
-            if (Settings.Default.CodeSourceDirectories != null && Settings.Default.CodeSourceDirectories.Contains(folderName))
+            if (Settings.Default.CodeSourceDirectories == null || !Settings.Default.CodeSourceDirectories.Contains(directoryName))
             {
-                errorMessage = $"The chosen directory \"{folderName}\" has already been used.";
                 return false;
             }
 
-            DirectoryInfo dirInfo = new DirectoryInfo(folderName);
+            Settings.Default.CodeSourceDirectories.Remove(directoryName);
+            return true;
+        }
+
+        /// <summary>
+        /// Validates that the given direcotry is currently a valid CodeSource folder (it has the correct files and folders).
+        /// </summary>
+        /// <param name="directory">The directory to check.</param>
+        /// <param name="errorMessage">The error message to return (if any).</param>
+        /// <returns>True if the directory is valid, otherwise false (with the error message initialised).</returns>
+        public static bool ValidateCodeSourceLocation(string directory, ref string errorMessage)
+        {
+            if (Settings.Default.CodeSourceDirectories != null && Settings.Default.CodeSourceDirectories.Contains(directory))
+            {
+                errorMessage = $"The chosen directory {directory} has already been used.";
+                return false;
+            }
+
+            DirectoryInfo dirInfo = new DirectoryInfo(directory);
             if (!dirInfo.Exists)
             {
-                errorMessage = $"The chosen directory \"{folderName}\" does not exist, or is not a directory";
+                errorMessage = $"The chosen directory {directory} does not exist, or is not a directory";
                 return false;
             }
 
-            DirectoryInfo lobsterTypeFolder = new DirectoryInfo(Path.Combine(folderName, Settings.Default.ClobTypeDirectoryName));
+            DirectoryInfo lobsterTypeFolder = new DirectoryInfo(Path.Combine(directory, Settings.Default.ClobTypeDirectoryName));
             if (!lobsterTypeFolder.Exists)
             {
-                errorMessage = $"The chosen folder must contain a directory named \"{Settings.Default.ClobTypeDirectoryName}\"";
+                errorMessage = $"The chosen folder must contain a directory named {Settings.Default.ClobTypeDirectoryName}";
                 return false;
             }
 
             FileInfo configFile = new FileInfo(Path.Combine(dirInfo.FullName, Settings.Default.DatabaseConfigFileName));
             if (!configFile.Exists)
             {
-                errorMessage = $"The chosen folder must contain a file named \"{Settings.Default.DatabaseConfigFileName}\"";
+                errorMessage = $"The chosen folder must contain a file named {Settings.Default.DatabaseConfigFileName}";
                 return false;
             }
 
             return true;
         }
 
-        public static bool ValidateNewCodeSourceLocation(string folderName, ref string errorMessage)
+        /// <summary>
+        /// Validates whether the given directory is a vliad place to set as a new CodeSOurce location.
+        /// </summary>
+        /// <param name="directory">The directory to validate.</param>
+        /// <param name="errorMessage">Any error message that occurred, if any.</param>
+        /// <returns>True if the location is valid, otherwise false.</returns>
+        public static bool ValidateNewCodeSourceLocation(string directory, ref string errorMessage)
         {
-            if (Settings.Default.CodeSourceDirectories != null && Settings.Default.CodeSourceDirectories.Contains(folderName))
+            if (Settings.Default.CodeSourceDirectories != null && Settings.Default.CodeSourceDirectories.Contains(directory))
             {
-                errorMessage = $"The chosen directory \"{folderName}\" has already been used.";
+                errorMessage = $"The chosen directory {directory} has already been used.";
                 return false;
             }
 
-            DirectoryInfo dirInfo = new DirectoryInfo(folderName);
+            DirectoryInfo dirInfo = new DirectoryInfo(directory);
             if (!dirInfo.Exists)
             {
-                errorMessage = $"The chosen directory \"{folderName}\" does not exist, or is not a directory";
+                errorMessage = $"The chosen directory {directory} does not exist, or is not a directory";
                 return false;
             }
 
-            FileInfo configFile = new FileInfo(Path.Combine(folderName, Settings.Default.DatabaseConfigFileName));
+            FileInfo configFile = new FileInfo(Path.Combine(directory, Settings.Default.DatabaseConfigFileName));
             if (configFile.Exists)
             {
-                errorMessage = $"The chosen folder already contains a file named \"{Settings.Default.DatabaseConfigFileName}\"";
+                errorMessage = $"The chosen folder already contains a file named {Settings.Default.DatabaseConfigFileName}";
                 return false;
             }
 
@@ -391,7 +422,7 @@ namespace LobsterModel
                     throw new MimeTypeNotFoundException($"Unknown mime-to-prefix key {mimeType}");
                 }
 
-                if (!String.IsNullOrEmpty(mt.Prefix))
+                if (!string.IsNullOrEmpty(mt.Prefix))
                 {
                     mnemonic = $"{mt.Prefix}/{mnemonic}";
                 }
@@ -476,6 +507,7 @@ namespace LobsterModel
         /// Opens a new OracleConnection and returns it.
         /// </summary>
         /// <param name="config">The connection configuration settings to use.</param>
+        /// <param name="password">The password to connect to the database with.</param>
         /// <returns>A new connectionif it opened successfully, otherwise null.</returns>
         private static OracleConnection OpenConnection(DatabaseConfig config, string password)
         {
@@ -524,6 +556,7 @@ namespace LobsterModel
         /// <param name="clobFile">The file to insert into the database.</param>
         /// <param name="clobDir">The clob directory that the file is being inserted into.</param>
         /// <param name="oracleConnection">The Oracle connction to use.</param>
+        [SuppressMessage("Microsoft.Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "There is no way around this.")]
         private static void UpdateDatabaseClob(DatabaseConnection databaseConnection, string fullpath, DBClobFile clobFile, ClobDirectory clobDir, DbConnection oracleConnection)
         {
             DbTransaction trans = oracleConnection.BeginTransaction();
@@ -655,6 +688,7 @@ namespace LobsterModel
         /// <param name="mimeType">The mimetype to insert the file as.</param>
         /// <param name="oracleConnection">The Oracle connection to use.</param>
         /// <returns>True if the file was inserted successfully, otherwise false.</returns>
+        [SuppressMessage("Microsoft.Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "There is no way around this.")]
         private static DBClobFile InsertDatabaseClob(DatabaseConnection databaseConnection, string fullpath, ClobDirectory clobDir, Table table, string mimeType, OracleConnection oracleConnection)
         {
             DbCommand command = oracleConnection.CreateCommand();
@@ -725,6 +759,8 @@ namespace LobsterModel
         /// <param name="clobFile">The file to download.</param>
         /// <param name="oracleConnection">The connection to use.</param>
         /// <param name="filename">The filepath to download the data into.</param>
+        [SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times", Justification = "The stream should be cleared by the 'usings'")]
+        [SuppressMessage("Microsoft.Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "There is no way around this.")]
         private static void DownloadClobDataToFile(DatabaseConnection databaseConnection, DBClobFile clobFile, OracleConnection oracleConnection, string filename)
         {
             OracleCommand command = oracleConnection.CreateCommand();
@@ -772,10 +808,12 @@ namespace LobsterModel
                     else
                     {
                         string result = reader.GetString(0);
-                        StreamWriter streamWriter = new StreamWriter(fs);
-                        streamWriter.NewLine = "\n";
-                        streamWriter.Write(result);
-                        streamWriter.Close();
+                        using (StreamWriter streamWriter = new StreamWriter(fs))
+                        {
+                            streamWriter.NewLine = "\n";
+                            streamWriter.Write(result);
+                            streamWriter.Close();
+                        }
                     }
                 }
 
@@ -805,6 +843,7 @@ namespace LobsterModel
         /// <param name="databaseConnection">The connection to get the files for.</param>
         /// <param name="clobDir">The directory to get the file lists for.</param>
         /// <param name="oracleConnection">The Oracle connection to use.</param>
+        [SuppressMessage("Microsoft.Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "There is no other way.")]
         private static void GetDatabaseFileListForDirectory(DatabaseConnection databaseConnection, ClobDirectory clobDir, OracleConnection oracleConnection)
         {
             clobDir.DatabaseFileList = new List<DBClobFile>();
@@ -863,7 +902,6 @@ namespace LobsterModel
             }
             catch (Exception e) when (e is InvalidOperationException || e is OracleException || e is ColumnNotFoundException)
             {
-                oracleCommand.Dispose();
                 MessageLog.LogError($"Error retrieving file lists from database for {clobDirectory.ClobType.Name} when executing command {oracleCommand.CommandText}: {e}");
                 throw new FileListRetrievalException($"Error retrieving file lists from database for {clobDirectory.ClobType.Name} when executing command {oracleCommand.CommandText}", e);
             }

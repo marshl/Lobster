@@ -34,7 +34,7 @@ namespace LobsterWpf
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public sealed partial class MainWindow : Window, IModelEventListener
+    public sealed partial class MainWindow : Window, IModelEventListener, IDisposable
     {
         /// <summary>
         /// The view of the current connection, if crrently connected.
@@ -584,6 +584,38 @@ namespace LobsterWpf
             if (MessageListWindow.Instance != null)
             {
                 MessageListWindow.Instance.Close();
+            }
+        }
+
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (!disposing)
+            {
+                return;
+            }
+
+            if (this.failureSound != null)
+            {
+                this.failureSound.Dispose();
+                this.failureSound = null;
+            }
+
+            if (this.successSound != null)
+            {
+                this.successSound.Dispose();
+                this.successSound = null;
+            }
+
+            if (this.notifyIcon != null)
+            {
+                this.notifyIcon.Dispose();
+                this.notifyIcon = null;
             }
         }
     }

@@ -25,7 +25,7 @@ namespace LobsterWpf
     /// <summary>
     /// The view of the LobsterModel.MessageLog
     /// </summary>
-    public class MessageLogView : IMessageLogEventListener, IDisposable, INotifyPropertyChanged
+    public sealed class MessageLogView : IMessageLogEventListener, IDisposable, INotifyPropertyChanged
     {
         /// <summary>
         /// The viiews of the messages for this view.
@@ -87,8 +87,19 @@ namespace LobsterWpf
         /// </summary>
         public void Dispose()
         {
+            this.Dispose(true);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if(!disposing)
+            {
+                return;
+            }
+
             MessageLog.Instance.EventListener = null;
         }
+
 
         /// <summary>
         /// Implementation of the INotifyPropertyChange, to tell WPF when a data value has changed

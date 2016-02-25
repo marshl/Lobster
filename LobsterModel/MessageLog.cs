@@ -35,7 +35,7 @@ namespace LobsterModel
     /// <summary>
     /// Used to log detailed information about the 
     /// </summary>
-    public class MessageLog : IDisposable
+    public sealed class MessageLog : IDisposable
     {
         /// <summary>
         /// The file stream this logger writes to.
@@ -46,6 +46,11 @@ namespace LobsterModel
         /// The writer of the stream the messages are written to.
         /// </summary>
         private StreamWriter streamWriter;
+
+        /// <summary>
+        /// The object to lock the filestream on.
+        /// </summary>
+        private object fileLock;
 
         /// <summary>
         /// Prevents a default instance of the <see cref="MessageLog"/> class from being created.
@@ -77,8 +82,6 @@ namespace LobsterModel
         /// Gets or sets the listener of events this log raises (such as when a new message is received).
         /// </summary>
         public IMessageLogEventListener EventListener { get; set; }
-
-        private object fileLock;
 
         /// <summary>
         /// Initalizes a new instance of the <see cref="MessageLog"/> class.
@@ -144,8 +147,17 @@ namespace LobsterModel
         public static void Close()
         {
             MessageLog.LogInfo("Lobster Stopped");
-            Instance.outStream.Close();
+            Instance.Dispose();
             Instance = null;
+        }
+
+        /// <summary>
+        /// Disposes this object.
+        /// </summary>
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         /// <summary>
@@ -173,24 +185,31 @@ namespace LobsterModel
             }
         }
 
-        public void Dispose()
-        {
-            this.Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
+        /// <summary>
+        /// Optionally disposes this object.
+        /// </summary>
+        /// <param name="disposing">Whther this object should be disposed or not.</param>
+        private void Dispose(bool disposing)
         {
             if (!disposing)
+            {
                 return;
+            }
 
-            this.streamWriter.Dispose();
-            this.outStream.Dispose();
-            this.streamWriter = null;
-            this.outStream = null;
+            if (this.streamWriter != null)
+            {
+                this.streamWriter.Dispose();
+                this.streamWriter = null;
+            }
+
+            if (this.outStream != null)
+            {
+                this.outStream.Dispose();
+                this.outStream = null;
+            }
+
             MessageLog.Instance = null;
         }
-
 
         /// <summary>
         /// A single message used by MessageLog.

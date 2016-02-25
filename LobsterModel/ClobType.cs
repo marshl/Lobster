@@ -115,7 +115,7 @@ namespace LobsterModel
         /// <returns>The ClobType, if loaded successfully, otherwise null.</returns>
         public static ClobType LoadClobType(string fullpath)
         {
-            MessageLog.LogInfo($"Loading Database Config File {fullpath}");
+            MessageLog.LogInfo($"Loading ClobType {fullpath}");
             ClobType clobType;
             try
             {

@@ -30,6 +30,7 @@ namespace LobsterModel
     /// <summary>
     /// The exception for when a file cannot be found in a clob directory.
     /// </summary>
+    [Serializable]
     public class ClobFileLookupException : Exception, ISerializable
     {
         /// <summary>

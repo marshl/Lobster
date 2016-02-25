@@ -64,6 +64,7 @@ namespace LobsterModel
         /// Initializes a new instance of the <see cref="DatabaseConnection"/> class.
         /// </summary>
         /// <param name="config">The configuration file to base this connection off.</param>
+        /// <param name="password">The password to connect to the database with.</param>
         /// <param name="eventListener">The event listener that events will be sent to when files are automatically updated.</param>
         public DatabaseConnection(DatabaseConfig config, string password, IModelEventListener eventListener)
         {
@@ -135,6 +136,9 @@ namespace LobsterModel
         /// </summary>
         public bool IsAutoUpdateEnabled { get; set; }
 
+        /// <summary>
+        /// Gets the password the user entered for this connection (set on initialisation).
+        /// </summary>
         public string Password { get; }
 
         /// <summary>
@@ -214,7 +218,9 @@ namespace LobsterModel
         protected virtual void Dispose(bool disposing)
         {
             if (!disposing)
+            {
                 return;
+            }
 
             if (this.fileWatcher != null)
             {
@@ -235,7 +241,6 @@ namespace LobsterModel
                 }
             }
         }
-
 
         /// <summary>
         /// The event raised when a file is renamed within the CodeSource directory.

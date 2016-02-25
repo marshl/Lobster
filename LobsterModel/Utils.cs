@@ -26,11 +26,13 @@ namespace LobsterModel
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Linq;
     using System.Threading;
     using System.Xml;
     using System.Xml.Schema;
+    using System.Xml.Serialization;
     using Properties;
 
     /// <summary>
@@ -113,6 +115,7 @@ namespace LobsterModel
         /// <param name="schemaFilename">The location of the schema file to validate the XML with.</param>
         /// <param name="result">A new object of type T if it passes validation.</param>
         /// <returns>A value indicating whether the file deserialised successfully, otherwise false.</returns>
+        [SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times", Justification = "The stream readers will be Disposed by 'using'.")]
         public static bool DeserialiseXmlFileUsingSchema<T>(string xmlFilename, string schemaFilename, out T result) where T : SerializableObject, new()
         {
             T obj = new T();
@@ -143,13 +146,13 @@ namespace LobsterModel
                 });
             }
 
-            System.Xml.Serialization.XmlSerializer xmls = new System.Xml.Serialization.XmlSerializer(typeof(T));
+            XmlSerializer xmls = new XmlSerializer(typeof(T));
 
             try
             {
                 using (StreamReader streamReader = new StreamReader(xmlFilename))
+                using (XmlReader xmlReader = XmlReader.Create(streamReader, readerSettings))
                 {
-                    XmlReader xmlReader = XmlReader.Create(streamReader, readerSettings);
                     obj = (T)xmls.Deserialize(xmlReader);
                     xmlReader.Close();
                     obj.ErrorList = validationEvents.Select(item => item.Message).ToList();
@@ -157,7 +160,7 @@ namespace LobsterModel
                     return true;
                 }
             }
-            catch (Exception ex ) when ( ex is InvalidOperationException || ex is UnauthorizedAccessException)
+            catch (Exception ex) when (ex is InvalidOperationException || ex is UnauthorizedAccessException)
             {
                 obj = new T();
                 obj.ErrorList.Add(ex.Message);

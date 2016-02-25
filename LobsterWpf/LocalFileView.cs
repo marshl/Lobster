@@ -27,7 +27,7 @@ namespace LobsterWpf
     /// <summary>
     /// A view representing a single local file, with a possible database file connection.
     /// </summary>
-    public class LocalFileView : FileNodeView
+    public sealed class LocalFileView : FileNodeView
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="LocalFileView"/> class.
@@ -81,7 +81,7 @@ namespace LobsterWpf
         /// <summary>
         /// Gets a value indicating whether this file can be updated or not.
         /// </summary>
-        public override bool CanBeUpdated
+        public override sealed bool CanBeUpdated
         {
             get
             {
@@ -92,7 +92,7 @@ namespace LobsterWpf
         /// <summary>
         /// Gets a value indicating whether this file can be diffed or not.
         /// </summary>
-        public override bool CanBeDiffed
+        public override sealed bool CanBeDiffed
         {
             get
             {
@@ -109,7 +109,7 @@ namespace LobsterWpf
         /// <summary>
         /// Gets a value indicating whether this file can inserted or not.
         /// </summary>
-        public override bool CanBeInserted
+        public override sealed bool CanBeInserted
         {
             get
             {
@@ -120,7 +120,7 @@ namespace LobsterWpf
         /// <summary>
         /// Gets a value indicating whether this file can be downloaded from the database
         /// </summary>
-        public override bool CanBePulled
+        public override sealed bool CanBePulled
         {
             get
             {
@@ -131,7 +131,7 @@ namespace LobsterWpf
         /// <summary>
         /// Gets a value indicating whether this file can be explored to or not.
         /// </summary>
-        public override bool CanBeExploredTo
+        public override sealed bool CanBeExploredTo
         {
             get
             {
@@ -142,7 +142,7 @@ namespace LobsterWpf
         /// <summary>
         /// Gets or sets the database file for this local file.
         /// </summary>
-        public override DBClobFile DatabaseFile
+        public override sealed DBClobFile DatabaseFile
         {
             get
             {
@@ -167,10 +167,22 @@ namespace LobsterWpf
             }
         }
 
+        private string fullname;
         /// <summary>
         /// Gets or sets the full path of the file for this view.
         /// </summary>
-        public override string FullName { get; set; }
+        public override string FullName
+        {
+            get
+            {
+                return this.fullname;
+            }
+
+            set
+            {
+                this.fullname = value;
+            }
+        }
 
         /// <summary>
         /// Gets the text that is displayed in the file tree view for this local file.

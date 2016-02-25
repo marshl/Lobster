@@ -23,7 +23,7 @@ namespace LobsterWpf
     /// <summary>
     /// The window that displays messages logged by LobsterModel.MessageLog
     /// </summary>
-    public partial class MessageListWindow : Window
+    public partial class MessageListWindow : Window, IDisposable
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="MessageListWindow"/> class.
@@ -46,7 +46,27 @@ namespace LobsterWpf
         /// <summary>
         /// Gets the data context MessageLogView of this window.
         /// </summary>
-        public MessageLogView LogView { get; }
+        public MessageLogView LogView { get; private set; }
+
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if(!disposing)
+            {
+                return;
+            }
+
+            if (this.LogView != null)
+            {
+                this.LogView.Dispose();
+                this.LogView = null;
+            }
+        }
 
         /// <summary>
         /// The event that is called when the window is closed.

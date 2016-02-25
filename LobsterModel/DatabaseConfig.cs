@@ -60,18 +60,6 @@ namespace LobsterModel
         /// </summary>
         public string Username { get; set; }
 
-        /*/// <summary>
-        /// Gets or sets the password to connect with.
-        /// </summary>
-        [XmlElement("password")]
-        public string Password { get; set; }*/
-
-        /// <summary>
-        /// Gets or sets the location of the CodeSource directory that is used for this database.
-        /// </summary>
-        //[XmlElement("codeSource")]
-        //public string CodeSource { get; set; }
-
         /// <summary>
         /// Gets or sets a value indicating whether pooling is enabled or not. 
         /// When enabled, Oracle will remember new connections for a time, and reuse it if the same computer connects using the same connection string.
@@ -84,17 +72,14 @@ namespace LobsterModel
         public bool AllowAutomaticUpdates { get; set; } = true;
 
         /// <summary>
-        /// Gets or sets the directory name where ClobTypes are stored.
-        /// </summary>
-        //[XmlElement("clobTypeDir")]
-        //public string ClobTypeDir { get; set; }
-
-        /// <summary>
         /// Gets or sets the file from which this DatabaseConfig was loaded.
         /// </summary>
         [XmlIgnore]
         public string FileLocation { get; set; }
 
+        /// <summary>
+        /// Gets the ful path of the CodeSource directory for this connection.
+        /// </summary>
         public string CodeSource
         {
             get
@@ -103,6 +88,9 @@ namespace LobsterModel
             }
         }
 
+        /// <summary>
+        /// Gets the location of the ClobType directory for this connection.
+        /// </summary>
         public string ClobTypeDirectory
         {
             get
@@ -160,21 +148,6 @@ namespace LobsterModel
         public static List<DatabaseConfig> GetConfigList()
         {
             List<DatabaseConfig> configList = new List<DatabaseConfig>();
-
-            /*if (!Model.IsConnectionDirectoryValid)
-            {
-                return configList;
-            }
-
-            foreach (string filename in Directory.GetFiles(Model.ConnectionDirectory, "*.xml"))
-            {
-                DatabaseConfig connection = DatabaseConfig.LoadDatabaseConfig(filename);
-                if (connection != null)
-                {
-                    configList.Add(connection);
-                }
-            }*/
-
 
             if (Settings.Default.CodeSourceDirectories == null || Settings.Default.CodeSourceDirectories.Count == 0)
             {
