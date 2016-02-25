@@ -203,7 +203,25 @@ namespace LobsterModel
         /// </summary>
         public void Dispose()
         {
-            this.fileWatcher.Dispose();
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Disposes this object.
+        /// </summary>
+        /// <param name="disposing">Whether this object is being disposed or not.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposing)
+                return;
+
+            if (this.fileWatcher != null)
+            {
+                this.fileWatcher.Dispose();
+                this.fileWatcher = null;
+            }
+
             foreach (string filename in this.TempFileList)
             {
                 try
@@ -217,6 +235,7 @@ namespace LobsterModel
                 }
             }
         }
+
 
         /// <summary>
         /// The event raised when a file is renamed within the CodeSource directory.
