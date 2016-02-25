@@ -26,7 +26,7 @@ namespace LobsterWpf
     /// <summary>
     /// The ViewModel for a model DatabaseConnection object.
     /// </summary>
-    public class ConnectionView : INotifyPropertyChanged, IDisposable
+    public sealed class ConnectionView : INotifyPropertyChanged, IDisposable
     {
         /// <summary>
         /// The file that is currently selected in the file tree view.
@@ -211,14 +211,18 @@ namespace LobsterWpf
             GC.SuppressFinalize(this);
         }
 
-        protected virtual void Dispose(bool disposing)
+        /// <summary>
+        /// Disposes of this object.
+        /// </summary>
+        /// <param name="disposing">Whether to dispose managed resources or not.</param>
+        private void Dispose(bool disposing)
         {
-            if(!disposing)
+            if (!disposing)
             {
                 return;
             }
 
-            if( this.Connection != null)
+            if (this.Connection != null)
             {
                 this.Connection.Dispose();
                 this.Connection = null;

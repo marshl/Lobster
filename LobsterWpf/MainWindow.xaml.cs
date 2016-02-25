@@ -68,11 +68,13 @@ namespace LobsterWpf
         }
 
         /// <summary>
-        /// The delegate for all file operation events.
+        /// Disposes of this object.
         /// </summary>
-        /// <param name="filename">The full path of the file.</param>
-        /// <param name="success">Whether the operation was a success or not.</param>
-        private delegate void FileOperationDelegate(string filename, bool success);
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
         /// <summary>
         /// The callback for when a automatic file update is completed.
@@ -81,7 +83,10 @@ namespace LobsterWpf
         /// <param name="updateSuccess">Whether the update was a success or not.</param>
         void IModelEventListener.OnAutoUpdateComplete(string filename, bool updateSuccess)
         {
-            this.Dispatcher.Invoke(new FileOperationDelegate(this.DisplayUpdateNotification), filename, updateSuccess);
+            this.Dispatcher.Invoke((MethodInvoker)delegate
+            {
+                this.DisplayUpdateNotification(filename, updateSuccess);
+            });
         }
 
         /// <summary>
@@ -587,12 +592,10 @@ namespace LobsterWpf
             }
         }
 
-        public void Dispose()
-        {
-            this.Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
+        /// <summary>
+        /// Disposes of this object.
+        /// </summary>
+        /// <param name="disposing">Whether to dispose of managed resources or not.</param>
         private void Dispose(bool disposing)
         {
             if (!disposing)

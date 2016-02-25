@@ -60,6 +60,7 @@ namespace LobsterWpf
 
             MainWindow mainWindow = new MainWindow();
             mainWindow.Show();
+            mainWindow.Dispose();
         }
 
         /// <summary>
@@ -73,7 +74,9 @@ namespace LobsterWpf
             {
                 Exception e = (Exception)args.ExceptionObject;
                 MessageLog.LogError($"Unhandled Exception {e}");
-                MessageBox.Show(@"An unhandled exception has occurred. Please add an issue to the Lobster GitHub repo, with a copy of the log file attached. (Remove any passwords in the file beforehand)");
+                MessageBox.Show(@"An unhandled exception has occurred. 
+Please add an issue to the Lobster GitHub repo, with a copy of the log file attached. 
+Ensure that there are no passwords in the file before uploading it.");
             }
             catch
             {

@@ -134,23 +134,6 @@ namespace LobsterWpf
         public DatabaseConnection DatabaseConnection { get; private set; }
 
         /// <summary>
-        /// Gets or sets the directory that connections are found in.
-        /// </summary>
-        /*public string ConnectionDirectory
-        {
-            get
-            {
-                return Model.ConnectionDirectory;
-            }
-
-            set
-            {
-                Model.ConnectionDirectory = value;
-                this.NotifyPropertyChanged("ConnectionDirectory");
-            }
-        }*/
-
-        /// <summary>
         /// Gets or sets the list of configuation files for the current connection directory.
         /// </summary>
         public ObservableCollection<DatabaseConfigView> DatabaseConfigList
@@ -217,24 +200,6 @@ namespace LobsterWpf
         }
 
         /// <summary>
-        /// The evenet for when the change directory method is clicked, prompting the user for the new directory.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The routed event arguments.</param>
-        /*private void ChangeDirectoryButton_Click(object sender, RoutedEventArgs e)
-        {
-            CommonOpenFileDialog dlg = new CommonOpenFileDialog();
-            dlg.IsFolderPicker = true;
-            CommonFileDialogResult result = dlg.ShowDialog();
-            this.Focus();
-            if (result == CommonFileDialogResult.Ok)
-            {
-                this.ConnectionDirectory = dlg.FileName;
-                this.LoadDatabaseConnections();
-            }
-        }*/
-
-        /// <summary>
         /// The event when the connection button is clicked.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
@@ -251,6 +216,11 @@ namespace LobsterWpf
             this.TryConnectWithConfig(config.BaseConfig);
         }
 
+        /// <summary>
+        /// The event called when the user removes a connection.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
         private void RemoveConnectionButton_Click(object sender, RoutedEventArgs e)
         {
             MessageBoxResult result = MessageBox.Show("Are you sure you want to forget this connection? (This will not affect any files on disk)", "Confirm", MessageBoxButton.OKCancel);
@@ -303,19 +273,20 @@ namespace LobsterWpf
             {
                 return;
             }
+
             string errorMessage = null;
-            if ( !Model.ValidateNewCodeSourceLocation(dlg.FileName, ref errorMessage))
+            if (!Model.ValidateNewCodeSourceLocation(dlg.FileName, ref errorMessage))
             {
                 MessageBox.Show(errorMessage);
                 return;
             }
 
             DatabaseConfig databaseConfig = null;
-            if ( !Model.InitialiseCodeSourceDirectory(dlg.FileName, ref databaseConfig))
+            if (!Model.InitialiseCodeSourceDirectory(dlg.FileName, ref databaseConfig))
             {
                 return;
             }
-            
+
             DatabaseConfigView configView = new DatabaseConfigView(databaseConfig);
 
             this.databaseConfigList.Add(configView);
@@ -323,7 +294,6 @@ namespace LobsterWpf
             this.IsEditingConfig = true;
             this.isEditingNewConfig = true;
         }
-
 
         /// <summary>
         /// The event called when the new connection button is clicked.
@@ -370,39 +340,17 @@ namespace LobsterWpf
         {
             TextPromptWindow win = new TextPromptWindow();
             win.ShowDialog();
-            if (!win.DialogResult ?? false)
+            if (!win.DialogResult.GetValueOrDefault(false))
             {
                 return;
             }
-            string password = win.textField.Password;
 
+            string password = win.textField.Password;
             Exception ex = null;
             bool result = this.CurrentConfigView.TestConnection(password, ref ex);
             string message = result ? "Connection test successful" : "Connection test unsuccessful.\n" + ex;
             MessageBox.Show(message);
         }
-
-        /// <summary>
-        /// The event that is called when the codesource button is clicked.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments.</param>
-        /*private void CodeSourceButton_Click(object sender, RoutedEventArgs e)
-        {
-            this.CurrentConfigView.SelectCodeSourceDirectory();
-            this.Focus();
-        }*/
-
-        /// <summary>
-        /// The event that is called when the clobtype button is clicked.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments.</param>
-        /*private void ClobTypeButton_Click(object sender, RoutedEventArgs e)
-        {
-            this.CurrentConfigView.SelectClobTypeDirectory();
-            this.Focus();
-        }*/
 
         /// <summary>
         /// The event that is called when the edit clob type button is clicked.
@@ -462,7 +410,7 @@ namespace LobsterWpf
         private void SaveEditButton_Click(object sender, RoutedEventArgs e)
         {
             Debug.Assert(this.IsEditingConfig, "The save button should be usable while not in edit mode");
-            
+
             bool result = this.CurrentConfigView.ApplyChanges();
             if (!result)
             {

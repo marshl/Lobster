@@ -30,6 +30,11 @@ namespace LobsterWpf
     public sealed class LocalFileView : FileNodeView
     {
         /// <summary>
+        /// The full name of this file.
+        /// </summary>
+        private string fullname;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="LocalFileView"/> class.
         /// </summary>
         /// <param name="connection">The parent connection of this file view.</param>
@@ -167,7 +172,6 @@ namespace LobsterWpf
             }
         }
 
-        private string fullname;
         /// <summary>
         /// Gets or sets the full path of the file for this view.
         /// </summary>

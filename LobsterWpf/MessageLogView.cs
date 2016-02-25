@@ -90,16 +90,19 @@ namespace LobsterWpf
             this.Dispose(true);
         }
 
+        /// <summary>
+        /// Disposes this object.
+        /// </summary>
+        /// <param name="disposing">Whether to dispose managed resources or not.</param>
         private void Dispose(bool disposing)
         {
-            if(!disposing)
+            if (!disposing)
             {
                 return;
             }
 
             MessageLog.Instance.EventListener = null;
         }
-
 
         /// <summary>
         /// Implementation of the INotifyPropertyChange, to tell WPF when a data value has changed

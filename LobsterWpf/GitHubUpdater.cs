@@ -76,7 +76,7 @@ namespace LobsterWpf
             DateTime latestRelease = new DateTime(year, month, day);
             DateTime linkerDate = Utils.RetrieveLinkerTimestamp();
 
-            if ( MessageLog.Instance == null )
+            if (MessageLog.Instance == null)
             {
                 return false;
             }
@@ -109,7 +109,7 @@ namespace LobsterWpf
                 zipFile.ExtractAll(destinationPath, ExtractExistingFileAction.OverwriteSilently);
 
                 string dirName = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                
+
                 // Go up one directory
                 dirName = new DirectoryInfo(dirName).Parent.FullName;
                 string script = CreateAutoUpdateScript(destinationPath, dirName);

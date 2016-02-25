@@ -9,7 +9,7 @@
   <Grid>
     <StackPanel Orientation="Vertical">
       <Label>Please enter your password:</Label>
-      <PasswordBox Name="textField" KeyDown="textField_KeyDown"/>
+      <PasswordBox Name="textField" KeyDown="TextField_KeyDown"/>
       <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
         <Button Width="100" Margin="5" Click="OkButton_Click">Ok</Button>
         <Button Width="100" Margin="5" Click="CancelButton_Click">Cancel</Button>

@@ -23,6 +23,9 @@ namespace LobsterWpf
     /// </summary>
     public partial class TextPromptWindow : Window
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TextPromptWindow"/> class.
+        /// </summary>
         public TextPromptWindow()
         {
             this.InitializeComponent();
@@ -30,19 +33,34 @@ namespace LobsterWpf
             this.textField.Focus();
         }
 
+        /// <summary>
+        /// The event called when the ok button is clicked, closing the window.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
         private void OkButton_Click(object sender, RoutedEventArgs e)
         {
             this.DialogResult = true;
             this.Close();
         }
 
+        /// <summary>
+        /// The event called when the cancel button is clicked, closing the window.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
             this.DialogResult = false;
             this.Close();
         }
 
-        private void textField_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        /// <summary>
+        /// The event called when the text field is changed.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void TextField_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
             if (e.Key == System.Windows.Input.Key.Return)
             {

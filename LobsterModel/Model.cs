@@ -41,34 +41,6 @@ namespace LobsterModel
     public static class Model
     {
         /// <summary>
-        /// Gets a value indicating whether the currently set connection directory is valid or not.
-        /// </summary>
-        /*public static bool IsConnectionDirectoryValid
-        {
-            get
-            {
-                return Settings.Default.ConnectionDir != null && Directory.Exists(Settings.Default.ConnectionDir);
-            }
-        }*/
-
-        /// <summary>
-        /// Gets or sets the directory where connection files are stored.
-        /// </summary>
-        /*public static string ConnectionDirectory
-        {
-            get
-            {
-                return Settings.Default.ConnectionDir;
-            }
-
-            set
-            {
-                Settings.Default.ConnectionDir = value;
-                Settings.Default.Save();
-            }
-        }*/
-
-        /// <summary>
         /// Tests a connection configuration and returns true if a connection could be made.
         /// </summary>
         /// <param name="databaseConfig">The configuration file to test</param>

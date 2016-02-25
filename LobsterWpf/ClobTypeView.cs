@@ -106,24 +106,7 @@ namespace LobsterWpf
                 this.NotifyPropertyChanged("IncludeSubDirectories");
             }
         }
-
-        /// <summary>
-        /// Gets or sets the SQL statement that is used to update and insert files into the database.
-        /// </summary>
-        /*public string LoaderStatement
-        {
-            get
-            {
-                return this.ClobTypeObject.LoaderStatement;
-            }
-
-            set
-            {
-                this.ClobTypeObject.LoaderStatement = value;
-                this.NotifyPropertyChanged("LoaderStatement");
-            }
-        }*/
-
+        
         /// <summary>
         /// Gets or sets the tables that files for this ClobType are stored in.
         /// ClobTypes usually have only a single table, but if there is more than one, then the user will be asked which to use when inserting a new file.

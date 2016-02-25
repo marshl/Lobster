@@ -142,42 +142,6 @@ namespace LobsterWpf
         }
 
         /// <summary>
-        /// Gets or sets the password to connect with.
-        /// </summary>
-        /*public string Password
-        {
-            get
-            {
-                return this.BaseConfig.Password;
-            }
-
-            set
-            {
-                this.BaseConfig.Password = value;
-                this.NotifyPropertyChanged("Password");
-                this.ChangesMade = true;
-            }
-        }*/
-
-        /// <summary>
-        /// Gets or sets the location of the CodeSource directory that is used for this database.
-        /// </summary>
-        /*public string CodeSource
-        {
-            get
-            {
-                return this.BaseConfig.CodeSource;
-            }
-
-            set
-            {
-                this.BaseConfig.CodeSource = value;
-                this.NotifyPropertyChanged("CodeSource");
-                this.ChangesMade = true;
-            }
-        }*/
-
-        /// <summary>
         /// Gets or sets a value indicating whether pooling is enabled or not. 
         /// When enabled, Oracle will remember new connections for a time, and reuse it if the same computer connects using the same connection string.
         /// </summary>
@@ -215,30 +179,14 @@ namespace LobsterWpf
         }
 
         /// <summary>
-        /// Gets or sets the directory name where ClobTypes are stored.
+        /// Gets the ClobType directory for the base config.
         /// </summary>
-        /*public string ClobTypeDir
-        {
-            get
-            {
-                return this.BaseConfig.ClobTypeDir;
-            }
-
-            set
-            {
-                this.BaseConfig.ClobTypeDir = value;
-                this.NotifyPropertyChanged("ClobTypeDir");
-                this.ChangesMade = true;
-            }
-        }*/
-
         public string ClobTypeDirectory
         {
             get
             {
                 return this.BaseConfig.ClobTypeDirectory;
             }
-
         }
 
         /// <summary>
@@ -273,6 +221,7 @@ namespace LobsterWpf
         /// <summary>
         /// Tests the connection.
         /// </summary>
+        /// <param name="password">The password to test the connection with.</param>
         /// <param name="ex">The exception tha was raised during connection testing, if any.</param>
         /// <returns>True if the connection test was successful, otherwise false.</returns>
         public bool TestConnection(string password, ref Exception ex)
@@ -281,39 +230,8 @@ namespace LobsterWpf
         }
 
         /// <summary>
-        /// Opens a folder select dialog to let the user pick a new code source directory.
-        /// </summary>
-        /*public void SelectCodeSourceDirectory()
-        {
-            CommonOpenFileDialog dlg = new CommonOpenFileDialog();
-            dlg.IsFolderPicker = true;
-            dlg.InitialDirectory = this.CodeSource;
-            CommonFileDialogResult result = dlg.ShowDialog();
-            if (result == CommonFileDialogResult.Ok)
-            {
-                this.CodeSource = dlg.FileName;
-            }
-        }*/
-
-        /// <summary>
-        /// Opens a folder select dialog to let the user pick a new clob type directory.
-        /// </summary>
-        /*public void SelectClobTypeDirectory()
-        {
-            CommonOpenFileDialog dlg = new CommonOpenFileDialog();
-            dlg.IsFolderPicker = true;
-            dlg.InitialDirectory = this.ClobTypeDir;
-            CommonFileDialogResult result = dlg.ShowDialog();
-            if (result == CommonFileDialogResult.Ok)
-            {
-                this.ClobTypeDir = dlg.FileName;
-            }
-        }*/
-
-        /// <summary>
         /// Writes the database config out to file, prompting the user for the file to save to if not already set.
         /// </summary>
-        /// <param name="initialDirectory">The directory that the save file dialog will initially open t=to if a new file is made.</param>
         /// <returns>True if the changes could be applied, otherwise false.</returns>
         public bool ApplyChanges()
         {

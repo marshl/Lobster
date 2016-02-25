@@ -48,15 +48,22 @@ namespace LobsterWpf
         /// </summary>
         public MessageLogView LogView { get; private set; }
 
+        /// <summary>
+        /// Disposes this object.
+        /// </summary>
         public void Dispose()
         {
             this.Dispose(true);
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Disposes this object.
+        /// </summary>
+        /// <param name="disposing">Whether to dispose managed resources or not.</param>
         protected virtual void Dispose(bool disposing)
         {
-            if(!disposing)
+            if (!disposing)
             {
                 return;
             }
