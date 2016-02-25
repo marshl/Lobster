@@ -35,7 +35,7 @@ namespace LobsterModel
     /// <summary>
     /// Used to log detailed information about the 
     /// </summary>
-    public class MessageLog
+    public class MessageLog : IDisposable
     {
         /// <summary>
         /// The file stream this logger writes to.
@@ -58,6 +58,7 @@ namespace LobsterModel
             this.outStream = new FileStream(Settings.Default.LogFilename, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
             this.streamWriter = new StreamWriter(this.outStream);
             this.streamWriter.WriteLine();
+            this.fileLock = new object();
 
             MessageLog.LogInfo($"Starting Lobster (build {Utils.RetrieveLinkerTimestamp()})");
         }
@@ -76,6 +77,8 @@ namespace LobsterModel
         /// Gets or sets the listener of events this log raises (such as when a new message is received).
         /// </summary>
         public IMessageLogEventListener EventListener { get; set; }
+
+        private object fileLock;
 
         /// <summary>
         /// Initalizes a new instance of the <see cref="MessageLog"/> class.
@@ -157,7 +160,7 @@ namespace LobsterModel
 
             if (messageType != Message.TYPE.SENSITIVE || Settings.Default.LogSensitiveMessages)
             {
-                lock (this.outStream)
+                lock (this.fileLock)
                 {
                     this.streamWriter.WriteLine(msg.ToString());
                     this.streamWriter.Flush();
@@ -169,6 +172,25 @@ namespace LobsterModel
                 this.EventListener.OnNewMessage(msg);
             }
         }
+
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposing)
+                return;
+
+            this.streamWriter.Dispose();
+            this.outStream.Dispose();
+            this.streamWriter = null;
+            this.outStream = null;
+            MessageLog.Instance = null;
+        }
+
 
         /// <summary>
         /// A single message used by MessageLog.
