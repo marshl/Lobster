@@ -1,5 +1,6 @@
 ##Release 2.3.1.0
-###Released: 23-02-2016
+#####Released: 23-02-2016
+
 ####Bug Fixes
  - Fixed a crash caused by inserting files with a mime types that has no prefix (such as a module):
  - Fixed a crash that would occur if the user attempts to save database configuration to a readonly file;
@@ -7,23 +8,28 @@
  - Changed the unhandled exception message;
  
 ##Release 2.3.0.0
-###Released: 22-02-2016
+#####Released: 22-02-2016
+
 ####Breaking Changes
  - Changed the configuration storage to place the DatabaseConfig and ClobTypes in the CodeSource directory (breaking change);
  - Fixed casing in the Xml files (breaking change);
+ 
 ####Features
  - Added the ability to "Pull" files from the database and execute them immediately;
  - Changed the message log view to more efficiently update the UI when a new message is logged;
  - Changed the DatabaseConnection to only log file event messages when the user setting FileLogEvents is set;
+ 
 ####Bug Fixes
  - Fixed a bug in the auto-updater where the wrong path would be used to restart the executable;
  - Fixed a bug where closing the program after an auto-update would instead crash;
+ 
 ####Appearance
  - Improved the layout of the Message window;
  - Changed the appearance of the backup log;
 
 ##Release 2.2.0.0
-###Released: 15-02-2016
+#####Released: 15-02-2016
+
 ####Features
  - Improved the file tree to remember which nodes were expanded when the tree is refreshed
  - Added a message list window to show the user what events have taken place
@@ -33,8 +39,10 @@
  - Changed the auto-updater to run on a separate thread
  - Changed the auto-updater to wait on process ID, instead of process name
  - Changed the logger to flush after every write
+ 
 ####Bug Fixes
  - Fixed a bug whereby old connections were not properly closed after opening a new connection
  - Fixed the automatic updates setting not working
+ 
 ####Appearance
  - Changed all windows to use the Lobster icon
