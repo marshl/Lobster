@@ -585,7 +585,6 @@ namespace LobsterWpf
         /// <param name="e">The event arguments.</param>
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            this.notifyIcon.Dispose();
             if (MessageListWindow.Instance != null)
             {
                 MessageListWindow.Instance.Close();
