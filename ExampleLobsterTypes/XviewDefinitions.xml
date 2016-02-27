@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ClobType xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name>Xview Definitions</Name>
+  <Enabled>true</Enabled>
+  <Directory>XviewDefinitions</Directory>
+  <IncludeSubDirectories>false</IncludeSubDirectories>
+  <Tables>
+    <Table>
+      <Schema>xviewmgr</Schema>
+      <Name>xview_definitions</Name>
+      <Columns>
+        <Column>
+          <Name>xview_name</Name>
+          <Purpose>MNEMONIC</Purpose>
+        </Column>
+        <Column>
+          <Name>xview_metadata</Name>
+          <Purpose>CLOB_DATA</Purpose>
+          <DataType>XMLTYPE</DataType>
+        </Column>
+      </Columns>
+      <CustomStatements>
+        <UpsertStatement>
+BEGIN
+  xviewmgr.xview.load(:clob, 'C');  
+  COMMIT;
+END;
+        </UpsertStatement>
+        <FileListStatement>
+SELECT xvd.xview_owner || '_' || xvd.xview_name
+FROM xviewmgr.xview_definitions xvd
+        </FileListStatement>
+        <DownloadStatement>
+SELECT xdm.xview_metadata
+FROM xviewmgr.xview_definition_metadata xdm
+WHERE (xdm.xview_owner || '_' || xdm.xview_name) = :mnemonic
+        </DownloadStatement>
+      </CustomStatements>
+    </Table>
+  </Tables>
+</ClobType>

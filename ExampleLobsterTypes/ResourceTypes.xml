@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ClobType xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name>Resource Types</Name>
+  <Enabled>true</Enabled>
+  <Directory>ResourceTypes</Directory>
+  <IncludeSubDirectories>false</IncludeSubDirectories>
+  <Tables>
+    <Table>
+      <Schema>decmgr</Schema>
+      <Name>resource_types</Name>
+      <Columns>
+        <Column>
+          <Name>res_type</Name>
+          <Purpose>MNEMONIC</Purpose>
+        </Column>
+        <Column>
+          <Name>xml_data</Name>
+          <Purpose>CLOB_DATA</Purpose>
+          <DataType>XMLTYPE</DataType>
+        </Column>
+      </Columns>
+    </Table>
+  </Tables>
+</ClobType>

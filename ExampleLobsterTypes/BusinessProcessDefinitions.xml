@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ClobType xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name>Business Process Definitions</Name>
+  <Enabled>true</Enabled>
+  <Directory>BusinessProcessDefinitions</Directory>
+  <IncludeSubDirectories>true</IncludeSubDirectories>
+  <LoaderStatement>
+DECLARE
+  l_xml XMLTYPE := :clob;
+  l_short_name VARCHAR2(4000);
+  l_process_id NUMBER;
+  c INTEGER;
+BEGIN
+  -- Get process name
+  SELECT EXTRACTVALUE(l_xml, '/*/SHORT_NAME')
+  INTO l_short_name
+  FROM sys.dual;
+  -- Get or create business process id
+  BEGIN
+    SELECT p.id
+    INTO l_process_id
+    FROM bpmmgr.business_processes p
+    WHERE p.short_name = l_short_name;
+  EXCEPTION WHEN NO_DATA_FOUND THEN
+    SELECT MAX(p.id)+1
+    INTO l_process_id
+    FROM bpmmgr.business_processes p;
+    IF l_process_id IS NULL THEN l_process_id := 1; END IF;
+    INSERT INTO bpmmgr.business_processes (id, short_name)
+    VALUES (l_process_id, l_short_name);
+  END;
+  -- Merge in business process definition
+  SELECT COUNT(*) 
+  INTO c  
+  FROM bpmmgr.business_process_definitions d
+  WHERE d.bp_id = l_process_id;
+  IF c = 0 THEN
+    INSERT INTO bpmmgr.business_process_definitions (id, bp_id, start_datetime)
+    values (l_process_id, l_process_id, sysdate);
+  END IF;
+  UPDATE bpmmgr.business_process_definitions d 
+  SET start_datetime = SYSDATE
+  , xml_data = l_xml
+  WHERE d.bp_id = l_process_id;
+END;
+  </LoaderStatement>
+  <Tables>
+    <Table>
+      <Schema>bpmmgr</Schema>
+      <Name>business_process_definitions</Name>
+      <Columns>
+        <Column>
+          <Name>id</Name>
+          <Purpose>ID</Purpose>
+        </Column>
+        <Column>
+          <Name>bp_id</Name>
+          <Purpose>FOREIGN_KEY</Purpose>
+        </Column>
+        <Column>
+          <Name>xml_data</Name>
+          <Purpose>CLOB_DATA</Purpose>
+          <DataType>XMLTYPE</DataType>
+        </Column>
+        <Column>
+          <Name>start_datetime</Name>
+          <Purpose>DATETIME</Purpose>
+        </Column>
+      </Columns>
+      <ParentTable>
+        <Schema>bpmmgr</Schema>
+        <Name>business_processes</Name>
+        <Columns>
+          <Column>
+            <Name>id</Name>
+            <Purpose>ID</Purpose>
+          </Column>
+          <Column>
+            <Name>short_name</Name>
+            <Purpose>MNEMONIC</Purpose>
+          </Column>
+        </Columns>
+      </ParentTable>
+    </Table>
+  </Tables>
+</ClobType>
