@@ -238,7 +238,7 @@ namespace LobsterWpf
         /// <param name="config">The config to connect with.</param>
         private void TryConnectWithConfig(DatabaseConfig config)
         {
-            TextPromptWindow win = new TextPromptWindow();
+            PasswordPromptWindow win = new PasswordPromptWindow();
             win.ShowDialog();
             if (!(win.DialogResult ?? false))
             {
@@ -338,7 +338,7 @@ namespace LobsterWpf
         /// <param name="e">The event arguments.</param>
         private void TestConnectionButton_Click(object sender, RoutedEventArgs e)
         {
-            TextPromptWindow win = new TextPromptWindow();
+            PasswordPromptWindow win = new PasswordPromptWindow();
             win.ShowDialog();
             if (!win.DialogResult.GetValueOrDefault(false))
             {

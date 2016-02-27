@@ -21,12 +21,12 @@ namespace LobsterWpf
     /// <summary>
     /// Interaction logic for TextPromptWindow.xaml
     /// </summary>
-    public partial class TextPromptWindow : Window
+    public partial class PasswordPromptWindow : Window
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TextPromptWindow"/> class.
+        /// Initializes a new instance of the <see cref="PasswordPromptWindow"/> class.
         /// </summary>
-        public TextPromptWindow()
+        public PasswordPromptWindow()
         {
             this.InitializeComponent();
 
