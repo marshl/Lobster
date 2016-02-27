@@ -9,7 +9,7 @@ Lobster is a file synchronisation program for Oracle databases, designed to auto
 
 3) For both PharmCIS and NOCI, the necessary configuration files have already been created. In this case, make sure that your repo is up to date, and use the "Add Existing Connection" button to select the CodeSource folder, and you are done configuring Lobster, and can proceed to the Using Lobster section
 
-4) If you wish to initialise a new directory for a connection, click the "Create Connection" button and select a directory. This will add the LobsterConnection.xml file and LobsterTypes/ directory to that location. If Lobster warns you that those files/folders are already in that directory, you may be attempting to intialise a directory that has aready been set up (see step 3).
+4) If you wish to initialise a new directory for a connection, click the "Create Connection" button and select a directory. This will add the LobsterConnection.xml file and LobsterTypes/ directory to that location. If Lobster warns you that those files/folders are already in that directory, you may be attempting to initialise a directory that has already been set up (see step 3).
 
 5) Now fill in the following details of the database server on the right hand side.
 
