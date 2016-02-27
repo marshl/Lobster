@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="TextPromptWindow.xaml.cs" company="marshl">
+// <copyright file="PasswordPromptWindow.xaml.cs" company="marshl">
 // Copyright 2016, Liam Marshall, marshl.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ namespace LobsterWpf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PasswordPromptWindow"/> class.
+        /// <param name="databaseName">The name of the database the password is for.</param>
+        /// <param name="username">The name of the user the password is for.</param>
         /// </summary>
         public PasswordPromptWindow(string databaseName, string username)
         {
