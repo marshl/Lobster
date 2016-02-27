@@ -128,7 +128,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
           </Grid.RowDefinitions>
-          <TextBlock Foreground="#FFBABABA" Grid.Row="0" FontSize="16">
+          <TextBlock Foreground="#FFBABABA" Grid.Row="0" FontSize="16" Margin="5">
             <TextBlock.Text>
               <MultiBinding StringFormat="Backups for: {0}" FallbackValue="Backups">
                 <Binding Path="SelectedFileNode.Name"/>
