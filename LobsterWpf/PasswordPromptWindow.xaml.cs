@@ -26,11 +26,13 @@ namespace LobsterWpf
         /// <summary>
         /// Initializes a new instance of the <see cref="PasswordPromptWindow"/> class.
         /// </summary>
-        public PasswordPromptWindow()
+        public PasswordPromptWindow(string databaseName, string username)
         {
             this.InitializeComponent();
 
             this.textField.Focus();
+            this.passwordLabel.Content = $"Please enter the password for {username}:";
+            this.Title = $"Connect to {databaseName}";
         }
 
         /// <summary>
