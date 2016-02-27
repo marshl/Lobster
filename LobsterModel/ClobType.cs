@@ -142,7 +142,7 @@ namespace LobsterModel
         /// </summary>
         public void Initialise()
         {
-            this.Tables.ForEach(x => x.Initialise());
+            this.Tables?.ForEach(x => x.Initialise());
         }
 
         /// <summary>
