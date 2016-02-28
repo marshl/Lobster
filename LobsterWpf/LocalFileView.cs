@@ -169,6 +169,7 @@ namespace LobsterWpf
                 this.NotifyPropertyChanged("CanBeUpdated");
                 this.NotifyPropertyChanged("CanBeDiffed");
                 this.NotifyPropertyChanged("CanBeInserted");
+                this.NotifyPropertyChanged("ForegroundColour");
             }
         }
 
