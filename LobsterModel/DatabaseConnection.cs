@@ -392,6 +392,16 @@ namespace LobsterModel
                     return;
                 }
 
+                if ( !clobDir.ClobType.AllowAutomaticUpdates)
+                {
+                    if ( Settings.Default.LogFileEvents)
+                    {
+                        MessageLog.LogInfo("The ClobType does not allow autuomatic file updates, and the file will be skipped.");
+                    }
+
+                    return;
+                }
+
                 DBClobFile clobFile = clobDir.GetDatabaseFileForFullpath(e.FullPath);
                 if (clobFile == null)
                 {

@@ -54,6 +54,11 @@ namespace LobsterModel
         public bool IncludeSubDirectories { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether or not a file modified in this directory will trigger an update.
+        /// </summary>
+        public bool AllowAutomaticUpdates { get; set; } = true;
+
+        /// <summary>
         /// Gets or sets the tables that files for this ClobType are stored in.
         /// ClobTypes usually have only a single table, but if there is more than one, then the user will be asked which to use when inserting a new file.
         /// </summary>

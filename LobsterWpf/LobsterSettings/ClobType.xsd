@@ -7,7 +7,7 @@
       <xs:element minOccurs="0" maxOccurs="1" name="Enabled" type="xs:boolean" />
       <xs:element minOccurs="1" maxOccurs="1" name="Directory" type="xs:string" />
       <xs:element minOccurs="1" maxOccurs="1" name="IncludeSubDirectories" type="xs:boolean" />
-      <xs:element minOccurs="0" maxOccurs="1" name="LoaderStatement" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="AllowAutomaticUpdates" type="xs:boolean" default="true"/>
       <xs:element minOccurs="1" maxOccurs="1" name="Tables" type="ArrayOfTable" />
     </xs:sequence>
   </xs:complexType>
