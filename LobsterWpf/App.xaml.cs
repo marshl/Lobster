@@ -60,7 +60,6 @@ namespace LobsterWpf
 
             MainWindow mainWindow = new MainWindow();
             mainWindow.Show();
-            mainWindow.Dispose();
         }
 
         /// <summary>
