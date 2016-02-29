@@ -27,7 +27,6 @@ namespace LobsterWpf
     using System.Collections.ObjectModel;
     using System.ComponentModel;
     using System.Diagnostics;
-    using System.IO;
     using System.Linq;
     using System.Windows;
     using System.Windows.Controls;
@@ -183,7 +182,7 @@ namespace LobsterWpf
         private bool ConfirmCancelChanges()
         {
             MessageBoxResult result = MessageBox.Show(
-                $"Are you sure you want to cancel any unsaved changes to {this.CurrentConfigView.Name}?",
+                $"Are you sure you want to cancel any unsaved changes to {(string.IsNullOrEmpty(this.CurrentConfigView.Name) ? "Unnamed" : this.CurrentConfigView.Name)}?",
                 "Cancel",
                 MessageBoxButton.OKCancel);
 
