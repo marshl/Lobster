@@ -14,7 +14,17 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
-
+//
+//      'Not far from this tunnel there is, or was for a long time, the 
+//      beginning of quite a broad path leading to the Bonfire Glade, 
+//      and then on more or less in our direction, east and a little 
+//      north.That is the path I am going to try and find.'
+//          - Merry
+//
+//          [ _The Lord of the Rings, I/vi "The Old Forest" ] 
+//
+// </copyright>
+//-----------------------------------------------------------------------
 namespace LobsterModel
 {
     using System;

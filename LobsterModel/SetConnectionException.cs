@@ -14,7 +14,14 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
-
+//
+//      'I can't believe that Gollum was connected with
+//       hobbits, however distantly,' said Frodo with some heat.
+//          -- Frodo
+//
+//      [ _The Lord of the Rings_, I/ii: "Shadow of the Past"]
+//
+//-----------------------------------------------------------------------
 namespace LobsterModel
 {
     using System;
