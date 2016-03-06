@@ -14,6 +14,13 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
+//
+//      Then he ordered the dwarves each to be put in a separate cell and to be given
+//      food and drink, but not to be allowed to pass the doors of their little prisons
+//
+//      [ _The Hobbit_, IX: "Barrels out of Bond"]
+//
+//-----------------------------------------------------------------------
 namespace LobsterModel
 {
     using System;

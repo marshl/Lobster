@@ -14,6 +14,12 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
+//
+//      "This is a heavy load!" some grumbled
+//
+//      [ _The Hobbit_, IX: "Barrels out of Bond"]
+//
+//-----------------------------------------------------------------------
 namespace LobsterModel
 {
     using System;

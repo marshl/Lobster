@@ -20,6 +20,7 @@
 //      The starlight on the Western Seas.'
 //      
 //      [ _The Lord of the Rings_, VI/ix: "The Grey Havens"]
+//
 //-----------------------------------------------------------------------
 namespace LobsterModel
 {
