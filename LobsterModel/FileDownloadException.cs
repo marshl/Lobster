@@ -14,6 +14,13 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
+//
+//      He began to pull down a bit more of the walls, in a leisurely sort of
+//      way, just to amuse himself.
+//
+//      [ _The Hobbit_, IX: "Flotsam and Jetsam"]
+//
+//-----------------------------------------------------------------------
 namespace LobsterModel
 {
     using System;

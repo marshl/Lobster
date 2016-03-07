@@ -14,6 +14,15 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
+//
+//      "Well yes - and no. Now it comes
+//      to it, I don't like parting with it at all, I may say. And I don't really see
+//      why I should.Why do you want me to?"
+//          -- Bilbo
+//
+//      [ _The Lord of the Rings_, I/i: "A Long Expected Party"]
+//
+//-----------------------------------------------------------------------
 namespace LobsterModel
 {
     using System;

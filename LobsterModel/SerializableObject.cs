@@ -14,6 +14,12 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
+//
+//      "Both wrong," cried Bilbo very much relieved
+//
+//      [ _The Hobbit_, VI: "Riddles in the Dark"]
+//
+//-----------------------------------------------------------------------
 namespace LobsterModel
 {
     using System.Collections.Generic;
