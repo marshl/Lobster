@@ -108,15 +108,15 @@
             <RowDefinition Height="*"/>
           </Grid.RowDefinitions>
           <Label Grid.Row="0" Grid.Column="0" Margin="3">Name:</Label>
-          <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Path=Name}" Margin="3"/>
+          <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Path=Name}" Margin="3" ToolTip="The name of the database (for display purposes only)"/>
           <Label Grid.Row="1" Grid.Column="0" Margin="3">Host:</Label>
-          <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Path=Host}" Margin="3"/>
+          <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Path=Host}" Margin="3" ToolTip="The IP address of host name of the database"/>
           <Label Grid.Row="2" Grid.Column="0" Margin="3">Port:</Label>
-          <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Path=Port}" Margin="3"/>
+          <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Path=Port}" Margin="3" ToolTip="The port the database listens on (the Oracle default is 1521)"/>
           <Label Grid.Row="3" Grid.Column="0" Margin="3">SID:</Label>
-          <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Path=SID}" Margin="3"/>
+          <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Path=SID}" Margin="3" ToolTip="The Oracle System ID of the database"/>
           <Label Grid.Row="4" Grid.Column="0" Margin="3">Username:</Label>
-          <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Path=Username}" Margin="3"/>
+          <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Path=Username}" Margin="3" ToolTip="The user to connect as (make sure the user has permissions to access every table)"/>
           <!--<Label Grid.Row="5" Grid.Column="0" Margin="3">Password:</Label>
           <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding Path=Password}" Margin="3"/>-->
 
@@ -126,13 +126,11 @@
               <ColumnDefinition Width="*"/>
               <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Label Grid.Column="0" Margin="3">Pool Connection:</Label>
-            <CheckBox Grid.Column="1" VerticalContentAlignment="Center" IsChecked="{Binding Path=UsePooling}"/>
-            <Button Grid.Column="2" Click="TestConnectionButton_Click" Width="125">Test Connection</Button>
+            <CheckBox Grid.Column="1" VerticalContentAlignment="Center" IsChecked="{Binding Path=UsePooling}" ToolTip="If pooling is enabled, the database will hold the connection open between queries. This speeds up Lobster operations, but can hinder database performance." Content="Pool Connection"/>
+            <Button Grid.Column="2" Click="TestConnectionButton_Click" Width="125" Content="Test Connection"/>
           </Grid>
           <StackPanel Orientation="Horizontal" Grid.Row="7" Grid.ColumnSpan="2">
-            <Label Grid.Column="0" Margin="5" >Allow Automatic Updates:</Label>
-            <CheckBox Grid.Column="1" VerticalContentAlignment="Center" IsChecked="{Binding Path=AllowAutomaticUpdates}"/>
+            <CheckBox Grid.Column="1" VerticalContentAlignment="Center" IsChecked="{Binding Path=AllowAutomaticUpdates}" Content="Allow Automatic Updates" ToolTip="If checked, Lobster will automatically update the database when a synchronised file is changed."/>
           </StackPanel>
           <!--<Label Grid.Row="8" Grid.Column="0" Margin="3">CodeSource Directory:</Label>-->
           <!--<Grid Grid.Row="8" Grid.Column="1" Margin="3">
