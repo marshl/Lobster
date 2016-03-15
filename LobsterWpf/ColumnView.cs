@@ -14,6 +14,15 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
+//
+//      Monoliths of
+//      black marble, they rose to great capitals carved in many strange figures of
+//      beasts and leaves; and far above in shadow the wide vaulting gleamed with dull
+//      gold, inset with flowing traceries of many colours.
+//
+//      [ _The Lord of the Rings_, V/i: "Minas Tirith"]
+//
+//-----------------------------------------------------------------------
 namespace LobsterWpf
 {
     using System.ComponentModel;

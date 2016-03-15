@@ -14,6 +14,12 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
+//
+//      "I can't," [Frodo] said. "I can't see. I can't find any hold. I can't move yet."
+//
+//      [ _The Lord of the Rings_, V/i: "Chapter"]
+//
+//-----------------------------------------------------------------------
 namespace LobsterModel
 {
     using System;

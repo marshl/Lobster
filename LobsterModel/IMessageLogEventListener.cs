@@ -14,6 +14,12 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
+//
+//      "What message?" said poor Mr. Baggins all in a fluster.
+//
+//      [ _The Hobbit_, II: "Roast Mutton"]
+//
+//-----------------------------------------------------------------------
 namespace LobsterModel
 {
     /// <summary>

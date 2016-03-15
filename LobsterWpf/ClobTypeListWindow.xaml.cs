@@ -14,6 +14,14 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
+//
+//      It was the middle of the afternoon
+//      before they noticed that great patches of flowers had begun to spring up, all
+//      the same kinds growing together as if they had been planted.
+//
+//      [ _The Hobbit_, VII: "Queer Lodgings"]
+//
+//-----------------------------------------------------------------------
 namespace LobsterWpf
 {
     using System.Collections.Generic;

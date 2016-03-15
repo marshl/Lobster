@@ -14,6 +14,13 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
+//
+//      It was lit by deep windows in the wide aisles at either side, beyond the rows of
+//      tallpillars that upheld the roof.
+//
+//      [ _The Lord of the Rings_, V/i: "Chapter"]
+//
+//-----------------------------------------------------------------------
 namespace LobsterWpf
 {
     using System.Collections.ObjectModel;

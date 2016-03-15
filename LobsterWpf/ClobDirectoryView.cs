@@ -14,9 +14,15 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
+//
+//      But, of course, Gandalf had made a special study of bewitchments
+//      with fire and lights.
+//
+//      [ _The Hobbit_, VI: "Out of the Frying Pan and Into the Fire"]
+//
+//-----------------------------------------------------------------------
 namespace LobsterWpf
 {
-    using System.IO;
     using LobsterModel;
 
     /// <summary>

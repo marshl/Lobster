@@ -14,6 +14,14 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
+//
+//      "Bless us and splash us, my precioussss! I guess it's a choice feast; at least a
+//      tasty morsel it'd make us, gollum!"
+//          -- CHARACTER
+//
+//      [ _The Lord of the Rings_, V/i: "Chapter"]
+//
+//-----------------------------------------------------------------------
 namespace LobsterWpf
 {
     using System;
