@@ -539,7 +539,7 @@ namespace LobsterWpf
         {
             if (MessageListWindow.Instance != null)
             {
-                MessageListWindow.Instance.BringIntoView();
+                MessageListWindow.Instance.Activate();
             }
             else
             {

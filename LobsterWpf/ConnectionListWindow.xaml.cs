@@ -238,6 +238,7 @@ namespace LobsterWpf
         private void TryConnectWithConfig(DatabaseConfig config)
         {
             PasswordPromptWindow win = new PasswordPromptWindow(config.Name, config.Username);
+            win.Owner = this;
             win.ShowDialog();
             if (!(win.DialogResult ?? false))
             {
@@ -418,6 +419,7 @@ namespace LobsterWpf
             else
             {
                 this.IsEditingConfig = false;
+                this.NotifyPropertyChanged("IsEditButtonEnabled");
             }
         }
 
