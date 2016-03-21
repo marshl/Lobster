@@ -392,9 +392,9 @@ namespace LobsterModel
                     return;
                 }
 
-                if ( !clobDir.ClobType.AllowAutomaticUpdates)
+                if (!clobDir.ClobType.AllowAutomaticUpdates)
                 {
-                    if ( Settings.Default.LogFileEvents)
+                    if (Settings.Default.LogFileEvents)
                     {
                         MessageLog.LogInfo("The ClobType does not allow autuomatic file updates, and the file will be skipped.");
                     }

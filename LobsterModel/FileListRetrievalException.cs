@@ -23,7 +23,6 @@
 //
 //          [ _The Lord of the Rings, I/vi "The Old Forest" ] 
 //
-// </copyright>
 //-----------------------------------------------------------------------
 namespace LobsterModel
 {
