@@ -25,12 +25,12 @@ namespace LobsterWpf
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.Diagnostics;
     using System.IO;
     using System.Net;
     using System.Reflection;
     using System.Text.RegularExpressions;
-    using System.Windows.Forms;
     using Ionic.Zip;
     using LobsterModel;
     using Newtonsoft.Json;
@@ -39,18 +39,39 @@ namespace LobsterWpf
     /// <summary>
     /// Used to connect with the GitHub API and request release information.
     /// </summary>
-    public static class GitHubUpdater
+    public class GitHubUpdater
     {
+        private string username;
+        private string repository;
+
+        private GitHubRelease release;
+
+        private string downloadUrl;
+        private string sourceFile;
+        private string destinationPath;
+
+        /// <summary>
+        /// 
+        /// </summary>
+
+        /// <param name="user">There user that owns the repository.</param>
+        /// <param name="repo">The repository name.</param>
+        public GitHubUpdater(string user, string repo)
+        {
+            this.username = user;
+            this.repository = repo;
+        }
+
+        public WebClient DownloadClient { get; private set; }
+
         /// <summary>
         /// Validates that the currently running program was built on the same day or after the latest GitHub release.
         /// </summary>
-        /// <param name="user">There user that owns the repository.</param>
-        /// <param name="repo">The repository name.</param>
         /// <returns>True if there is a newer release available.</returns>
-        public static bool RunUpdateCheck(string user, string repo)
+        public bool RunUpdateCheck()
         {
             RestClient restClient = new RestClient("https://api.github.com");
-            var restRequest = new RestRequest($"/repos/{user}/{repo}/releases/latest", Method.GET);
+            var restRequest = new RestRequest($"/repos/{this.username}/{this.repository}/releases/latest", Method.GET);
             IRestResponse response = restClient.Execute(restRequest);
             if (response.StatusCode != HttpStatusCode.OK)
             {
@@ -58,7 +79,7 @@ namespace LobsterWpf
                 return false;
             }
 
-            GitHubRelease release = JsonConvert.DeserializeObject<GitHubRelease>(response.Content);
+            this.release = JsonConvert.DeserializeObject<GitHubRelease>(response.Content);
             Regex regex = new Regex("(?<year>[0-9]{4})-(?<month>[0-9]{2})-(?<day>[0-9]{2})");
             Match match = regex.Match(release.DatePublished);
             if (!match.Success)
@@ -82,44 +103,57 @@ namespace LobsterWpf
             }
 
             MessageLog.LogInfo($"Release comparison: local={linkerDate} github={latestRelease}");
+            return latestRelease > linkerDate;
+        }
 
-            if (latestRelease > linkerDate)
+        public void PrepareUpdate()
+        {
+            MessageLog.LogInfo("Proceeding with update.");
+
+            this.downloadUrl = this.release.Assets[0].BrowserDownloadUrl;
+            this.sourceFile = $"{Path.GetTempPath()}\\{Path.GetFileName(this.downloadUrl)}";
+            this.destinationPath = $"{Path.GetTempPath()}\\{Path.GetFileNameWithoutExtension(this.downloadUrl)}";
+
+            MessageLog.LogInfo($"Downloading file from {downloadUrl} to {sourceFile}");
+
+            this.DownloadClient = new WebClient();
+            this.DownloadClient.DownloadFileCompleted += this.Client_DownloadFileCompleted;
+        }
+
+        public void BeginUpdate()
+        {
+            this.DownloadClient.DownloadFileAsync(new Uri(this.downloadUrl), this.sourceFile);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The completed event arguments.</param>
+        private void Client_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
+        {
+            if (e.Cancelled)
             {
-                DialogResult result = MessageBox.Show("A newer version is available. Would you like to update now?", "Update Available", MessageBoxButtons.OKCancel);
-
-                if (result != DialogResult.OK)
-                {
-                    return false;
-                }
-
-                MessageLog.LogInfo("Proceeding with update.");
-
-                string downloadUrl = release.Assets[0].BrowserDownloadUrl;
-                string sourceFile = $"{Path.GetTempPath()}\\{Path.GetFileName(downloadUrl)}";
-                string destinationPath = $"{Path.GetTempPath()}\\{Path.GetFileNameWithoutExtension(downloadUrl)}";
-
-                using (WebClient client = new WebClient())
-                {
-                    MessageLog.LogInfo($"Downloading file from {downloadUrl} to {sourceFile}");
-                    client.DownloadFile(downloadUrl, sourceFile);
-                }
-
-                MessageLog.LogInfo($"Extracting file from {sourceFile} to {destinationPath}");
-                ZipFile zipFile = ZipFile.Read(sourceFile);
-                zipFile.ExtractAll(destinationPath, ExtractExistingFileAction.OverwriteSilently);
-
-                string dirName = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-
-                // Go up one directory
-                dirName = new DirectoryInfo(dirName).Parent.FullName;
-                string script = CreateAutoUpdateScript(destinationPath, dirName);
-
-                MessageLog.LogInfo($"Starting batch script {script}");
-                Process.Start(script);
-                return true;
+                return;
             }
 
-            return false;
+            if ( e.Error != null )
+            {
+                return;
+            }
+
+            MessageLog.LogInfo($"Extracting file from {this.sourceFile} to {this.destinationPath}");
+            ZipFile zipFile = ZipFile.Read(this.sourceFile);
+            zipFile.ExtractAll(destinationPath, ExtractExistingFileAction.OverwriteSilently);
+
+            string dirName = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+            // Go up one directory
+            dirName = new DirectoryInfo(dirName).Parent.FullName;
+            string script = CreateAutoUpdateScript(destinationPath, dirName);
+
+            MessageLog.LogInfo($"Starting batch script {script}");
+            Process.Start(script);
         }
 
         /// <summary>
@@ -128,7 +162,7 @@ namespace LobsterWpf
         /// <param name="source">Where the program is currently located.</param>
         /// <param name="destination">The the new copy of the program is located.</param>
         /// <returns>The file location of the .bat script.</returns>
-        public static string CreateAutoUpdateScript(string source, string destination)
+        private static string CreateAutoUpdateScript(string source, string destination)
         {
             MessageLog.LogInfo("Creating batch script.");
             string scriptFilePath = $"{Path.GetTempPath()}\\lobster_update.bat";

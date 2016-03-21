@@ -131,6 +131,9 @@
     <Compile Include="ColumnView.cs" />
     <Compile Include="DatabaseConfigView.cs" />
     <Compile Include="DatabaseFileView.cs" />
+    <Compile Include="DownloadUpdateWindow.xaml.cs">
+      <DependentUpon>DownloadUpdateWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="EditClobTypeWindow.xaml.cs">
       <DependentUpon>EditClobTypeWindow.xaml</DependentUpon>
     </Compile>
@@ -171,6 +174,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="ConnectionListWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="DownloadUpdateWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

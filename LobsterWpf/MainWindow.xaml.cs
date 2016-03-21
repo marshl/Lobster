@@ -18,16 +18,15 @@ namespace LobsterWpf
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.Diagnostics;
     using System.Drawing;
     using System.IO;
     using System.Media;
-    using System.Reflection;
     using System.Threading;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Forms;
-    using System.Windows.Media;
     using LobsterModel;
     using Properties;
 
@@ -212,11 +211,12 @@ namespace LobsterWpf
         /// <param name="e">The event arguments.</param>
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            Thread thread = new Thread(() => this.UpdateCheck());
-            thread.Start();
+            //Thread thread = new Thread(() => this.UpdateCheck());
+            //thread.Start();
 
             this.OpenConnectionDialog();
             this.notifyIcon.Visible = true;
+            this.UpdateCheck();
         }
 
         /// <summary>
@@ -224,14 +224,50 @@ namespace LobsterWpf
         /// </summary>
         private void UpdateCheck()
         {
-            bool result = GitHubUpdater.RunUpdateCheck("marshl", "lobster");
-            if (result)
+            GitHubUpdater updater = new GitHubUpdater("marshl", "lobster");
+            Thread thread = new Thread(() =>
+            {
+                bool updateExists = updater.RunUpdateCheck();
+                if (!updateExists)
+                {
+                    return;
+                }
+
+                DialogResult result = System.Windows.Forms.MessageBox.Show("A newer version is available. Would you like to update now?", "Update Available", MessageBoxButtons.OKCancel);
+                if (result != System.Windows.Forms.DialogResult.OK)
+                {
+                    return;
+                }
+
+                updater.PrepareUpdate();
+
+                // The DownloadUpdateWindow begins the update once opened
+                this.Dispatcher.Invoke((Action)delegate
+                {
+                    DownloadUpdateWindow window = new DownloadUpdateWindow(updater);
+                    window.Owner = this;
+                    updater.DownloadClient.DownloadFileCompleted += DownloadClient_DownloadFileCompleted;
+                    window.ShowDialog();
+                });
+
+            });
+            thread.Start();
+        }
+
+        private void DownloadClient_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
+        {
+            if ( e.Error != null )
+            {
+                System.Windows.MessageBox.Show(e.Error.ToString(), "Update Error");
+                return;
+            }
+
+            if (!e.Cancelled)
             {
                 this.Dispatcher.Invoke((Action)delegate
                 {
                     this.Close();
                 });
-                return;
             }
         }
 
