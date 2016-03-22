@@ -41,19 +41,39 @@ namespace LobsterWpf
     /// </summary>
     public class GitHubUpdater
     {
+        /// <summary>
+        /// The name of the GitHUb user to search for.
+        /// </summary>
         private string username;
-        private string repository;
-
-        private GitHubRelease release;
-
-        private string downloadUrl;
-        private string sourceFile;
-        private string destinationPath;
 
         /// <summary>
-        /// 
+        /// The repository of the user to query
         /// </summary>
+        private string repository;
 
+        /// <summary>
+        /// The release information, if found.
+        /// </summary>
+        private GitHubRelease release;
+
+        /// <summary>
+        /// The URL the release zip can be downloaded from
+        /// </summary>
+        private string releaseDownloadUrl;
+
+        /// <summary>
+        /// The file to download the zip into.
+        /// </summary>
+        private string fileDownloadLocation;
+
+        /// <summary>
+        /// The location the zip file is exracted to (before copying it over the top of the current Lobster install)
+        /// </summary>
+        private string zipUnpackDirectory;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GitHubUpdater"/> class.       
+        /// </summary>
         /// <param name="user">There user that owns the repository.</param>
         /// <param name="repo">The repository name.</param>
         public GitHubUpdater(string user, string repo)
@@ -62,6 +82,9 @@ namespace LobsterWpf
             this.repository = repo;
         }
 
+        /// <summary>
+        /// Gets the client the release file will be downloaded with.
+        /// </summary>
         public WebClient DownloadClient { get; private set; }
 
         /// <summary>
@@ -81,7 +104,7 @@ namespace LobsterWpf
 
             this.release = JsonConvert.DeserializeObject<GitHubRelease>(response.Content);
             Regex regex = new Regex("(?<year>[0-9]{4})-(?<month>[0-9]{2})-(?<day>[0-9]{2})");
-            Match match = regex.Match(release.DatePublished);
+            Match match = regex.Match(this.release.DatePublished);
             if (!match.Success)
             {
                 MessageLog.LogWarning("An error occurred when attempting to extract the publish date");
@@ -106,27 +129,33 @@ namespace LobsterWpf
             return latestRelease > linkerDate;
         }
 
+        /// <summary>
+        /// Prepares the web client for downloading the release zip;
+        /// </summary>
         public void PrepareUpdate()
         {
             MessageLog.LogInfo("Proceeding with update.");
 
-            this.downloadUrl = this.release.Assets[0].BrowserDownloadUrl;
-            this.sourceFile = $"{Path.GetTempPath()}\\{Path.GetFileName(this.downloadUrl)}";
-            this.destinationPath = $"{Path.GetTempPath()}\\{Path.GetFileNameWithoutExtension(this.downloadUrl)}";
+            this.releaseDownloadUrl = this.release.Assets[0].BrowserDownloadUrl;
+            this.fileDownloadLocation = $"{Path.GetTempPath()}\\{Path.GetFileName(this.releaseDownloadUrl)}";
+            this.zipUnpackDirectory = $"{Path.GetTempPath()}\\{Path.GetFileNameWithoutExtension(this.releaseDownloadUrl)}";
 
-            MessageLog.LogInfo($"Downloading file from {downloadUrl} to {sourceFile}");
+            MessageLog.LogInfo($"Downloading file from {this.releaseDownloadUrl} to {this.fileDownloadLocation}");
 
             this.DownloadClient = new WebClient();
             this.DownloadClient.DownloadFileCompleted += this.Client_DownloadFileCompleted;
         }
 
+        /// <summary>
+        /// Begins the download of the release zip.
+        /// </summary>
         public void BeginUpdate()
         {
-            this.DownloadClient.DownloadFileAsync(new Uri(this.downloadUrl), this.sourceFile);
+            this.DownloadClient.DownloadFileAsync(new Uri(this.releaseDownloadUrl), this.fileDownloadLocation);
         }
 
         /// <summary>
-        /// 
+        /// The event called when the download has completed.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">The completed event arguments.</param>
@@ -137,20 +166,20 @@ namespace LobsterWpf
                 return;
             }
 
-            if ( e.Error != null )
+            if (e.Error != null)
             {
                 return;
             }
 
-            MessageLog.LogInfo($"Extracting file from {this.sourceFile} to {this.destinationPath}");
-            ZipFile zipFile = ZipFile.Read(this.sourceFile);
-            zipFile.ExtractAll(destinationPath, ExtractExistingFileAction.OverwriteSilently);
+            MessageLog.LogInfo($"Extracting file from {this.fileDownloadLocation} to {this.zipUnpackDirectory}");
+            ZipFile zipFile = ZipFile.Read(this.fileDownloadLocation);
+            zipFile.ExtractAll(this.zipUnpackDirectory, ExtractExistingFileAction.OverwriteSilently);
 
             string dirName = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
             // Go up one directory
             dirName = new DirectoryInfo(dirName).Parent.FullName;
-            string script = CreateAutoUpdateScript(destinationPath, dirName);
+            string script = this.CreateAutoUpdateScript(this.zipUnpackDirectory, dirName);
 
             MessageLog.LogInfo($"Starting batch script {script}");
             Process.Start(script);
@@ -158,11 +187,12 @@ namespace LobsterWpf
 
         /// <summary>
         /// Creates a .bat script that, when executed, will copy the contents of the update over the top of the current installation.
+        /// The script waits for Lobster to close before executing.
         /// </summary>
         /// <param name="source">Where the program is currently located.</param>
         /// <param name="destination">The the new copy of the program is located.</param>
         /// <returns>The file location of the .bat script.</returns>
-        private static string CreateAutoUpdateScript(string source, string destination)
+        private string CreateAutoUpdateScript(string source, string destination)
         {
             MessageLog.LogInfo("Creating batch script.");
             string scriptFilePath = $"{Path.GetTempPath()}\\lobster_update.bat";

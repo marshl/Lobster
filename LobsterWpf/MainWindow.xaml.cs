@@ -211,9 +211,6 @@ namespace LobsterWpf
         /// <param name="e">The event arguments.</param>
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            //Thread thread = new Thread(() => this.UpdateCheck());
-            //thread.Start();
-
             this.OpenConnectionDialog();
             this.notifyIcon.Visible = true;
             this.UpdateCheck();
@@ -249,19 +246,26 @@ namespace LobsterWpf
                     updater.DownloadClient.DownloadFileCompleted += DownloadClient_DownloadFileCompleted;
                     window.ShowDialog();
                 });
-
             });
+
             thread.Start();
         }
 
+        /// <summary>
+        /// The event called when the update download has finished.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The completed event arguments.</param>
         private void DownloadClient_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
         {
-            if ( e.Error != null )
+            // If there was an error, print it out
+            if (e.Error != null)
             {
                 System.Windows.MessageBox.Show(e.Error.ToString(), "Update Error");
                 return;
             }
 
+            // If the event wasn't cancelled, then close the program
             if (!e.Cancelled)
             {
                 this.Dispatcher.Invoke((Action)delegate
