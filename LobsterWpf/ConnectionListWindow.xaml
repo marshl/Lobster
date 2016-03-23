@@ -108,7 +108,7 @@
             <RowDefinition Height="*"/>
           </Grid.RowDefinitions>
           <Label Grid.Row="0" Grid.Column="0" Margin="3">Name:</Label>
-          <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Path=Name}" Margin="3" ToolTip="The name of the database (for display purposes only)"/>
+          <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Path=Name}" Margin="3" ToolTip="The name of the database (for informational purposes only)"/>
           <Label Grid.Row="1" Grid.Column="0" Margin="3">Host:</Label>
           <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Path=Host}" Margin="3" ToolTip="The IP address of host name of the database"/>
           <Label Grid.Row="2" Grid.Column="0" Margin="3">Port:</Label>
@@ -126,7 +126,7 @@
               <ColumnDefinition Width="*"/>
               <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <CheckBox Grid.Column="1" VerticalContentAlignment="Center" IsChecked="{Binding Path=UsePooling}" ToolTip="If pooling is enabled, the database will hold the connection open between queries. This speeds up Lobster operations, but can hinder database performance." Content="Pool Connection"/>
+            <CheckBox Grid.Column="1" VerticalContentAlignment="Center" IsChecked="{Binding Path=UsePooling}" ToolTip="If pooling is enabled, the database will hold the connection open between queries.&#x0a;This speeds up Lobster operations, but can hinder database performance." Content="Pool Connection"/>
             <Button Grid.Column="2" Click="TestConnectionButton_Click" Width="125" Content="Test Connection"/>
           </Grid>
           <StackPanel Orientation="Horizontal" Grid.Row="7" Grid.ColumnSpan="2">
