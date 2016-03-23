@@ -14,6 +14,14 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
+//
+//      At first they made
+//      fair progress, but as they went on, their passage became slower and more
+//      dangerous.
+//
+//      [ _The Lord of the Rings_, I/xi: "A Knife in the Dark"]
+//
+//-----------------------------------------------------------------------
 namespace LobsterWpf
 {
     using System.ComponentModel;

@@ -14,6 +14,13 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
+//
+//      'I am a herald and ambassador, and may not be assailed!' 
+//      [The Messenger of Mordor] cried.
+//
+//      [ _The Lord of the Rings_, V/x: "The Black Gate Opens"]
+//
+//-----------------------------------------------------------------------
 namespace LobsterWpf
 {
     using System;

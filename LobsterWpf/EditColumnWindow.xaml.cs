@@ -14,13 +14,19 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
-
+//
+//      "This pillar marks the spot where Durin first looked
+//      in the Mirrormere"
+//          -- Gimli
+//
+//      [ _The Lord of the Rings_, II/vi: "Lothlorien"]
+//
+//-----------------------------------------------------------------------
 namespace LobsterWpf
 {
     using System;
     using System.Linq;
     using System.Windows;
-    using System.Windows.Media;
     using LobsterModel;
 
     /// <summary>

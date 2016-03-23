@@ -14,6 +14,13 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
+//
+//      'Will you aid me or thwart me? Choose swiftly!'
+//          -- Aragorn
+//
+//      [ _The Lord of the Rings_, III/ii: "The Riders of Rohan"]
+//
+//-----------------------------------------------------------------------
 namespace LobsterWpf
 {
     using System.Collections.ObjectModel;

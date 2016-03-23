@@ -20,6 +20,7 @@
 //       doom, a Fell Rider of the air.'
 //
 //      [ _The Lord of the Rings_, V/i: "Minas Tirith"]
+//
 //-----------------------------------------------------------------------
 namespace LobsterWpf
 {

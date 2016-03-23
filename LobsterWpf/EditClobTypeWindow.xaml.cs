@@ -14,7 +14,12 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
-
+//
+//      "The new Master is of wiser kind," said Balin
+//
+//      [ _The Hobbit_, XIX: "The Last Stage"]
+//
+//-----------------------------------------------------------------------
 namespace LobsterWpf
 {
     using System.Windows;

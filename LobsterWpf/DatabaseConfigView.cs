@@ -14,6 +14,14 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
+//
+//      The yells and yammering, croaking, jibbering and jabbering; howls,
+//      growls and curses; shrieking and skriking, that followed were beyond
+//      description.
+//
+//      [ _The Hobbit_, IV: "Over Hill and Under Hill"]
+//
+//-----------------------------------------------------------------------
 namespace LobsterWpf
 {
     using System;

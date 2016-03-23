@@ -14,7 +14,14 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
-
+//
+//      "I have not brought you hither to be
+//      instructed by you, but to give you a choice."
+//          -- Saruman
+//
+//      [ _The Lord of the Rings_, II/ii: "THe Council of Elrond"]
+//
+//-----------------------------------------------------------------------
 namespace LobsterWpf
 {
     using System.Text.RegularExpressions;

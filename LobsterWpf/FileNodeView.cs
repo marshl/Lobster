@@ -14,6 +14,14 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
+//
+//      Dori, Nori, On, Oin, and Gloin were more comfortable in a huge pine with regular
+//      branches sticking out at intervals like the spokes of a wheel.
+//          -- CHARACTER
+//
+//      [ _The Hobbit_, IX: "Out of the Frying Pan and Into the Fire"]
+//
+//-----------------------------------------------------------------------
 namespace LobsterWpf
 {
     using System;

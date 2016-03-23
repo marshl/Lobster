@@ -14,6 +14,15 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
+//
+//      'I think that in
+//      the end, if all else is conquered, Bombadil will fall, Last as he was First; and
+//      then Night will come.'
+//          -- Glorfindel
+//
+//      [ _The Lord of the Rings_, II/iii: "The Ring Goes South"]
+//
+//-----------------------------------------------------------------------
 namespace LobsterWpf
 {
     using System;

@@ -14,6 +14,14 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
+//
+//      It was sparely furnished, having but a small table, two chairs and a
+//      bench; but at either side there were curtained alcoves and well-clad beds within
+//      with vessels and basins for washing
+//
+//      [ _The Lord of the Rings_, V/i: "Minas Tirith"]
+//
+//-----------------------------------------------------------------------
 namespace LobsterWpf
 {
     using System.Collections.ObjectModel;
