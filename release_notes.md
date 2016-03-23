@@ -1,3 +1,25 @@
+##Release 2.4.0.0
+#####Released: 24-03-2016
+
+####Features
+ - Added a new element to ClobTypes to prevent automatic file updates for files in that directory;
+ - Changed the auto-updater to display the download progress in a popup window that also lets the user cancel the update;
+ - Updated the readme
+ 
+####Bug Fixes
+ - Fixed the "IncludeSubDirectories" flag not preventing file auto-updates or changing the file tree display;
+ - Fixed a bug where Lobster could crash when attempting to dispose of the message log;
+ - Fixed a possible crash if a ClobType file has no tables;
+ - Fixed a bug that prevented success/failure sounds from playing;
+ - Fixed a bug where newly inserted files would still appear green;
+ - Fixed some issues where the connection window or password prompt window could appear behind other windows;
+ 
+####Appearance
+ - Added tooltips for most actions in the connection list and main windows;
+ - Improved the layout of the backup list;
+ - Improved the layout and title of the password prompt window;
+ - Changed the "Cancel Unsaved Changes" popup to have a fallback value if the database config does not have a name;
+
 ##Release 2.3.1.0
 #####Released: 23-02-2016
 
