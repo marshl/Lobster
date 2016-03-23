@@ -14,6 +14,13 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
+//
+//      'That is plain enough,' said Gimli. `If you are a friend, speak the
+//      password, and the doors will open, and you can enter.'
+//
+//      [ _The Lord of the Rings_, V/i: "Chapter"]
+//
+//-----------------------------------------------------------------------
 namespace LobsterWpf
 {
     using System.Windows;

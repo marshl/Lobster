@@ -14,6 +14,14 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
+//
+//      Against the opposite wall was a long bench laden with wide earthenware
+//      basins, and beside it stood brown ewers filled with water, some cold, some
+//      steaming hot.
+//
+//      [ _The Lord of the Rings_, I/vii: "In the House of Tom Bombadil"]
+//
+//-----------------------------------------------------------------------
 namespace LobsterWpf
 {
     using System.Windows;

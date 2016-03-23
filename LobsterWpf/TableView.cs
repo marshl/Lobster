@@ -14,6 +14,12 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
+//
+//      Pippin had to climb on the bench to look out over the deep stone sill.
+//
+//      [ _The Lord of the Rings_, V/i: "Minas Tirith"]
+//
+//-----------------------------------------------------------------------
 namespace LobsterWpf
 {
     using System.Collections.Generic;

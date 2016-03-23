@@ -14,6 +14,13 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
+//
+//      'What news from the North, Riders of Rohan?'
+//          -- Aragorn
+//
+//      [ _The Lord of the Rings_, III/ii: "The Riders of Rohan"]
+//
+//-----------------------------------------------------------------------
 namespace LobsterWpf
 {
     using System;

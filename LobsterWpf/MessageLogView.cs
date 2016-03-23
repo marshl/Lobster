@@ -14,6 +14,13 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
+//
+//      'What news from the North, O mighty wind, do you bring to me today?
+//          -- Aragorn
+//
+//      [ _The Lord of the Rings_, III/i: "The Departure of Boromir"]
+//
+//-----------------------------------------------------------------------
 namespace LobsterWpf
 {
     using System;

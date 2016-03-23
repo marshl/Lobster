@@ -14,6 +14,15 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
+//
+//      'But it is a heavy burden. So heavy that none could lay it
+//      on another.I do not lay it on you.But if you take it freely, I will say that
+//      your choice is right'
+//          -- Elrond
+//
+//      [ _The Lord of the Rings_, II/ii: "The Council of Elrond"]
+//
+//-----------------------------------------------------------------------
 namespace LobsterWpf
 {
     using System.Collections.Specialized;

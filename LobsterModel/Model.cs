@@ -15,11 +15,11 @@
 // </copyright>
 //-----------------------------------------------------------------------
 //
-//      'Long ago they fell under the dominion of the One, and they became Ringwraiths,
-//      shadows under his great Shadow, his most terrible servants.'
-//          -- Gandalf
+//      'I am naked in the dark. Sam, and there is no veil between me and
+//      the wheel of fire.'
+//          -- Frodo
 // 
-//      [ _The Lord of the Rings_, I/ii: "The Shadow of the Past"]
+//      [ _The Lord of the Rings_, VI/iii: "Mount Doom"]
 //
 //-----------------------------------------------------------------------
 namespace LobsterModel

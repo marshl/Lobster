@@ -14,11 +14,18 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
+//
+//      It was often said (in
+//      other families) that long ago one of the Took ancestors must have taken a fairy
+//      wife.
+//
+//      [ _The Hobbit_, I: "An Unexpected Party"]
+//
+//-----------------------------------------------------------------------
 namespace LobsterWpf
 {
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Windows.Media;

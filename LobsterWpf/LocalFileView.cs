@@ -14,6 +14,14 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
+//
+//      Dwalin and Balin had swarmed up a tall
+//      slender fir with few branches and were trying to find a place to sit in the
+//      greenery of the topmost boughs.
+//
+//      [ _The Hobbit_, VI: "Out of the Frying Pan and Into the Fire"]
+//
+//-----------------------------------------------------------------------
 namespace LobsterWpf
 {
     using System.Collections.Generic;

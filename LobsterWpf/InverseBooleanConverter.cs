@@ -14,6 +14,13 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
+//
+//      Sam reeled, clutching at the stone. He felt as
+//      if the whole dark world was turning upside down.
+//
+//      [ _The Lord of the Rings_, V/x: "The Choices of Master Samwise"]
+//
+//-----------------------------------------------------------------------
 namespace LobsterWpf
 {
     using System;
