@@ -59,7 +59,7 @@ namespace LobsterModel
         public void GetWorkingFiles(DatabaseConnection connection, ref List<string> workingFileList)
         {
             string directoryPath = this.GetFullPath(connection);
-            string[] files = Directory.GetFiles(directoryPath, ".", SearchOption.AllDirectories);
+            string[] files = Directory.GetFiles(directoryPath, ".", this.ClobType.IncludeSubDirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
             workingFileList.AddRange(files);
         }
 

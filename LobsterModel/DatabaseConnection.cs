@@ -345,108 +345,116 @@ namespace LobsterModel
 
             FileInfo fileInfo = new FileInfo(e.FullPath);
 
-            if (e.ChangeType == WatcherChangeTypes.Changed)
+            if (e.ChangeType != WatcherChangeTypes.Changed)
             {
-                if (!this.IsAutoUpdateEnabled)
-                {
-                    if (Settings.Default.LogFileEvents)
-                    {
-                        MessageLog.LogInfo($"Automatic clobbing is disabled, ignoring event.");
-                    }
-
-                    return;
-                }
-
-                if (!fileInfo.Exists)
-                {
-                    if (Settings.Default.LogFileEvents)
-                    {
-                        MessageLog.LogInfo($"File could not be found {e.FullPath}");
-                    }
-
-                    return;
-                }
-
-                if (fileInfo.IsReadOnly)
-                {
-                    if (Settings.Default.LogFileEvents)
-                    {
-                        MessageLog.LogInfo($"File is read only and will be skipped {e.FullPath}");
-                    }
-
-                    return;
-                }
-
-                ClobDirectory clobDir;
-                try
-                {
-                    clobDir = this.GetClobDirectoryForFile(e.FullPath);
-                }
-                catch (Exception ex) when (ex is ClobFileLookupException)
-                {
-                    if (Settings.Default.LogFileEvents)
-                    {
-                        MessageLog.LogInfo($"The file does not belong to any ClobDirectory and will be skipped {e.FullPath}");
-                    }
-
-                    return;
-                }
-
-                if (!clobDir.ClobType.AllowAutomaticUpdates)
-                {
-                    if (Settings.Default.LogFileEvents)
-                    {
-                        MessageLog.LogInfo("The ClobType does not allow autuomatic file updates, and the file will be skipped.");
-                    }
-
-                    return;
-                }
-
-                DBClobFile clobFile = clobDir.GetDatabaseFileForFullpath(e.FullPath);
-                if (clobFile == null)
-                {
-                    if (Settings.Default.LogFileEvents)
-                    {
-                        MessageLog.LogInfo($"The file does not have a DBClobFile and will be skipped {e.FullPath}");
-                    }
-
-                    return;
-                }
-
-                if (clobFile.LastUpdatedTime.AddMilliseconds(Settings.Default.FileUpdateTimeoutMilliseconds) > DateTime.Now)
-                {
-                    if (Settings.Default.LogFileEvents)
-                    {
-                        MessageLog.LogInfo("The file was updated within the cooldown period, and will be skipped.");
-                    }
-
-                    return;
-                }
-
-                if (Settings.Default.LogFileEvents)
-                {
-                    MessageLog.LogInfo($"Auto-updating file {e.FullPath}");
-                }
-
-                try
-                {
-                    Model.SendUpdateClobMessage(this, e.FullPath);
-                }
-                catch (FileUpdateException)
-                {
-                    this.EventListener.OnAutoUpdateComplete(e.FullPath, false);
-                    return;
-                }
-
-                this.EventListener.OnAutoUpdateComplete(e.FullPath, true);
+                return;
             }
-            else
+
+            if (!this.IsAutoUpdateEnabled)
             {
                 if (Settings.Default.LogFileEvents)
                 {
-                    MessageLog.LogInfo($"Unsupported change type {e.ChangeType} for {e.FullPath}");
+                    MessageLog.LogInfo($"Automatic clobbing is disabled, ignoring event.");
                 }
+
+                return;
             }
+
+            if (!fileInfo.Exists)
+            {
+                if (Settings.Default.LogFileEvents)
+                {
+                    MessageLog.LogInfo($"File could not be found {e.FullPath}");
+                }
+
+                return;
+            }
+
+            if (fileInfo.IsReadOnly)
+            {
+                if (Settings.Default.LogFileEvents)
+                {
+                    MessageLog.LogInfo($"File is read only and will be skipped {e.FullPath}");
+                }
+
+                return;
+            }
+
+            ClobDirectory clobDir;
+            try
+            {
+                clobDir = this.GetClobDirectoryForFile(e.FullPath);
+            }
+            catch (Exception ex) when (ex is ClobFileLookupException)
+            {
+                if (Settings.Default.LogFileEvents)
+                {
+                    MessageLog.LogInfo($"The file does not belong to any ClobDirectory and will be skipped {e.FullPath}");
+                }
+
+                return;
+            }
+
+            if (!clobDir.ClobType.AllowAutomaticUpdates)
+            {
+                if (Settings.Default.LogFileEvents)
+                {
+                    MessageLog.LogInfo("The ClobType does not allow autuomatic file updates, and the file will be skipped.");
+                }
+
+                return;
+            }
+            
+            // "IncludeSubDirectories" check
+            if (!clobDir.ClobType.IncludeSubDirectories && fileInfo.Directory.FullName != clobDir.GetFullPath(this))
+            {
+                if (Settings.Default.LogFileEvents)
+                {
+                    MessageLog.LogInfo("The ClobType does not include sub directories, and the file will be skipped.");
+                }
+
+                return;
+            }
+
+            DBClobFile clobFile = clobDir.GetDatabaseFileForFullpath(e.FullPath);
+            if (clobFile == null)
+            {
+                if (Settings.Default.LogFileEvents)
+                {
+                    MessageLog.LogInfo($"The file does not have a DBClobFile and will be skipped {e.FullPath}");
+                }
+
+                return;
+            }
+
+            if (clobFile.LastUpdatedTime.AddMilliseconds(Settings.Default.FileUpdateTimeoutMilliseconds) > DateTime.Now)
+            {
+                if (Settings.Default.LogFileEvents)
+                {
+                    MessageLog.LogInfo("The file was updated within the cooldown period, and will be skipped.");
+                }
+
+                return;
+            }
+
+            if (Settings.Default.LogFileEvents)
+            {
+                MessageLog.LogInfo($"Auto-updating file {e.FullPath}");
+            }
+
+            try
+            {
+                Model.SendUpdateClobMessage(this, e.FullPath);
+            }
+            catch (FileUpdateException)
+            {
+                this.EventListener.OnAutoUpdateComplete(e.FullPath, false);
+                return;
+            }
+
+            this.EventListener.OnAutoUpdateComplete(e.FullPath, true);
+
+
         }
     }
 }

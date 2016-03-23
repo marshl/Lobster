@@ -46,8 +46,9 @@ namespace LobsterWpf
         /// Initializes a new instance of the <see cref="LocalFileView"/> class.
         /// </summary>
         /// <param name="connection">The parent connection of this file view.</param>
-        /// <param name="filename">The full path of the file this view will represent.</param>
-        public LocalFileView(ConnectionView connection, string filename) : base(connection)
+        /// <param name="filename">The full path of the file this view will represent.</param
+        /// <param name="recurse">Whether to include sub directories or not.</param>
+        public LocalFileView(ConnectionView connection, string filename, bool recurse) : base(connection)
         {
             this.FullName = filename;
 
@@ -65,17 +66,20 @@ namespace LobsterWpf
                 this.LastWriteTime = dirInfo.LastWriteTime;
                 this.Children = new ObservableCollection<FileNodeView>();
 
-                foreach (DirectoryInfo subDir in dirInfo.GetDirectories())
+                if (recurse)
                 {
-                    FileNodeView node = new LocalFileView(ParentConnectionView, subDir.FullName);
-                    this.Children.Add(node);
+                    foreach (DirectoryInfo subDir in dirInfo.GetDirectories())
+                    {
+                        FileNodeView node = new LocalFileView(ParentConnectionView, subDir.FullName, recurse);
+                        this.Children.Add(node);
+                    }
                 }
 
                 foreach (FileInfo file in dirInfo.GetFiles())
                 {
                     if (connection.ShowReadOnlyFiles || !file.IsReadOnly)
                     {
-                        FileNodeView node = new LocalFileView(this.ParentConnectionView, file.FullName);
+                        FileNodeView node = new LocalFileView(this.ParentConnectionView, file.FullName, recurse);
                         this.Children.Add(node);
                     }
                 }

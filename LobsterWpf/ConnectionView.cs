@@ -184,7 +184,7 @@ namespace LobsterWpf
 
             if (this.CurrentDisplayMode == DisplayMode.LocalFiles)
             {
-                this.RootFile = new LocalFileView(connection: this, filename: rootDirInfo.FullName);
+                this.RootFile = new LocalFileView(connection: this, filename: rootDirInfo.FullName, recurse: clobDir.ClobType.IncludeSubDirectories);
             }
             else if (this.CurrentDisplayMode == DisplayMode.DatabaseFiles)
             {
