@@ -638,6 +638,8 @@ namespace LobsterWpf
             {
                 MessageListWindow.Instance.Close();
             }
+
+            this.Dispose();
         }
 
         /// <summary>
@@ -649,6 +651,12 @@ namespace LobsterWpf
             if (!disposing)
             {
                 return;
+            }
+
+            if (this.connectionView != null)
+            {
+                this.connectionView.Dispose();
+                this.connectionView = null;
             }
 
             if (this.failureSound != null)
