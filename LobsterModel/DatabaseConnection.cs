@@ -51,6 +51,11 @@ namespace LobsterModel
         private List<FileSystemEventArgs> fileEventQueue = new List<FileSystemEventArgs>();
 
         /// <summary>
+        /// A value indicating whether any of the current stack of file events require a file tree change (file delete/create/rename).
+        /// </summary>
+        private bool fileTreeChangeInQueue = false;
+
+        /// <summary>
         /// A basic object to be locked when a thread is procesing a file event.
         /// </summary>
         private object fileEventProcessingSemaphore = new object();
@@ -296,6 +301,11 @@ namespace LobsterModel
                         MessageLog.LogInfo("Event stack populated.");
                     }
 
+                    if (e.ChangeType != WatcherChangeTypes.Changed)
+                    {
+                        this.fileTreeChangeInQueue = true;
+                    }
+
                     this.EventListener.OnEventProcessingStart();
                 }
 
@@ -326,7 +336,8 @@ namespace LobsterModel
                             MessageLog.LogInfo("Event stack empty.");
                         }
 
-                        this.EventListener.OnFileProcessingFinished();
+                        this.EventListener.OnFileProcessingFinished(this.fileTreeChangeInQueue);
+                        this.fileTreeChangeInQueue = false;
                     }
                 }
             }
@@ -404,7 +415,7 @@ namespace LobsterModel
 
                 return;
             }
-            
+
             // "IncludeSubDirectories" check
             if (!clobDir.ClobType.IncludeSubDirectories && fileInfo.Directory.FullName != clobDir.GetFullPath(this))
             {
@@ -453,8 +464,6 @@ namespace LobsterModel
             }
 
             this.EventListener.OnAutoUpdateComplete(e.FullPath, true);
-
-
         }
     }
 }

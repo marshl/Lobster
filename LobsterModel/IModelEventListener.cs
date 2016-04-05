@@ -63,6 +63,7 @@ namespace LobsterModel
         /// <summary>
         /// The event raised when the first last file change event of a processing group is completed.
         /// </summary>
-        void OnFileProcessingFinished();
+        /// <param name="fileTreeChanged">Whether or not there was a change to the file tree during event processing (a file create/delete/rename).</param>
+        void OnFileProcessingFinished(bool fileTreeChanged);
     }
 }

@@ -25,8 +25,11 @@
 namespace LobsterWpf
 {
     using System;
+    using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.ComponentModel;
+    using System.IO;
+    using System.Linq;
     using System.Windows;
     using System.Windows.Media;
     using LobsterModel;
@@ -57,6 +60,31 @@ namespace LobsterWpf
         private bool isExpanded = false;
 
         /// <summary>
+        /// A string representation of the size of the file, including unit (e.g. 12kb)
+        /// </summary>
+        private string fileSize;
+
+        /// <summary>
+        /// The complete file path of the 
+        /// </summary>
+        private string filePath;
+
+        /// <summary>
+        /// The string to use when displaying the file.
+        /// </summary>
+        private string displayName;
+
+        /// <summary>
+        /// Whether the file this node represents is read only.
+        /// </summary>
+        private bool isReadOnly;
+
+        /// <summary>
+        /// The database information about the file (if applicable).
+        /// </summary>
+        private DBClobFile databaseFile;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="FileNodeView"/> class.
         /// </summary>
         /// <param name="connectionView">The parent connetion of the file.</param>
@@ -71,9 +99,21 @@ namespace LobsterWpf
         public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
-        /// Gets a string representing the size of the local file, if it exists.
+        /// Gets or sets a string representing the size of this file.
         /// </summary>
-        public abstract string FileSize { get; }
+        public string FileSize
+        {
+            get
+            {
+                return this.fileSize;
+            }
+
+            protected set
+            {
+                this.fileSize = value;
+                this.NotifyPropertyChanged("FileSize");
+            }
+        }
 
         /// <summary>
         /// Gets or sets the collection of backup records.
@@ -96,12 +136,36 @@ namespace LobsterWpf
         /// <summary>
         /// Gets or sets the full path of the local file.
         /// </summary>
-        public abstract string FullName { get; set; }
+        public string FilePath
+        {
+            get
+            {
+                return this.filePath;
+            }
+
+            protected set
+            {
+                this.filePath = value;
+                this.NotifyPropertyChanged("FilePath");
+            }
+        }
 
         /// <summary>
-        /// Gets the text that will be displayed in the file tree view.
+        /// Gets or sets the text that will be displayed in the file tree view.
         /// </summary>
-        public abstract string Name { get; }
+        public string DisplayName
+        {
+            get
+            {
+                return this.displayName;
+            }
+
+            set
+            {
+                this.displayName = value;
+                this.NotifyPropertyChanged("DisplayName");
+            }
+        }
 
         /// <summary>
         /// Gets or sets the child file nodes for this view.
@@ -114,14 +178,38 @@ namespace LobsterWpf
         public abstract ImageSource ImageUrl { get; }
 
         /// <summary>
-        /// Gets a value indicating whether the local file for this file is read only or not.
+        /// Gets or sets a value indicating whether this file is read only or not.
         /// </summary>
-        public abstract bool IsReadOnly { get; }
+        public bool IsReadOnly
+        {
+            get
+            {
+                return this.isReadOnly;
+            }
+
+            protected set
+            {
+                this.isReadOnly = value;
+                this.NotifyPropertyChanged("IsReadOnly");
+            }
+        }
 
         /// <summary>
         /// Gets or sets the database file.
         /// </summary>
-        public abstract DBClobFile DatabaseFile { get; set; }
+        public DBClobFile DatabaseFile
+        {
+            get
+            {
+                return this.databaseFile;
+            }
+
+            set
+            {
+                this.databaseFile = value;
+                this.NotifyPropertyChanged("DatabaseFile");
+            }
+        }
 
         /// <summary>
         /// Gets a value indicating whether this file can update the database with its local file.
@@ -189,15 +277,20 @@ namespace LobsterWpf
 
                     if (this.isExpanded)
                     {
-                        this.parentConnectionView.ExpandedDirectoryNames.Add(this.FullName);
+                        this.parentConnectionView.ExpandedDirectoryNames.Add(this.FilePath);
                     }
                     else
                     {
-                        this.parentConnectionView.ExpandedDirectoryNames.Remove(this.FullName);
+                        this.parentConnectionView.ExpandedDirectoryNames.Remove(this.FilePath);
                     }
                 }
             }
         }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this file is actually a directory.
+        /// </summary>
+        public bool IsDirectory { get; protected set; }
 
         /// <summary>
         /// Gets the parent connection view of this file.
@@ -216,9 +309,54 @@ namespace LobsterWpf
         }
 
         /// <summary>
-        /// Resets aspects of this file.
+        /// Refreshes any data relevant to the file.
         /// </summary>
-        public abstract void Refresh();
+        /// <param name="recurse">Whether all child files should also be refreshed.</param>
+        public void RefreshFileInformation(bool recurse)
+        {
+            if (this.IsDirectory)
+            {
+                DirectoryInfo dirInfo = new DirectoryInfo(this.FilePath);
+                this.LastWriteTime = dirInfo.LastWriteTime;
+                this.FileSize = string.Empty;
+                this.IsReadOnly = false;
+
+                if (recurse)
+                {
+                    foreach (var child in this.Children)
+                    {
+                        child.RefreshFileInformation(true);
+                    }
+                }
+            }
+            else if (this.FilePath != null)
+            {
+                FileInfo fileInfo = new FileInfo(this.FilePath);
+                this.LastWriteTime = fileInfo.LastWriteTime;
+
+                this.FileSize = Utils.BytesToString(fileInfo.Length);
+                this.IsReadOnly = fileInfo.IsReadOnly;
+            }
+
+            this.NotifyPropertyChanged();
+        }
+
+        /// <summary>
+        /// Refreshes the cache of backup files from the backup directory.
+        /// </summary>
+        public void RefreshBackupList()
+        {
+            if (this.IsDirectory)
+            {
+                return;
+            }
+
+            List<FileBackup> fileBackups = BackupLog.GetBackupsForFile(this.ParentConnectionView.Connection.Config.CodeSource, this.FilePath);
+            if (fileBackups != null)
+            {
+                this.FileBackupList = new ObservableCollection<FileBackup>(fileBackups.OrderByDescending(backup => backup.DateCreated));
+            }
+        }
 
         /// <summary>
         /// Implementation of the INotifyPropertyChange, to tell WPF when a data value has changed
@@ -227,7 +365,7 @@ namespace LobsterWpf
         /// <remarks>This method is called by the Set accessor of each property.
         /// The CallerMemberName attribute that is applied to the optional propertyName
         /// parameter causes the property name of the caller to be substituted as an argument.</remarks>
-        protected void NotifyPropertyChanged(string propertyName)
+        protected void NotifyPropertyChanged(string propertyName = null)
         {
             if (this.PropertyChanged != null)
             {

@@ -151,13 +151,13 @@ namespace LobsterWpf
         /// <summary>
         /// The callback for when the last file event in the event queue is processed.
         /// </summary>
-        void IModelEventListener.OnFileProcessingFinished()
+        /// <param name="fileTreeChanged">Whether a structual change to the file tree has occurred, and the internal tree needs to be refreshed.</param>
+        void IModelEventListener.OnFileProcessingFinished(bool fileTreeChanged)
         {
             this.Dispatcher.Invoke((MethodInvoker)delegate
             {
                 this.connectionView.IsEnabled = true;
-
-                this.RepopulateFileListView();
+                this.RepopulateFileListView(fileTreeChanged);
             });
         }
 
@@ -199,7 +199,7 @@ namespace LobsterWpf
 
                 this.ConnectionContainer.DataContext = this.connectionView = new ConnectionView(window.DatabaseConnection);
                 this.connectionView.SelectedFileNode = null;
-                this.RepopulateFileListView();
+                this.RepopulateFileListView(true);
             }
         }
 
@@ -301,13 +301,14 @@ namespace LobsterWpf
         /// <param name="e">The event arguments.</param>
         private void ClobTypeListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            this.RepopulateFileListView();
+            this.RepopulateFileListView(true);
         }
 
         /// <summary>
         /// Clears the file list and populates with the files of the currently selected clob directory.
         /// </summary>
-        private void RepopulateFileListView()
+        /// <param name="fullRebuild">WHether a full rebuild of the file list needs to be performed.</param>
+        private void RepopulateFileListView(bool fullRebuild)
         {
             if (this.clobTypeListBox.SelectedIndex == -1)
             {
@@ -321,7 +322,14 @@ namespace LobsterWpf
 
             ClobDirectoryView clobDirView = (ClobDirectoryView)this.clobTypeListBox.SelectedItem;
 
-            this.connectionView.PopulateFileTreeForClobDirectory(clobDirView.BaseClobDirectory);
+            if (fullRebuild)
+            {
+                this.connectionView.PopulateFileTreeForClobDirectory(clobDirView.BaseClobDirectory);
+            }
+            else
+            {
+                this.connectionView.RootFile.RefreshFileInformation(true);
+            }
         }
 
         /// <summary>
@@ -331,7 +339,7 @@ namespace LobsterWpf
         /// <param name="e">The event arguments</param>
         private void HideReadonlyCheckbox_Toggled(object sender, RoutedEventArgs e)
         {
-            this.RepopulateFileListView();
+            this.RepopulateFileListView(true);
         }
 
         /// <summary>
@@ -346,13 +354,13 @@ namespace LobsterWpf
                 return;
             }
 
-            string filename = this.connectionView.SelectedFileNode.FullName;
+            string filename = this.connectionView.SelectedFileNode.FilePath;
 
             FileInfo fi = new FileInfo(filename);
             if (fi.IsReadOnly)
             {
                 MessageBoxResult result = System.Windows.MessageBox.Show(
-                    $"{this.connectionView.SelectedFileNode.Name} is locked. Are you sure you want to clob it?",
+                    $"{this.connectionView.SelectedFileNode.DisplayName} is locked. Are you sure you want to clob it?",
                     "File is Locked",
                     MessageBoxButton.OKCancel);
 
@@ -373,7 +381,7 @@ namespace LobsterWpf
             }
 
             this.DisplayUpdateNotification(filename, true);
-            this.connectionView.SelectedFileNode.Refresh();
+            this.connectionView.SelectedFileNode.RefreshBackupList();
         }
 
         /// <summary>
@@ -388,7 +396,7 @@ namespace LobsterWpf
                 return;
             }
 
-            string filename = this.connectionView.SelectedFileNode.FullName;
+            string filename = this.connectionView.SelectedFileNode.FilePath;
 
             try
             {
@@ -413,7 +421,7 @@ namespace LobsterWpf
                 return;
             }
 
-            string filename = this.connectionView.SelectedFileNode.FullName;
+            string filename = this.connectionView.SelectedFileNode.FilePath;
 
             try
             {
@@ -441,7 +449,7 @@ namespace LobsterWpf
         {
             if (this.connectionView.SelectedFileNode != null)
             {
-                Utils.OpenFileInExplorer(this.connectionView.SelectedFileNode.FullName);
+                Utils.OpenFileInExplorer(this.connectionView.SelectedFileNode.FilePath);
             }
         }
 
@@ -454,7 +462,7 @@ namespace LobsterWpf
         {
             if (this.connectionView.SelectedFileNode != null)
             {
-                string filename = this.connectionView.SelectedFileNode.FullName;
+                string filename = this.connectionView.SelectedFileNode.FilePath;
                 try
                 {
                     DBClobFile databaseFile = null;
@@ -464,6 +472,7 @@ namespace LobsterWpf
                     {
                         this.DisplayUpdateNotification(filename, true);
                         this.connectionView.SelectedFileNode.DatabaseFile = databaseFile;
+                        this.connectionView.SelectedFileNode.RefreshFileInformation(false);
                     }
                 }
                 catch (FileInsertException ex)
@@ -491,7 +500,7 @@ namespace LobsterWpf
         /// <param name="success">Whether the file was updated successfulyl or not.</param>
         private void DisplayUpdateNotification(string filename, bool success)
         {
-            string message = "File update " + (success ? "succeeded" : "failed") + " for " + System.IO.Path.GetFileName(filename);
+            string message = "File update " + (success ? "succeeded" : "failed") + " for " + Path.GetFileName(filename);
             NotificationWindow nw = new NotificationWindow(message, success);
             nw.Show();
 
@@ -548,7 +557,7 @@ namespace LobsterWpf
             List<FileListRetrievalException> errorList = new List<FileListRetrievalException>();
 
             Model.GetDatabaseFileLists(this.connectionView.Connection, ref errorList);
-            this.RepopulateFileListView();
+            this.RepopulateFileListView(true);
         }
 
         /// <summary>
@@ -564,7 +573,7 @@ namespace LobsterWpf
             }
 
             this.connectionView.CurrentDisplayMode = this.LocalOnlyFilesRadio.IsChecked.Value ? ConnectionView.DisplayMode.LocalFiles : ConnectionView.DisplayMode.DatabaseFiles;
-            this.RepopulateFileListView();
+            this.RepopulateFileListView(true);
         }
 
         /// <summary>

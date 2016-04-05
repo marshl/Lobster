@@ -24,10 +24,8 @@
 //-----------------------------------------------------------------------
 namespace LobsterWpf
 {
-    using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.IO;
-    using System.Linq;
     using System.Windows.Media;
     using LobsterModel;
     using Properties;
@@ -38,32 +36,21 @@ namespace LobsterWpf
     public sealed class LocalFileView : FileNodeView
     {
         /// <summary>
-        /// The full name of this file.
-        /// </summary>
-        private string fullname;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="LocalFileView"/> class.
         /// </summary>
         /// <param name="connection">The parent connection of this file view.</param>
-        /// <param name="filename">The full path of the file this view will represent.</param
+        /// <param name="filename">The full path of the file this view will represent.</param>
         /// <param name="recurse">Whether to include sub directories or not.</param>
         public LocalFileView(ConnectionView connection, string filename, bool recurse) : base(connection)
         {
-            this.FullName = filename;
-
-            FileInfo fileInfo = new FileInfo(filename);
-            if (fileInfo.Exists)
-            {
-                this.LastWriteTime = fileInfo.LastWriteTime;
-            }
+            this.FilePath = filename;
+            this.DisplayName = Path.GetFileName(this.FilePath);
 
             DirectoryInfo dirInfo = new DirectoryInfo(filename);
             this.IsDirectory = dirInfo.Exists;
 
             if (this.IsDirectory)
             {
-                this.LastWriteTime = dirInfo.LastWriteTime;
                 this.Children = new ObservableCollection<FileNodeView>();
 
                 if (recurse)
@@ -84,16 +71,24 @@ namespace LobsterWpf
                     }
                 }
 
-                this.IsExpanded = this.ParentConnectionView.ExpandedDirectoryNames.Contains(this.FullName);
+                this.IsExpanded = this.ParentConnectionView.ExpandedDirectoryNames.Contains(this.FilePath);
+            }
+            else 
+            {
+                // Not a directory
+                try
+                {
+                    ClobDirectory clobDir = this.ParentConnectionView.Connection.GetClobDirectoryForFile(this.FilePath);
+                    this.DatabaseFile = clobDir.GetDatabaseFileForFullpath(this.FilePath);
+                }
+                catch (ClobFileLookupException)
+                {
+                    this.DatabaseFile = null;
+                }
             }
 
-            this.Refresh();
+            this.RefreshFileInformation(false);
         }
-
-        /// <summary>
-        /// Gets a value indicating whether this file is a directory or not.
-        /// </summary>
-        public bool IsDirectory { get; }
 
         /// <summary>
         /// Gets a value indicating whether this file can be updated or not.
@@ -118,7 +113,7 @@ namespace LobsterWpf
                     return false;
                 }
 
-                string extension = Path.GetExtension(this.Name);
+                string extension = Path.GetExtension(this.DisplayName);
                 return Settings.Default.DiffableExtensions.Contains(extension);
             }
         }
@@ -157,73 +152,6 @@ namespace LobsterWpf
         }
 
         /// <summary>
-        /// Gets or sets the database file for this local file.
-        /// </summary>
-        public override sealed DBClobFile DatabaseFile
-        {
-            get
-            {
-                try
-                {
-                    ClobDirectory clobDir = this.ParentConnectionView.Connection.GetClobDirectoryForFile(this.FullName);
-                    return clobDir.GetDatabaseFileForFullpath(this.FullName);
-                }
-                catch (ClobFileLookupException)
-                {
-                    return null;
-                }
-            }
-
-            set
-            {
-                this.NotifyPropertyChanged("DatabaseFile");
-                this.NotifyPropertyChanged("IsLocalOnly");
-                this.NotifyPropertyChanged("CanBeUpdated");
-                this.NotifyPropertyChanged("CanBeDiffed");
-                this.NotifyPropertyChanged("CanBeInserted");
-                this.NotifyPropertyChanged("ForegroundColour");
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the full path of the file for this view.
-        /// </summary>
-        public override string FullName
-        {
-            get
-            {
-                return this.fullname;
-            }
-
-            set
-            {
-                this.fullname = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets the text that is displayed in the file tree view for this local file.
-        /// </summary>
-        public override string Name
-        {
-            get
-            {
-                return Path.GetFileName(this.FullName);
-            }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether this file is read only or not.
-        /// </summary>
-        public override bool IsReadOnly
-        {
-            get
-            {
-                return !this.IsDirectory && (File.GetAttributes(this.FullName) & FileAttributes.ReadOnly) != 0;
-            }
-        }
-
-        /// <summary>
         /// Gets a colour that is used as the foreground for the name.
         /// </summary>
         public override string ForegroundColour
@@ -231,17 +159,6 @@ namespace LobsterWpf
             get
             {
                 return (this.IsDirectory || this.DatabaseFile != null ? Colors.White : Colors.LimeGreen).ToString();
-            }
-        }
-
-        /// <summary>
-        /// Gets a string representing the size of this file.
-        /// </summary>
-        public override string FileSize
-        {
-            get
-            {
-                return this.IsDirectory ? null : Utils.BytesToString(new FileInfo(this.FullName).Length);
             }
         }
 
@@ -271,24 +188,7 @@ namespace LobsterWpf
                     }
                 }
 
-                return (ImageSource)App.Current.FindResource(resourceName);
-            }
-        }
-
-        /// <summary>
-        /// Refreshes any data relevant to the file.
-        /// </summary>
-        public override void Refresh()
-        {
-            this.NotifyPropertyChanged("FileSize");
-
-            if (!this.IsDirectory)
-            {
-                List<FileBackup> fileBackups = BackupLog.GetBackupsForFile(this.ParentConnectionView.Connection.Config.CodeSource, this.FullName);
-                if (fileBackups != null)
-                {
-                    this.FileBackupList = new ObservableCollection<FileBackup>(fileBackups.OrderByDescending(backup => backup.DateCreated));
-                }
+                return (ImageSource)System.Windows.Application.Current.FindResource(resourceName);
             }
         }
     }

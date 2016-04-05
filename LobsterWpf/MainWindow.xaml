@@ -78,7 +78,7 @@
               <HierarchicalDataTemplate DataType="{x:Type local:FileNodeView}" ItemsSource="{Binding Children}">
                 <StackPanel Orientation="Horizontal">
                   <Image Source="{Binding ImageUrl}" Height="18"/>
-                  <TextBlock Text="{Binding Path=Name}" Foreground="{Binding Path=ForegroundColour}"  VerticalAlignment="Center"/>
+                  <TextBlock Text="{Binding Path=DisplayName}" Foreground="{Binding Path=ForegroundColour}"  VerticalAlignment="Center"/>
                 </StackPanel>
               </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
@@ -172,7 +172,7 @@
           </ItemsPanelTemplate>
         </StatusBar.ItemsPanel>
         <StatusBarItem Grid.Column="0">
-          <TextBlock Text="{Binding FullName}"/>
+          <TextBlock Text="{Binding FilePath}"/>
         </StatusBarItem>
         <StatusBarItem Grid.Column="1" HorizontalContentAlignment="Right">
           <TextBlock>
