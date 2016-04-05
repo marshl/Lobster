@@ -6,7 +6,7 @@
       <Value Profile="(Default)">tortoisemerge</Value>
     </Setting>
     <Setting Name="DiffProgramArguments" Type="System.String" Scope="User">
-      <Value Profile="(Default)">/mine:{0} /theirs:{1}</Value>
+      <Value Profile="(Default)">/mine:"{0}" /theirs:"{1}"</Value>
     </Setting>
     <Setting Name="DiffableExtensions" Type="System.Collections.Specialized.StringCollection" Scope="User">
       <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
