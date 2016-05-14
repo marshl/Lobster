@@ -315,6 +315,7 @@
   <ItemGroup>
     <SplashScreen Include="Resources\Images\cartoon-lobster-800px.png" />
     <Resource Include="Resources\Images\Annotate_info.ico" />
+    <Resource Include="Resources\Images\Annotate_Error.ico" />
     <Content Include="Resources\Images\cartoon-lobster.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
