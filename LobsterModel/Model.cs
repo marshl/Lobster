@@ -481,7 +481,6 @@ namespace LobsterModel
                     + $";Pooling=" + (config.UsePooling ? "true" : "false");
 
                 MessageLog.LogInfo($"Connecting to database {config.Name}");
-                MessageLog.LogSensitive($"Connection string is {con.ConnectionString}");
                 con.Open();
                 return con;
             }
