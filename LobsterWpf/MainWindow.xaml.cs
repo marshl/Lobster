@@ -488,6 +488,7 @@ namespace LobsterWpf
         private void LocalFileTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             this.connectionView.SelectedFileNode = (FileNodeView)e.NewValue;
+            this.connectionView.SelectedFileNode?.RefreshBackupList();
         }
 
         /// <summary>
