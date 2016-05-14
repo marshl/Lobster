@@ -27,10 +27,12 @@ namespace LobsterModel
     using System;
     using System.Collections.Generic;
     using System.Data.Common;
+    using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Linq;
     using System.Net.Sockets;
+    using System.Security;
     using Oracle.ManagedDataAccess.Client;
     using Oracle.ManagedDataAccess.Types;
     using Properties;
@@ -47,7 +49,7 @@ namespace LobsterModel
         /// <param name="password">The password to connect to the database with.</param>
         /// <param name="e">The exception that was raised, if any.</param>
         /// <returns>True if the connection was successful, otherwise false.</returns>
-        public static bool TestConnection(DatabaseConfig databaseConfig, string password, ref Exception e)
+        public static bool TestConnection(DatabaseConfig databaseConfig, SecureString password, ref Exception e)
         {
             try
             {
@@ -189,7 +191,7 @@ namespace LobsterModel
         /// <param name="password">The password to connect to the database with.</param>
         /// <param name="eventListener">The event listener that will be used to populate the connection wtih.</param>
         /// <returns>The successfully created database connection.</returns>
-        public static DatabaseConnection SetDatabaseConnection(DatabaseConfig config, string password, IModelEventListener eventListener)
+        public static DatabaseConnection SetDatabaseConnection(DatabaseConfig config, SecureString password, IModelEventListener eventListener)
         {
             MessageLog.LogInfo($"Changing connection to {config.Name}");
             try
@@ -465,13 +467,13 @@ namespace LobsterModel
         /// <param name="config">The connection configuration settings to use.</param>
         /// <param name="password">The password to connect to the database with.</param>
         /// <returns>A new connectionif it opened successfully, otherwise null.</returns>
-        private static OracleConnection OpenConnection(DatabaseConfig config, string password)
+        private static OracleConnection OpenConnection(DatabaseConfig config, SecureString password)
         {
             try
             {
                 OracleConnection con = new OracleConnection();
                 con.ConnectionString = "User Id=" + config.Username
-                    + (string.IsNullOrEmpty(password) ? null : ";Password=" + password)
+                    + (password.Length == 0 ? null : ";Password=" + Utils.SecureStringToString(password))
                     + ";Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)("
                     + $"HOST={config.Host})"
                     + $"(PORT={config.Port})))(CONNECT_DATA="

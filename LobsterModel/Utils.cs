@@ -29,6 +29,8 @@ namespace LobsterModel
     using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Linq;
+    using System.Runtime.InteropServices;
+    using System.Security;
     using System.Threading;
     using System.Xml;
     using System.Xml.Schema;
@@ -212,6 +214,26 @@ namespace LobsterModel
         public static void OpenFileInExplorer(string fullName)
         {
             Process.Start("explorer", $"/select,{fullName}");
+        }
+
+        /// <summary>
+        /// Converts a SecureString to a System.String
+        /// </summary>
+        /// <param name="value">The secure string to convert.</param>
+        /// <returns>The string representation of the string.</returns>
+        /// <remarks>http://stackoverflow.com/questions/818704/how-to-convert-securestring-to-system-string</remarks>
+        public static string SecureStringToString(SecureString value)
+        {
+            IntPtr valuePtr = IntPtr.Zero;
+            try
+            {
+                valuePtr = Marshal.SecureStringToGlobalAllocUnicode(value);
+                return Marshal.PtrToStringUni(valuePtr);
+            }
+            finally
+            {
+                Marshal.ZeroFreeGlobalAllocUnicode(valuePtr);
+            }
         }
     }
 }

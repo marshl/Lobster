@@ -26,6 +26,7 @@ namespace LobsterModel
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Security;
     using System.Threading;
     using System.Xml;
     using System.Xml.Schema;
@@ -71,14 +72,14 @@ namespace LobsterModel
         /// <param name="config">The configuration file to base this connection off.</param>
         /// <param name="password">The password to connect to the database with.</param>
         /// <param name="eventListener">The event listener that events will be sent to when files are automatically updated.</param>
-        public DatabaseConnection(DatabaseConfig config, string password, IModelEventListener eventListener)
+        public DatabaseConnection(DatabaseConfig config, SecureString password, IModelEventListener eventListener)
         {
             this.Config = config;
             this.IsAutoUpdateEnabled = this.Config.AllowAutomaticUpdates;
             this.Password = password;
 
             this.EventListener = eventListener;
-            bool result = Utils.DeserialiseXmlFileUsingSchema<MimeTypeList>("LobsterSettings/MimeTypes.xml", null, out this.mimeTypeList);
+            bool result = Utils.DeserialiseXmlFileUsingSchema("LobsterSettings/MimeTypes.xml", null, out this.mimeTypeList);
 
             try
             {
@@ -144,7 +145,7 @@ namespace LobsterModel
         /// <summary>
         /// Gets the password the user entered for this connection (set on initialisation).
         /// </summary>
-        public string Password { get; }
+        public SecureString Password { get; }
 
         /// <summary>
         /// Returns the ClobDirectory that would contain the given fullpath, if applicable.

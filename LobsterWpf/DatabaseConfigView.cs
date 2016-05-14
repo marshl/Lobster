@@ -27,6 +27,7 @@ namespace LobsterWpf
     using System;
     using System.ComponentModel;
     using System.IO;
+    using System.Security;
     using LobsterModel;
     using Microsoft.WindowsAPICodePack.Dialogs;
 
@@ -232,7 +233,7 @@ namespace LobsterWpf
         /// <param name="password">The password to test the connection with.</param>
         /// <param name="ex">The exception tha was raised during connection testing, if any.</param>
         /// <returns>True if the connection test was successful, otherwise false.</returns>
-        public bool TestConnection(string password, ref Exception ex)
+        public bool TestConnection(SecureString password, ref Exception ex)
         {
             return Model.TestConnection(this.BaseConfig, password, ref ex);
         }

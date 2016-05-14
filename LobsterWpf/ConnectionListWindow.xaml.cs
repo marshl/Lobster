@@ -28,6 +28,7 @@ namespace LobsterWpf
     using System.ComponentModel;
     using System.Diagnostics;
     using System.Linq;
+    using System.Security;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Input;
@@ -245,7 +246,7 @@ namespace LobsterWpf
                 return;
             }
 
-            string password = win.textField.Password;
+            SecureString password = win.textField.SecurePassword;
 
             try
             {
@@ -345,7 +346,7 @@ namespace LobsterWpf
                 return;
             }
 
-            string password = win.textField.Password;
+            SecureString password = win.textField.SecurePassword;
             Exception ex = null;
             bool result = this.CurrentConfigView.TestConnection(password, ref ex);
             string message = result ? "Connection test successful" : "Connection test unsuccessful.\n" + ex;
