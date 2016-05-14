@@ -83,14 +83,15 @@ namespace LobsterWpf
                         resourceName = "InfoImageSource";
                         break;
                     case MessageLog.Message.TYPE.ERROR:
-                        resourceName = "PriorityImageSource";
+                        resourceName = "ErrorImageSource";
                         break;
                     case MessageLog.Message.TYPE.WARNING:
                         resourceName = "WarningImageSource";
                         break;
                 }
 
-                return (ImageSource)App.Current.FindResource(resourceName);
+                var image = (ImageSource)App.Current.FindResource(resourceName);
+                return image;
             }
         }
 

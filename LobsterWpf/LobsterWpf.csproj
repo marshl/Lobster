@@ -15,6 +15,7 @@
     <WarningLevel>4</WarningLevel>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -26,8 +27,7 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>2.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <ApplicationVersion>2.4.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -375,7 +375,7 @@
     <Resource Include="Resources\Images\Annotate_Default.ico" />
     <None Include="Resources\Images\Annotate_Disabled.ico" />
     <Resource Include="Resources\Images\Annotate_Help.ico" />
-    <None Include="Resources\Images\Annotate_HighPriority.ico" />
+    <Resource Include="Resources\Images\Annotate_HighPriority.ico" />
     <None Include="Resources\Images\Annotate_QuestionBlue.ico" />
     <None Include="Resources\Images\Annotate_QuestionRed.ico" />
     <Resource Include="Resources\Images\Annotate_Warning.ico" />
