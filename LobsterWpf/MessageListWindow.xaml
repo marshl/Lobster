@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LobsterWpf"
         mc:Ignorable="d"
-        Title="MessageListWindow" Height="300" Width="600" Background="{StaticResource BackgroundKey}" Icon="Resources/Images/cartoon-lobster.ico" Closed="Window_Closed">
+        Title="Messages" Height="300" Width="600" Background="{StaticResource BackgroundKey}" Icon="Resources/Images/cartoon-lobster.ico" Closed="Window_Closed">
   <Grid>
     <ListBox Grid.Column="0" Grid.Row="0" ItemsSource="{Binding MessageList}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
       <ListBox.ItemContainerStyle>
@@ -15,17 +15,13 @@
       </ListBox.ItemContainerStyle>
       <ListBox.ItemTemplate>
         <DataTemplate DataType="MessageView">
-          <Grid>
-            <Grid.RowDefinitions>
-              <RowDefinition/>
-              <RowDefinition/>
-            </Grid.RowDefinitions>
-            <StackPanel Grid.Row="0" Orientation="Horizontal">
-              <Image Source="{Binding ImageUrl}" Height="24" Margin="0,0,10,0"/>
+          <StackPanel Grid.Row="0" Orientation="Horizontal">
+            <Image Source="{Binding ImageUrl}" Height="24" Margin="0,0,10,0"/>
+            <StackPanel Orientation="Vertical">
               <TextBlock Text="{Binding DateCreated}"/>
+              <TextBlock Grid.Row="1" Text="{Binding Text}" TextWrapping="Wrap" FontSize="12"/>
             </StackPanel>
-            <TextBlock Grid.Row="1" Text="{Binding Text}" TextWrapping="Wrap" FontSize="12"/>
-          </Grid>
+          </StackPanel>
         </DataTemplate>
       </ListBox.ItemTemplate>
     </ListBox>

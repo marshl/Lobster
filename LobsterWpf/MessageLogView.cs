@@ -27,6 +27,7 @@ namespace LobsterWpf
     using System.Collections.ObjectModel;
     using System.ComponentModel;
     using System.Linq;
+    using System.Windows;
     using LobsterModel;
 
     /// <summary>
@@ -35,7 +36,7 @@ namespace LobsterWpf
     public sealed class MessageLogView : IMessageLogEventListener, IDisposable, INotifyPropertyChanged
     {
         /// <summary>
-        /// The viiews of the messages for this view.
+        /// The views of the messages for this view.
         /// </summary>
         private ObservableCollection<MessageView> messageList;
 
@@ -81,7 +82,7 @@ namespace LobsterWpf
         /// <param name="msg">The message that caused the log to change state.</param>
         void IMessageLogEventListener.OnNewMessage(MessageLog.Message msg)
         {
-            App.Current.Dispatcher.Invoke((Action)delegate
+            Application.Current.Dispatcher.Invoke((Action)delegate
             {
                 this.MessageList.Add(new MessageView(msg));
             });
