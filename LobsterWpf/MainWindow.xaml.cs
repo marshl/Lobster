@@ -391,16 +391,14 @@ namespace LobsterWpf
         /// <param name="e">The event arguments.</param>
         private void PullButton_Click(object sender, RoutedEventArgs e)
         {
-            if (this.connectionView.SelectedFileNode == null)
+            if (this.connectionView?.SelectedFileNode?.DatabaseFile == null)
             {
                 return;
             }
 
-            string filename = this.connectionView.SelectedFileNode.FilePath;
-
             try
             {
-                string resultPath = Model.SendDownloadClobDataToFileMessage(this.connectionView.Connection, filename);
+                string resultPath = Model.SendDownloadClobDataToFileMessage(this.connectionView.Connection, this.connectionView.SelectedFileNode.DatabaseFile);
                 Process.Start(resultPath);
             }
             catch (FileDownloadException ex)
@@ -416,16 +414,15 @@ namespace LobsterWpf
         /// <param name="e">The event arguments.</param>
         private void DiffButton_Click(object sender, RoutedEventArgs e)
         {
-            if (this.connectionView.SelectedFileNode == null)
+            if (this.connectionView?.SelectedFileNode?.DatabaseFile == null)
             {
                 return;
             }
 
-            string filename = this.connectionView.SelectedFileNode.FilePath;
-
             try
             {
-                string downloadedFile = Model.SendDownloadClobDataToFileMessage(this.connectionView.Connection, filename);
+                string filename = this.connectionView.SelectedFileNode.FilePath;
+                string downloadedFile = Model.SendDownloadClobDataToFileMessage(this.connectionView.Connection, this.connectionView.SelectedFileNode.DatabaseFile);
                 string args = string.Format(
                     Settings.Default.DiffProgramArguments,
                     downloadedFile,

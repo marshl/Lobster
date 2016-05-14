@@ -161,7 +161,7 @@ namespace LobsterModel
         /// <param name="databaseConnection">The connection to download for.</param>
         /// <param name="fullpath">The file name to download the file for.</param>
         /// <returns>The path of the resulting file.</returns>
-        public static string SendDownloadClobDataToFileMessage(DatabaseConnection databaseConnection, string fullpath)
+        public static string SendDownloadClobDataToFileMessage(DatabaseConnection databaseConnection, DBClobFile databaseFile)
         {
             OracleConnection oracleConnection = OpenConnection(databaseConnection.Config, databaseConnection.Password);
             if (oracleConnection == null)
@@ -169,26 +169,10 @@ namespace LobsterModel
                 return null;
             }
 
-            DBClobFile clobFile;
+            string filepath = Utils.GetTempFilepath(databaseFile.Filename);
             try
             {
-                ClobDirectory clobDir = databaseConnection.GetClobDirectoryForFile(fullpath);
-                clobFile = clobDir.GetDatabaseFileForFullpath(fullpath);
-            }
-            catch (Exception e) when (e is ClobFileLookupException)
-            {
-                throw new FileDownloadException("The path could not be mapped to a DbClobFile");
-            }
-
-            if (clobFile == null)
-            {
-                throw new FileDownloadException("The path was found in a directory, but could be found as a file.");
-            }
-
-            string filepath = Utils.GetTempFilepath(clobFile.Filename);
-            try
-            {
-                Model.DownloadClobDataToFile(databaseConnection, clobFile, oracleConnection, filepath);
+                Model.DownloadClobDataToFile(databaseConnection, databaseFile, oracleConnection, filepath);
                 databaseConnection.TempFileList.Add(filepath);
                 return filepath;
             }
@@ -713,7 +697,7 @@ namespace LobsterModel
             }
             catch (Exception e) when (e is InvalidOperationException || e is OracleException || e is IOException || e is ColumnNotFoundException)
             {
-                // Discard the insert amde into the parent table
+                // Discard the insert made into the parent table
                 trans.Rollback();
                 MessageLog.LogError($"Error creating new clob when executing command: {command.CommandText} {e}");
                 throw new FileInsertException("An exception ocurred when attempting to insert a file into the child table.", e);
