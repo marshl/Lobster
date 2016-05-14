@@ -175,7 +175,6 @@ namespace LobsterModel
                 lock (this.fileLock)
                 {
                     this.streamWriter.WriteLine(msg.ToString());
-                    this.streamWriter.Flush();
                 }
             }
 
@@ -276,7 +275,7 @@ namespace LobsterModel
             /// <returns>The string representation of this <see cref="Message"/>.</returns>
             public override string ToString()
             {
-                return this.DateCreated.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture) + " [" + this.MessageType + "]: " + this.Text;
+                return $"{this.DateCreated:'yyyy-MM-dd HH:mm:ss.fff'} [{this.MessageType }]: {this.Text}";
             }
         }
     }
