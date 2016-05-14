@@ -150,7 +150,7 @@
                   <Button Click="OpenBackupButton_Click">
                     <Image Source="{DynamicResource FolderImageSource}" Width="25"/>
                   </Button>
-                  <TextBlock Text="{Binding DateCreated}" FontWeight="Bold"/>
+                  <TextBlock Text="{Binding Path=DateCreated, StringFormat=yyyy-MM-dd HH:mm:ss.fff}" FontWeight="Bold"/>
                 </StackPanel>
               </DataTemplate>
             </ListBox.ItemTemplate>
