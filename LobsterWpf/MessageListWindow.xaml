@@ -15,13 +15,21 @@
       </ListBox.ItemContainerStyle>
       <ListBox.ItemTemplate>
         <DataTemplate DataType="MessageView">
-          <StackPanel Grid.Row="0" Orientation="Horizontal">
-            <Image Source="{Binding ImageUrl}" Height="24" Margin="0,0,10,0"/>
-            <StackPanel Orientation="Vertical">
-              <TextBlock Text="{Binding DateCreated}"/>
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto"/>
+              <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Image Grid.Column="0" Source="{Binding ImageUrl}" Height="24" Margin="0,0,10,0"/>
+            <Grid Grid.Column="1">
+              <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+              </Grid.RowDefinitions>
+              <TextBlock Grid.Row="0" Text="{Binding DateCreated}"/>
               <TextBlock Grid.Row="1" Text="{Binding Text}" TextWrapping="Wrap" FontSize="12"/>
-            </StackPanel>
-          </StackPanel>
+            </Grid>
+          </Grid>
         </DataTemplate>
       </ListBox.ItemTemplate>
     </ListBox>
