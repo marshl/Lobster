@@ -23,6 +23,7 @@
 //-----------------------------------------------------------------------
 namespace LobsterModel
 {
+    using System;
     using Properties;
 
     /// <summary>
@@ -43,7 +44,6 @@ namespace LobsterModel
             set
             {
                 Settings.Default.BackupEnabled = value;
-                Settings.Default.Save();
             }
         }
 
@@ -60,7 +60,6 @@ namespace LobsterModel
             set
             {
                 Settings.Default.LogSensitiveMessages = value;
-                Settings.Default.Save();
             }
         }
 
@@ -77,8 +76,12 @@ namespace LobsterModel
             set
             {
                 Settings.Default.FileUpdateTimeoutMilliseconds = value;
-                Settings.Default.Save();
             }
+        }
+
+        public void ApplyChanges()
+        {
+            Settings.Default.Save();
         }
 
         /// <summary>
@@ -94,8 +97,12 @@ namespace LobsterModel
             set
             {
                 Settings.Default.AppendFooterToDatabaseFiles = value;
-                Settings.Default.Save();
             }
+        }
+
+        public void Reset()
+        {
+            Settings.Default.Reload();
         }
     }
 }

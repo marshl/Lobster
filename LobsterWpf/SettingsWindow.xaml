@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LobsterWpf"
         mc:Ignorable="d"
-        Title="Settings" Height="405" Width="350" MinHeight="405" MinWidth="350" ShowInTaskbar="False" Background="{StaticResource BackgroundKey}" Icon="Resources/Images/cartoon-lobster.ico" >
+        Title="Settings" Height="500" Width="375" MinHeight="500" MinWidth="375" ShowInTaskbar="False" Background="{StaticResource BackgroundKey}" Icon="Resources/Images/cartoon-lobster.ico" >
   <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="Auto"/>
@@ -21,38 +21,52 @@
       <RowDefinition Height="Auto"/>
       <RowDefinition Height="Auto"/>
       <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
       <RowDefinition Height="*"/>
     </Grid.RowDefinitions>
 
-    <Label Grid.Row="0" Grid.Column="0" Margin="5">Backup Files:</Label>
-    <CheckBox Grid.Row="0" Grid.Column="1" IsChecked="{Binding Path=ModelSettings.IsBackupEnabled}" Margin="5"/>
+    <StackPanel Orientation="Horizontal"  Grid.Row="0" Grid.Column="0">
+      <Label Margin="5">Backup Files:</Label>
+      <CheckBox IsChecked="{Binding Path=ModelSettings.IsBackupEnabled}" Margin="5,10,5,0"/>
 
-    <Label Grid.Row="1" Grid.Column="0" Margin="5">Diffable Extensions:</Label>
-    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Path=DiffProgramName}" Margin="5"/>
-
-    <Label Grid.Row="2" Grid.Column="0" Margin="5">Diff Program Arguments:</Label>
-    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Path=DiffProgramArguments}" Margin="5"/>
-
-    <Label Grid.Row="3" Grid.Column="0" Margin="5">Diffable Extensions:</Label>
-    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Path=DiffableExtensions}" Margin="5"/>
-
-    <Label Grid.Row="4" Grid.Column="0" Margin="5">Log Sensitive Messages:</Label>
-    <CheckBox Grid.Row="4" Grid.Column="1" IsChecked="{Binding Path=ModelSettings.LogSenstiveMessages}" Margin="5" VerticalAlignment="Center"/>
-
-    <Label Grid.Row="5" Grid.Column="0" Margin="5">File Update Timeout (ms):</Label>
-    <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding Path=ModelSettings.FileUpdateTimeoutMilliseconds}" Margin="5" PreviewTextInput="TextBox_PreviewTextInput"/>
-
-    <Label Grid.Row="6" Grid.Column="0" Margin="5">Append Footer Comment:</Label>
-    <CheckBox Grid.Row="6" Grid.Column="1" IsChecked="{Binding Path=ModelSettings.AppendFooterToDatabaseFiles}" Margin="5" VerticalAlignment="Center"/>
-
-    <Label Grid.Row="7" Grid.Column="0" Margin="5">Success Sound File:</Label>
-    <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding Path=SuccessSoundFile}" Margin="5"/>
+    </StackPanel>
     
-    <Label Grid.Row="8" Grid.Column="0" Margin="5">Failure Sound File:</Label>
-    <TextBox Grid.Row="8" Grid.Column="1" Text="{Binding Path=FailureSoundFile}" Margin="5"/>
+    <DockPanel Grid.Row="1" Grid.ColumnSpan="2">
+      <Label Margin="5">Delete Backups:</Label>
+      <CheckBox Name="DeleteBackupsCheckbox" IsChecked="{Binding Path=DeleteBackups}" Margin="5,10,0,0"/>
+      <Label Margin="0,5">after </Label>
+      <TextBox Margin="5,5,5,10.333" Width="41" Text="{Binding Path=BackupTimeoutDays}" IsEnabled="{Binding ElementName=DeleteBackupsCheckbox, Path=IsChecked}"/>
+      <Label Margin="0,5,5,5">days.</Label>
+    </DockPanel>
 
-    <StackPanel Grid.Row="9" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5">
-      <Button Margin="10" Width="75" Height="20" Click="CloseButton_Click">Close</Button>
+    <Label Grid.Row="2" Grid.Column="0" Margin="5">Diffable Extensions:</Label>
+    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Path=DiffProgramName}" Margin="5"/>
+
+    <Label Grid.Row="3" Grid.Column="0" Margin="5">Diff Program Arguments:</Label>
+    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Path=DiffProgramArguments}" Margin="5"/>
+
+    <Label Grid.Row="4" Grid.Column="0" Margin="5">Diffable Extensions:</Label>
+    <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Path=DiffableExtensions}" Margin="5"/>
+
+    <Label Grid.Row="5" Grid.Column="0" Margin="5">Log Sensitive Messages:</Label>
+    <CheckBox Grid.Row="5" Grid.Column="1" IsChecked="{Binding Path=ModelSettings.LogSenstiveMessages}" Margin="5" VerticalAlignment="Center"/>
+
+    <Label Grid.Row="6" Grid.Column="0" Margin="5">File Update Timeout (ms):</Label>
+    <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding Path=ModelSettings.FileUpdateTimeoutMilliseconds}" Margin="5" PreviewTextInput="TextBox_PreviewTextInput"/>
+
+    <Label Grid.Row="7" Grid.Column="0" Margin="5">Append Footer Comment:</Label>
+    <CheckBox Grid.Row="7" Grid.Column="1" IsChecked="{Binding Path=ModelSettings.AppendFooterToDatabaseFiles}" Margin="5" VerticalAlignment="Center"/>
+
+    <Label Grid.Row="8" Grid.Column="0" Margin="5">Success Sound File:</Label>
+    <TextBox Grid.Row="8" Grid.Column="1" Text="{Binding Path=SuccessSoundFile}" Margin="5"/>
+
+    <Label Grid.Row="9" Grid.Column="0" Margin="5">Failure Sound File:</Label>
+    <TextBox Grid.Row="9" Grid.Column="1" Text="{Binding Path=FailureSoundFile}" Margin="5"/>
+
+    <StackPanel Grid.Row="10" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5">
+      <Button Margin="10" Width="75" Height="20" Click="OkButton_Click">OK</Button>
+      <Button Margin="10" Width="75" Height="20" Click="ApplyButton_Click">Apply</Button>
+      <Button Margin="10" Width="75" Height="20" Click="CancelButton_Click">Cancel</Button>
     </StackPanel>
   </Grid>
 </Window>

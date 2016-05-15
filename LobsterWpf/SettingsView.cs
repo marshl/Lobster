@@ -25,6 +25,7 @@
 //-----------------------------------------------------------------------
 namespace LobsterWpf
 {
+    using System;
     using System.Collections.Specialized;
     using Properties;
 
@@ -42,9 +43,9 @@ namespace LobsterWpf
         }
 
         /// <summary>
-        /// Gets or sets the settigns view for the model.
+        /// Gets the settings view for the model.
         /// </summary>
-        public LobsterModel.SettingsView ModelSettings { get; set; }
+        public LobsterModel.SettingsView ModelSettings { get; }
 
         /// <summary>
         /// Gets or sets the name of the program used to diff files.
@@ -59,7 +60,6 @@ namespace LobsterWpf
             set
             {
                 Settings.Default.DiffProgramName = value;
-                Settings.Default.Save();
             }
         }
 
@@ -76,8 +76,13 @@ namespace LobsterWpf
             set
             {
                 Settings.Default.DiffProgramArguments = value;
-                Settings.Default.Save();
             }
+        }
+
+        public void ApplyChanges()
+        {
+            Settings.Default.Save();
+            this.ModelSettings.ApplyChanges();
         }
 
         /// <summary>
@@ -96,8 +101,13 @@ namespace LobsterWpf
             {
                 Settings.Default.DiffableExtensions = new StringCollection();
                 Settings.Default.DiffableExtensions.AddRange(value.Split(' '));
-                Settings.Default.Save();
             }
+        }
+
+        public void Reset()
+        {
+            Settings.Default.Reload();
+            this.ModelSettings.Reset();
         }
 
         /// <summary>
@@ -113,7 +123,6 @@ namespace LobsterWpf
             set
             {
                 Settings.Default.SuccessSoundFile = value;
-                Settings.Default.Save();
             }
         }
 
@@ -130,7 +139,38 @@ namespace LobsterWpf
             set
             {
                 Settings.Default.FailureSoundFile = value;
-                Settings.Default.Save();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether backup files should be deleted.
+        /// </summary>
+        public bool DeleteBackups
+        {
+            get
+            {
+                return Settings.Default.DeleteBackupFiles;
+            }
+
+            set
+            {
+                Settings.Default.DeleteBackupFiles = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the number of days after which backup files should be deleted.
+        /// </summary>
+        public int BackupTimeoutDays
+        {
+            get
+            {
+                return Settings.Default.BackupFileLifetimeDays;
+            }
+
+            set
+            {
+                Settings.Default.BackupFileLifetimeDays = value;
             }
         }
     }

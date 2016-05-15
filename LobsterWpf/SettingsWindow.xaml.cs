@@ -50,13 +50,38 @@ namespace LobsterWpf
         public SettingsView Settings { get; set; }
 
         /// <summary>
-        /// The event called when the Close button is clicked, closing the window.
+        /// The event called when the Cancel button is clicked, closing the window.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">Teh event arguments.</param>
-        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        private void OkButton_Click(object sender, RoutedEventArgs e)
         {
+            this.Settings.ApplyChanges();
             this.DialogResult = true;
+            this.Close();
+        }
+
+
+        /// <summary>
+        /// The event called when the Cancel button is clicked, closing the window.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">Teh event arguments.</param>
+        private void ApplyButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Settings.ApplyChanges();
+        }
+
+
+        /// <summary>
+        /// The event called when the Cancel button is clicked, closing the window.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">Teh event arguments.</param>
+        private void CancelButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.DialogResult = false;
+            this.Settings.Reset();
             this.Close();
         }
 

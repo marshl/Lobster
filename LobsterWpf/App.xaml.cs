@@ -27,7 +27,7 @@ namespace LobsterWpf
     using System;
     using System.Windows;
     using LobsterModel;
-
+    using Properties;
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
@@ -44,6 +44,11 @@ namespace LobsterWpf
         public App()
         {
             this.log = MessageLog.Initialise();
+            if (Settings.Default.DeleteBackupFiles)
+            {
+                BackupLog.DeleteOldBackupFiles(Settings.Default.BackupFileLifetimeDays);
+            }
+
 #if !DEBUG
             AppDomain currentDomain = AppDomain.CurrentDomain;
             currentDomain.UnhandledException += new UnhandledExceptionEventHandler(this.GlobalExceptionHandler);

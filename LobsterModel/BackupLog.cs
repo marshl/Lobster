@@ -104,5 +104,29 @@ namespace LobsterModel
             DirectoryInfo dirInfo = new DirectoryInfo(backupDirectory);
             return dirInfo;
         }
+
+        public static void DeleteOldBackupFiles(int daysOld)
+        {
+            DirectoryInfo backupDir = new DirectoryInfo(Settings.Default.BackupDirectory);
+            if (!backupDir.Exists)
+            {
+                return;
+            }
+
+            foreach (FileInfo file in backupDir.GetFiles("*", SearchOption.AllDirectories))
+            {
+                if (file.LastWriteTime < DateTime.Now.AddDays(-daysOld))
+                {
+                    try
+                    {
+                        file.Delete();
+                    }
+                    catch (IOException ex)
+                    {
+                        MessageLog.LogError($"An exception occurred when attempting to delete the out of date backup file {file.FullName}: {ex}");
+                    }
+                }
+            }
+        }
     }
 }
