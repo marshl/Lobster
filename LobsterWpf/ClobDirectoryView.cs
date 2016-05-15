@@ -23,6 +23,7 @@
 //-----------------------------------------------------------------------
 namespace LobsterWpf
 {
+    using System.Windows;
     using LobsterModel;
 
     /// <summary>
@@ -65,6 +66,17 @@ namespace LobsterWpf
             get
             {
                 return this.BaseClobDirectory.ClobType.Directory;
+            }
+        }
+
+        /// <summary>
+        /// Gets whether the clob directory has any warnings.
+        /// </summary>
+        public Visibility WarningVisibility
+        {
+            get
+            {
+                return this.BaseClobDirectory.ClobType.ErrorList.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
             }
         }
 
