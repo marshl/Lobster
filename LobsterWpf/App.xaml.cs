@@ -28,6 +28,7 @@ namespace LobsterWpf
     using System.Windows;
     using LobsterModel;
     using Properties;
+
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
@@ -86,7 +87,6 @@ Ensure that there are no passwords in the file before uploading it.");
             catch
             {
                 MessageBox.Show("Oops, an exception occurred when trying to handle the unhandled exception. I'm sorry, but you are well and truly fucked.");
-                // Swallow exceptional exceptions
             }
             finally
             {

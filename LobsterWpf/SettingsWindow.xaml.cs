@@ -61,7 +61,6 @@ namespace LobsterWpf
             this.Close();
         }
 
-
         /// <summary>
         /// The event called when the Cancel button is clicked, closing the window.
         /// </summary>
@@ -71,7 +70,6 @@ namespace LobsterWpf
         {
             this.Settings.ApplyChanges();
         }
-
 
         /// <summary>
         /// The event called when the Cancel button is clicked, closing the window.

@@ -79,12 +79,6 @@ namespace LobsterWpf
             }
         }
 
-        public void ApplyChanges()
-        {
-            Settings.Default.Save();
-            this.ModelSettings.ApplyChanges();
-        }
-
         /// <summary>
         /// Gets or sets a the extensions that a file must have to be diffed (space delimeted string).
         /// </summary>
@@ -103,13 +97,7 @@ namespace LobsterWpf
                 Settings.Default.DiffableExtensions.AddRange(value.Split(' '));
             }
         }
-
-        public void Reset()
-        {
-            Settings.Default.Reload();
-            this.ModelSettings.Reset();
-        }
-
+        
         /// <summary>
         /// Gets or sets the path of the file used as a success sound effect.
         /// </summary>
@@ -172,6 +160,24 @@ namespace LobsterWpf
             {
                 Settings.Default.BackupFileLifetimeDays = value;
             }
+        }
+
+        /// <summary>
+        /// Applies the changes to the settings to the user settings file.
+        /// </summary>
+        public void ApplyChanges()
+        {
+            Settings.Default.Save();
+            this.ModelSettings.ApplyChanges();
+        }
+
+        /// <summary>
+        /// Resets the settings back to the contents of the user settings file.
+        /// </summary>
+        public void Reset()
+        {
+            Settings.Default.Reload();
+            this.ModelSettings.Reset();
         }
     }
 }
