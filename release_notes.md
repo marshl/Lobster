@@ -1,3 +1,27 @@
+##Release 2.4.1.0
+#####Released: 15-05-2016
+
+####Features
+ - Added the option to delete backup files after a given number of days;
+ - Changed the user settings window to let the user cancel changes;
+ - Improved the file tree rebuild speed by ~30% (70ms => 50ms on a 2014 laptop);
+ - Changed the file tree to only rebuld when necessary;
+ - Improved event logging speed;
+ - Reduced risk of exposing passwords via uninitialised memory attacks;
+ 
+####Bug Fixes
+ - Fixed an issue where temporary files would not be deleted when a connection is closed;
+ - Fixed the default argument for the Diff program not working for files with spaces in their names;
+ - Fixed an issue where attempting to "Pull" a database only file would cause a crash;
+ - Fixed an issue where the file backup list was not initialised when selecting a file;
+ - Fixed a bug where all file events would have the same text;
+ 
+####Appearance
+ - Changed the error message symbol;
+ - Improved appearance of the message list;
+ - Added a warning symbol to rows in the directory list if the XML file had parsing or validation errors;
+ - Fixed issue #86: Incorrect date format for file backup list;
+
 ##Release 2.4.0.0
 #####Released: 24-03-2016
 
