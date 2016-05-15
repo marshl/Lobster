@@ -221,7 +221,7 @@ namespace LobsterModel
         /// </summary>
         /// <param name="value">The secure string to convert.</param>
         /// <returns>The string representation of the string.</returns>
-        /// <remarks>http://stackoverflow.com/questions/818704/how-to-convert-securestring-to-system-string</remarks>
+        /// <remarks>Found here: http://stackoverflow.com/questions/818704/how-to-convert-securestring-to-system-string</remarks>
         public static string SecureStringToString(SecureString value)
         {
             IntPtr valuePtr = IntPtr.Zero;

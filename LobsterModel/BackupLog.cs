@@ -82,29 +82,9 @@ namespace LobsterModel
         }
 
         /// <summary>
-        /// Finds the directory that would be used to store backups for the given file.
-        /// This does not create the directory if it doesn't already exist.
+        /// Deletes backup files that are older than the given number of days.
         /// </summary>
-        /// <param name="startingDirectory">The CodeSource directory the file is stored under.</param>
-        /// <param name="filename">The file that is being backed up.</param>
-        /// <returns>The directory where the backup would be stored.</returns>
-        private static DirectoryInfo GetBackupDirectoryForFile(string startingDirectory, string filename)
-        {
-            Debug.Assert(new Uri(startingDirectory).IsBaseOf(new Uri(filename)), "The file must be a child of the starting directory.");
-            DirectoryInfo backupDir = new DirectoryInfo(Settings.Default.BackupDirectory);
-            if (!backupDir.Exists)
-            {
-                backupDir.Create();
-            }
-
-            Uri baseUri = new Uri(startingDirectory);
-            Uri fileUri = new Uri(filename);
-            Uri relativeUri = baseUri.MakeRelativeUri(fileUri);
-            string backupDirectory = Path.Combine(backupDir.FullName, relativeUri.OriginalString);
-            DirectoryInfo dirInfo = new DirectoryInfo(backupDirectory);
-            return dirInfo;
-        }
-
+        /// <param name="daysOld">Files older than this number of days are deleted.</param>
         public static void DeleteOldBackupFiles(int daysOld)
         {
             DirectoryInfo backupDir = new DirectoryInfo(Settings.Default.BackupDirectory);
@@ -127,6 +107,30 @@ namespace LobsterModel
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Finds the directory that would be used to store backups for the given file.
+        /// This does not create the directory if it doesn't already exist.
+        /// </summary>
+        /// <param name="startingDirectory">The CodeSource directory the file is stored under.</param>
+        /// <param name="filename">The file that is being backed up.</param>
+        /// <returns>The directory where the backup would be stored.</returns>
+        private static DirectoryInfo GetBackupDirectoryForFile(string startingDirectory, string filename)
+        {
+            Debug.Assert(new Uri(startingDirectory).IsBaseOf(new Uri(filename)), "The file must be a child of the starting directory.");
+            DirectoryInfo backupDir = new DirectoryInfo(Settings.Default.BackupDirectory);
+            if (!backupDir.Exists)
+            {
+                backupDir.Create();
+            }
+
+            Uri baseUri = new Uri(startingDirectory);
+            Uri fileUri = new Uri(filename);
+            Uri relativeUri = baseUri.MakeRelativeUri(fileUri);
+            string backupDirectory = Path.Combine(backupDir.FullName, relativeUri.OriginalString);
+            DirectoryInfo dirInfo = new DirectoryInfo(backupDirectory);
+            return dirInfo;
         }
     }
 }

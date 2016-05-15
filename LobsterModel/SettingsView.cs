@@ -79,11 +79,6 @@ namespace LobsterModel
             }
         }
 
-        public void ApplyChanges()
-        {
-            Settings.Default.Save();
-        }
-
         /// <summary>
         /// Gets or sets a value indicating whether Clob or Xml type files should have footers appended to them.
         /// </summary>
@@ -100,6 +95,17 @@ namespace LobsterModel
             }
         }
 
+        /// <summary>
+        /// Applies changs to the settings to the user settings file.
+        /// </summary>
+        public void ApplyChanges()
+        {
+            Settings.Default.Save();
+        }
+
+        /// <summary>
+        /// Resets settings back to user values.
+        /// </summary>
         public void Reset()
         {
             Settings.Default.Reload();

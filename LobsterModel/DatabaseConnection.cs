@@ -409,7 +409,11 @@ namespace LobsterModel
             this.EventListener.OnAutoUpdateComplete(e.FullPath, true);
         }
 
-        private void LogFileEvent(string text)
+        /// <summary>
+        /// Logs the given text only if file events are enabled.
+        /// </summary>
+        /// <param name="message">The message to log.</param>
+        private void LogFileEvent(string message)
         {
             if (Settings.Default.LogFileEvents)
             {

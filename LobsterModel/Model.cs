@@ -161,7 +161,7 @@ namespace LobsterModel
         /// Public access for downloading database files.
         /// </summary>
         /// <param name="databaseConnection">The connection to download for.</param>
-        /// <param name="fullpath">The file name to download the file for.</param>
+        /// <param name="databaseFile">The file name to download the file for.</param>
         /// <returns>The path of the resulting file.</returns>
         public static string SendDownloadClobDataToFileMessage(DatabaseConnection databaseConnection, DBClobFile databaseFile)
         {
