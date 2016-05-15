@@ -413,7 +413,7 @@ namespace LobsterModel
         {
             if (Settings.Default.LogFileEvents)
             {
-                MessageLog.LogInfo("The file was updated within the cooldown period, and will be skipped.");
+                MessageLog.LogInfo(message);
             }
         }
     }
