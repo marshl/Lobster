@@ -388,17 +388,13 @@
     <None Include="Resources\Images\Favorites.ico" />
     <None Include="Resources\Images\FloppyDisk.ico" />
     <None Include="Resources\Images\folder.ico" />
-    <None Include="Resources\Images\Folder_6221.ico" />
-    <None Include="Resources\Images\Folder_6222.ico" />
     <Resource Include="Resources\Images\folder_open.ico" />
     <Resource Include="Resources\Images\Folder_stuffed.ico" />
-    <None Include="Resources\Images\GenericVSEditor_9905.ico" />
     <Resource Include="Resources\Images\Generic_Document.ico" />
     <None Include="Resources\Images\Monitor.ico" />
     <None Include="Resources\Images\move.ico" />
     <None Include="Resources\Images\Network_Folder.ico" />
     <None Include="Resources\Images\New.ico" />
-    <None Include="Resources\Images\PropertyIcon.ico" />
     <None Include="Resources\Images\search.ico" />
     <None Include="Resources\Images\Settings.ico" />
   </ItemGroup>
