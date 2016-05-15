@@ -137,11 +137,11 @@ namespace LobsterModel
                 {
                     if (e.Severity == XmlSeverityType.Warning)
                     {
-                        MessageLog.LogWarning(e.Message);
+                        MessageLog.LogError($"A validation warning occured when parsing {Path.GetFileName(xmlFilename)}: {e.Message}");
                     }
                     else if (e.Severity == XmlSeverityType.Error)
                     {
-                        MessageLog.LogError(e.Message);
+                        MessageLog.LogError($"A validation error occured when parsing {Path.GetFileName(xmlFilename)}: {e.Message}");
                     }
 
                     validationEvents.Add(e);
