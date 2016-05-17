@@ -351,6 +351,12 @@ namespace LobsterWpf
                 return;
             }
 
+            // Don't retreive backups for database only files.
+            if ( this.FilePath == null)
+            {
+                return;
+            }
+
             List<FileBackup> fileBackups = BackupLog.GetBackupsForFile(this.ParentConnectionView.Connection.Config.CodeSource, this.FilePath);
             if (fileBackups != null)
             {
