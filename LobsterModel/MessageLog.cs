@@ -275,7 +275,7 @@ namespace LobsterModel
             /// <returns>The string representation of this <see cref="Message"/>.</returns>
             public override string ToString()
             {
-                return $"{this.DateCreated:'yyyy-MM-dd HH:mm:ss.fff'} [{this.MessageType }]: {this.Text}";
+                return $"{this.DateCreated:yyyy-MM-dd HH:mm:ss.fff} [{this.MessageType }]: {this.Text}";
             }
         }
     }
