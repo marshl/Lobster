@@ -1,3 +1,12 @@
+##Release 2.4.2.0
+#####Released: 01-06-2016
+
+####Bug Fixes
+ - Fixed #90: Selecting a database only file causes a crash;
+ - Fixed #91: Incorrect date string in lobster.log;
+ - Fixed #92: Crash on SVN Update
+ - Fixed #92: Crash on file delete;
+ 
 ##Release 2.4.1.0
 #####Released: 15-05-2016
 
@@ -50,6 +59,7 @@
 ####Bug Fixes
  - Fixed a crash caused by inserting files with a mime types that has no prefix (such as a module):
  - Fixed a crash that would occur if the user attempts to save database configuration to a readonly file;
+ 
 ####Appearance
  - Changed the unhandled exception message;
  
@@ -57,8 +67,8 @@
 #####Released: 22-02-2016
 
 ####Breaking Changes
- - Changed the configuration storage to place the DatabaseConfig and ClobTypes in the CodeSource directory (breaking change);
- - Fixed casing in the Xml files (breaking change);
+ - Changed the configuration storage to place the DatabaseConfig and ClobTypes in the CodeSource directory;
+ - Fixed casing in the Xml files;
  
 ####Features
  - Added the ability to "Pull" files from the database and execute them immediately;
