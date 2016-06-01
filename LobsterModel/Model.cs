@@ -723,16 +723,17 @@ namespace LobsterModel
             OracleCommand command = oracleConnection.CreateCommand();
 
             Table table = clobFile.ParentTable;
-            Column column;
+            Column column = null;
             try
             {
-                column = clobFile.GetDataColumn();
                 if (table.CustomStatements?.DownloadStatement != null)
                 {
                     command.CommandText = table.CustomStatements.DownloadStatement;
                 }
                 else
                 {
+                   
+                    column = clobFile.GetDataColumn();
                     command.CommandText = table.BuildGetDataCommand(clobFile);
                 }
 
@@ -756,7 +757,7 @@ namespace LobsterModel
 
                 using (FileStream fs = Utils.WaitForFile(filename, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
                 {
-                    if (column.DataType == Column.Datatype.BLOB)
+                    if (column?.DataType == Column.Datatype.BLOB)
                     {
                         byte[] b = new byte[reader.GetBytes(0, 0, null, 0, int.MaxValue)];
                         reader.GetBytes(0, 0, b, 0, b.Length);
