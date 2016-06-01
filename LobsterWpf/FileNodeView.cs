@@ -332,10 +332,12 @@ namespace LobsterWpf
             else if (this.FilePath != null)
             {
                 FileInfo fileInfo = new FileInfo(this.FilePath);
-                this.LastWriteTime = fileInfo.LastWriteTime;
-
-                this.FileSize = Utils.BytesToString(fileInfo.Length);
-                this.IsReadOnly = fileInfo.IsReadOnly;
+                if (fileInfo.Exists)
+                {
+                    this.LastWriteTime = fileInfo.LastWriteTime;
+                    this.FileSize = Utils.BytesToString(fileInfo.Length);
+                    this.IsReadOnly = fileInfo.IsReadOnly;
+                }
             }
 
             this.NotifyPropertyChanged();

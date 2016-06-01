@@ -280,6 +280,11 @@ namespace LobsterModel
 
             lock (this.fileEventQueue)
             {
+                if (e.ChangeType != WatcherChangeTypes.Changed)
+                {
+                    this.fileTreeChangeInQueue = true;
+                }
+
                 // Ignore the event if it is already in the event list.
                 // This often occurs, as most programs invoke several file change events when saving.
                 if (this.fileEventQueue.Find(x => x.FullPath.Equals(e.FullPath, StringComparison.OrdinalIgnoreCase)) != null)
@@ -291,12 +296,6 @@ namespace LobsterModel
                 if (this.fileEventQueue.Count == 0)
                 {
                     this.LogFileEvent("Event stack populated.");
-
-                    if (e.ChangeType != WatcherChangeTypes.Changed)
-                    {
-                        this.fileTreeChangeInQueue = true;
-                    }
-
                     this.EventListener.OnEventProcessingStart();
                 }
 
