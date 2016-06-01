@@ -354,7 +354,7 @@ namespace LobsterWpf
             }
 
             // Don't retreive backups for database only files.
-            if ( this.FilePath == null)
+            if (this.FilePath == null)
             {
                 return;
             }

@@ -732,7 +732,6 @@ namespace LobsterModel
                 }
                 else
                 {
-                   
                     column = clobFile.GetDataColumn();
                     command.CommandText = table.BuildGetDataCommand(clobFile);
                 }

@@ -25,7 +25,6 @@
 //-----------------------------------------------------------------------
 namespace LobsterWpf
 {
-    using System;
     using System.Collections.Specialized;
     using Properties;
 
