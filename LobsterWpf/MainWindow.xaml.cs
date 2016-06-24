@@ -42,7 +42,7 @@ namespace LobsterWpf
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public sealed partial class MainWindow : Window, IModelEventListener, IDisposable
+    public sealed partial class MainWindow : Window, IDisposable
     {
         /// <summary>
         /// The view of the current connection, if crrently connected.
@@ -85,83 +85,6 @@ namespace LobsterWpf
         }
 
         /// <summary>
-        /// The callback for when a automatic file update is completed.
-        /// </summary>
-        /// <param name="filename">The full name of the file that was updated.</param>
-        /// <param name="updateSuccess">Whether the update was a success or not.</param>
-        void IModelEventListener.OnAutoUpdateComplete(string filename, bool updateSuccess)
-        {
-            this.Dispatcher.Invoke((MethodInvoker)delegate
-            {
-                this.DisplayUpdateNotification(filename, updateSuccess);
-            });
-        }
-
-        /// <summary>
-        /// The callback for when the user needs to select a table to insert a file into.
-        /// </summary>
-        /// <param name="filename">The full path of the file </param>
-        /// <param name="tables">The tables that the user can select from.</param>
-        /// <param name="table">The table that the user selected.</param>
-        /// <returns>Whether the user selected a table to use or not.</returns>
-        bool IModelEventListener.PromptForTable(string filename, Table[] tables, ref Table table)
-        {
-            TableSelectorWindow tsw = new TableSelectorWindow(filename, tables);
-            tsw.Owner = this;
-            bool? result = tsw.ShowDialog();
-            if (result ?? false)
-            {
-                table = tsw.SelectedTable;
-            }
-
-            return result ?? false;
-        }
-
-        /// <summary>
-        /// The callback for when the user is needed to select a mime type for a file to be inserted as.
-        /// </summary>
-        /// <param name="filename">The full path of the file</param>
-        /// <param name="mimeTypes">The mime types that the user can select from.</param>
-        /// <param name="mimeType">The mime type that the user selected.</param>
-        /// <returns>True if the user selected a mime type, otherwise false.</returns>
-        bool IModelEventListener.PromptForMimeType(string filename, string[] mimeTypes, ref string mimeType)
-        {
-            MimeTypeSelectorWindow msw = new MimeTypeSelectorWindow(filename, mimeTypes);
-            msw.Owner = this;
-            bool? result = msw.ShowDialog();
-            if (result ?? false)
-            {
-                mimeType = msw.SelectedMimeType;
-            }
-
-            return result ?? false;
-        }
-
-        /// <summary>
-        /// The callback for when a file event is initially received.
-        /// </summary>
-        void IModelEventListener.OnEventProcessingStart()
-        {
-            this.Dispatcher.Invoke((MethodInvoker)delegate
-            {
-                this.connectionView.IsEnabled = false;
-            });
-        }
-
-        /// <summary>
-        /// The callback for when the last file event in the event queue is processed.
-        /// </summary>
-        /// <param name="fileTreeChanged">Whether a structual change to the file tree has occurred, and the internal tree needs to be refreshed.</param>
-        void IModelEventListener.OnFileProcessingFinished(bool fileTreeChanged)
-        {
-            this.Dispatcher.Invoke((MethodInvoker)delegate
-            {
-                this.connectionView.IsEnabled = true;
-                this.RepopulateFileListView(fileTreeChanged);
-            });
-        }
-
-        /// <summary>
         /// The method that is called when the window is initialised.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
@@ -187,7 +110,7 @@ namespace LobsterWpf
         /// </summary>
         private void OpenConnectionDialog()
         {
-            ConnectionListWindow window = new ConnectionListWindow(this);
+            ConnectionListWindow window = new ConnectionListWindow();
             window.Owner = this;
             bool? result = window.ShowDialog();
             if (result.HasValue && result.Value)
@@ -200,6 +123,12 @@ namespace LobsterWpf
                 this.ConnectionContainer.DataContext = this.connectionView = new ConnectionView(window.DatabaseConnection);
                 this.connectionView.SelectedFileNode = null;
                 this.RepopulateFileListView(true);
+                
+                this.connectionView.Connection.FileProcessingFinishedEvent += this.OnFileProcessingFinished;
+                this.connectionView.Connection.RequestMimeTypeEvent += this.PromptForMimeType;
+                this.connectionView.Connection.RequestTableEvent += this.PromptForTable;
+                this.connectionView.Connection.StartChangeProcessingEvent += this.OnEventProcessingStart;
+                this.connectionView.Connection.UpdateCompleteEvent += this.OnAutoUpdateComplete;
             }
         }
 
@@ -683,6 +612,78 @@ namespace LobsterWpf
                 this.notifyIcon.Dispose();
                 this.notifyIcon = null;
             }
+        }
+
+        /// <summary>
+        /// The callback for when a automatic file update is completed.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="args">The event arguments</param>
+        private void OnAutoUpdateComplete(object sender, FileUpdateCompleteEventArgs args)
+        {
+            this.Dispatcher.Invoke((MethodInvoker)delegate
+            {
+                this.DisplayUpdateNotification(args.Fullpath, args.Success);
+            });
+        }
+
+        /// <summary>
+        /// The callback for when the user needs to select a table to insert a file into.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="args">The event arguments</param>
+        private void PromptForTable(object sender, TableRequestEventArgs args)
+        {
+            TableSelectorWindow tsw = new TableSelectorWindow(args.FullPath, args.Tables);
+            tsw.Owner = this;
+            bool? result = tsw.ShowDialog();
+            if (result ?? false)
+            {
+                args.SelectedTable = tsw.SelectedTable;
+            }
+        }
+
+        /// <summary>
+        /// The callback for when the user is needed to select a mime type for a file to be inserted as.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="args">The event arguments</param>
+        private void PromptForMimeType(object sender, MimeTypeRequestEventArgs args)
+        {
+            MimeTypeSelectorWindow msw = new MimeTypeSelectorWindow(args.FullPath, args.MimeTypes);
+            msw.Owner = this;
+            bool? result = msw.ShowDialog();
+            if (result ?? false)
+            {
+                args.SelectedMimeType = msw.SelectedMimeType;
+            }
+        }
+
+        /// <summary>
+        /// The callback for when a file event is initially received.
+        /// </summary>\
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="args">The event arguments</param>
+        private void OnEventProcessingStart(object sender, FileChangeEventArgs args)
+        {
+            this.Dispatcher.Invoke((MethodInvoker)delegate
+            {
+                this.connectionView.IsEnabled = false;
+            });
+        }
+
+        /// <summary>
+        /// The callback for when the last file event in the event queue is processed.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="args">The event arguments</param>
+        private void OnFileProcessingFinished(object sender, FileProcessingFinishedEventArgs args)
+        {
+            this.Dispatcher.Invoke((MethodInvoker)delegate
+            {
+                this.connectionView.IsEnabled = true;
+                this.RepopulateFileListView(args.FileTreeChange);
+            });
         }
     }
 }

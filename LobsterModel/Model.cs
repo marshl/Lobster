@@ -117,8 +117,8 @@ namespace LobsterModel
             Table table = null;
             if (clobDir.ClobType.Tables.Count > 1)
             {
-                bool result = databaseConnection.EventListener.PromptForTable(fullpath, clobDir.ClobType.Tables.ToArray(), ref table);
-                if (!result)
+                table = databaseConnection.OnTableRequest(databaseConnection, fullpath, clobDir.ClobType.Tables.ToArray());
+                if (table == null)
                 {
                     return false;
                 }
@@ -134,9 +134,9 @@ namespace LobsterModel
             if (table.TryGetColumnWithPurpose(Column.Purpose.MIME_TYPE, out mimeTypeColumn)
                 && table.TryGetColumnWithPurpose(Column.Purpose.CLOB_DATA, out dataColumn))
             {
-                bool result = databaseConnection.EventListener.PromptForMimeType(fullpath, dataColumn.MimeTypeList.ToArray(), ref mimeType);
+                mimeType = databaseConnection.OnMimeTypeRequest(databaseConnection, fullpath, dataColumn.MimeTypeList.ToArray());
 
-                if (!result)
+                if (mimeType == null)
                 {
                     return false;
                 }
@@ -189,10 +189,10 @@ namespace LobsterModel
         /// </summary>
         /// <param name="config">The connection to open.</param>
         /// <param name="password">The password to connect to the database with.</param>
-        /// <param name="eventListener">The event listener that will be used to populate the connection wtih.</param>
         /// <returns>The successfully created database connection.</returns>
-        public static DatabaseConnection SetDatabaseConnection(DatabaseConfig config, SecureString password, IModelEventListener eventListener)
+        public static DatabaseConnection SetDatabaseConnection(DatabaseConfig config, SecureString password)
         {
+            // TODO: Move to DatabaseConnection
             MessageLog.LogInfo($"Changing connection to {config.Name}");
             try
             {
@@ -209,7 +209,7 @@ namespace LobsterModel
                 throw new SetConnectionException($"The clob type directory {config.ClobTypeDirectory} could not be found.");
             }
 
-            DatabaseConnection databaseConnection = new DatabaseConnection(config, password, eventListener);
+            DatabaseConnection databaseConnection = new DatabaseConnection(config, password);
 
             List<ClobTypeLoadException> errors = new List<ClobTypeLoadException>();
             List<FileListRetrievalException> fileLoadErrors = new List<FileListRetrievalException>();

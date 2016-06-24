@@ -28,10 +28,6 @@ namespace LobsterModel
     using System.IO;
     using System.Security;
     using System.Threading;
-    using System.Xml;
-    using System.Xml.Schema;
-    using System.Xml.Serialization;
-    using Oracle.ManagedDataAccess.Client;
     using Properties;
 
     /// <summary>
@@ -71,14 +67,12 @@ namespace LobsterModel
         /// </summary>
         /// <param name="config">The configuration file to base this connection off.</param>
         /// <param name="password">The password to connect to the database with.</param>
-        /// <param name="eventListener">The event listener that events will be sent to when files are automatically updated.</param>
-        public DatabaseConnection(DatabaseConfig config, SecureString password, IModelEventListener eventListener)
+        public DatabaseConnection(DatabaseConfig config, SecureString password)
         {
             this.Config = config;
             this.IsAutoUpdateEnabled = this.Config.AllowAutomaticUpdates;
             this.Password = password;
 
-            this.EventListener = eventListener;
             bool result = Utils.DeserialiseXmlFileUsingSchema("LobsterSettings/MimeTypes.xml", null, out this.mimeTypeList);
 
             try
@@ -101,9 +95,29 @@ namespace LobsterModel
         }
 
         /// <summary>
-        /// Gets the event listener that is sent messages whenever a change is made to the model due to a FileSystemEvent.
+        /// The event for when all file event processing has finished.
         /// </summary>
-        public IModelEventListener EventListener { get; private set; }
+        public event EventHandler<FileProcessingFinishedEventArgs> FileProcessingFinishedEvent;
+
+        /// <summary>
+        /// The event for when the first file change has ocurred within a block of events.
+        /// </summary>
+        public event EventHandler<FileChangeEventArgs> StartChangeProcessingEvent;
+
+        /// <summary>
+        /// The event for when a file update has completed (successfully or not).
+        /// </summary>
+        public event EventHandler<FileUpdateCompleteEventArgs> UpdateCompleteEvent;
+
+        /// <summary>
+        /// The event for when a Table selection is required by the user.
+        /// </summary>
+        public event EventHandler<TableRequestEventArgs> RequestTableEvent;
+
+        /// <summary>
+        /// The event for when a mime type is needed.
+        /// </summary>
+        public event EventHandler<MimeTypeRequestEventArgs> RequestMimeTypeEvent;
 
         /// <summary>
         /// Gets or sets the list of mime types that are used to translate from file names to database mnemonics and vice-sersa.
@@ -209,6 +223,50 @@ namespace LobsterModel
         }
 
         /// <summary>
+        /// Signal a request for a table type to the event subscribers.
+        /// Used for finding which table a file that can be inserted into multiple tables should be inserted into.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="fullpath">The full name of the file being inserted.</param>
+        /// <param name="tables">The list of table that the user can select from.</param>
+        /// <returns>The user selected table (if any)</returns>
+        public Table OnTableRequest(object sender, string fullpath, Table[] tables)
+        {
+            var handler = this.RequestTableEvent;
+            if (handler != null)
+            {
+                var args = new TableRequestEventArgs(fullpath, tables);
+                handler(sender, args);
+
+                return args.SelectedTable;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Used to signal a mime type request to event listeners.
+        /// For inserting a new record into a mime type controlled table.
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="fullpath">The fullpath of the file that requires a mime type to be specified.</param>
+        /// <param name="mimeTypes">The list of possible mime types that can be used.</param>
+        /// <returns>The mime type to insert the new record as.</returns>
+        public string OnMimeTypeRequest(object sender, string fullpath, string[] mimeTypes)
+        {
+            var handler = this.RequestMimeTypeEvent;
+            if (handler != null)
+            {
+                var args = new MimeTypeRequestEventArgs(fullpath, mimeTypes);
+                handler(sender, args);
+
+                return args.SelectedMimeType;
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Disposes this object.
         /// </summary>
         public void Dispose()
@@ -296,7 +354,7 @@ namespace LobsterModel
                 if (this.fileEventQueue.Count == 0)
                 {
                     this.LogFileEvent("Event stack populated.");
-                    this.EventListener.OnEventProcessingStart();
+                    this.OnEventProcessingStart();
                 }
 
                 this.fileEventQueue.Add(e);
@@ -315,7 +373,7 @@ namespace LobsterModel
                     if (this.fileEventQueue.Count == 0)
                     {
                         this.LogFileEvent("Event stack empty.");
-                        this.EventListener.OnFileProcessingFinished(this.fileTreeChangeInQueue);
+                        this.OnFileProcessingFinished(this.fileTreeChangeInQueue);
                         this.fileTreeChangeInQueue = false;
                     }
                 }
@@ -401,11 +459,11 @@ namespace LobsterModel
             }
             catch (FileUpdateException)
             {
-                this.EventListener.OnAutoUpdateComplete(e.FullPath, false);
+                this.OnAutoUpdateComplete(e.FullPath, false);
                 return;
             }
-
-            this.EventListener.OnAutoUpdateComplete(e.FullPath, true);
+            
+            this.OnAutoUpdateComplete(e.FullPath, true);
         }
 
         /// <summary>
@@ -417,6 +475,51 @@ namespace LobsterModel
             if (Settings.Default.LogFileEvents)
             {
                 MessageLog.LogInfo(message);
+            }
+        }
+
+        /// <summary>
+        /// Signals a start in file processing to the event subscribers.
+        /// </summary>
+        private void OnEventProcessingStart()
+        {
+            var handler = this.StartChangeProcessingEvent;
+
+            if (handler != null)
+            {
+                FileChangeEventArgs args = new FileChangeEventArgs();
+                handler(this, args);
+            }
+        }
+
+        /// <summary>
+        /// Signals that a file automatic update has finished.
+        /// </summary>
+        /// <param name="filename">The path of the file that was updated.</param>
+        /// <param name="success">Whether the update was a success or not.</param>
+        private void OnAutoUpdateComplete(string filename, bool success)
+        {
+            var handler = this.UpdateCompleteEvent;
+
+            if (handler != null)
+            {
+                FileUpdateCompleteEventArgs args = new FileUpdateCompleteEventArgs(filename, success);
+                handler(this, args);
+            }
+        }
+
+        /// <summary>
+        /// Signals that all file events within a file processing block have finished.
+        /// </summary>
+        /// <param name="fileTreeChange">Whether or not the structure of the tree has changed.</param>
+        private void OnFileProcessingFinished(bool fileTreeChange)
+        {
+            var handler = this.FileProcessingFinishedEvent;
+
+            if (handler != null)
+            {
+                var args = new FileProcessingFinishedEventArgs(fileTreeChange);
+                handler(this, args);
             }
         }
     }

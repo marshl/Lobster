@@ -46,11 +46,6 @@ namespace LobsterWpf
         private ObservableCollection<DatabaseConfigView> databaseConfigList;
 
         /// <summary>
-        /// The event listener that is used to populate new connections.
-        /// </summary>
-        private IModelEventListener eventListener;
-
-        /// <summary>
         /// Whether the user is currently editing a config file or not.
         /// </summary>
         private bool isEditingConfig = false;
@@ -63,14 +58,12 @@ namespace LobsterWpf
         /// <summary>
         /// Initializes a new instance of the <see cref="ConnectionListWindow"/> class.
         /// </summary>
-        /// <param name="listener">The event listener sed to create new connections.</param>
-        public ConnectionListWindow(IModelEventListener listener)
+        public ConnectionListWindow()
         {
             this.InitializeComponent();
 
             this.LoadDatabaseConnections();
             this.DataContext = this;
-            this.eventListener = listener;
         }
 
         /// <summary>
@@ -250,7 +243,7 @@ namespace LobsterWpf
 
             try
             {
-                this.DatabaseConnection = Model.SetDatabaseConnection(config, password, this.eventListener);
+                this.DatabaseConnection = Model.SetDatabaseConnection(config, password);
                 this.DialogResult = true;
                 this.Close();
             }

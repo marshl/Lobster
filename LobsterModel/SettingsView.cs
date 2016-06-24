@@ -96,6 +96,17 @@ namespace LobsterModel
         }
 
         /// <summary>
+        /// Gets the name of the configuration file that Lobster expects is in a CodeSource folder.
+        /// </summary>
+        public string DatabaseConfigFileName
+        {
+            get
+            {
+                return Settings.Default.DatabaseConfigFileName;
+            }
+        }
+
+        /// <summary>
         /// Applies changs to the settings to the user settings file.
         /// </summary>
         public void ApplyChanges()
