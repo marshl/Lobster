@@ -206,7 +206,7 @@ if not errorlevel 1 (
 )
 
 xcopy /s/e/y ""{source}"" ""{destination}""
-call ""{Assembly.GetExecutingAssembly().Location}""
+start ""{Assembly.GetExecutingAssembly().Location}""
 ";
 
             using (StreamWriter stream = new StreamWriter(scriptFilePath))
