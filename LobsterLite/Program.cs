@@ -1,52 +1,49 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Security;
-using LobsterModel;
-using Mono.Options;
-using System.Linq;
-using System.Threading;
-
+﻿//-----------------------------------------------------------------------
+// <copyright file="Program.cs" company="marshl">
+// Copyright 2016, Liam Marshall, marshl.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 namespace LobsterLite
 {
-    class Program
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Security;
+    using System.Threading;
+    using LobsterModel;
+    using Mono.Options;
+
+    /// <summary>
+    /// The main executable class
+    /// </summary>
+    public class Program
     {
-        static int Main(string[] args)
+        /// <summary>
+        /// The program entry point
+        /// </summary>
+        /// <param name="args">The command line arguments</param>
+        /// <returns>A nonzero value if an error occurred, otherwise 0</returns>
+        public static int Main(string[] args)
         {
             MessageLog messageLog = MessageLog.Initialise();
 
-            bool show_help = false;
-            string username = "XVIEWMGR";
-            int port = 1521;
-            //string password = null;
-            string hostname = null;
-            string sid = null;
-            string directory = null;
+            bool showHelp = false;
 
             var optionSet = new OptionSet()
             {
-                { "u|username=",
-                    "the username to log in as.\n" +
-                        "default xviewmgr.",
-                  (string v) => username = v },
-                { "r|port=",
-                    "the port to connect to\n" +
-                        "default 1521.",
-                  (int v) => port = v },
-                 /*{ "p|password=",
-                    "the password of the user\n",
-                  (string v) => password = v },*/
-                 { "o|host=",
-                    "the host to connect to\n",
-                  (string v) => hostname = v },
-                 { "s|sid=",
-                    "the Oracle Service ID\n",
-                  (string v) => sid = v },
-                { "d|directory=",
-                    "the CodeSource directory to compare with.\n",
-                  (string v) => directory = v },
                 { "h|help",  "show this message and exit",
-                  v => show_help = v != null },
+                  v => showHelp = v != null },
             };
 
             List<string> extra;
@@ -62,33 +59,33 @@ namespace LobsterLite
                 return 1;
             }
 
-            if (show_help)
+            if (showHelp)
             {
-                ShowHelp(optionSet);
+                Program.ShowHelp(optionSet);
                 return 0;
             }
 
-            string message;
             if (extra.Count < 2)
             {
                 Console.WriteLine("Not enough arguments.");
-                ShowHelp(optionSet);
+                Program.ShowHelp(optionSet);
                 return 1;
             }
             else if (extra.Count > 2)
             {
                 Console.WriteLine("Too many arguments");
+                Program.ShowHelp(optionSet);
+                return 1;
+            }
+
+            string codeSourcePath = extra?[0];
+            string password = extra?[1];
+            if (codeSourcePath == null || password == null)
+            {
                 ShowHelp(optionSet);
                 return 1;
             }
 
-            /*if (password == null || hostname == null || sid == null || directory == null)
-            {
-                ShowHelp(p);
-                return;
-            }*/
-            string codeSourcePath = extra[0];
-            string password = extra[1];
             SecureString securePassword = new SecureString();
             foreach (char c in password)
             {
@@ -110,6 +107,12 @@ namespace LobsterLite
             return result ? 0 : 1;
         }
 
+        /// <summary>
+        /// Executes the program with the given arguments
+        /// </summary>
+        /// <param name="codeSourcePath">The directory of the CodeSource folder to use.</param>
+        /// <param name="password">The password to connect to the database with.</param>
+        /// <returns>Returns true if no error occurred, otherwise false.</returns>
         private static bool Run(string codeSourcePath, SecureString password)
         {
             if (!Directory.Exists(codeSourcePath))
@@ -145,11 +148,7 @@ namespace LobsterLite
         /// <param name="optionSet">The option set to display the help for.</param>
         private static void ShowHelp(OptionSet optionSet)
         {
-            /*Console.WriteLine("Usage: greet [OPTIONS]+ message");
-            Console.WriteLine("Greet a list of individuals with an optional message.");
-            Console.WriteLine("If no message is specified, a generic greeting is used.");
-            Console.WriteLine();*/
-            Console.WriteLine("Options:");
+            Console.WriteLine("Usage: LobsterLite CodeSource password [OPTIONS]");
             optionSet.WriteOptionDescriptions(Console.Out);
         }
     }
