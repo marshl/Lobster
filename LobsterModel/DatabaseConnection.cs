@@ -67,11 +67,6 @@ namespace LobsterModel
         private DirectoryInfo codeSourceDirectory;
 
         /// <summary>
-        /// The directory of the clob types folder (wtihin the codeSourceDirectory)
-        /// </summary>
-        private DirectoryInfo clobTypeDirectory;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseConnection"/> class.
         /// </summary>
         /// <param name="config">The configuration file to base this connection off.</param>
@@ -83,6 +78,8 @@ namespace LobsterModel
             this.Password = password;
 
             bool result = Utils.DeserialiseXmlFileUsingSchema("LobsterSettings/MimeTypes.xml", null, out this.mimeTypeList);
+
+            this.ClobTypeDirectory = new DirectoryInfo(this.Config.ClobTypeDirectory);
 
             this.codeSourceDirectory = new DirectoryInfo(config.CodeSource);
             if (!this.codeSourceDirectory.Exists)
@@ -124,6 +121,11 @@ namespace LobsterModel
         /// The event for when a mime type is needed.
         /// </summary>
         public event EventHandler<MimeTypeRequestEventArgs> RequestMimeTypeEvent;
+
+        /// <summary>
+        /// The event for when a ClobType in the LobsterTypes directory has changed.
+        /// </summary>
+        public event EventHandler<FileSystemEventArgs> ClobTypeChangedEvent;
 
         /// <summary>
         /// Gets or sets the list of mime types that are used to translate from file names to database mnemonics and vice-sersa.
@@ -168,18 +170,21 @@ namespace LobsterModel
         public SecureString Password { get; }
 
         /// <summary>
+        /// Gets the directory of the clob types folder (wtihin the codeSourceDirectory)
+        /// </summary>
+        public DirectoryInfo ClobTypeDirectory { get; }
+
+        /// <summary>
         /// Loads each of the xml files in the ClobTypeDir (if they are valid).
         /// </summary>
         /// <param name="errors">Any errors that are raised during loading.</param>
         public void LoadClobTypes(ref List<ClobTypeLoadException> errors)
         {
             this.ClobDirectoryList = new List<ClobDirectory>();
-
-            this.clobTypeDirectory = new DirectoryInfo(this.Config.ClobTypeDirectory);
-            if (!this.clobTypeDirectory.Exists)
+            if (!this.ClobTypeDirectory.Exists)
             {
-                MessageLog.LogWarning($"The directory {clobTypeDirectory} could not be found when loading connection {this.Config.Name}");
-                errors.Add(new ClobTypeLoadException($"The directory {this.clobTypeDirectory} could not be found when loading connection {this.Config.Name}"));
+                MessageLog.LogWarning($"The directory {ClobTypeDirectory} could not be found when loading connection {this.Config.Name}");
+                errors.Add(new ClobTypeLoadException($"The directory {this.ClobTypeDirectory} could not be found when loading connection {this.Config.Name}"));
                 return;
             }
 
@@ -246,6 +251,17 @@ namespace LobsterModel
         }
 
         /// <summary>
+        /// Reloads the list of ClobTypes without destorying the connection.
+        /// </summary>
+        public void ReloadClobTypes()
+        {
+            List<ClobTypeLoadException> errors = new List<ClobTypeLoadException>();
+            List<FileListRetrievalException> fileLoadErrors = new List<FileListRetrievalException>();
+            this.LoadClobTypes(ref errors);
+            Model.GetDatabaseFileLists(this, ref fileLoadErrors);
+        }
+
+        /// <summary>
         /// Disposes this object.
         /// </summary>
         public void Dispose()
@@ -292,7 +308,18 @@ namespace LobsterModel
         /// <param name="args">The arguments for the event.</param>
         private void OnClobTypeChangeEvent(object sender, FileSystemEventArgs args)
         {
-            // TODO: Stuff
+            lock (this.fileEventQueue)
+            {
+                lock (this.fileEventProcessingSemaphore)
+                {
+                    var handler = this.ClobTypeChangedEvent;
+
+                    if (handler != null)
+                    {
+                        handler(this, args);
+                    }
+                }
+            }
         }
 
         /// <summary>

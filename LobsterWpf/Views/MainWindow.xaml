@@ -23,6 +23,7 @@
         <MenuItem Header="_Connection" IsEnabled="{Binding Path=IsEnabled, FallbackValue=false}">
           <MenuItem Header="_Update Files Automatically" IsCheckable="True" IsChecked="{Binding Path=IsAutoUpdateEnabled, FallbackValue=True}" IsEnabled="{Binding Path=Connection.Config.AllowAutomaticUpdates}"/>
           <MenuItem Header="_Requery Database" Click="RequeryDatabaseMenuItem_Click"/>
+          <MenuItem Header="Reload _Lobster Types" Click="ReloadLobsterTypesMenuItem_Click"/>
         </MenuItem>
         <MenuItem Header="_View">
           <MenuItem Header="_Options" Click="OptionsMenuItem_Click"/>
@@ -71,7 +72,7 @@
             <RowDefinition Height="35"/>
             <RowDefinition Height="35"/>
           </Grid.RowDefinitions>
-          <TreeView Grid.Row="0" Name="localFileTreeView" ItemsSource="{Binding RootFile.Children}" SelectedItemChanged="LocalFileTreeView_SelectedItemChanged" Background="{StaticResource BackgroundKey}">
+          <TreeView Grid.Row="0" Name="localFileTreeView" SelectedItemChanged="LocalFileTreeView_SelectedItemChanged" Background="{StaticResource BackgroundKey}">
             <TreeView.ItemContainerStyle>
               <Style TargetType="{x:Type TreeViewItem}">
                 <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>

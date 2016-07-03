@@ -129,6 +129,7 @@ namespace LobsterWpf
                 this.connectionView.Connection.RequestTableEvent += this.PromptForTable;
                 this.connectionView.Connection.StartChangeProcessingEvent += this.OnEventProcessingStart;
                 this.connectionView.Connection.UpdateCompleteEvent += this.OnAutoUpdateComplete;
+                this.connectionView.Connection.ClobTypeChangedEvent += this.ReloadLobsterTypesMenuItem_Click;
             }
         }
 
@@ -241,6 +242,8 @@ namespace LobsterWpf
         {
             if (this.clobTypeListBox.SelectedIndex == -1)
             {
+                this.connectionView.PopulateFileTreeForClobDirectory(null);
+                this.localFileTreeView.ItemsSource = null;
                 return;
             }
 
@@ -259,6 +262,8 @@ namespace LobsterWpf
             {
                 this.connectionView.RootFile.RefreshFileInformation(true);
             }
+
+            this.localFileTreeView.ItemsSource = this.connectionView.RootFile.Children;
         }
 
         /// <summary>
@@ -570,7 +575,7 @@ namespace LobsterWpf
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">The event arguments.</param>
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void Window_Closing(object sender, CancelEventArgs e)
         {
             if (MessageListWindow.Instance != null)
             {
@@ -685,6 +690,22 @@ namespace LobsterWpf
             {
                 this.connectionView.IsEnabled = true;
                 this.RepopulateFileListView(args.FileTreeChange);
+            });
+        }
+
+        /// <summary>
+        /// The handler for when the Reload Lobster Types menu item is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void ReloadLobsterTypesMenuItem_Click(object sender, EventArgs e)
+        {
+            this.Dispatcher.Invoke((MethodInvoker)delegate
+            {
+                this.connectionView.ReloadClobTypes();
+                this.connectionView.SelectedFileNode = null;
+                this.clobTypeListBox.SelectedIndex = -1;
+                this.RepopulateFileListView(true);
             });
         }
     }

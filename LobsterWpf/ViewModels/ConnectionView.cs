@@ -173,6 +173,11 @@ namespace LobsterWpf
         {
             if (clobDir == null)
             {
+                if (this.RootFile != null)
+                {
+                    this.RootFile.Children = null;
+                }
+
                 this.RootFile = null;
                 return;
             }
@@ -207,6 +212,20 @@ namespace LobsterWpf
             }
 
             this.NotifyPropertyChanged("RootFile");
+        }
+
+        /// <summary>
+        /// Reloads the ClobTypes for the current connection.
+        /// </summary>
+        public void ReloadClobTypes()
+        {
+            this.Connection.ReloadClobTypes();
+            this.ClobDirectories.Clear();
+
+            foreach (ClobDirectory clobDir in this.Connection.ClobDirectoryList)
+            {
+                this.ClobDirectories.Add(new ClobDirectoryView(this.Connection, clobDir));
+            }
         }
 
         /// <summary>
