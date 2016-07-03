@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LobsterWpf"
         mc:Ignorable="d"
-        Title="Messages" Height="300" Width="600" Background="{StaticResource BackgroundKey}" Icon="Resources/Images/cartoon-lobster.ico" Closed="Window_Closed">
+        Title="Messages" Height="300" Width="600" Background="{StaticResource BackgroundKey}" Icon="../Resources/Images/cartoon-lobster.ico" Closed="Window_Closed">
   <Grid>
     <ListBox Grid.Column="0" Grid.Row="0" ItemsSource="{Binding MessageList}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
       <ListBox.ItemContainerStyle>

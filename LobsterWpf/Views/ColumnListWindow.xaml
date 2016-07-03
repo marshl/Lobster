@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LobsterWpf"
         mc:Ignorable="d"
-        Title="Columns" Height="300" Width="400" MinWidth="300" MinHeight="300" ShowInTaskbar="False" Background="{StaticResource BackgroundKey}" Icon="Resources/Images/cartoon-lobster.ico" >
+        Title="Columns" Height="300" Width="400" MinWidth="300" MinHeight="300" ShowInTaskbar="False" Background="{StaticResource BackgroundKey}" Icon="../Resources/Images/cartoon-lobster.ico" >
   <Grid>
     <Grid.RowDefinitions>
       <RowDefinition Height="*"/>

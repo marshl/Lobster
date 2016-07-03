@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LobsterWpf"
         mc:Ignorable="d"
-        Title="EditTableWindow" Height="659.935" Width="373.799" MinHeight="325" MinWidth="300" ShowInTaskbar="False" Background="{StaticResource BackgroundKey}" Icon="Resources/Images/cartoon-lobster.ico" >
+        Title="EditTableWindow" Height="659.935" Width="373.799" MinHeight="325" MinWidth="300" ShowInTaskbar="False" Background="{StaticResource BackgroundKey}" Icon="../Resources/Images/cartoon-lobster.ico" >
   <ScrollViewer>
     <Grid>
       <Grid.ColumnDefinitions>

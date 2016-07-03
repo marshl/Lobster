@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LobsterWpf"
         mc:Ignorable="d"
-        Title="DownloadUpdateWindow" Height="125" Width="300" Background="{StaticResource BackgroundKey}" ShowInTaskbar="False" Icon="Resources/Images/cartoon-lobster.ico" ResizeMode="NoResize" WindowStyle="None" WindowStartupLocation="CenterOwner">
+        Title="DownloadUpdateWindow" Height="125" Width="300" Background="{StaticResource BackgroundKey}" ShowInTaskbar="False" Icon="../Resources/Images/cartoon-lobster.ico" ResizeMode="NoResize" WindowStyle="None" WindowStartupLocation="CenterOwner">
 
   <StackPanel Orientation="Vertical">
     <Label x:Name="DownloadProgressLabel" HorizontalAlignment="Left" Content="Download Pending..." VerticalAlignment="Center" Margin="10"/>
