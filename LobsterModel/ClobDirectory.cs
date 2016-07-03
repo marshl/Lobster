@@ -47,6 +47,11 @@ namespace LobsterModel
             this.ClobType = clobType;
             this.Directory = new DirectoryInfo(Path.Combine(codeSourceDirectory.FullName, this.ClobType.Directory));
 
+            if (!this.Directory.Exists)
+            {
+                throw new ClobTypeLoadException($"The ClobDirectory {this.Directory.FullName} could not be found.");
+            }
+
             try
             {
                 this.fileWatcher = new FileSystemWatcher(this.Directory.FullName);
