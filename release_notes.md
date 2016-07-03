@@ -1,3 +1,16 @@
+##Release 2.5.0.0
+#####Released: 03-07-2016
+
+####Features
+ - Added a command line interface (auto-updates only);
+ - Implemented Hot Reloading of Lobster Types (if a change is detected in the LobsterTypes directory);
+  - Lobster Types can now also be reloaded through a menu item;
+ 
+####Bug Fixes
+ - Fixed #97: Crash on ClobType Select;
+ - Changed the auto updater to not wait on the new instance of Lobster to exit before exiting itself;
+ 
+
 ##Release 2.4.2.0
 #####Released: 01-06-2016
 
