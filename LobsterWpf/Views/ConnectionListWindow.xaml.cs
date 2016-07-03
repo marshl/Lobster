@@ -249,7 +249,7 @@ namespace LobsterWpf
             }
             catch (SetConnectionException ex)
             {
-                MessageBox.Show($"An error occurred when attempting to connect to the database: \n{ex}");
+                MessageBox.Show($"{ex.Message}");
             }
         }
 

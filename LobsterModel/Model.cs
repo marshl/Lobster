@@ -201,7 +201,7 @@ namespace LobsterModel
             }
             catch (ConnectToDatabaseException ex)
             {
-                throw new SetConnectionException("A test connection could not be made to the database", ex);
+                throw new SetConnectionException($"A connection could not be made to the database: {ex.Message}", ex);
             }
 
             if (config.ClobTypeDirectory == null || !Directory.Exists(config.ClobTypeDirectory))
@@ -486,8 +486,8 @@ namespace LobsterModel
             }
             catch (Exception e) when (e is InvalidOperationException || e is OracleException || e is ArgumentException || e is SocketException)
             {
-                MessageLog.LogError($"Connection to Oracle failed: {e}");
-                throw new ConnectToDatabaseException("Failed to open connection.", e);
+                MessageLog.LogError($"Connection to Oracle failed: {e.Message}");
+                throw new ConnectToDatabaseException($"Failed to open connection: {e.Message}", e);
             }
         }
 
