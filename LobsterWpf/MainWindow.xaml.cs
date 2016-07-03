@@ -283,6 +283,7 @@ namespace LobsterWpf
                 return;
             }
 
+            var clobDirView = (ClobDirectoryView)this.clobTypeListBox.SelectedItem;
             string filename = this.connectionView.SelectedFileNode.FilePath;
 
             FileInfo fi = new FileInfo(filename);
@@ -301,7 +302,7 @@ namespace LobsterWpf
 
             try
             {
-                Model.SendUpdateClobMessage(this.connectionView.Connection, filename);
+                Model.SendUpdateClobMessage(this.connectionView.Connection, clobDirView.BaseClobDirectory, filename);
             }
             catch (FileUpdateException)
             {
@@ -388,11 +389,12 @@ namespace LobsterWpf
         {
             if (this.connectionView.SelectedFileNode != null)
             {
+                var clobDirView = (ClobDirectoryView)this.clobTypeListBox.SelectedItem;
                 string filename = this.connectionView.SelectedFileNode.FilePath;
                 try
                 {
                     DBClobFile databaseFile = null;
-                    bool result = Model.SendInsertClobMessage(this.connectionView.Connection, filename, ref databaseFile);
+                    bool result = Model.SendInsertClobMessage(this.connectionView.Connection, clobDirView.BaseClobDirectory, filename, ref databaseFile);
 
                     if (result)
                     {
@@ -449,10 +451,10 @@ namespace LobsterWpf
         private void PushBackupButton_Click(object sender, EventArgs e)
         {
             FileBackup fileBackup = ((FrameworkElement)sender).DataContext as FileBackup;
-
+            var clobDirView = (ClobDirectoryView)this.clobTypeListBox.SelectedItem;
             try
             {
-                Model.UpdateClobWithExternalFile(this.connectionView.Connection, fileBackup.OriginalFilename, fileBackup.BackupFilename);
+                Model.UpdateClobWithExternalFile(this.connectionView.Connection, clobDirView.BaseClobDirectory, fileBackup.OriginalFilename, fileBackup.BackupFilename);
             }
             catch (FileUpdateException)
             {

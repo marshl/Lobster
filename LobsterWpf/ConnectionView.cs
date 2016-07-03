@@ -177,23 +177,21 @@ namespace LobsterWpf
                 return;
             }
 
-            DirectoryInfo rootDirInfo = new DirectoryInfo(clobDir.GetFullPath(this.Connection));
-            if (!rootDirInfo.Exists)
+            if (!clobDir.directory.Exists)
             {
                 return;
             }
 
             if (this.CurrentDisplayMode == DisplayMode.LocalFiles)
             {
-                this.RootFile = new LocalFileView(connection: this, filename: rootDirInfo.FullName, recurse: clobDir.ClobType.IncludeSubDirectories);
+                this.RootFile = new LocalFileView(this, clobDir, clobDir.directory.FullName, clobDir.ClobType.IncludeSubDirectories);
             }
             else if (this.CurrentDisplayMode == DisplayMode.DatabaseFiles)
             {
                 this.RootFile = new DatabaseFileView(this, null, null);
                 this.RootFile.Children = new ObservableCollection<FileNodeView>();
 
-                DirectoryInfo dirInfo = new DirectoryInfo(clobDir.GetFullPath(this.Connection));
-                FileInfo[] files = dirInfo.GetFiles(".", SearchOption.AllDirectories);
+                FileInfo[] files = clobDir.directory.GetFiles(".", SearchOption.AllDirectories);
 
                 foreach (DBClobFile df in clobDir.DatabaseFileList)
                 {

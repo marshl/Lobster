@@ -70,12 +70,12 @@ namespace LobsterModel
         /// <param name="databaseConnection">The connection to update with.</param>
         /// <param name="targetFilename">The file to update the database record for.</param>
         /// <param name="sourceFilename">The file to get the data fro the update the record with.</param>
-        public static void UpdateClobWithExternalFile(DatabaseConnection databaseConnection, string targetFilename, string sourceFilename)
+        public static void UpdateClobWithExternalFile(DatabaseConnection databaseConnection, ClobDirectory clobDir, string targetFilename, string sourceFilename)
         {
             try
             {
                 OracleConnection oracleConnection = Model.OpenConnection(databaseConnection.Config, databaseConnection.Password);
-                ClobDirectory clobDir = databaseConnection.GetClobDirectoryForFile(targetFilename);
+                //ClobDirectory clobDir = databaseConnection.GetClobDirectoryForFile(targetFilename);
                 DBClobFile clobFile = clobDir?.GetDatabaseFileForFullpath(targetFilename);
 
                 if (Settings.Default.BackupEnabled)
@@ -97,9 +97,9 @@ namespace LobsterModel
         /// </summary>
         /// <param name="databaseConnection">The connection to update with.</param>
         /// <param name="fullpath">The file to update.</param>
-        public static void SendUpdateClobMessage(DatabaseConnection databaseConnection, string fullpath)
+        public static void SendUpdateClobMessage(DatabaseConnection databaseConnection, ClobDirectory clobDir, string fullpath)
         {
-            Model.UpdateClobWithExternalFile(databaseConnection, fullpath, fullpath);
+            Model.UpdateClobWithExternalFile(databaseConnection, clobDir, fullpath, fullpath);
         }
 
         /// <summary>
@@ -110,9 +110,9 @@ namespace LobsterModel
         /// <param name="fullpath">The path of the file to insert.</param>
         /// <param name="returnFile">The database file that represents what was just inserted.</param>
         /// <returns>A value indicating whether the insert was followed through.</returns>
-        public static bool SendInsertClobMessage(DatabaseConnection databaseConnection, string fullpath, ref DBClobFile returnFile)
+        public static bool SendInsertClobMessage(DatabaseConnection databaseConnection, ClobDirectory clobDir, string fullpath, ref DBClobFile returnFile)
         {
-            ClobDirectory clobDir = databaseConnection.GetClobDirectoryForFile(fullpath);
+            //ClobDirectory clobDir = databaseConnection.GetClobDirectoryForFile(fullpath);
 
             Table table = null;
             if (clobDir.ClobType.Tables.Count > 1)
@@ -445,7 +445,7 @@ namespace LobsterModel
 
             foreach (ClobDirectory clobDir in databaseConnection.ClobDirectoryList)
             {
-                if (!Directory.Exists(clobDir.GetFullPath(databaseConnection)))
+                if (!clobDir.directory.Exists)
                 {
                     continue;
                 }

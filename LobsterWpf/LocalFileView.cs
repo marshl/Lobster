@@ -41,7 +41,7 @@ namespace LobsterWpf
         /// <param name="connection">The parent connection of this file view.</param>
         /// <param name="filename">The full path of the file this view will represent.</param>
         /// <param name="recurse">Whether to include sub directories or not.</param>
-        public LocalFileView(ConnectionView connection, string filename, bool recurse) : base(connection)
+        public LocalFileView(ConnectionView connection, ClobDirectory clobDir, string filename, bool recurse) : base(connection)
         {
             this.FilePath = filename;
             this.DisplayName = Path.GetFileName(this.FilePath);
@@ -57,7 +57,7 @@ namespace LobsterWpf
                 {
                     foreach (DirectoryInfo subDir in dirInfo.GetDirectories())
                     {
-                        FileNodeView node = new LocalFileView(ParentConnectionView, subDir.FullName, recurse);
+                        FileNodeView node = new LocalFileView(ParentConnectionView, clobDir, subDir.FullName, recurse);
                         this.Children.Add(node);
                     }
                 }
@@ -66,7 +66,7 @@ namespace LobsterWpf
                 {
                     if (connection.ShowReadOnlyFiles || !file.IsReadOnly)
                     {
-                        FileNodeView node = new LocalFileView(this.ParentConnectionView, file.FullName, recurse);
+                        FileNodeView node = new LocalFileView(this.ParentConnectionView, clobDir, file.FullName, recurse);
                         this.Children.Add(node);
                     }
                 }
@@ -78,7 +78,7 @@ namespace LobsterWpf
                 // Not a directory
                 try
                 {
-                    ClobDirectory clobDir = this.ParentConnectionView.Connection.GetClobDirectoryForFile(this.FilePath);
+                    //ClobDirectory clobDir = this.ParentConnectionView.Connection.GetClobDirectoryForFile(this.FilePath);
                     this.DatabaseFile = clobDir.GetDatabaseFileForFullpath(this.FilePath);
                 }
                 catch (ClobFileLookupException)

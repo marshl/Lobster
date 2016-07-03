@@ -27,19 +27,72 @@ namespace LobsterModel
     using System.Collections.Generic;
     using System.IO;
 
+
     /// <summary>
     /// A ClobDirectory maps to a single ClobType, and represents the directory on the file system where the files for that ClobType are found.
     /// </summary>
     public class ClobDirectory
     {
         /// <summary>
+        /// The event for when a mime type is needed.
+        /// </summary>
+        public event EventHandler<ClobDirectoryFileChangeEventArgs> FileChangeEvent;
+
+
+        private FileSystemWatcher fileWatcher;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ClobDirectory"/> class
         /// </summary>
         /// <param name="clobType">The ClobType that points to this directory.</param>
-        public ClobDirectory(ClobType clobType)
+        public ClobDirectory(DirectoryInfo codeSourceDirectory, ClobType clobType)
         {
             this.ClobType = clobType;
+            this.directory = new DirectoryInfo(Path.Combine(codeSourceDirectory.FullName, this.ClobType.Directory));
+
+            try
+            {
+                this.fileWatcher = new FileSystemWatcher(this.directory.FullName);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new ClobTypeLoadException("An error occurred when creating the FileSystemWatcher", ex);
+            }
+
+            this.fileWatcher.IncludeSubdirectories = true;
+            this.fileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.CreationTime | NotifyFilters.Attributes;
+            this.fileWatcher.Changed += new FileSystemEventHandler(this.OnFileSystemEvent);
+            this.fileWatcher.Created += new FileSystemEventHandler(this.OnFileSystemEvent);
+            this.fileWatcher.Deleted += new FileSystemEventHandler(this.OnFileSystemEvent);
+            this.fileWatcher.Renamed += new RenamedEventHandler(this.OnFileSystemEvent);
+
+            this.fileWatcher.EnableRaisingEvents = true;
         }
+
+        public class ClobDirectoryFileChangeEventArgs : EventArgs
+        {
+            public ClobDirectoryFileChangeEventArgs(ClobDirectory clobDir, FileSystemEventArgs args)
+            {
+                this.ClobDir = clobDir;
+                this.Args = args;
+            }
+
+            public ClobDirectory ClobDir { get; }
+            public FileSystemEventArgs Args { get; }
+        }
+
+        private void OnFileSystemEvent(object sender, FileSystemEventArgs eventArgs)
+        {
+            var handler = this.FileChangeEvent;
+
+            if (handler != null)
+            {
+                var args = new ClobDirectoryFileChangeEventArgs(this, eventArgs);
+                handler(this, args);
+            }
+        }
+
+        public DirectoryInfo directory { get; }
 
         /// <summary>
         /// Gets the ClobType that controls this directory
@@ -50,18 +103,6 @@ namespace LobsterModel
         /// Gets or sets the list of files that Lobster has found on the database for this directory
         /// </summary>
         public List<DBClobFile> DatabaseFileList { get; set; }
-
-        /// <summary>
-        /// Gets all editable files within this directory, and stores them in the given list.
-        /// </summary>
-        /// <param name="connection">The connection to get the unlocked files for.</param>
-        /// <param name="workingFileList">The list of files to populate.</param>
-        public void GetWorkingFiles(DatabaseConnection connection, ref List<string> workingFileList)
-        {
-            string directoryPath = this.GetFullPath(connection);
-            string[] files = Directory.GetFiles(directoryPath, ".", this.ClobType.IncludeSubDirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
-            workingFileList.AddRange(files);
-        }
 
         /// <summary>
         /// Finds and returns the database file that matches the given local file.
@@ -80,20 +121,9 @@ namespace LobsterModel
         /// <param name="connection">The connection parent of this directory.</param>
         /// <param name="fullpath">The file to test for.</param>
         /// <returns>Whether the file is in this directory or not.</returns>
-        public bool IsLocalFileInDirectory(DatabaseConnection connection, string fullpath)
+        public bool IsLocalFileInDirectory(string fullpath)
         {
-            DirectoryInfo dirInfo = new DirectoryInfo(this.GetFullPath(connection));
-            return Array.Exists(dirInfo.GetFiles(".", SearchOption.AllDirectories), x => x.FullName.Equals(fullpath, StringComparison.OrdinalIgnoreCase));
-        }
-
-        /// <summary>
-        /// Gets the full path of the directory governed by this type.
-        /// </summary>
-        /// <param name="connection">The parent connection of this clob type.</param>
-        /// <returns>The full path of the directory.</returns>
-        public string GetFullPath(DatabaseConnection connection)
-        {
-            return Path.GetFullPath(Path.Combine(connection.Config.CodeSource, this.ClobType.Directory));
+            return Array.Exists(this.directory.GetFiles(".", SearchOption.AllDirectories), x => x.FullName.Equals(fullpath, StringComparison.OrdinalIgnoreCase));
         }
     }
 }
