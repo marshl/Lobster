@@ -39,7 +39,7 @@ namespace LobsterWpf
         public ClobDirectoryView(DatabaseConnection connection, ClobDirectory clobDirectory)
         {
             this.BaseClobDirectory = clobDirectory;
-            this.DirectoryExists = clobDirectory.directory.Exists;
+            this.DirectoryExists = clobDirectory.Directory.Exists;
         }
 
         /// <summary>

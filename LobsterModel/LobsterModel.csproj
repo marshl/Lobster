@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="BackupLog.cs" />
     <Compile Include="ClobDirectory.cs" />
+    <Compile Include="ClobDirectoryFileChangeEventArgs.cs" />
     <Compile Include="ClobFileLookupException.cs" />
     <Compile Include="ClobType.cs" />
     <Compile Include="Column.cs" />

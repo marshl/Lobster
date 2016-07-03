@@ -27,32 +27,29 @@ namespace LobsterModel
     using System.Collections.Generic;
     using System.IO;
 
-
     /// <summary>
     /// A ClobDirectory maps to a single ClobType, and represents the directory on the file system where the files for that ClobType are found.
     /// </summary>
     public class ClobDirectory
     {
         /// <summary>
-        /// The event for when a mime type is needed.
+        /// The file system event watcher for changes in this directory.
         /// </summary>
-        public event EventHandler<ClobDirectoryFileChangeEventArgs> FileChangeEvent;
-
-
         private FileSystemWatcher fileWatcher;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ClobDirectory"/> class
         /// </summary>
+        /// <param name="codeSourceDirectory">The directory that the code source is located in.</param>
         /// <param name="clobType">The ClobType that points to this directory.</param>
         public ClobDirectory(DirectoryInfo codeSourceDirectory, ClobType clobType)
         {
             this.ClobType = clobType;
-            this.directory = new DirectoryInfo(Path.Combine(codeSourceDirectory.FullName, this.ClobType.Directory));
+            this.Directory = new DirectoryInfo(Path.Combine(codeSourceDirectory.FullName, this.ClobType.Directory));
 
             try
             {
-                this.fileWatcher = new FileSystemWatcher(this.directory.FullName);
+                this.fileWatcher = new FileSystemWatcher(this.Directory.FullName);
             }
             catch (ArgumentException ex)
             {
@@ -69,30 +66,15 @@ namespace LobsterModel
             this.fileWatcher.EnableRaisingEvents = true;
         }
 
-        public class ClobDirectoryFileChangeEventArgs : EventArgs
-        {
-            public ClobDirectoryFileChangeEventArgs(ClobDirectory clobDir, FileSystemEventArgs args)
-            {
-                this.ClobDir = clobDir;
-                this.Args = args;
-            }
+        /// <summary>
+        /// The event for when a mime type is needed.
+        /// </summary>
+        public event EventHandler<ClobDirectoryFileChangeEventArgs> FileChangeEvent;
 
-            public ClobDirectory ClobDir { get; }
-            public FileSystemEventArgs Args { get; }
-        }
-
-        private void OnFileSystemEvent(object sender, FileSystemEventArgs eventArgs)
-        {
-            var handler = this.FileChangeEvent;
-
-            if (handler != null)
-            {
-                var args = new ClobDirectoryFileChangeEventArgs(this, eventArgs);
-                handler(this, args);
-            }
-        }
-
-        public DirectoryInfo directory { get; }
+        /// <summary>
+        /// Gets the directory informaton for this directory.
+        /// </summary>
+        public DirectoryInfo Directory { get; }
 
         /// <summary>
         /// Gets the ClobType that controls this directory
@@ -118,12 +100,28 @@ namespace LobsterModel
         /// <summary>
         /// Returns whether the given file exists within the file system directory for this ClobDirectory.
         /// </summary>
-        /// <param name="connection">The connection parent of this directory.</param>
         /// <param name="fullpath">The file to test for.</param>
         /// <returns>Whether the file is in this directory or not.</returns>
         public bool IsLocalFileInDirectory(string fullpath)
         {
-            return Array.Exists(this.directory.GetFiles(".", SearchOption.AllDirectories), x => x.FullName.Equals(fullpath, StringComparison.OrdinalIgnoreCase));
+            SearchOption so = this.ClobType.IncludeSubDirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
+            return Array.Exists(this.Directory.GetFiles(".", so), x => x.FullName.Equals(fullpath, StringComparison.OrdinalIgnoreCase));
+        }
+
+        /// <summary>
+        /// The event listener for the file system watcher.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="eventArgs">The file system event arguments.</param>
+        private void OnFileSystemEvent(object sender, FileSystemEventArgs eventArgs)
+        {
+            var handler = this.FileChangeEvent;
+
+            if (handler != null)
+            {
+                var args = new ClobDirectoryFileChangeEventArgs(this, eventArgs);
+                handler(this, args);
+            }
         }
     }
 }

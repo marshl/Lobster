@@ -36,11 +36,8 @@ namespace LobsterModel
     public class DatabaseConnection : IDisposable
     {
         /// <summary>
-        /// The file watcher for the entire CodeSource directory. 
-        /// FIles that are not covered by any ClobTypes filtered out when processed.
+        /// The file watcher for the directory where the clob types are stored.
         /// </summary>
-        //private FileSystemWatcher fileWatcher;
-
         private FileSystemWatcher clobTypeFileWatcher;
 
         /// <summary>
@@ -65,6 +62,16 @@ namespace LobsterModel
         private MimeTypeList mimeTypeList;
 
         /// <summary>
+        /// The directory of the CodeSource folder.
+        /// </summary>
+        private DirectoryInfo codeSourceDirectory;
+
+        /// <summary>
+        /// The directory of the clob types folder (wtihin the codeSourceDirectory)
+        /// </summary>
+        private DirectoryInfo clobTypeDirectory;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseConnection"/> class.
         /// </summary>
         /// <param name="config">The configuration file to base this connection off.</param>
@@ -77,10 +84,10 @@ namespace LobsterModel
 
             bool result = Utils.DeserialiseXmlFileUsingSchema("LobsterSettings/MimeTypes.xml", null, out this.mimeTypeList);
 
-            this.CodeSourceDirectory = new DirectoryInfo(config.CodeSource);
-            if (!this.CodeSourceDirectory.Exists)
+            this.codeSourceDirectory = new DirectoryInfo(config.CodeSource);
+            if (!this.codeSourceDirectory.Exists)
             {
-                throw new SetConnectionException($"Could not find CodeSource directory: {this.CodeSourceDirectory.FullName}");
+                throw new SetConnectionException($"Could not find CodeSource directory: {this.codeSourceDirectory.FullName}");
             }
 
             this.clobTypeFileWatcher = new FileSystemWatcher(this.Config.ClobTypeDirectory);
@@ -91,11 +98,6 @@ namespace LobsterModel
             this.clobTypeFileWatcher.Renamed += new RenamedEventHandler(this.OnClobTypeChangeEvent);
 
             this.clobTypeFileWatcher.EnableRaisingEvents = true;
-        }
-
-        private void OnClobTypeChangeEvent(object sender, FileSystemEventArgs args)
-        {
-
         }
 
         /// <summary>
@@ -165,10 +167,6 @@ namespace LobsterModel
         /// </summary>
         public SecureString Password { get; }
 
-        private DirectoryInfo CodeSourceDirectory { get; set; }
-
-        private DirectoryInfo ClobTypeDirectory { get; set; }
-
         /// <summary>
         /// Loads each of the xml files in the ClobTypeDir (if they are valid).
         /// </summary>
@@ -177,11 +175,11 @@ namespace LobsterModel
         {
             this.ClobDirectoryList = new List<ClobDirectory>();
 
-            this.ClobTypeDirectory = new DirectoryInfo(this.Config.ClobTypeDirectory);
-            if (!ClobTypeDirectory.Exists)
+            this.clobTypeDirectory = new DirectoryInfo(this.Config.ClobTypeDirectory);
+            if (!this.clobTypeDirectory.Exists)
             {
-                MessageLog.LogWarning($"The directory {ClobTypeDirectory} could not be found when loading connection {this.Config.Name}");
-                errors.Add(new ClobTypeLoadException($"The directory {ClobTypeDirectory} could not be found when loading connection {this.Config.Name}"));
+                MessageLog.LogWarning($"The directory {clobTypeDirectory} could not be found when loading connection {this.Config.Name}");
+                errors.Add(new ClobTypeLoadException($"The directory {this.clobTypeDirectory} could not be found when loading connection {this.Config.Name}"));
                 return;
             }
 
@@ -192,21 +190,15 @@ namespace LobsterModel
             {
                 try
                 {
-                    ClobDirectory clobDir = new ClobDirectory(this.CodeSourceDirectory, clobType);
-                    clobDir.FileChangeEvent += OnClobDirectoryFileChangeEvent;
+                    ClobDirectory clobDir = new ClobDirectory(this.codeSourceDirectory, clobType);
+                    clobDir.FileChangeEvent += this.OnClobDirectoryFileChangeEvent;
                     this.ClobDirectoryList.Add(clobDir);
                 }
                 catch (ClobTypeLoadException ex)
                 {
-                    MessageLog.LogError($"An error occurred when loading the ClobType {clobType.Directory}");
+                    MessageLog.LogError($"An error occurred when loading the ClobType {clobType.Directory}: {ex}");
                 }
             }
-        }
-
-        private void OnClobDirectoryFileChangeEvent(object sender, ClobDirectory.ClobDirectoryFileChangeEventArgs e)
-        {
-            Thread thread = new Thread(() => this.EnqueueFileEvent(e.ClobDir, e.Args));
-            thread.Start();
         }
 
         /// <summary>
@@ -272,6 +264,7 @@ namespace LobsterModel
             {
                 return;
             }
+
             if (this.clobTypeFileWatcher != null)
             {
                 this.clobTypeFileWatcher.Dispose();
@@ -293,9 +286,30 @@ namespace LobsterModel
         }
 
         /// <summary>
-        /// Takes a single file event, and pushes it onto the event stack, before processing that event.
+        /// The listener for when a file is changed within the clob type directory.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
+        /// <param name="args">The arguments for the event.</param>
+        private void OnClobTypeChangeEvent(object sender, FileSystemEventArgs args)
+        {
+            // TODO: Stuff
+        }
+
+        /// <summary>
+        /// The listener when a child ClobDirectory raises a file change event.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="args">The event arguments.</param>
+        private void OnClobDirectoryFileChangeEvent(object sender, ClobDirectoryFileChangeEventArgs args)
+        {
+            Thread thread = new Thread(() => this.EnqueueFileEvent(args.ClobDir, args.Args));
+            thread.Start();
+        }
+
+        /// <summary>
+        /// Takes a single file event, and pushes it onto the event stack, before processing that event.
+        /// </summary>
+        /// <param name="clobDirectory">The directory from where the event originated.</param>
         /// <param name="args">The event arguments.</param>
         private void EnqueueFileEvent(ClobDirectory clobDirectory, FileSystemEventArgs args)
         {
@@ -348,6 +362,7 @@ namespace LobsterModel
         /// <summary>
         /// Processes a single file event. Sending a file update to the database if necessary.
         /// </summary>
+        /// <param name="clobDirectory">The clob directory that the event was raised from.</param>
         /// <param name="e">The event to process.</param>
         private void ProcessFileEvent(ClobDirectory clobDirectory, FileSystemEventArgs e)
         {
@@ -386,7 +401,7 @@ namespace LobsterModel
             }
 
             // "IncludeSubDirectories" check
-            if (!clobDirectory.ClobType.IncludeSubDirectories && fileInfo.Directory.FullName != clobDirectory.directory.FullName)
+            if (!clobDirectory.ClobType.IncludeSubDirectories && fileInfo.Directory.FullName != clobDirectory.Directory.FullName)
             {
                 this.LogFileEvent("The ClobType does not include sub directories, and the file will be skipped.");
                 return;

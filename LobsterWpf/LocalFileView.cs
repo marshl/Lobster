@@ -39,6 +39,7 @@ namespace LobsterWpf
         /// Initializes a new instance of the <see cref="LocalFileView"/> class.
         /// </summary>
         /// <param name="connection">The parent connection of this file view.</param>
+        /// <param name="clobDir">The directory from which this file originated.</param>
         /// <param name="filename">The full path of the file this view will represent.</param>
         /// <param name="recurse">Whether to include sub directories or not.</param>
         public LocalFileView(ConnectionView connection, ClobDirectory clobDir, string filename, bool recurse) : base(connection)
@@ -78,7 +79,6 @@ namespace LobsterWpf
                 // Not a directory
                 try
                 {
-                    //ClobDirectory clobDir = this.ParentConnectionView.Connection.GetClobDirectoryForFile(this.FilePath);
                     this.DatabaseFile = clobDir.GetDatabaseFileForFullpath(this.FilePath);
                 }
                 catch (ClobFileLookupException)
