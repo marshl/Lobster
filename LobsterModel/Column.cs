@@ -24,7 +24,6 @@
 //-----------------------------------------------------------------------
 namespace LobsterModel
 {
-    using System;
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.Diagnostics;
@@ -33,7 +32,7 @@ namespace LobsterModel
     /// <summary>
     /// A ClobType table contains a number of columns that are required to use the table. Each column has a different purpose describing how it affects the table.
     /// </summary>
-    public class Column : ICloneable
+    public class Column
     {
         /// <summary>
         /// The purpose defines how the column will be used by Lobster.
@@ -178,21 +177,6 @@ namespace LobsterModel
         public override string ToString()
         {
             return this.Name;
-        }
-
-        /// <summary>
-        /// Creates a deep copy of this Column
-        /// </summary>
-        /// <returns>A deep copy of this Column.</returns>
-        public object Clone()
-        {
-            Column copy = new Column();
-            copy.Name = this.Name;
-            copy.Sequence = this.Sequence;
-            copy.ColumnPurpose = this.ColumnPurpose;
-            copy.DataType = this.DataType;
-            copy.MimeTypeList = new List<string>(this.MimeTypeList);
-            return copy;
         }
 
         /// <summary>

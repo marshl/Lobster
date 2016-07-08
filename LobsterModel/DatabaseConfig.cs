@@ -33,7 +33,7 @@ namespace LobsterModel
     /// <summary>
     /// Used to store information about a database connection, loaded directly from an XML file.
     /// </summary>
-    public class DatabaseConfig : SerializableObject, ICloneable
+    public class DatabaseConfig : SerializableObject
     {
         /// <summary>
         /// Gets or sets the name of the connection. This is for display purposes only.
@@ -179,25 +179,6 @@ namespace LobsterModel
             Settings.Default.Save();
 
             return configList;
-        }
-
-        /// <summary>
-        /// Creates a deep copy of this DatabaseConfig
-        /// </summary>
-        /// <returns>The newly created copy.</returns>
-        public object Clone()
-        {
-            DatabaseConfig other = new DatabaseConfig();
-            other.Name = this.Name;
-            other.Host = this.Host;
-            other.SID = this.SID;
-            other.Port = this.Port;
-            other.Username = this.Username;
-            other.UsePooling = this.UsePooling;
-
-            other.FileLocation = this.FileLocation;
-
-            return other;
         }
     }
 }

@@ -24,7 +24,6 @@
 //-----------------------------------------------------------------------
 namespace LobsterModel
 {
-    using System;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Globalization;
@@ -34,7 +33,7 @@ namespace LobsterModel
     /// Rperesents a single SQL table in the database. Used to build commands for 
     /// inserting, updating and querying values from this table.
     /// </summary>
-    public class Table : ICloneable
+    public class Table
     {
         /// <summary>
         /// Gets or sets the schema/user that this table belongs to.
@@ -313,30 +312,6 @@ namespace LobsterModel
                     + (mimeCol != null ? $", t.{mimeCol.Name}" : null)
                     + $" FROM {this.FullName} t";
             }
-        }
-
-        /// <summary>
-        /// Creates a deep copy of this table and all columns beaneath it.
-        /// </summary>
-        /// <returns>The copy of the table.</returns>
-        public object Clone()
-        {
-            Table copy = new Table();
-            copy.Schema = this.Schema;
-            copy.Name = this.Name;
-
-            if (this.ParentTable != null)
-            {
-                copy.ParentTable = (Table)this.ParentTable.Clone();
-            }
-
-            if (this.Columns != null)
-            {
-                copy.Columns = new List<Column>();
-                this.Columns.ForEach(x => copy.Columns.Add((Column)x.Clone()));
-            }
-
-            return copy;
         }
 
         /// <summary>

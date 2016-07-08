@@ -27,7 +27,6 @@ namespace LobsterModel
     using System.Collections.Generic;
     using System.IO;
     using System.Xml;
-    using System.Xml.Schema;
     using System.Xml.Serialization;
     using Properties;
 
@@ -35,7 +34,7 @@ namespace LobsterModel
     /// A ClobType defines a particular usage of the database. In its most common form, A ClobType contains a single table that maps to a single directory on the file system.
     /// ClobTypes are stored as Xml files which are deserialized into this structure.
     /// </summary>
-    public class ClobType : SerializableObject, ICloneable
+    public class ClobType : SerializableObject
     {
         /// <summary>
         /// Gets or sets the display name for this ClobType. This value has no functional impact, 
@@ -148,31 +147,6 @@ namespace LobsterModel
         public void Initialise()
         {
             this.Tables?.ForEach(x => x.Initialise());
-        }
-
-        /// <summary>
-        /// Creates and returns a deep copy of this ClobType.
-        /// </summary>
-        /// <returns>A boxed copy of this ClobType.</returns>
-        public object Clone()
-        {
-            ClobType copy = new ClobType();
-            copy.Name = this.Name;
-            copy.Directory = this.Directory;
-            copy.IncludeSubDirectories = this.IncludeSubDirectories;
-            copy.FilePath = this.FilePath;
-
-            copy.Tables = new List<Table>();
-            if (this.Tables != null)
-            {
-                foreach (Table table in this.Tables)
-                {
-                    copy.Tables.Add((Table)table.Clone());
-                }
-            }
-
-            copy.Initialise();
-            return copy;
         }
     }
 }
