@@ -85,19 +85,10 @@ namespace LobsterModel
             const int HeaderOffset = 60;
             const int LinkerTimestampOffset = 8;
             byte[] b = new byte[2048];
-            Stream s = null;
 
-            try
+            using (var s = new FileStream(filePath, FileMode.Open, FileAccess.Read))
             {
-                s = new FileStream(filePath, FileMode.Open, FileAccess.Read);
                 s.Read(b, 0, 2048);
-            }
-            finally
-            {
-                if (s != null)
-                {
-                    s.Close();
-                }
             }
 
             int i = BitConverter.ToInt32(b, HeaderOffset);
@@ -152,11 +143,11 @@ namespace LobsterModel
 
             try
             {
-                using (StreamReader streamReader = new StreamReader(xmlFilename))
-                using (XmlReader xmlReader = XmlReader.Create(streamReader, readerSettings))
+                
+                using (FileStream fileStream = File.OpenRead(xmlFilename))
+                using (XmlReader xmlReader = XmlReader.Create(fileStream, readerSettings))
                 {
                     obj = (T)xmls.Deserialize(xmlReader);
-                    xmlReader.Close();
                     obj.ErrorList = validationEvents.Select(item => item.Message).ToList();
                     result = obj;
                     return true;
