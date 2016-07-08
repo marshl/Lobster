@@ -307,7 +307,7 @@ namespace LobsterWpf
 
             try
             {
-                Model.SendUpdateClobMessage(this.connectionView.Connection, clobDirView.BaseClobDirectory, filename);
+                this.connectionView.Connection.SendUpdateClobMessage(clobDirView.BaseClobDirectory, filename);
             }
             catch (FileUpdateException)
             {
@@ -333,7 +333,7 @@ namespace LobsterWpf
 
             try
             {
-                string resultPath = Model.SendDownloadClobDataToFileMessage(this.connectionView.Connection, this.connectionView.SelectedFileNode.DatabaseFile);
+                string resultPath = this.connectionView.Connection.SendDownloadClobDataToFileMessage(this.connectionView.SelectedFileNode.DatabaseFile);
                 Process.Start(resultPath);
             }
             catch (FileDownloadException ex)
@@ -357,7 +357,7 @@ namespace LobsterWpf
             try
             {
                 string filename = this.connectionView.SelectedFileNode.FilePath;
-                string downloadedFile = Model.SendDownloadClobDataToFileMessage(this.connectionView.Connection, this.connectionView.SelectedFileNode.DatabaseFile);
+                string downloadedFile = this.connectionView.Connection.SendDownloadClobDataToFileMessage(this.connectionView.SelectedFileNode.DatabaseFile);
                 string args = string.Format(
                     Settings.Default.DiffProgramArguments,
                     downloadedFile,
@@ -399,7 +399,7 @@ namespace LobsterWpf
                 try
                 {
                     DBClobFile databaseFile = null;
-                    bool result = Model.SendInsertClobMessage(this.connectionView.Connection, clobDirView.BaseClobDirectory, filename, ref databaseFile);
+                    bool result = this.connectionView.Connection.SendInsertClobMessage(clobDirView.BaseClobDirectory, filename, ref databaseFile);
 
                     if (result)
                     {
@@ -459,7 +459,7 @@ namespace LobsterWpf
             var clobDirView = (ClobDirectoryView)this.clobTypeListBox.SelectedItem;
             try
             {
-                Model.UpdateClobWithExternalFile(this.connectionView.Connection, clobDirView.BaseClobDirectory, fileBackup.OriginalFilename, fileBackup.BackupFilename);
+                this.connectionView.Connection.UpdateClobWithExternalFile(clobDirView.BaseClobDirectory, fileBackup.OriginalFilename, fileBackup.BackupFilename);
             }
             catch (FileUpdateException)
             {
@@ -490,7 +490,7 @@ namespace LobsterWpf
         {
             List<FileListRetrievalException> errorList = new List<FileListRetrievalException>();
 
-            Model.GetDatabaseFileLists(this.connectionView.Connection, ref errorList);
+            this.connectionView.Connection.GetDatabaseFileLists(ref errorList);
             this.RepopulateFileListView(true);
         }
 

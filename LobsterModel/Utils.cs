@@ -143,7 +143,6 @@ namespace LobsterModel
 
             try
             {
-                
                 using (FileStream fileStream = File.OpenRead(xmlFilename))
                 using (XmlReader xmlReader = XmlReader.Create(fileStream, readerSettings))
                 {

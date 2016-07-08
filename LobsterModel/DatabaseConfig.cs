@@ -25,9 +25,12 @@ namespace LobsterModel
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Net.Sockets;
+    using System.Security;
     using System.Xml;
     using System.Xml.Schema;
     using System.Xml.Serialization;
+    using Oracle.ManagedDataAccess.Client;
     using Properties;
 
     /// <summary>
@@ -179,6 +182,56 @@ namespace LobsterModel
             Settings.Default.Save();
 
             return configList;
+        }
+
+        /// <summary>
+        /// Tests if a connection could be made.
+        /// </summary>
+        /// <param name="password">The password to connect to the database with.</param>
+        /// <param name="e">The exception that was raised, if any.</param>
+        /// <returns>True if the connection was successful, otherwise false.</returns>
+        public bool TestConnection(SecureString password, ref Exception e)
+        {
+            try
+            {
+                OracleConnection con = this.OpenConnection(password);
+                con.Close();
+                return true;
+            }
+            catch (ConnectToDatabaseException ex)
+            {
+                e = ex;
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Opens a new OracleConnection and returns it.
+        /// </summary>
+        /// <param name="password">The password to connect to the database with.</param>
+        /// <returns>A new connectionif it opened successfully, otherwise null.</returns>
+        public OracleConnection OpenConnection(SecureString password)
+        {
+            try
+            {
+                OracleConnection con = new OracleConnection();
+                con.ConnectionString = "User Id=" + this.Username
+                    + (password.Length == 0 ? null : ";Password=" + Utils.SecureStringToString(password))
+                    + ";Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)("
+                    + $"HOST={this.Host})"
+                    + $"(PORT={this.Port})))(CONNECT_DATA="
+                    + $"(SID={this.SID})(SERVER=DEDICATED)))"
+                    + $";Pooling=" + (this.UsePooling ? "true" : "false");
+
+                MessageLog.LogInfo($"Connecting to database {this.Name}");
+                con.Open();
+                return con;
+            }
+            catch (Exception e) when (e is InvalidOperationException || e is OracleException || e is ArgumentException || e is SocketException)
+            {
+                MessageLog.LogError($"Connection to Oracle failed: {e.Message}");
+                throw new ConnectToDatabaseException($"Failed to open connection: {e.Message}", e);
+            }
         }
     }
 }

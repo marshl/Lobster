@@ -235,7 +235,7 @@ namespace LobsterWpf
         /// <returns>True if the connection test was successful, otherwise false.</returns>
         public bool TestConnection(SecureString password, ref Exception ex)
         {
-            return Model.TestConnection(this.BaseConfig, password, ref ex);
+            return this.BaseConfig.TestConnection(password, ref ex);
         }
 
         /// <summary>
