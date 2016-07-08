@@ -152,7 +152,10 @@ namespace LobsterWpf
         {
             this.OpenConnectionDialog();
             this.notifyIcon.Visible = true;
+
+#if !DEBUG
             this.UpdateCheck();
+#endif
         }
 
         /// <summary>
