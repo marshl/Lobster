@@ -27,8 +27,6 @@ namespace LobsterModel
     using System;
     using System.Collections.Generic;
     using System.Data.Common;
-    using System.Diagnostics;
-    using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Linq;
     using System.Net.Sockets;
@@ -513,7 +511,6 @@ namespace LobsterModel
         /// <param name="clobFile">The file to insert into the database.</param>
         /// <param name="clobDir">The clob directory that the file is being inserted into.</param>
         /// <param name="oracleConnection">The Oracle connction to use.</param>
-        [SuppressMessage("Microsoft.Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "There is no way around this.")]
         private static void UpdateDatabaseClob(DatabaseConnection databaseConnection, string fullpath, DBClobFile clobFile, ClobDirectory clobDir, DbConnection oracleConnection)
         {
             DbTransaction trans = oracleConnection.BeginTransaction();
@@ -642,7 +639,6 @@ namespace LobsterModel
         /// <param name="mimeType">The mimetype to insert the file as.</param>
         /// <param name="oracleConnection">The Oracle connection to use.</param>
         /// <returns>True if the file was inserted successfully, otherwise false.</returns>
-        [SuppressMessage("Microsoft.Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "There is no way around this.")]
         private static DBClobFile InsertDatabaseClob(DatabaseConnection databaseConnection, string fullpath, ClobDirectory clobDir, Table table, string mimeType, OracleConnection oracleConnection)
         {
             DbCommand command = oracleConnection.CreateCommand();
@@ -713,8 +709,6 @@ namespace LobsterModel
         /// <param name="clobFile">The file to download.</param>
         /// <param name="oracleConnection">The connection to use.</param>
         /// <param name="filename">The filepath to download the data into.</param>
-        [SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times", Justification = "The stream should be cleared by the 'usings'")]
-        [SuppressMessage("Microsoft.Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "There is no way around this.")]
         private static void DownloadClobDataToFile(DatabaseConnection databaseConnection, DBClobFile clobFile, OracleConnection oracleConnection, string filename)
         {
             OracleCommand command = oracleConnection.CreateCommand();
@@ -796,7 +790,6 @@ namespace LobsterModel
         /// <param name="databaseConnection">The connection to get the files for.</param>
         /// <param name="clobDir">The directory to get the file lists for.</param>
         /// <param name="oracleConnection">The Oracle connection to use.</param>
-        [SuppressMessage("Microsoft.Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "There is no other way.")]
         private static void GetDatabaseFileListForDirectory(DatabaseConnection databaseConnection, ClobDirectory clobDir, OracleConnection oracleConnection)
         {
             clobDir.DatabaseFileList = new List<DBClobFile>();
