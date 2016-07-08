@@ -58,7 +58,7 @@
     <Compile Include="FileBackup.cs" />
     <Compile Include="EventArguments\FileChangeEventArgs.cs" />
     <Compile Include="Exceptions\FileDownloadException.cs" />
-    <Compile Include="EventArguments\FileInsertException.cs" />
+    <Compile Include="Exceptions\FileInsertException.cs" />
     <Compile Include="Exceptions\FileListRetrievalException.cs" />
     <Compile Include="EventArguments\FileProcessingFinishedEventArgs.cs" />
     <Compile Include="Exceptions\FileUpdateException.cs" />
