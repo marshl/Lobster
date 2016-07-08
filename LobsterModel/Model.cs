@@ -612,14 +612,12 @@ namespace LobsterModel
                     fs.Read(fileData, 0, Convert.ToInt32(fs.Length));
 
                     param.Value = fileData;
-                    OracleParameter op = (OracleParameter)param;
-                    op.OracleDbType = OracleDbType.Blob;
+                    param.OracleDbType = OracleDbType.Blob;
                 }
                 else
                 {
                     // Text mode
-                    StreamReader sr = new StreamReader(fs);
-                    string contents = sr.ReadToEnd();
+                    string contents = File.ReadAllText(fullpath);
 
                     if (Settings.Default.AppendFooterToDatabaseFiles)
                     {
@@ -627,8 +625,7 @@ namespace LobsterModel
                     }
 
                     param.Value = contents;
-                    OracleParameter op = (OracleParameter)param;
-                    op.OracleDbType = column.DataType == Column.Datatype.XMLTYPE ? OracleDbType.XmlType : OracleDbType.Clob;
+                    param.OracleDbType = column.DataType == Column.Datatype.XMLTYPE ? OracleDbType.XmlType : OracleDbType.Clob;
                 }
             }
 
@@ -769,7 +766,6 @@ namespace LobsterModel
                         {
                             streamWriter.NewLine = "\n";
                             streamWriter.Write(result);
-                            streamWriter.Close();
                         }
                     }
                 }
