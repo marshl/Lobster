@@ -30,8 +30,7 @@ namespace LobsterModel
     /// <summary>
     /// The exception for when a file cannot be found in a clob directory.
     /// </summary>
-    [Serializable]
-    public class ClobFileLookupException : Exception, ISerializable
+    public class ClobFileLookupException : Exception
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ClobFileLookupException"/> class.
@@ -56,17 +55,6 @@ namespace LobsterModel
         /// <param name="message">The message that describes the error.</param>
         /// <param name="innerException">The exception that is the cause of this exception..</param>
         public ClobFileLookupException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ClobFileLookupException"/> class with the serialied info.
-        /// </summary>
-        /// <param name="info">The System.Runtime.Serialization.SerializationInfo that holds the serialized
-        /// object data about the exception being thrown.</param>
-        /// <param name="context">The System.Runtime.Serialization.StreamingContext that contains contextual information
-        /// about the source or destination.</param>
-        protected ClobFileLookupException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
     }
