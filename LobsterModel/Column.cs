@@ -25,7 +25,6 @@
 namespace LobsterModel
 {
     using System.Collections.Generic;
-    using System.ComponentModel;
     using System.Diagnostics;
     using System.Xml.Serialization;
 
@@ -158,7 +157,6 @@ namespace LobsterModel
         /// If this column has a sequence, it will return {sequence}.NEXTVAL
         /// Otherwise it will return a query that will find the highest value of the column + 1
         /// </summary>
-        [Browsable(false)]
         public string NextID
         {
             get
