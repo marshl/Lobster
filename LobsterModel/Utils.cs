@@ -43,6 +43,11 @@ namespace LobsterModel
     public abstract class Utils
     {
         /// <summary>
+        /// The last retreived linker timestamp
+        /// </summary>
+        private static DateTime? linkerTimestamp;
+
+        /// <summary>
         /// Attempts to read a file, even if the file is locked. Tries 10 times before throwing an IOException
         /// </summary>
         /// <param name="fullPath">The location of the file.</param>
@@ -81,6 +86,11 @@ namespace LobsterModel
         /// <returns>The DateTime taht the assembly was linked</returns>
         public static DateTime RetrieveLinkerTimestamp()
         {
+            if (linkerTimestamp.HasValue)
+            {
+                return linkerTimestamp.Value;
+            }
+
             string filePath = System.Reflection.Assembly.GetCallingAssembly().Location;
             const int HeaderOffset = 60;
             const int LinkerTimestampOffset = 8;
@@ -96,7 +106,9 @@ namespace LobsterModel
             DateTime dt = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             dt = dt.AddSeconds(secondsSince1970);
             dt = dt.ToLocalTime();
-            return dt;
+
+            linkerTimestamp = dt;
+            return linkerTimestamp.Value;
         }
 
         /// <summary>
