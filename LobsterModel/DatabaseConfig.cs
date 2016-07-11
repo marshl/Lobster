@@ -185,6 +185,141 @@ namespace LobsterModel
         }
 
         /// <summary>
+        /// INitialises the given directory with the necessary configuration files and folders.
+        /// </summary>
+        /// <param name="directory">The directory to initialise.</param>
+        /// <param name="newConfig">The database configuration file that is created.</param>
+        /// <returns>True if the directory was set up  correctly, false if there was an issue setting it up, or if the directory already has them.</returns>
+        public static bool InitialiseCodeSourceDirectory(string directory, ref DatabaseConfig newConfig)
+        {
+            try
+            {
+                Directory.CreateDirectory(Path.Combine(directory, Settings.Default.ClobTypeDirectoryName));
+                newConfig = new DatabaseConfig();
+                string configFile = Path.Combine(directory, Settings.Default.DatabaseConfigFileName);
+                DatabaseConfig.SerialiseToFile(configFile, newConfig);
+                newConfig.FileLocation = configFile;
+
+                if (!AddCodeSourceDirectory(directory))
+                {
+                    return false;
+                }
+
+                return true;
+            }
+            catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Adds the given directory to the CodeSource dirctory list.
+        /// </summary>
+        /// <param name="directoryName">The directory to add.</param>
+        /// <returns>True if the directory is new and was added ok, false if the directory was already being used.</returns>
+        public static bool AddCodeSourceDirectory(string directoryName)
+        {
+            if (Settings.Default.CodeSourceDirectories == null)
+            {
+                Settings.Default.CodeSourceDirectories = new System.Collections.Specialized.StringCollection();
+            }
+            else if (Settings.Default.CodeSourceDirectories.Contains(directoryName))
+            {
+                return false;
+            }
+
+            Settings.Default.CodeSourceDirectories.Add(directoryName);
+            Settings.Default.Save();
+            return true;
+        }
+
+        /// <summary>
+        /// Validates that the given direcotry is currently a valid CodeSource folder (it has the correct files and folders).
+        /// </summary>
+        /// <param name="directory">The directory to check.</param>
+        /// <param name="errorMessage">The error message to return (if any).</param>
+        /// <returns>True if the directory is valid, otherwise false (with the error message initialised).</returns>
+        public static bool ValidateCodeSourceLocation(string directory, ref string errorMessage)
+        {
+            if (Settings.Default.CodeSourceDirectories != null && Settings.Default.CodeSourceDirectories.Contains(directory))
+            {
+                errorMessage = $"The chosen directory {directory} has already been used.";
+                return false;
+            }
+
+            DirectoryInfo dirInfo = new DirectoryInfo(directory);
+            if (!dirInfo.Exists)
+            {
+                errorMessage = $"The chosen directory {directory} does not exist, or is not a directory";
+                return false;
+            }
+
+            DirectoryInfo lobsterTypeFolder = new DirectoryInfo(Path.Combine(directory, Settings.Default.ClobTypeDirectoryName));
+            if (!lobsterTypeFolder.Exists)
+            {
+                errorMessage = $"The chosen folder must contain a directory named {Settings.Default.ClobTypeDirectoryName}";
+                return false;
+            }
+
+            FileInfo configFile = new FileInfo(Path.Combine(dirInfo.FullName, Settings.Default.DatabaseConfigFileName));
+            if (!configFile.Exists)
+            {
+                errorMessage = $"The chosen folder must contain a file named {Settings.Default.DatabaseConfigFileName}";
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Validates whether the given directory is a vliad place to set as a new CodeSOurce location.
+        /// </summary>
+        /// <param name="directory">The directory to validate.</param>
+        /// <param name="errorMessage">Any error message that occurred, if any.</param>
+        /// <returns>True if the location is valid, otherwise false.</returns>
+        public static bool ValidateNewCodeSourceLocation(string directory, ref string errorMessage)
+        {
+            if (Settings.Default.CodeSourceDirectories != null && Settings.Default.CodeSourceDirectories.Contains(directory))
+            {
+                errorMessage = $"The chosen directory {directory} has already been used.";
+                return false;
+            }
+
+            DirectoryInfo dirInfo = new DirectoryInfo(directory);
+            if (!dirInfo.Exists)
+            {
+                errorMessage = $"The chosen directory {directory} does not exist, or is not a directory";
+                return false;
+            }
+
+            FileInfo configFile = new FileInfo(Path.Combine(directory, Settings.Default.DatabaseConfigFileName));
+            if (configFile.Exists)
+            {
+                errorMessage = $"The chosen folder already contains a file named {Settings.Default.DatabaseConfigFileName}";
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Removes the CodeSource folder with the given name from the known list.
+        /// </summary>
+        /// <param name="directoryName">The  name of the directory to remove.</param>
+        /// <returns>True if the directory already exists and was removed, otherwise false.</returns>
+        public static bool RemoveCodeSource(string directoryName)
+        {
+            if (Settings.Default.CodeSourceDirectories == null || !Settings.Default.CodeSourceDirectories.Contains(directoryName))
+            {
+                return false;
+            }
+
+            Settings.Default.CodeSourceDirectories.Remove(directoryName);
+            return true;
+        }
+
+        /// <summary>
         /// Tests if a connection could be made.
         /// </summary>
         /// <param name="password">The password to connect to the database with.</param>
@@ -194,7 +329,7 @@ namespace LobsterModel
         {
             try
             {
-                OracleConnection con = this.OpenConnection(password);
+                OracleConnection con = this.OpenSqlConnection(password);
                 con.Close();
                 return true;
             }
@@ -210,7 +345,7 @@ namespace LobsterModel
         /// </summary>
         /// <param name="password">The password to connect to the database with.</param>
         /// <returns>A new connectionif it opened successfully, otherwise null.</returns>
-        public OracleConnection OpenConnection(SecureString password)
+        public OracleConnection OpenSqlConnection(SecureString password)
         {
             try
             {

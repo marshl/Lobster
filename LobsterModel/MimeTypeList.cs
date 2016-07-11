@@ -23,6 +23,7 @@
 //-----------------------------------------------------------------------
 namespace LobsterModel
 {
+    using System;
     using System.Collections.Generic;
     using System.Xml.Serialization;
 
@@ -36,6 +37,29 @@ namespace LobsterModel
         /// </summary>
         [XmlArray]
         public List<MimeType> MimeTypes { get; set; }
+
+        /// <summary>
+        /// Creates a comment to place at the bottom of a non-binary file of the given mime type.
+        /// </summary>
+        /// <param name="mimeType">The mime type of the file the footer is for.</param>
+        /// <returns>The footer string.</returns>
+        public static string GetClobFooterMessage(string mimeType)
+        {
+            string openingComment = "<!--";
+            string closingComment = "-->";
+            if (mimeType != null && (mimeType.Equals("text/javascript", StringComparison.OrdinalIgnoreCase) || mimeType.Equals("text/css", StringComparison.OrdinalIgnoreCase)))
+            {
+                openingComment = "/*";
+                closingComment = "*/";
+            }
+
+            return $"{openingComment}"
+                + $" Last clobbed by user {Environment.UserName}"
+                + $" on machine {Environment.MachineName}"
+                + $" at {DateTime.Now}"
+                + $" (Lobster build {Utils.RetrieveLinkerTimestamp().ToShortDateString()})"
+                + $"{closingComment}";
+        }
 
         /// <summary>
         /// A single mime type.

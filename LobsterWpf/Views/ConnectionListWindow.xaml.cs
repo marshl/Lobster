@@ -220,7 +220,7 @@ namespace LobsterWpf
 
             if (result == MessageBoxResult.OK)
             {
-                Model.RemoveCodeSource(this.CurrentConfigView.BaseConfig.CodeSource);
+                DatabaseConfig.RemoveCodeSource(this.CurrentConfigView.BaseConfig.CodeSource);
                 this.databaseConfigList.Remove(this.CurrentConfigView);
             }
         }
@@ -243,7 +243,7 @@ namespace LobsterWpf
 
             try
             {
-                this.DatabaseConnection = Model.SetDatabaseConnection(config, password);
+                this.DatabaseConnection = DatabaseConnection.CreateDatabaseConnection(config, password);
                 this.DialogResult = true;
                 this.Close();
             }
@@ -269,14 +269,14 @@ namespace LobsterWpf
             }
 
             string errorMessage = null;
-            if (!Model.ValidateNewCodeSourceLocation(dlg.FileName, ref errorMessage))
+            if (!DatabaseConfig.ValidateNewCodeSourceLocation(dlg.FileName, ref errorMessage))
             {
                 MessageBox.Show(errorMessage);
                 return;
             }
 
             DatabaseConfig databaseConfig = null;
-            if (!Model.InitialiseCodeSourceDirectory(dlg.FileName, ref databaseConfig))
+            if (!DatabaseConfig.InitialiseCodeSourceDirectory(dlg.FileName, ref databaseConfig))
             {
                 return;
             }
@@ -305,13 +305,13 @@ namespace LobsterWpf
             }
 
             string errorMessage = null;
-            if (!Model.ValidateCodeSourceLocation(dlg.FileName, ref errorMessage))
+            if (!DatabaseConfig.ValidateCodeSourceLocation(dlg.FileName, ref errorMessage))
             {
                 MessageBox.Show(errorMessage);
                 return;
             }
 
-            Model.AddCodeSourceDirectory(dlg.FileName);
+            DatabaseConfig.AddCodeSourceDirectory(dlg.FileName);
 
             this.LoadDatabaseConnections();
         }

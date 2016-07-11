@@ -137,7 +137,7 @@ namespace LobsterLite
                 return false;
             }
 
-            DatabaseConnection connection = Model.SetDatabaseConnection(config, password);
+            DatabaseConnection connection = DatabaseConnection.CreateDatabaseConnection(config, password);
 
             return true;
         }

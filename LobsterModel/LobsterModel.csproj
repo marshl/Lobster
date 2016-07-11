@@ -64,13 +64,13 @@
     <Compile Include="Exceptions\FileUpdateException.cs" />
     <Compile Include="IMessageLogEventListener.cs" />
     <Compile Include="Exceptions\MimeTypeNotFoundException.cs" />
-    <Compile Include="Model.cs" />
     <Compile Include="EventArguments\MimeTypeRequestEventArgs.cs" />
     <Compile Include="EventArguments\TableRequestEventArgs.cs" />
     <Compile Include="SerializableObject.cs" />
     <Compile Include="Exceptions\SetConnectionException.cs" />
     <Compile Include="SettingsView.cs" />
     <Compile Include="EventArguments\FileUpdateCompleteEventArgs.cs" />
+    <Compile Include="SqlBuilder.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="DatabaseConfig.cs" />
     <Compile Include="DatabaseConnection.cs" />

@@ -26,6 +26,7 @@ namespace LobsterModel
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Security;
     using System.Threading;
     using Oracle.ManagedDataAccess.Client;
@@ -73,7 +74,7 @@ namespace LobsterModel
         /// </summary>
         /// <param name="config">The configuration file to base this connection off.</param>
         /// <param name="password">The password to connect to the database with.</param>
-        public DatabaseConnection(DatabaseConfig config, SecureString password)
+        private DatabaseConnection(DatabaseConfig config, SecureString password)
         {
             this.Config = config;
             this.IsAutoUpdateEnabled = this.Config.AllowAutomaticUpdates;
@@ -177,6 +178,43 @@ namespace LobsterModel
         public DirectoryInfo ClobTypeDirectory { get; }
 
         /// <summary>
+        /// Sets the current connection to the given connection, if able.
+        /// </summary>
+        /// <param name="config">The connection to open.</param>
+        /// <param name="password">The password to connect to the database with.</param>
+        /// <returns>The successfully created database connection.</returns>
+        public static DatabaseConnection CreateDatabaseConnection(DatabaseConfig config, SecureString password)
+        {
+            MessageLog.LogInfo($"Changing connection to {config.Name}");
+            try
+            {
+                OracleConnection con = config.OpenSqlConnection(password);
+                con.Close();
+            }
+            catch (ConnectToDatabaseException ex)
+            {
+                throw new SetConnectionException($"A connection could not be made to the database: {ex.Message}", ex);
+            }
+
+            if (config.ClobTypeDirectory == null || !Directory.Exists(config.ClobTypeDirectory))
+            {
+                throw new SetConnectionException($"The clob type directory {config.ClobTypeDirectory} could not be found.");
+            }
+
+            DatabaseConnection databaseConnection = new DatabaseConnection(config, password);
+
+            List<ClobTypeLoadException> errors = new List<ClobTypeLoadException>();
+            List<FileListRetrievalException> fileLoadErrors = new List<FileListRetrievalException>();
+
+            databaseConnection.LoadClobTypes(ref errors);
+            databaseConnection.GetDatabaseFileLists(ref fileLoadErrors);
+
+            MessageLog.LogInfo("Connection change successful");
+
+            return databaseConnection;
+        }
+
+        /// <summary>
         /// Loads each of the xml files in the ClobTypeDir (if they are valid).
         /// </summary>
         /// <param name="errors">Any errors that are raised during loading.</param>
@@ -269,7 +307,7 @@ namespace LobsterModel
         /// <param name="errorList">The list of errors that were encountered when getting the database files.</param>
         public void GetDatabaseFileLists(ref List<FileListRetrievalException> errorList)
         {
-            OracleConnection oracleConnection = this.Config.OpenConnection(this.Password);
+            OracleConnection oracleConnection = this.Config.OpenSqlConnection(this.Password);
             if (oracleConnection == null)
             {
                 MessageLog.LogError("Connection failed, cannot diff files with database.");
@@ -304,7 +342,7 @@ namespace LobsterModel
         {
             try
             {
-                OracleConnection oracleConnection = this.Config.OpenConnection(this.Password);
+                OracleConnection oracleConnection = this.Config.OpenSqlConnection(this.Password);
                 DBClobFile clobFile = clobDir?.GetDatabaseFileForFullpath(targetFilename);
 
                 if (Settings.Default.BackupEnabled)
@@ -381,7 +419,7 @@ namespace LobsterModel
                 }
             }
 
-            OracleConnection oracleConnection = this.Config.OpenConnection(this.Password);
+            OracleConnection oracleConnection = this.Config.OpenSqlConnection(this.Password);
             try
             {
                 DBClobFile databaseFile = this.InsertDatabaseClob(fullpath, clobDir, table, mimeType, oracleConnection);
@@ -403,7 +441,7 @@ namespace LobsterModel
         /// <returns>The path of the resulting file.</returns>
         public string SendDownloadClobDataToFileMessage(DBClobFile databaseFile)
         {
-            OracleConnection oracleConnection = this.Config.OpenConnection(this.Password);
+            OracleConnection oracleConnection = this.Config.OpenSqlConnection(this.Password);
             if (oracleConnection == null)
             {
                 return null;
@@ -506,7 +544,7 @@ namespace LobsterModel
 
             try
             {
-                command.Parameters.Add(Model.CreateFileDataParameter(fullpath, table, mimeType));
+                command.Parameters.Add(SqlBuilder.CreateFileDataParameter(fullpath, table, mimeType));
                 MessageLog.LogInfo($"Executing insert query: {command.CommandText}");
                 command.ExecuteNonQuery();
                 command.Dispose();
@@ -657,7 +695,7 @@ namespace LobsterModel
                         parentTable: table,
                         mnemonic: mnemonic,
                         mimetype: mimeType,
-                        filename: Model.ConvertMnemonicToFilename(this, mnemonic, table, mimeType));
+                        filename: this.ConvertMnemonicToFilename(mnemonic, table, mimeType));
 
                     clobDirectory.DatabaseFileList.Add(databaseFile);
                 }
@@ -714,7 +752,7 @@ namespace LobsterModel
 
             try
             {
-                command.Parameters.Add(Model.CreateFileDataParameter(fullpath, clobFile.ParentTable, clobFile.MimeType));
+                command.Parameters.Add(SqlBuilder.CreateFileDataParameter(fullpath, clobFile.ParentTable, clobFile.MimeType));
             }
             catch (IOException e)
             {
@@ -1007,6 +1045,45 @@ namespace LobsterModel
                 var args = new FileProcessingFinishedEventArgs(fileTreeChange);
                 handler(this, args);
             }
+        }
+
+        /// <summary>
+        /// Converts the mnemonic of a file on the database to the local filename that it would represent.
+        /// </summary>
+        /// <param name="mnemonic">The database mnemonic.</param>
+        /// <param name="table">The table the mnemonic is from (can be null).</param>
+        /// <param name="mimeType">The mime type of the database file, if applicable.</param>
+        /// <returns>The name as converted from the mnemonic.</returns>
+        private string ConvertMnemonicToFilename(string mnemonic, Table table, string mimeType)
+        {
+            string filename = mnemonic;
+            string prefix = null;
+
+            if (mnemonic.Contains('/'))
+            {
+                prefix = mnemonic.Substring(0, mnemonic.LastIndexOf('/'));
+                filename = mnemonic.Substring(mnemonic.LastIndexOf('/') + 1);
+            }
+
+            // Assume xml data types for tables without a datatype column, or a prefix
+            Column mimeTypeColumn;
+            if (table == null || !table.TryGetColumnWithPurpose(Column.Purpose.MIME_TYPE, out mimeTypeColumn) || prefix == null)
+            {
+                filename += table?.DefaultExtension ?? ".xml";
+            }
+            else
+            {
+                MimeTypeList.MimeType mt = this.MimeTypeList.MimeTypes.Find(x => x.Name.Equals(mimeType));
+
+                if (mt == null)
+                {
+                    throw new MimeTypeNotFoundException($"Unkown mime-to-extension key {mimeType}");
+                }
+
+                filename += mt.Extension;
+            }
+
+            return filename;
         }
     }
 }
