@@ -24,9 +24,8 @@
 //-----------------------------------------------------------------------
 namespace LobsterModel
 {
+    using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Globalization;
     using System.Xml.Serialization;
 
     /// <summary>
@@ -54,7 +53,6 @@ namespace LobsterModel
         /// <summary>
         /// Gets or sets the columns in this table that Lobster needs.
         /// </summary>
-        [XmlArray]
         public List<Column> Columns { get; set; }
 
         /// <summary>
@@ -112,206 +110,6 @@ namespace LobsterModel
         public bool ShouldSerializeDefaultExtension()
         {
             return this.DefaultExtension != null;
-        }
-
-        /// <summary>
-        /// Constructs an SQL statement to update a row in the database
-        /// </summary>
-        /// <param name="clobFile">The ClobFile to build an update statement for.</param>
-        /// <returns>The update statement.</returns>
-        public string BuildUpdateStatement(DBClobFile clobFile)
-        {
-            Column clobCol = clobFile.GetDataColumn();
-            string command = $"UPDATE {this.FullName} c SET c.{clobCol.Name} = :clob";
-
-            Column dateCol;
-            if (this.TryGetColumnWithPurpose(Column.Purpose.DATETIME, out dateCol))
-            {
-                command += $", {dateCol.Name} = SYSDATE";
-            }
-
-            if (this.ParentTable != null)
-            {
-                Table pt = this.ParentTable;
-                Column foreignKeyCol = this.GetColumnWithPurpose(Column.Purpose.FOREIGN_KEY);
-                Column parentIDCol = pt.GetColumnWithPurpose(Column.Purpose.ID);
-                Column parentMnemCol = pt.GetColumnWithPurpose(Column.Purpose.MNEMONIC);
-
-                command += $" WHERE c.{foreignKeyCol.Name} = ("
-                        + $" SELECT p.{parentIDCol.Name}"
-                        + $" FROM {pt.FullName} p"
-                        + $" WHERE p.{parentMnemCol.Name} = '{clobFile.Mnemonic}')";
-            }
-            else
-            {
-                Column mnemCol = this.GetColumnWithPurpose(Column.Purpose.MNEMONIC);
-                command += $" WHERE c.{mnemCol.Name} = '{clobFile.Mnemonic}'";
-            }
-
-            return command;
-        }
-
-        /// <summary>
-        /// Constructs an SQL statement to insert a row into the parent table of this table with the given mnemonic.
-        /// </summary>
-        /// <param name="mnemonic">The mnemonic for the file to insert.</param>
-        /// <returns>The insert statement.</returns>
-        public string BuildInsertParentStatement(string mnemonic)
-        {
-            Debug.Assert(this.ParentTable != null, "Inserting into a parent table requires a parent to be defined");
-            Table pt = this.ParentTable;
-
-            Column idCol = pt.GetColumnWithPurpose(Column.Purpose.ID);
-            Column mnemCol = pt.GetColumnWithPurpose(Column.Purpose.MNEMONIC);
-
-            string command = $"INSERT INTO {pt.FullName} p"
-                + $" (p.{idCol.Name}, p.{mnemCol.Name} )"
-                + $" VALUES( {idCol.NextID}, '{mnemonic}' )";
-
-            return command;
-        }
-
-        /// <summary>
-        /// Constructs an SQL statement to insert a file into the database.
-        /// If this table has a parent, then the parent information will be applied. 
-        /// If not, the wile will be inserted normally.
-        /// </summary>
-        /// <param name="mnemonic">The mnemonic for the file to add.</param>
-        /// <param name="mimeType">The mime type of the file to add, if applicable.</param>
-        /// <returns>The insert SQl statement.</returns>
-        public string BuildInsertChildStatement(string mnemonic, string mimeType)
-        {
-            // Make a string for the column names...
-            string insertCommand = "INSERT INTO " + this.FullName + " t ( ";
-
-            // ..and another for the values. The insertCommand and valueCommand are joined to form the full statement
-            string valueCommand = " VALUES ( ";
-
-            if (this.ParentTable != null)
-            {
-                Table pt = this.ParentTable;
-                Column foreignKeyCol = this.GetColumnWithPurpose(Column.Purpose.FOREIGN_KEY);
-                Column parentIDCol = pt.GetColumnWithPurpose(Column.Purpose.ID);
-                Column parentMnemCol = pt.GetColumnWithPurpose(Column.Purpose.MNEMONIC);
-
-                insertCommand += $"t.{foreignKeyCol.Name}";
-
-                valueCommand += $"( SELECT p.{parentIDCol.Name} FROM {pt.FullName} p WHERE p.{parentMnemCol.Name} = '{mnemonic}' )";
-            }
-            else
-            {
-                Column mnemCol = this.GetColumnWithPurpose(Column.Purpose.MNEMONIC);
-                insertCommand += $" t.{mnemCol.Name} ";
-                valueCommand += $" '{mnemonic}' ";
-
-                if (mimeType != null)
-                {
-                    Column mimeCol = this.GetColumnWithPurpose(Column.Purpose.MIME_TYPE);
-                    insertCommand += $", t.{mimeCol.Name} ";
-                    valueCommand += $", '{mimeType}' ";
-                }
-            }
-
-            // No parent table
-            Column idCol;
-            if (this.TryGetColumnWithPurpose(Column.Purpose.ID, out idCol))
-            {
-                insertCommand += $", t.{idCol.Name} ";
-                valueCommand += $", {idCol.NextID} ";
-            }
-
-            // The date column is optional
-            Column dateCol;
-            if (this.TryGetColumnWithPurpose(Column.Purpose.DATETIME, out dateCol))
-            {
-                insertCommand += $", t.{dateCol.Name} ";
-                valueCommand += ", SYSDATE ";
-            }
-
-            // The full name column is optional. It is set to the PascalCase of the mnemonic
-            Column fullNameCol;
-            if (this.TryGetColumnWithPurpose(Column.Purpose.FULL_NAME, out fullNameCol))
-            {
-                TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
-                string fullName = textInfo.ToTitleCase(mnemonic.ToLower());
-                insertCommand += $", t.{fullNameCol.Name} ";
-                valueCommand += $", '{fullName}' ";
-            }
-
-            Column dataCol = this.Columns.Find(x => x.ColumnPurpose == Column.Purpose.CLOB_DATA
-                                                && (mimeType == null || x.MimeTypeList.Contains(mimeType)));
-
-            if (dataCol == null)
-            {
-                throw new ColumnNotFoundException(this, Column.Purpose.DATETIME, mimeType);
-            }
-
-            insertCommand += $", t.{dataCol.Name} )";
-            valueCommand += ", :clob ) ";
-            return insertCommand + valueCommand;
-        }
-
-        /// <summary>
-        /// Constructs an SQL statement to get the 
-        /// </summary>
-        /// <param name="clobFile">The ClobFile to build the statement for.</param>
-        /// <returns>The SQL command</returns>
-        public string BuildGetDataCommand(DBClobFile clobFile)
-        {
-            Column clobCol = clobFile.GetDataColumn();
-            if (this.ParentTable != null)
-            {
-                Table pt = this.ParentTable;
-                Column foreignKeyCol = this.GetColumnWithPurpose(Column.Purpose.FOREIGN_KEY);
-                Column parentIDCol = pt.GetColumnWithPurpose(Column.Purpose.ID);
-                Column parentMnemCol = pt.GetColumnWithPurpose(Column.Purpose.MNEMONIC);
-                return
-                    $"SELECT c.{clobCol.Name}"
-                    + $" FROM {pt.FullName} p"
-                    + $" JOIN {this.FullName} c"
-                    + $" ON c.{foreignKeyCol.Name} = p.{parentIDCol.Name}"
-                    + $" WHERE p.{parentMnemCol.Name} = :mnemonic";
-            }
-            else
-            {
-                Column mnemCol = this.GetColumnWithPurpose(Column.Purpose.MNEMONIC);
-                return
-                    $"SELECT t.{clobCol.Name}"
-                    + $" FROM {this.FullName} t"
-                    + $" WHERE t.{mnemCol.Name} = :mnemonic";
-            }
-        }
-
-        /// <summary>
-        /// Constructs an SQL query to retrieve the list of files in this table on the database.
-        /// If this table has a mime type column, then the value of that column will be included in the query.
-        /// </summary>
-        /// <returns>The SQL command the retrive the file lists for this table.</returns>
-        public string GetFileListCommand()
-        {
-            Column mimeCol;
-            this.TryGetColumnWithPurpose(Column.Purpose.MIME_TYPE, out mimeCol);
-
-            if (this.ParentTable != null)
-            {
-                Table pt = this.ParentTable;
-                Column foreignKeyCol = this.GetColumnWithPurpose(Column.Purpose.FOREIGN_KEY);
-                Column parentIDCol = pt.GetColumnWithPurpose(Column.Purpose.ID);
-                Column parentMnemCol = pt.GetColumnWithPurpose(Column.Purpose.MNEMONIC);
-
-                return $"SELECT p.{parentMnemCol.Name}"
-                    + (mimeCol != null ? $", c.{mimeCol.Name}" : null)
-                    + $" FROM {pt.FullName} p"
-                    + $" JOIN {this.FullName} c"
-                    + $" ON c.{foreignKeyCol.Name}= p.{parentIDCol.Name}";
-            }
-            else
-            {
-                Column mnemCol = this.GetColumnWithPurpose(Column.Purpose.MNEMONIC);
-                return $"SELECT t.{mnemCol.Name}"
-                    + (mimeCol != null ? $", t.{mimeCol.Name}" : null)
-                    + $" FROM {this.FullName} t";
-            }
         }
 
         /// <summary>
