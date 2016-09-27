@@ -23,15 +23,12 @@
 //      [ _The Lord of the Rings_, I/ii: "The Showdow of the Past"]
 //
 //-----------------------------------------------------------------------
-
 namespace LobsterModel
 {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
-    using System.Linq;
-    using System.Text;
     using Properties;
 
     /// <summary>

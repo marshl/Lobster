@@ -42,10 +42,10 @@ namespace LobsterModel
         /// </summary>
         /// <param name="codeSourceDirectory">The directory that the code source is located in.</param>
         /// <param name="clobType">The ClobType that points to this directory.</param>
-        public ClobDirectory(DirectoryInfo codeSourceDirectory, ClobType clobType)
+        public ClobDirectory(string codeSourceDirectory, ClobType clobType)
         {
             this.ClobType = clobType;
-            this.Directory = new DirectoryInfo(Path.Combine(codeSourceDirectory.FullName, this.ClobType.Directory));
+            this.Directory = new DirectoryInfo(Path.Combine(codeSourceDirectory, this.ClobType.Directory));
 
             if (!this.Directory.Exists)
             {

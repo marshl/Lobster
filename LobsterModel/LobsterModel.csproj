@@ -48,6 +48,8 @@
   <ItemGroup>
     <Compile Include="BackupLog.cs" />
     <Compile Include="ClobDirectory.cs" />
+    <Compile Include="CodeSourceController.cs" />
+    <Compile Include="ConnectionConfig.cs" />
     <Compile Include="EventArguments\ClobDirectoryFileChangeEventArgs.cs" />
     <Compile Include="Exceptions\ClobFileLookupException.cs" />
     <Compile Include="ClobType.cs" />
@@ -66,6 +68,7 @@
     <Compile Include="Exceptions\MimeTypeNotFoundException.cs" />
     <Compile Include="EventArguments\MimeTypeRequestEventArgs.cs" />
     <Compile Include="EventArguments\TableRequestEventArgs.cs" />
+    <Compile Include="CodeSourceConfig.cs" />
     <Compile Include="SerializableObject.cs" />
     <Compile Include="Exceptions\SetConnectionException.cs" />
     <Compile Include="SettingsView.cs" />

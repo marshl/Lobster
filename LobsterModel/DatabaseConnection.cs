@@ -65,32 +65,24 @@ namespace LobsterModel
         private MimeTypeList mimeTypeList;
 
         /// <summary>
-        /// The directory of the CodeSource folder.
-        /// </summary>
-        private DirectoryInfo codeSourceDirectory;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseConnection"/> class.
         /// </summary>
         /// <param name="config">The configuration file to base this connection off.</param>
         /// <param name="password">The password to connect to the database with.</param>
-        private DatabaseConnection(DatabaseConfig config, SecureString password)
+        private DatabaseConnection(ConnectionConfig config, SecureString password)
         {
             this.Config = config;
-            this.IsAutoUpdateEnabled = this.Config.AllowAutomaticUpdates;
+            this.IsAutomaticClobbingEnabled = this.Config.AllowAutomaticClobbing;
             this.Password = password;
 
             bool result = Utils.DeserialiseXmlFileUsingSchema("LobsterSettings/MimeTypes.xml", null, out this.mimeTypeList);
 
-            this.ClobTypeDirectory = new DirectoryInfo(this.Config.ClobTypeDirectory);
-
-            this.codeSourceDirectory = new DirectoryInfo(config.CodeSource);
-            if (!this.codeSourceDirectory.Exists)
+            if (!Directory.Exists(this.Config.ParentCodeSourceConfig.CodeSourceDirectory))
             {
-                throw new SetConnectionException($"Could not find CodeSource directory: {this.codeSourceDirectory.FullName}");
+                throw new SetConnectionException($"Could not find CodeSource directory: {this.Config.ParentCodeSourceConfig.CodeSourceDirectory}");
             }
 
-            this.clobTypeFileWatcher = new FileSystemWatcher(this.Config.ClobTypeDirectory);
+            this.clobTypeFileWatcher = new FileSystemWatcher(this.Config.ParentCodeSourceConfig.ClobTypeDirectory);
             this.clobTypeFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.CreationTime;
             this.clobTypeFileWatcher.Changed += new FileSystemEventHandler(this.OnClobTypeChangeEvent);
             this.clobTypeFileWatcher.Created += new FileSystemEventHandler(this.OnClobTypeChangeEvent);
@@ -155,7 +147,7 @@ namespace LobsterModel
         /// <summary>
         /// Gets the configuration file for this connection.
         /// </summary>
-        public DatabaseConfig Config { get; private set; }
+        public ConnectionConfig Config { get; private set; }
 
         /// <summary>
         /// Gets the list of ClobDirectories for each ClobType located in directory in the configuration settings.
@@ -165,7 +157,7 @@ namespace LobsterModel
         /// <summary>
         /// Gets or sets a value indicating whether the database should be automatically updated when a file is changed.
         /// </summary>
-        public bool IsAutoUpdateEnabled { get; set; }
+        public bool IsAutomaticClobbingEnabled { get; set; }
 
         /// <summary>
         /// Gets the password the user entered for this connection (set on initialisation).
@@ -173,17 +165,12 @@ namespace LobsterModel
         public SecureString Password { get; }
 
         /// <summary>
-        /// Gets the directory of the clob types folder (wtihin the codeSourceDirectory)
-        /// </summary>
-        public DirectoryInfo ClobTypeDirectory { get; }
-
-        /// <summary>
         /// Sets the current connection to the given connection, if able.
         /// </summary>
         /// <param name="config">The connection to open.</param>
         /// <param name="password">The password to connect to the database with.</param>
         /// <returns>The successfully created database connection.</returns>
-        public static DatabaseConnection CreateDatabaseConnection(DatabaseConfig config, SecureString password)
+        public static DatabaseConnection CreateDatabaseConnection(ConnectionConfig config, SecureString password)
         {
             MessageLog.LogInfo($"Changing connection to {config.Name}");
             try
@@ -196,9 +183,9 @@ namespace LobsterModel
                 throw new SetConnectionException($"A connection could not be made to the database: {ex.Message}", ex);
             }
 
-            if (config.ClobTypeDirectory == null || !Directory.Exists(config.ClobTypeDirectory))
+            if (config.ParentCodeSourceConfig.ClobTypeDirectory == null || !Directory.Exists(config.ParentCodeSourceConfig.ClobTypeDirectory))
             {
-                throw new SetConnectionException($"The clob type directory {config.ClobTypeDirectory} could not be found.");
+                throw new SetConnectionException($"The clob type directory {config.ParentCodeSourceConfig.ClobTypeDirectory} could not be found.");
             }
 
             DatabaseConnection databaseConnection = new DatabaseConnection(config, password);
@@ -220,22 +207,25 @@ namespace LobsterModel
         /// <param name="errors">Any errors that are raised during loading.</param>
         public void LoadClobTypes(ref List<ClobTypeLoadException> errors)
         {
+            string clobTypeDir = this.Config.ParentCodeSourceConfig.ClobTypeDirectory;
+
+
             this.ClobDirectoryList = new List<ClobDirectory>();
-            if (!this.ClobTypeDirectory.Exists)
+            if (!Directory.Exists(Config.ParentCodeSourceConfig.ClobTypeDirectory))
             {
-                MessageLog.LogWarning($"The directory {ClobTypeDirectory} could not be found when loading connection {this.Config.Name}");
-                errors.Add(new ClobTypeLoadException($"The directory {this.ClobTypeDirectory} could not be found when loading connection {this.Config.Name}"));
+                MessageLog.LogWarning($"The directory {clobTypeDir} could not be found when loading connection {this.Config.Name}");
+                errors.Add(new ClobTypeLoadException($"The directory {clobTypeDir} could not be found when loading connection {this.Config.Name}"));
                 return;
             }
 
-            List<ClobType> clobTypes = ClobType.GetClobTypeList(this.Config.ClobTypeDirectory);
+            List<ClobType> clobTypes = ClobType.GetClobTypeList(clobTypeDir);
             clobTypes.ForEach(x => x.Initialise());
 
             foreach (ClobType clobType in clobTypes)
             {
                 try
                 {
-                    ClobDirectory clobDir = new ClobDirectory(this.codeSourceDirectory, clobType);
+                    ClobDirectory clobDir = new ClobDirectory(this.Config.ParentCodeSourceConfig.ClobTypeDirectory, clobType);
                     clobDir.FileChangeEvent += this.OnClobDirectoryFileChangeEvent;
                     this.ClobDirectoryList.Add(clobDir);
                 }
@@ -367,7 +357,7 @@ namespace LobsterModel
         /// <param name="fullpath">The path of the file as it exists locally.</param>
         public void BackupClobFile(OracleConnection oracleConnection, DBClobFile clobFile, string fullpath)
         {
-            FileInfo backupFile = BackupLog.AddBackup(this.Config.CodeSource, fullpath);
+            FileInfo backupFile = BackupLog.AddBackup(this.Config.ParentCodeSourceConfig.CodeSourceDirectory, fullpath);
             this.DownloadClobDataToFile(clobFile, oracleConnection, backupFile.FullName);
         }
 
@@ -515,7 +505,7 @@ namespace LobsterModel
             {
                 try
                 {
-                    command.CommandText = table.BuildInsertParentStatement(mnemonic);
+                    command.CommandText = SqlBuilder.BuildInsertParentStatement(table, mnemonic);
                     MessageLog.LogInfo($"Executing Insert query on parent table: {command.CommandText}");
                     command.ExecuteNonQuery();
                     command.Dispose();
@@ -539,7 +529,7 @@ namespace LobsterModel
             }
             else
             {
-                command.CommandText = table.BuildInsertChildStatement(mnemonic, mimeType);
+                command.CommandText = SqlBuilder.BuildInsertChildStatement(table, mnemonic, mimeType);
             }
 
             try
@@ -584,7 +574,7 @@ namespace LobsterModel
                 else
                 {
                     column = clobFile.GetDataColumn();
-                    command.CommandText = table.BuildGetDataCommand(clobFile);
+                    command.CommandText = SqlBuilder.BuildGetDataCommand(table, clobFile);
                 }
 
                 command.Parameters.Add("mnemonic", clobFile.Mnemonic);
@@ -663,7 +653,7 @@ namespace LobsterModel
                 }
                 else
                 {
-                    oracleCommand.CommandText = table.GetFileListCommand();
+                    oracleCommand.CommandText = SqlBuilder.GetFileListCommand(table);
                 }
 
                 this.ProcessFileList(clobDir, oracleCommand, table);
@@ -741,7 +731,7 @@ namespace LobsterModel
             {
                 try
                 {
-                    command.CommandText = table.BuildUpdateStatement(clobFile);
+                    command.CommandText = SqlBuilder.BuildUpdateStatement(table, clobFile);
                 }
                 catch (ColumnNotFoundException e)
                 {
@@ -840,12 +830,7 @@ namespace LobsterModel
             {
                 lock (this.fileEventProcessingSemaphore)
                 {
-                    var handler = this.ClobTypeChangedEvent;
-
-                    if (handler != null)
-                    {
-                        handler(this, args);
-                    }
+                    this.ClobTypeChangedEvent?.Invoke(this, args);
                 }
             }
         }
@@ -931,7 +916,7 @@ namespace LobsterModel
                 return;
             }
 
-            if (!this.IsAutoUpdateEnabled)
+            if (!this.IsAutomaticClobbingEnabled)
             {
                 this.LogFileEvent($"Automatic clobbing is disabled, ignoring event.");
                 return;
@@ -1008,12 +993,8 @@ namespace LobsterModel
         private void OnEventProcessingStart()
         {
             var handler = this.StartChangeProcessingEvent;
-
-            if (handler != null)
-            {
-                FileChangeEventArgs args = new FileChangeEventArgs();
-                handler(this, args);
-            }
+            FileChangeEventArgs args = new FileChangeEventArgs();
+            handler?.Invoke(this, args);
         }
 
         /// <summary>
@@ -1024,12 +1005,8 @@ namespace LobsterModel
         private void OnAutoUpdateComplete(string filename, bool success)
         {
             var handler = this.UpdateCompleteEvent;
-
-            if (handler != null)
-            {
-                FileUpdateCompleteEventArgs args = new FileUpdateCompleteEventArgs(filename, success);
-                handler(this, args);
-            }
+            FileUpdateCompleteEventArgs args = new FileUpdateCompleteEventArgs(filename, success);
+            handler?.Invoke(this, args);
         }
 
         /// <summary>
@@ -1039,12 +1016,8 @@ namespace LobsterModel
         private void OnFileProcessingFinished(bool fileTreeChange)
         {
             var handler = this.FileProcessingFinishedEvent;
-
-            if (handler != null)
-            {
-                var args = new FileProcessingFinishedEventArgs(fileTreeChange);
-                handler(this, args);
-            }
+            var args = new FileProcessingFinishedEventArgs(fileTreeChange);
+            handler?.Invoke(this, args);
         }
 
         /// <summary>
