@@ -1,14 +1,14 @@
-﻿<Window x:Class="LobsterWpf.ConnectionListWindow"
+﻿<Window x:Class="LobsterWpf.Views.ConnectionListWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:LobsterWpf"
-        xmlns:l="clr-namespace:LobsterWpf"
+        xmlns:root="clr-namespace:LobsterWpf"
+        xmlns:local="clr-namespace:LobsterWpf.Views"
         mc:Ignorable="d"
-        Title="Connections" Height="485" Width="700" Icon="../Resources/Images/cartoon-lobster.ico" ShowInTaskbar="False" Background="{StaticResource BackgroundKey}" >
+        Title="Connections" Height="485" Width="800" Icon="../Resources/Images/cartoon-lobster.ico" ShowInTaskbar="False" Background="{StaticResource BackgroundKey}" >
   <Window.Resources>
-    <l:InverseBooleanConverter x:Key="inverseBooleanConverter" />
+    <root:InverseBooleanConverter x:Key="inverseBooleanConverter"/>
   </Window.Resources>
   <Grid>
     <Grid.ColumnDefinitions>
@@ -16,28 +16,33 @@
       <ColumnDefinition/>
     </Grid.ColumnDefinitions>
     <Grid.RowDefinitions>
-      <RowDefinition Height="Auto"/>
-      <RowDefinition/>
+      <RowDefinition Height="*"/>
       <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
-    <!--
-    <DockPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Center">
-      <Label DockPanel.Dock="Left" VerticalAlignment="Center">Directory:</Label>
-      <Label x:Name="directoryLabel" VerticalAlignment="Center" Content="{Binding Path=ConnectionDirectory, FallbackValue='No directory selected'}" HorizontalAlignment="Left"/>
-      <Button x:Name="changeDirectoryButton" Grid.Row="1"  Content="Change Directory" HorizontalAlignment="Right" VerticalAlignment="Center" Click="ChangeDirectoryButton_Click" Margin="5"/>
-    </DockPanel>
-    -->
-    <Grid Grid.Row="1" Grid.Column="0">
+    <Grid Grid.Row="0" Grid.Column="0">
       <Grid.RowDefinitions>
         <RowDefinition Height="Auto"/>
         <RowDefinition Height="*"/>
         <RowDefinition Height="Auto"/>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="*"/>
+        <RowDefinition Height="Auto"/>
       </Grid.RowDefinitions>
-      <StackPanel Grid.Row="0" Orientation="Horizontal">
-        <Button Content="Create Connection" HorizontalAlignment="Left" Margin="5" Click="NewConnectionButton_Click"/>
-        <Button Content="Add Existing Connection" HorizontalAlignment="Left" Margin="5" Click="AddExistingButton_Click"/>
+      <Label Grid.Row="0" Content="Codesource Directories" FontSize="16"/>
+      <ListBox Name="codeSourceListBox" Grid.Row="1" ItemsSource="{Binding CodeSourceConfigList}" SelectionChanged="codeSourceListBox_SelectionChanged" IsEnabled="{Binding Path=IsEditingConfig, Converter={StaticResource inverseBooleanConverter}}" DockPanel.Dock="Top" VerticalContentAlignment="Stretch" MouseDoubleClick="codeSourceListBox_MouseDoubleClick">
+        <StackPanel>
+          <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+          <TextBlock Text="{Binding FileLocation}" FontStyle="Italic"/>
+        </StackPanel>
+      </ListBox>
+      <StackPanel Grid.Row="2" Orientation="Horizontal" DockPanel.Dock="Bottom">
+        <Button Content="Add Existing Codesource" HorizontalAlignment="Left" Margin="5" Click="AddExistingButton_Click"/>
+        <Button Content="Setup New Codesouce" HorizontalAlignment="Left" Margin="5" Click="NewConnectionButton_Click"/>
       </StackPanel>
-      <ListBox Grid.Row="1" Name="connectionListBox" ItemsSource="{Binding DatabaseConfigList}" SelectionChanged="ConnectionListBox_SelectionChanged" IsEnabled="{Binding Path=IsEditingConfig, Converter={StaticResource inverseBooleanConverter}}">
+      <Line Grid.Row="3"/>
+      <Label Content="Database Connections" Grid.Row="4" FontSize="16"/>
+      <ListBox Name="connectionListBox" Grid.Row="5" ItemsSource="{Binding DatabaseConfigList}" SelectionChanged="ConnectionListBox_SelectionChanged" IsEnabled="{Binding Path=IsEditingConfig, Converter={StaticResource inverseBooleanConverter}}" VerticalContentAlignment="Stretch" MouseDoubleClick="connectionListBox_MouseDoubleClick">
         <ListBox.ItemTemplate>
           <DataTemplate DataType="DatabaseConfig">
             <DataTemplate.Resources>
@@ -51,7 +56,6 @@
             </DataTemplate.Resources>
             <StackPanel>
               <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
-              <TextBlock Text="{Binding FileLocation}" FontStyle="Italic"/>
               <TextBlock>
                 <TextBlock.Text>
                   <MultiBinding StringFormat="Host: {0}:{1}">
@@ -72,18 +76,16 @@
         </ListBox.ItemTemplate>
         <ListBox.ItemContainerStyle>
           <Style TargetType="ListBoxItem">
-            <EventSetter Event="MouseDoubleClick" Handler="HandleDoubleClick"/>
+            <EventSetter Event="MouseDoubleClick" Handler="connectionListBox_MouseDoubleClick"/>
           </Style>
         </ListBox.ItemContainerStyle>
       </ListBox>
-      <StackPanel Orientation="Horizontal" Grid.Row="2">
-
-
+      <StackPanel Orientation="Horizontal" Grid.Row="6">
         <Button Content="Connect" Margin="5" Width="100" Click="ConnectButton_Click" IsEnabled="{Binding ElementName=connectionListBox, Path=SelectedItems.Count}"/>
         <Button Content="Remove" Margin="5" Width="100" Click="RemoveConnectionButton_Click" IsEnabled="{Binding ElementName=connectionListBox, Path=SelectedItems.Count}"/>
       </StackPanel>
     </Grid>
-    <GroupBox Grid.Column="1" Grid.Row="1" DataContext="{Binding ElementName=connectionListBox, Path=SelectedItem}" Margin="5">
+    <GroupBox Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" DataContext="{Binding ElementName=connectionListBox, Path=SelectedItem}" Margin="5">
       <GroupBox.Header>
         <TextBlock Text="{Binding Path=Name, FallbackValue='Database Connection'}"/>
       </GroupBox.Header>
@@ -122,34 +124,15 @@
 
           <Grid Grid.Row="6" Margin="3" Grid.ColumnSpan="2">
             <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="Auto"/>
               <ColumnDefinition Width="*"/>
               <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <CheckBox Grid.Column="1" VerticalContentAlignment="Center" IsChecked="{Binding Path=UsePooling}" ToolTip="If pooling is enabled, the database will hold the connection open between queries.&#x0a;This speeds up Lobster operations, but can hinder database performance." Content="Pool Connection"/>
-            <Button Grid.Column="2" Click="TestConnectionButton_Click" Width="125" Content="Test Connection"/>
+            <CheckBox Grid.Column="0" VerticalContentAlignment="Center" IsChecked="{Binding Path=UsePooling}" ToolTip="If pooling is enabled, the database will hold the connection open between queries.&#x0a;This speeds up Lobster operations, but can hinder database performance." Content="Pool Connection"/>
+            <Button Grid.Column="1" Click="TestConnectionButton_Click" Width="125" Content="Test Connection"/>
           </Grid>
-          <StackPanel Orientation="Horizontal" Grid.Row="7" Grid.ColumnSpan="2">
+          <StackPanel Orientation="Horizontal" Grid.Row="7" Grid.ColumnSpan="2" Margin="4,0,0,0">
             <CheckBox Grid.Column="1" VerticalContentAlignment="Center" IsChecked="{Binding Path=AllowAutomaticUpdates}" Content="Allow Automatic Updates" ToolTip="If checked, Lobster will automatically update the database when a synchronised file is changed."/>
           </StackPanel>
-          <!--<Label Grid.Row="8" Grid.Column="0" Margin="3">CodeSource Directory:</Label>-->
-          <!--<Grid Grid.Row="8" Grid.Column="1" Margin="3">
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="*"/>
-              <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <TextBox Width="Auto" Grid.Column="0" Text="{Binding Path=CodeSource}"/>
-            <Button Grid.Column="1" Click="CodeSourceButton_Click" Margin="5,0,0,0">. . .</Button>
-          </Grid>-->
-          <!--<Label Grid.Row="9" Grid.Column="0" Margin="3">ClobType Directory:</Label>-->
-          <!--<Grid Grid.Row="9" Grid.Column="1" Margin="3">
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="*"/>
-              <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <TextBox Width="Auto" Grid.Column="0" Text="{Binding Path=ClobTypeDir}"/>
-            <Button Grid.Column="1" Click="ClobTypeButton_Click" Margin="5,0,0,0">. . .</Button>
-          </Grid>-->
           <StackPanel Grid.Row="10" Grid.Column="1" Margin="3">
             <Button Width="100" HorizontalAlignment="Right" Click="EditClobTypeButton_Click">Clob Types</Button>
           </StackPanel>

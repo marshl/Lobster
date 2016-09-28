@@ -22,7 +22,7 @@
 //      [ _The Hobbit_, I: "An Unexpected Party"]
 //
 //-----------------------------------------------------------------------
-namespace LobsterWpf
+namespace LobsterWpf.ViewModels
 {
     using System.Collections.Generic;
     using System.Collections.ObjectModel;

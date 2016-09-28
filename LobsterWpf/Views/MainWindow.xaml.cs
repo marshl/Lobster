@@ -38,6 +38,8 @@ namespace LobsterWpf
     using System.Windows.Forms;
     using LobsterModel;
     using Properties;
+    using ViewModels;
+    using Views;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml

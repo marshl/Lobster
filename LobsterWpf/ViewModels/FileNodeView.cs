@@ -22,7 +22,7 @@
 //      [ _The Hobbit_, IX: "Out of the Frying Pan and Into the Fire"]
 //
 //-----------------------------------------------------------------------
-namespace LobsterWpf
+namespace LobsterWpf.ViewModels
 {
     using System;
     using System.Collections.Generic;
@@ -359,7 +359,7 @@ namespace LobsterWpf
                 return;
             }
 
-            List<FileBackup> fileBackups = BackupLog.GetBackupsForFile(this.ParentConnectionView.Connection.Config.CodeSource, this.FilePath);
+            List<FileBackup> fileBackups = BackupLog.GetBackupsForFile(this.ParentConnectionView.Connection.Config.ParentCodeSourceConfig.CodeSourceDirectory, this.FilePath);
             if (fileBackups != null)
             {
                 this.FileBackupList = new ObservableCollection<FileBackup>(fileBackups.OrderByDescending(backup => backup.DateCreated));

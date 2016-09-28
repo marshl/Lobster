@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LobsterWpf"
+        xmlns:viewmodels="clr-namespace:LobsterWpf.ViewModels"
         mc:Ignorable="d"
         Title="Lobster" Height="600" Width="800" Loaded="Window_Loaded" Icon="../Resources/Images/cartoon-lobster.ico" MinWidth="640" MinHeight="480" Background="{StaticResource BackgroundKey}" Initialized="Window_Initialized" StateChanged="Window_StateChanged" Closing="Window_Closing">
   <Grid x:Name="ConnectionContainer">
@@ -79,7 +80,7 @@
               </Style>
             </TreeView.ItemContainerStyle>
             <TreeView.ItemTemplate>
-              <HierarchicalDataTemplate DataType="{x:Type local:FileNodeView}" ItemsSource="{Binding Children}">
+              <HierarchicalDataTemplate DataType="{x:Type viewmodels:FileNodeView}" ItemsSource="{Binding Children}">
                 <StackPanel Orientation="Horizontal">
                   <Image Source="{Binding ImageUrl}" Height="18"/>
                   <TextBlock Text="{Binding Path=DisplayName}" Foreground="{Binding Path=ForegroundColour}"  VerticalAlignment="Center"/>

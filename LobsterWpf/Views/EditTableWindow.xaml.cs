@@ -26,10 +26,13 @@ namespace LobsterWpf
 {
     using System.Windows;
     using LobsterModel;
+    using ViewModels;
+    using System;
 
     /// <summary>
     /// Interaction logic for EditTableWindow.xaml
     /// </summary>
+    [Obsolete]
     public partial class EditTableWindow : Window
     {
         /// <summary>

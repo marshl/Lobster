@@ -23,13 +23,16 @@
 //-----------------------------------------------------------------------
 namespace LobsterWpf
 {
+    using System;
     using System.Collections.ObjectModel;
     using System.Windows;
     using LobsterModel;
+    using ViewModels;
 
     /// <summary>
     /// Interaction logic for ColumnListWindow.xaml
     /// </summary>
+    [Obsolete]
     public partial class ColumnListWindow : Window
     {
         /// <summary>

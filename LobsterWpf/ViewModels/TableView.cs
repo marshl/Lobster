@@ -20,8 +20,9 @@
 //      [ _The Lord of the Rings_, V/i: "Minas Tirith"]
 //
 //-----------------------------------------------------------------------
-namespace LobsterWpf
+namespace LobsterWpf.ViewModels
 {
+    using System;
     using System.Collections.Generic;
     using System.ComponentModel;
     using LobsterModel;
@@ -29,6 +30,7 @@ namespace LobsterWpf
     /// <summary>
     /// The model-view of the LobserModel.Table
     /// </summary>
+    [Obsolete]
     public class TableView : INotifyPropertyChanged
     {
         /// <summary>

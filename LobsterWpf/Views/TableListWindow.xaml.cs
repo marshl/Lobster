@@ -19,10 +19,13 @@ namespace LobsterWpf
     using System.Collections.ObjectModel;
     using System.Windows;
     using LobsterModel;
+    using ViewModels;
+    using System;
 
     /// <summary>
     /// Interaction logic for TableListWindow.xaml
     /// </summary>
+    [Obsolete]
     public partial class TableListWindow : Window
     {
         /// <summary>

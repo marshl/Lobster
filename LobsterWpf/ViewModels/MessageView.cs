@@ -21,7 +21,7 @@
 //      [ _The Lord of the Rings_, V/x: "The Black Gate Opens"]
 //
 //-----------------------------------------------------------------------
-namespace LobsterWpf
+namespace LobsterWpf.ViewModels
 {
     using System;
     using System.Windows.Media;

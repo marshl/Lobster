@@ -24,10 +24,13 @@ namespace LobsterWpf
 {
     using System.Windows;
     using LobsterModel;
+    using ViewModels;
+    using System;
 
     /// <summary>
     /// Interaction logic for EditClobTypeWindow.xaml
     /// </summary>
+    [Obsolete]
     public partial class EditClobTypeWindow : Window
     {
         /// <summary>

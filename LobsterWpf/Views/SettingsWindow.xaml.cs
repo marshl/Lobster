@@ -27,6 +27,7 @@ namespace LobsterWpf
     using System.Text.RegularExpressions;
     using System.Windows;
     using System.Windows.Input;
+    using ViewModels;
 
     /// <summary>
     /// Interaction logic for SettingsWindow.xaml

@@ -26,6 +26,7 @@ namespace LobsterWpf
     using System;
     using System.Diagnostics;
     using System.Windows;
+    using ViewModels;
 
     /// <summary>
     /// The window that displays messages logged by LobsterModel.MessageLog

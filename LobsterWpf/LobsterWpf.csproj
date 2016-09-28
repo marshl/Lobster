@@ -122,6 +122,8 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="ViewModels\ClobDirectoryView.cs" />
+    <Compile Include="ViewModels\CodeSourceConfigView.cs" />
+    <Compile Include="ViewModels\ConnectionConfigView.cs" />
     <Compile Include="Views\ClobTypeListWindow.xaml.cs">
       <DependentUpon>ClobTypeListWindow.xaml</DependentUpon>
     </Compile>

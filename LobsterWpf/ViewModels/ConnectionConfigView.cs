@@ -31,19 +31,18 @@ namespace LobsterWpf.ViewModels
     using LobsterModel;
     using Microsoft.WindowsAPICodePack.Dialogs;
 
-    [Obsolete]
     /// <summary>
     /// The view of a DatabaseConfig object.
     /// </summary>
-    public class DatabaseConfigView : INotifyPropertyChanged
+    public class ConnectionConfigView : INotifyPropertyChanged
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseConfigView"/> class.
         /// </summary>
-        /// <param name="databaseConfig">The database config to use as the model of this view.</param>
-        public DatabaseConfigView(DatabaseConfig databaseConfig)
+        /// <param name="connectionConfig">The database config to use as the model of this view.</param>
+        public ConnectionConfigView(ConnectionConfig connectionConfig)
         {
-            this.BaseConfig = databaseConfig;
+            this.BaseConfig = connectionConfig;
         }
 
         /// <summary>
@@ -54,7 +53,7 @@ namespace LobsterWpf.ViewModels
         /// <summary>
         /// Gets the underlying model object.
         /// </summary>
-        public DatabaseConfig BaseConfig { get; }
+        public ConnectionConfig BaseConfig { get; }
 
         /// <summary>
         /// Gets or sets a value indicating whether changes have been made to any of the fields in this config.
@@ -173,58 +172,18 @@ namespace LobsterWpf.ViewModels
         /// <summary>
         /// Gets or sets a value indicating whether files in the connection can be automatically clobbed when updated.
         /// </summary>
-        public bool AllowAutomaticUpdates
+        public bool AllowAutomaticClobbing
         {
             get
             {
-                return this.BaseConfig.AllowAutomaticUpdates;
+                return this.BaseConfig.AllowAutomaticClobbing;
             }
 
             set
             {
-                this.BaseConfig.AllowAutomaticUpdates = value;
-                this.NotifyPropertyChanged("AllowAutomaticUpdates");
+                this.BaseConfig.AllowAutomaticClobbing = value;
+                this.NotifyPropertyChanged("AllowAutomaticClobbing");
                 this.ChangesMade = true;
-            }
-        }
-
-        /// <summary>
-        /// Gets the ClobType directory for the base config.
-        /// </summary>
-        public string ClobTypeDirectory
-        {
-            get
-            {
-                return this.BaseConfig.ClobTypeDirectory;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the file from which this DatabaseConfig was loaded.
-        /// </summary>
-        public string FileLocation
-        {
-            get
-            {
-                return this.BaseConfig.FileLocation;
-            }
-
-            set
-            {
-                this.BaseConfig.FileLocation = value;
-                this.NotifyPropertyChanged("FileLocation");
-                this.ChangesMade = true;
-            }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether the xml the config was loaded from was valid.
-        /// </summary>
-        public bool IsValid
-        {
-            get
-            {
-                return this.BaseConfig.IsValid;
             }
         }
 
@@ -240,41 +199,6 @@ namespace LobsterWpf.ViewModels
         }
 
         /// <summary>
-        /// Writes the database config out to file, prompting the user for the file to save to if not already set.
-        /// </summary>
-        /// <returns>True if the changes could be applied, otherwise false.</returns>
-        public bool ApplyChanges()
-        {
-            if (this.BaseConfig.FileLocation == null || !File.Exists(this.BaseConfig.FileLocation))
-            {
-                CommonSaveFileDialog dlg = new CommonSaveFileDialog();
-                dlg.Filters.Add(new CommonFileDialogFilter("eXtensible Markup Language", "*.xml"));
-                dlg.Title = "Save Lobster Connection As";
-                dlg.DefaultFileName = string.IsNullOrEmpty(this.Name) ? "NewConnection.xml" : this.Name.Replace(" ", string.Empty) + ".xml";
-
-                CommonFileDialogResult result = dlg.ShowDialog();
-                if (result == CommonFileDialogResult.Ok)
-                {
-                    this.FileLocation = dlg.FileName;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-
-            try
-            {
-                DatabaseConfig.SerialiseToFile(this.FileLocation, this.BaseConfig);
-                return true;
-            }
-            catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
         /// Implementation of the INotifyPropertyChange, to tell WPF when a data value has changed
         /// </summary>
         /// <param name="propertyName">The name of the property that has changed.</param>
@@ -283,10 +207,7 @@ namespace LobsterWpf.ViewModels
         /// parameter causes the property name of the caller to be substituted as an argument.</remarks>
         private void NotifyPropertyChanged(string propertyName = "")
         {
-            if (this.PropertyChanged != null)
-            {
-                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

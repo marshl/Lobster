@@ -21,7 +21,7 @@
 //      [ _The Lord of the Rings_, III/i: "The Departure of Boromir"]
 //
 //-----------------------------------------------------------------------
-namespace LobsterWpf
+namespace LobsterWpf.ViewModels
 {
     using System;
     using System.Collections.ObjectModel;

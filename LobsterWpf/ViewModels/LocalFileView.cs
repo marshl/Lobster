@@ -22,7 +22,7 @@
 //      [ _The Hobbit_, VI: "Out of the Frying Pan and Into the Fire"]
 //
 //-----------------------------------------------------------------------
-namespace LobsterWpf
+namespace LobsterWpf.ViewModels
 {
     using System.Collections.ObjectModel;
     using System.IO;

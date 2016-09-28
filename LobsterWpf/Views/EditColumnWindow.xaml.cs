@@ -28,10 +28,12 @@ namespace LobsterWpf
     using System.Linq;
     using System.Windows;
     using LobsterModel;
+    using ViewModels;
 
     /// <summary>
     /// Interaction logic for EditColumnWindow.xaml
     /// </summary>
+    [Obsolete]
     public partial class EditColumnWindow : Window
     {
         /// <summary>

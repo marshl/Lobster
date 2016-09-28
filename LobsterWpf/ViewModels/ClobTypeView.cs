@@ -22,7 +22,7 @@
 //      [ _The Lord of the Rings_, I/i: "A Long-expected Party"]
 //
 //-----------------------------------------------------------------------
-namespace LobsterWpf
+namespace LobsterWpf.ViewModels
 {
     using System.Collections.Generic;
     using System.ComponentModel;

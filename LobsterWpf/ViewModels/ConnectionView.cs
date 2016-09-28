@@ -22,7 +22,7 @@
 //      [ _The Lord of the Rings_, V/i: "Chapter"]
 //
 //-----------------------------------------------------------------------
-namespace LobsterWpf
+namespace LobsterWpf.ViewModels
 {
     using System;
     using System.Collections.Generic;
@@ -150,12 +150,12 @@ namespace LobsterWpf
         {
             get
             {
-                return this.Connection.IsAutoUpdateEnabled;
+                return this.Connection.IsAutomaticClobbingEnabled;
             }
 
             set
             {
-                this.Connection.IsAutoUpdateEnabled = value;
+                this.Connection.IsAutomaticClobbingEnabled = value;
                 this.NotifyPropertyChanged("IsAutoUpdateEnabled");
             }
         }

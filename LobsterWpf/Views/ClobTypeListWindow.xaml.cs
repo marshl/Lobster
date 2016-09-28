@@ -29,10 +29,13 @@ namespace LobsterWpf
     using System.IO;
     using System.Windows;
     using LobsterModel;
+    using ViewModels;
+    using System;
 
     /// <summary>
     /// Interaction logic for ClobTypeListWindow.xaml
     /// </summary>
+    [Obsolete]
     public partial class ClobTypeListWindow : Window
     {
         /// <summary>

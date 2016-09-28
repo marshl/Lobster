@@ -20,7 +20,7 @@
 //      [ _The Lord of the Rings_, I/iii: "Three is Company"]
 //
 //-----------------------------------------------------------------------
-namespace LobsterWpf
+namespace LobsterWpf.Views
 {
     using System;
     using System.Collections.Generic;
@@ -34,6 +34,7 @@ namespace LobsterWpf
     using System.Windows.Input;
     using LobsterModel;
     using Microsoft.WindowsAPICodePack.Dialogs;
+    using LobsterWpf.ViewModels;
 
     /// <summary>
     /// Interaction logic for ConnectionListWindow.xaml
@@ -43,7 +44,7 @@ namespace LobsterWpf
         /// <summary>
         /// The internal value for DatabaseConfigList.
         /// </summary>
-        private ObservableCollection<DatabaseConfigView> databaseConfigList;
+        private ObservableCollection<ConnectionConfigView> databaseConfigList;
 
         /// <summary>
         /// Whether the user is currently editing a config file or not.
@@ -113,11 +114,11 @@ namespace LobsterWpf
         /// <summary>
         /// Gets the <see cref="DatabaseConfigView"/> that is currently selected in the config list.
         /// </summary>
-        public DatabaseConfigView CurrentConfigView
+        public ConnectionConfigView CurrentConfigView
         {
             get
             {
-                return this.connectionListBox.SelectedItem as DatabaseConfigView;
+                return this.connectionListBox.SelectedItem as ConnectionConfigView;
             }
         }
 
@@ -129,7 +130,7 @@ namespace LobsterWpf
         /// <summary>
         /// Gets or sets the list of configuation files for the current connection directory.
         /// </summary>
-        public ObservableCollection<DatabaseConfigView> DatabaseConfigList
+        public ObservableCollection<ConnectionConfigView> DatabaseConfigList
         {
             get
             {
@@ -142,18 +143,7 @@ namespace LobsterWpf
                 this.NotifyPropertyChanged("DatabaseConfigList");
             }
         }
-
-        /// <summary>
-        /// The event when a connection config item is double clicked.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments.</param>
-        protected void HandleDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            DatabaseConfigView configView = ((ListBoxItem)sender).Content as DatabaseConfigView;
-            this.TryConnectWithConfig(configView.BaseConfig);
-        }
-
+        
         /// <summary>
         /// Implementation of the INotifyPropertyChange, to tell WPF when a data value has changed
         /// </summary>
@@ -204,7 +194,7 @@ namespace LobsterWpf
                 return;
             }
 
-            DatabaseConfigView config = this.DatabaseConfigList[this.connectionListBox.SelectedIndex];
+            ConnectionConfigView config = this.DatabaseConfigList[this.connectionListBox.SelectedIndex];
 
             this.TryConnectWithConfig(config.BaseConfig);
         }
@@ -216,20 +206,20 @@ namespace LobsterWpf
         /// <param name="e">The event arguments.</param>
         private void RemoveConnectionButton_Click(object sender, RoutedEventArgs e)
         {
-            MessageBoxResult result = MessageBox.Show("Are you sure you want to forget this connection? (This will not affect any files on disk)", "Confirm", MessageBoxButton.OKCancel);
+            /*MessageBoxResult result = MessageBox.Show("Are you sure you want to forget this connection? (This will not affect any files on disk)", "Confirm", MessageBoxButton.OKCancel);
 
             if (result == MessageBoxResult.OK)
             {
-                DatabaseConfig.RemoveCodeSource(this.CurrentConfigView.BaseConfig.CodeSource);
+                DatabaseConfig.RemoveCodeSource(this.CurrentConfigView.BaseConfig.ParentCodeSourceConfig.CodeSourceDirectory);
                 this.databaseConfigList.Remove(this.CurrentConfigView);
-            }
+            }*/
         }
 
         /// <summary>
         /// Attempts to change the current connection to the input config. If successful, the window is closed.
         /// </summary>
         /// <param name="config">The config to connect with.</param>
-        private void TryConnectWithConfig(DatabaseConfig config)
+        private void TryConnectWithConfig(ConnectionConfig config)
         {
             PasswordPromptWindow win = new PasswordPromptWindow(config.Name, config.Username);
             win.Owner = this;
@@ -260,7 +250,7 @@ namespace LobsterWpf
         /// <param name="e">The event arguments.</param>
         private void NewConnectionButton_Click(object sender, RoutedEventArgs e)
         {
-            CommonOpenFileDialog dlg = new CommonOpenFileDialog();
+            /*CommonOpenFileDialog dlg = new CommonOpenFileDialog();
             dlg.IsFolderPicker = true;
             CommonFileDialogResult result = dlg.ShowDialog();
             if (result != CommonFileDialogResult.Ok)
@@ -269,24 +259,24 @@ namespace LobsterWpf
             }
 
             string errorMessage = null;
-            if (!DatabaseConfig.ValidateNewCodeSourceLocation(dlg.FileName, ref errorMessage))
+            if (!CodeSourceConfig.ValidateNewCodeSourceLocation(dlg.FileName, ref errorMessage))
             {
                 MessageBox.Show(errorMessage);
                 return;
             }
 
-            DatabaseConfig databaseConfig = null;
-            if (!DatabaseConfig.InitialiseCodeSourceDirectory(dlg.FileName, ref databaseConfig))
+            CodeSourceConfig codeSourceConfig = null;
+            if (!CodeSourceConfig.InitialiseCodeSourceDirectory(dlg.FileName, ref codeSourceConfig))
             {
                 return;
             }
 
-            DatabaseConfigView configView = new DatabaseConfigView(databaseConfig);
+            CodeSourceConfigView configView = new CodeSourceConfigView(codeSourceConfig);
 
             this.databaseConfigList.Add(configView);
             this.connectionListBox.SelectedItem = configView;
             this.IsEditingConfig = true;
-            this.isEditingNewConfig = true;
+            this.isEditingNewConfig = true;*/
         }
 
         /// <summary>
@@ -305,13 +295,13 @@ namespace LobsterWpf
             }
 
             string errorMessage = null;
-            if (!DatabaseConfig.ValidateCodeSourceLocation(dlg.FileName, ref errorMessage))
+            if (!CodeSourceConfig.ValidateCodeSourceLocation(dlg.FileName, ref errorMessage))
             {
                 MessageBox.Show(errorMessage);
                 return;
             }
 
-            DatabaseConfig.AddCodeSourceDirectory(dlg.FileName);
+            CodeSourceConfig.AddCodeSourceDirectory(dlg.FileName);
 
             this.LoadDatabaseConnections();
         }
@@ -321,8 +311,8 @@ namespace LobsterWpf
         /// </summary>
         private void LoadDatabaseConnections()
         {
-            List<DatabaseConfigView> configViews = DatabaseConfig.GetConfigList().Select(item => new DatabaseConfigView(item)).ToList();
-            this.DatabaseConfigList = new ObservableCollection<DatabaseConfigView>(configViews);
+            /*List<DatabaseConfigView> configViews = DatabaseConfig.GetConfigList().Select(item => new DatabaseConfigView(item)).ToList();
+            this.DatabaseConfigList = new ObservableCollection<DatabaseConfigView>(configViews);*/
         }
 
         /// <summary>
@@ -353,10 +343,10 @@ namespace LobsterWpf
         /// <param name="e">The event arguments.</param>
         private void EditClobTypeButton_Click(object sender, RoutedEventArgs e)
         {
-            ClobTypeListWindow window = new ClobTypeListWindow(this.CurrentConfigView.ClobTypeDirectory);
+            /*ClobTypeListWindow window = new ClobTypeListWindow(this.CurrentConfigView.ClobTypeDirectory);
             window.Owner = this;
             bool? result = window.ShowDialog();
-            this.Focus();
+            this.Focus();*/
         }
 
         /// <summary>
@@ -403,7 +393,7 @@ namespace LobsterWpf
         /// <param name="e">The event arguments.</param>
         private void SaveEditButton_Click(object sender, RoutedEventArgs e)
         {
-            Debug.Assert(this.IsEditingConfig, "The save button should be usable while not in edit mode");
+            /*Debug.Assert(this.IsEditingConfig, "The save button should be usable while not in edit mode");
 
             bool result = this.CurrentConfigView.ApplyChanges();
             if (!result)
@@ -414,7 +404,7 @@ namespace LobsterWpf
             {
                 this.IsEditingConfig = false;
                 this.NotifyPropertyChanged("IsEditButtonEnabled");
-            }
+            }*/
         }
 
         /// <summary>
@@ -443,6 +433,22 @@ namespace LobsterWpf
             }
 
             this.NotifyPropertyChanged("IsEditButtonEnabled");
+        }
+
+        private void codeSourceListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+
+        }
+
+        private void connectionListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            ConnectionConfigView configView = ((ListBoxItem)sender).Content as ConnectionConfigView;
+            this.TryConnectWithConfig(configView.BaseConfig);
+        }
+
+        private void codeSourceListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
         }
     }
 }

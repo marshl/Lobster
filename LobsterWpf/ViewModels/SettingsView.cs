@@ -23,7 +23,7 @@
 //      [ _The Lord of the Rings_, II/ii: "The Council of Elrond"]
 //
 //-----------------------------------------------------------------------
-namespace LobsterWpf
+namespace LobsterWpf.ViewModels
 {
     using System.Collections.Specialized;
     using Properties;

@@ -23,14 +23,16 @@
 //      [ _The Lord of the Rings_, V/i: "Minas Tirith"]
 //
 //-----------------------------------------------------------------------
-namespace LobsterWpf
+namespace LobsterWpf.ViewModels
 {
+    using System;
     using System.ComponentModel;
     using LobsterModel;
 
     /// <summary>
     /// The mode-view for a LObsterMOdel.Column
     /// </summary>
+    [Obsolete]
     public class ColumnView : INotifyPropertyChanged
     {
         /// <summary>
