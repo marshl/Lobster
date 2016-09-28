@@ -1,9 +1,9 @@
-﻿<Window x:Class="LobsterWpf.EditClobTypeWindow"
+﻿<Window x:Class="LobsterWpf.Views.EditClobTypeWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:LobsterWpf"
+        xmlns:local="clr-namespace:LobsterWpf.Views"
         mc:Ignorable="d"
         Title="Edit Clob Type" Height="245" Width="400" MinHeight="245" MinWidth="400" Background="{StaticResource BackgroundKey}" ShowInTaskbar="False" Icon="../Resources/Images/cartoon-lobster.ico" >
   <Grid>

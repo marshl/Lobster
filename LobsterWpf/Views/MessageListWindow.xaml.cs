@@ -21,7 +21,7 @@
 //      [ _The Lord of the Rings_, III/ii: "The Riders of Rohan"]
 //
 //-----------------------------------------------------------------------
-namespace LobsterWpf
+namespace LobsterWpf.Views
 {
     using System;
     using System.Diagnostics;

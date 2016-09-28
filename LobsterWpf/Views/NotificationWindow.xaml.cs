@@ -22,7 +22,7 @@
 //      [ _The Lord of the Rings_, V/i: "Minas Tirith"]
 //
 //-----------------------------------------------------------------------
-namespace LobsterWpf
+namespace LobsterWpf.Views
 {
     using System;
     using System.Collections.Generic;

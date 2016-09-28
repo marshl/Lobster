@@ -22,7 +22,7 @@
 //      [ _The Lord of the Rings_, I/vii: "In the House of Tom Bombadil"]
 //
 //-----------------------------------------------------------------------
-namespace LobsterWpf
+namespace LobsterWpf.Views
 {
     using System.Windows;
     using LobsterModel;

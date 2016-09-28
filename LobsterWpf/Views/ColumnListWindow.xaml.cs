@@ -21,7 +21,7 @@
 //      [ _The Lord of the Rings_, V/i: "Chapter"]
 //
 //-----------------------------------------------------------------------
-namespace LobsterWpf
+namespace LobsterWpf.Views
 {
     using System;
     using System.Collections.ObjectModel;

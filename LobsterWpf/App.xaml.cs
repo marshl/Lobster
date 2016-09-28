@@ -28,6 +28,7 @@ namespace LobsterWpf
     using System.Windows;
     using LobsterModel;
     using Properties;
+    using Views;
 
     /// <summary>
     /// Interaction logic for App.xaml

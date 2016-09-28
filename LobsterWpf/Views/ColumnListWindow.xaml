@@ -1,9 +1,9 @@
-﻿<Window x:Class="LobsterWpf.ColumnListWindow"
+﻿<Window x:Class="LobsterWpf.Views.ColumnListWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:LobsterWpf"
+        xmlns:local="clr-namespace:LobsterWpf.Views"
         mc:Ignorable="d"
         Title="Columns" Height="300" Width="400" MinWidth="300" MinHeight="300" ShowInTaskbar="False" Background="{StaticResource BackgroundKey}" Icon="../Resources/Images/cartoon-lobster.ico" >
   <Grid>

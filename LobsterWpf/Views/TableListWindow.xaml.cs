@@ -14,7 +14,7 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
-namespace LobsterWpf
+namespace LobsterWpf.Views
 {
     using System.Collections.ObjectModel;
     using System.Windows;

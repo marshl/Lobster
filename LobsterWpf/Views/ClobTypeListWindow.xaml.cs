@@ -22,7 +22,7 @@
 //      [ _The Hobbit_, VII: "Queer Lodgings"]
 //
 //-----------------------------------------------------------------------
-namespace LobsterWpf
+namespace LobsterWpf.Views
 {
     using System.Collections.Generic;
     using System.Collections.ObjectModel;

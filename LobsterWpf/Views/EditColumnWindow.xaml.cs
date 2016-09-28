@@ -22,7 +22,7 @@
 //      [ _The Lord of the Rings_, II/vi: "Lothlorien"]
 //
 //-----------------------------------------------------------------------
-namespace LobsterWpf
+namespace LobsterWpf.Views
 {
     using System;
     using System.Linq;

@@ -22,7 +22,7 @@
 //      [ _The Lord of the Rings_, II/ii: "THe Council of Elrond"]
 //
 //-----------------------------------------------------------------------
-namespace LobsterWpf
+namespace LobsterWpf.Views
 {
     using System.Text.RegularExpressions;
     using System.Windows;

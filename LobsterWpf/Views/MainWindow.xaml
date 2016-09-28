@@ -1,9 +1,9 @@
-﻿<Window x:Class="LobsterWpf.MainWindow"
+﻿<Window x:Class="LobsterWpf.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:LobsterWpf"
+        xmlns:local="clr-namespace:LobsterWpf.Views"
         xmlns:viewmodels="clr-namespace:LobsterWpf.ViewModels"
         mc:Ignorable="d"
         Title="Lobster" Height="600" Width="800" Loaded="Window_Loaded" Icon="../Resources/Images/cartoon-lobster.ico" MinWidth="640" MinHeight="480" Background="{StaticResource BackgroundKey}" Initialized="Window_Initialized" StateChanged="Window_StateChanged" Closing="Window_Closing">

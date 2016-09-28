@@ -22,7 +22,7 @@
 //      [ _The Lord of the Rings_, I/xi: "A Knife in the Dark"]
 //
 //-----------------------------------------------------------------------
-namespace LobsterWpf
+namespace LobsterWpf.Views
 {
     using System.ComponentModel;
     using System.Net;

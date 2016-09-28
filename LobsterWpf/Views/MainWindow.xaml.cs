@@ -23,7 +23,7 @@
 //      [ _The Lord of the Rings_, II/iii: "The Ring Goes South"]
 //
 //-----------------------------------------------------------------------
-namespace LobsterWpf
+namespace LobsterWpf.Views
 {
     using System;
     using System.Collections.Generic;

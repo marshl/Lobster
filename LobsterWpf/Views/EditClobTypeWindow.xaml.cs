@@ -20,7 +20,7 @@
 //      [ _The Hobbit_, XIX: "The Last Stage"]
 //
 //-----------------------------------------------------------------------
-namespace LobsterWpf
+namespace LobsterWpf.Views
 {
     using System.Windows;
     using LobsterModel;
