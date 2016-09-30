@@ -76,18 +76,22 @@ namespace LobsterWpf
         /// <param name="args">The exception arguments.</param>
         private void GlobalExceptionHandler(object sender, UnhandledExceptionEventArgs args)
         {
+            Exception e = (Exception)args.ExceptionObject;
+            string message = @"An unhandled exception has occurred. 
+Please add an issue to the Lobster GitHub repo, with a copy of the log file attached. 
+Ensure that there are no passwords in the file before uploading it.";
+
             try
             {
-                Exception e = (Exception)args.ExceptionObject;
-                MessageLog.LogError($"Unhandled Exception {e}");
+                MessageLog.LogError($"An unhandled exception occurred:\n {e}");
                 MessageLog.Close();
-                MessageBox.Show(@"An unhandled exception has occurred. 
-Please add an issue to the Lobster GitHub repo, with a copy of the log file attached. 
-Ensure that there are no passwords in the file before uploading it.");
+                MessageBox.Show(message);
             }
-            catch
+            catch (Exception ex)
             {
-                MessageBox.Show("Oops, an exception occurred when trying to handle the unhandled exception. I'm sorry, but you are well and truly fucked.");
+                MessageBox.Show($@"An unhandled exception occurred, but an error occurred when attempting to write the message to the log file. 
+The original exception was: {e}
+The exception that occurred when logging the exception was: {ex}");
             }
             finally
             {
