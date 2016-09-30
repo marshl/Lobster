@@ -85,7 +85,7 @@ namespace LobsterModel
         /// <summary>
         /// Deserialises the given file into a new <see cref="DatabaseConnection"/>.
         /// </summary>
-        /// <param name="fullpath">The location of the file to deserialise.</param>
+        /// <param name="codeSourceDirectory">The location of the file to deserialise.</param>
         /// <returns>The new <see cref="DatabaseConnection"/>.</returns>
         public static CodeSourceConfig LoadCodeSourceConfig(string codeSourceDirectory)
         {
