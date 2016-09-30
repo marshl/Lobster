@@ -19,7 +19,7 @@ namespace LobsterModel
     using System;
 
     /// <summary>
-    /// The event arguments for <see cref="StartChangeProcessingEvent"/>.
+    /// The event arguments for <see cref="FileChangeEventArgs"/>.
     /// </summary>
     public class FileChangeEventArgs : EventArgs
     {
