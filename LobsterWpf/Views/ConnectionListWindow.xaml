@@ -31,10 +31,14 @@
       </Grid.RowDefinitions>
       <Label Grid.Row="0" Content="Codesource Directories" FontSize="16"/>
       <ListBox Name="codeSourceListBox" Grid.Row="1" ItemsSource="{Binding CodeSourceConfigList}" SelectionChanged="codeSourceListBox_SelectionChanged" IsEnabled="{Binding Path=IsEditingConfig, Converter={StaticResource inverseBooleanConverter}}" DockPanel.Dock="Top" VerticalContentAlignment="Stretch" MouseDoubleClick="codeSourceListBox_MouseDoubleClick">
-        <StackPanel>
-          <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
-          <TextBlock Text="{Binding FileLocation}" FontStyle="Italic"/>
-        </StackPanel>
+        <ListBox.ItemTemplate>
+          <DataTemplate DataType="CodeSourceConfigView">
+            <StackPanel>
+              <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+              <TextBlock Text="{Binding FileLocation}" FontStyle="Italic"/>
+            </StackPanel>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
       </ListBox>
       <StackPanel Grid.Row="2" Orientation="Horizontal" DockPanel.Dock="Bottom">
         <Button Content="Add Existing Codesource" HorizontalAlignment="Left" Margin="5" Click="AddExistingButton_Click"/>

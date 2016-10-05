@@ -24,6 +24,7 @@
 //-----------------------------------------------------------------------
 namespace LobsterWpf.Views
 {
+    using System;
     using System.Collections.ObjectModel;
     using System.Windows;
     using LobsterModel;
@@ -43,7 +44,7 @@ namespace LobsterWpf.Views
             this.InitializeComponent();
 
             this.MessageLabel = $"Please select the table to insert {System.IO.Path.GetFileName(filename)} into:";
-            this.TableList = new ObservableCollection<LobsterModel.Table>(tables);
+            this.TableList = new ObservableCollection<Table>(tables);
         }
 
         /// <summary>

@@ -32,7 +32,23 @@ namespace LobsterWpf.ViewModels
         /// Gets or sets a value indicating whether changes have been made to any of the fields in this config.
         /// </summary>
         public bool ChangesMade { get; set; } = false;
-        
+
+        public string Name
+        {
+            get
+            {
+                return this.BaseConfig.Name;
+            }
+        }
+
+        public string FileLocation
+        {
+            get
+            {
+                return this.BaseConfig.FileLocation;
+            }
+        }
+
         /// <summary>
         /// Implementation of the INotifyPropertyChange, to tell WPF when a data value has changed
         /// </summary>

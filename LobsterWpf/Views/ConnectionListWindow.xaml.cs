@@ -26,7 +26,6 @@ namespace LobsterWpf.Views
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.ComponentModel;
-    using System.Diagnostics;
     using System.Linq;
     using System.Security;
     using System.Windows;
@@ -34,17 +33,19 @@ namespace LobsterWpf.Views
     using System.Windows.Input;
     using LobsterModel;
     using Microsoft.WindowsAPICodePack.Dialogs;
-    using LobsterWpf.ViewModels;
+    using ViewModels;
 
     /// <summary>
     /// Interaction logic for ConnectionListWindow.xaml
     /// </summary>
     public partial class ConnectionListWindow : Window, INotifyPropertyChanged
     {
+        public ObservableCollection<CodeSourceConfigView> CodeSourceConfigList { get; set; }
+
         /// <summary>
         /// The internal value for DatabaseConfigList.
         /// </summary>
-        private ObservableCollection<ConnectionConfigView> databaseConfigList;
+        public ObservableCollection<ConnectionConfigView> DatabaseConfigList { get; set; }
 
         /// <summary>
         /// Whether the user is currently editing a config file or not.
@@ -63,8 +64,15 @@ namespace LobsterWpf.Views
         {
             this.InitializeComponent();
 
-            this.LoadDatabaseConnections();
+            this.LoadCodeSourceConfigs();
+            //this.LoadDatabaseConnections();
             this.DataContext = this;
+        }
+
+        private void LoadCodeSourceConfigs()
+        {
+            List<CodeSourceConfigView> configViews = CodeSourceConfig.GetConfigList().Select(item => new CodeSourceConfigView(item)).ToList();
+            this.CodeSourceConfigList = new ObservableCollection<CodeSourceConfigView>(configViews);
         }
 
         /// <summary>
@@ -114,11 +122,19 @@ namespace LobsterWpf.Views
         /// <summary>
         /// Gets the <see cref="DatabaseConfigView"/> that is currently selected in the config list.
         /// </summary>
-        public ConnectionConfigView CurrentConfigView
+        public ConnectionConfigView CurrentConnectionConfigView
         {
             get
             {
                 return this.connectionListBox.SelectedItem as ConnectionConfigView;
+            }
+        }
+
+        public CodeSourceConfigView CurrentCodeSourceConfigView
+        {
+            get
+            {
+                return (CodeSourceConfigView)this.codeSourceListBox.SelectedItem;
             }
         }
 
@@ -128,23 +144,6 @@ namespace LobsterWpf.Views
         public DatabaseConnection DatabaseConnection { get; private set; }
 
         /// <summary>
-        /// Gets or sets the list of configuation files for the current connection directory.
-        /// </summary>
-        public ObservableCollection<ConnectionConfigView> DatabaseConfigList
-        {
-            get
-            {
-                return this.databaseConfigList;
-            }
-
-            set
-            {
-                this.databaseConfigList = value;
-                this.NotifyPropertyChanged("DatabaseConfigList");
-            }
-        }
-        
-        /// <summary>
         /// Implementation of the INotifyPropertyChange, to tell WPF when a data value has changed
         /// </summary>
         /// <param name="propertyName">The name of the property that has changed.</param>
@@ -153,10 +152,7 @@ namespace LobsterWpf.Views
         /// parameter causes the property name of the caller to be substituted as an argument.</remarks>
         private void NotifyPropertyChanged(string propertyName = "")
         {
-            if (this.PropertyChanged != null)
-            {
-                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         /// <summary>
@@ -166,7 +162,7 @@ namespace LobsterWpf.Views
         private bool ConfirmCancelChanges()
         {
             MessageBoxResult result = MessageBox.Show(
-                $"Are you sure you want to cancel any unsaved changes to {(string.IsNullOrEmpty(this.CurrentConfigView.Name) ? "Unnamed" : this.CurrentConfigView.Name)}?",
+                $"Are you sure you want to cancel any unsaved changes to {(string.IsNullOrEmpty(this.CurrentConnectionConfigView.Name) ? "Unnamed" : this.CurrentConnectionConfigView.Name)}?",
                 "Cancel",
                 MessageBoxButton.OKCancel);
 
@@ -174,7 +170,7 @@ namespace LobsterWpf.Views
             {
                 if (this.isEditingNewConfig)
                 {
-                    this.databaseConfigList.Remove(this.CurrentConfigView);
+                    this.DatabaseConfigList.Remove(this.CurrentConnectionConfigView);
                     this.isEditingNewConfig = false;
                 }
             }
@@ -322,7 +318,7 @@ namespace LobsterWpf.Views
         /// <param name="e">The event arguments.</param>
         private void TestConnectionButton_Click(object sender, RoutedEventArgs e)
         {
-            PasswordPromptWindow win = new PasswordPromptWindow(this.CurrentConfigView.Name, this.CurrentConfigView.Username);
+            PasswordPromptWindow win = new PasswordPromptWindow(this.CurrentConnectionConfigView.Name, this.CurrentConnectionConfigView.Username);
             win.ShowDialog();
             if (!win.DialogResult.GetValueOrDefault(false))
             {
@@ -331,7 +327,7 @@ namespace LobsterWpf.Views
 
             SecureString password = win.textField.SecurePassword;
             Exception ex = null;
-            bool result = this.CurrentConfigView.TestConnection(password, ref ex);
+            bool result = this.CurrentConnectionConfigView.TestConnection(password, ref ex);
             string message = result ? "Connection test successful" : "Connection test unsuccessful.\n" + ex;
             MessageBox.Show(message);
         }
@@ -358,7 +354,7 @@ namespace LobsterWpf.Views
         {
             if (this.IsEditingConfig)
             {
-                if (this.CurrentConfigView.ChangesMade && !this.ConfirmCancelChanges())
+                if (this.CurrentConnectionConfigView.ChangesMade && !this.ConfirmCancelChanges())
                 {
                     return;
                 }
