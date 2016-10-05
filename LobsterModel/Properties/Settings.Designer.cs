@@ -190,7 +190,7 @@ namespace LobsterModel.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("LobsterConnection.xml")]
+        [global::System.Configuration.DefaultSettingValueAttribute("LobsterConfig.xml")]
         public string DatabaseConfigFileName {
             get {
                 return ((string)(this["DatabaseConfigFileName"]));

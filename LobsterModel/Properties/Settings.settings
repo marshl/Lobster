@@ -51,7 +51,7 @@
       <Value Profile="(Default)">LobsterTypes</Value>
     </Setting>
     <Setting Name="DatabaseConfigFileName" Type="System.String" Scope="User">
-      <Value Profile="(Default)">LobsterConnection.xml</Value>
+      <Value Profile="(Default)">LobsterConfig.xml</Value>
     </Setting>
     <Setting Name="CodeSourceDirectories" Type="System.Collections.Specialized.StringCollection" Scope="User">
       <Value Profile="(Default)" />
