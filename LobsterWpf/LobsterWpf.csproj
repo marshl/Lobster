@@ -126,6 +126,9 @@
     <Compile Include="ViewModels\ClobDirectoryView.cs" />
     <Compile Include="ViewModels\CodeSourceConfigView.cs" />
     <Compile Include="ViewModels\ConnectionConfigView.cs" />
+    <Compile Include="Views\AddCodeSourceWindow.xaml.cs">
+      <DependentUpon>AddCodeSourceWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\ClobTypeListWindow.xaml.cs">
       <DependentUpon>ClobTypeListWindow.xaml</DependentUpon>
     </Compile>
@@ -169,6 +172,10 @@
     <Compile Include="Views\PasswordPromptWindow.xaml.cs">
       <DependentUpon>PasswordPromptWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="Views\AddCodeSourceWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\ClobTypeListWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

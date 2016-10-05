@@ -1,0 +1,26 @@
+﻿<Window x:Class="LobsterWpf.Views.AddCodeSourceWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:LobsterWpf.Views"
+        mc:Ignorable="d"
+        Title="Add CodeSource" Height="218.653" Width="408" Background="{StaticResource BackgroundKey}" Icon="../Resources/Images/cartoon-lobster.ico" Topmost="True" ResizeMode="NoResize" SizeToContent="Height" >
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+    <TextBlock Grid.Row="0" x:Name="label" HorizontalAlignment="Left" Margin="10" VerticalAlignment="Top" TextWrapping="WrapWithOverflow" Foreground="{StaticResource ForegroundBrush}">
+      If you want to add a CodeSource directory that has already been prepared for Lobster, click <Bold>Add Prepared CodeSource</Bold>
+      <LineBreak/>
+      If you want to prepare a CodeSource directory for usage with Lobster that has not already been prepared, then click <Bold>Prepare New CodeSource</Bold>
+      <LineBreak/>
+      The CodeSource directory that you want to use may have already been prepared for Lobster, please double-check that no-one else has prepared the directory before using <Bold>Prepare New CodeSource</Bold>
+    </TextBlock>
+    <StackPanel Grid.Row="1" Orientation="Horizontal">
+      <Button Content="Add Prepared CodeSource" Margin="5"/>
+      <Button Content="Prepare New CodeSource" Margin="5"/>
+    </StackPanel>
+  </Grid>
+</Window>
