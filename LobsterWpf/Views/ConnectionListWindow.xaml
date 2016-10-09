@@ -41,14 +41,14 @@
         </ListBox.ItemTemplate>
       </ListBox>
       <StackPanel Grid.Row="2" Orientation="Horizontal" DockPanel.Dock="Bottom">
-        <Button Content="Add Existing Codesource" HorizontalAlignment="Left" Margin="5" Click="AddExistingButton_Click"/>
-        <Button Content="Setup New Codesouce" HorizontalAlignment="Left" Margin="5" Click="NewConnectionButton_Click"/>
+        <Button Content="Add CodeSource" HorizontalAlignment="Left" Margin="5" Click="AddCodeSourceButton_Click"/>
+        <Button Content="Remove CodeSouce" HorizontalAlignment="Left" Margin="5" Click="RemoveCodeSourceButton_Click" IsEnabled="{Binding ElementName=codeSourceListBox, Path=Selec tedItems.Count}"/>
       </StackPanel>
       <Line Grid.Row="3"/>
       <Label Content="Database Connections" Grid.Row="4" FontSize="16"/>
-      <ListBox Name="connectionListBox" Grid.Row="5" ItemsSource="{Binding DatabaseConfigList}" SelectionChanged="ConnectionListBox_SelectionChanged" IsEnabled="{Binding Path=IsEditingConfig, Converter={StaticResource inverseBooleanConverter}}" VerticalContentAlignment="Stretch" MouseDoubleClick="connectionListBox_MouseDoubleClick">
+      <ListBox Name="connectionListBox" Grid.Row="5" ItemsSource="{Binding SelectedCodeSourceConfig.ConnectionConfigViewList}" SelectionChanged="ConnectionListBox_SelectionChanged" IsEnabled="{Binding Path=IsEditingConfig, Converter={StaticResource inverseBooleanConverter}}" VerticalContentAlignment="Stretch" MouseDoubleClick="connectionListBox_MouseDoubleClick">
         <ListBox.ItemTemplate>
-          <DataTemplate DataType="DatabaseConfig">
+          <DataTemplate DataType="ConnectionConfigView">
             <DataTemplate.Resources>
               <Style TargetType="{x:Type TextBlock}">
                 <Style.Triggers>

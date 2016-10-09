@@ -130,14 +130,14 @@ namespace LobsterLite
                 return false;
             }
 
-            DatabaseConfig config = DatabaseConfig.LoadDatabaseConfig(configFile.FullName);
+            CodeSourceConfig config = CodeSourceConfig.LoadCodeSourceConfig(configFile.FullName);
             if (config == null)
             {
                 MessageLog.LogError("The database configuration file could not be loaded.");
                 return false;
             }
 
-            DatabaseConnection connection = DatabaseConnection.CreateDatabaseConnection(config, password);
+            //DatabaseConnection connection = DatabaseConnection.CreateDatabaseConnection(config, password);
 
             return true;
         }

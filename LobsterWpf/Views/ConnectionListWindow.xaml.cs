@@ -26,6 +26,7 @@ namespace LobsterWpf.Views
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.ComponentModel;
+    using System.IO;
     using System.Linq;
     using System.Security;
     using System.Windows;
@@ -34,6 +35,8 @@ namespace LobsterWpf.Views
     using LobsterModel;
     using Microsoft.WindowsAPICodePack.Dialogs;
     using ViewModels;
+    using System.Runtime.Serialization;
+    using System.Runtime.CompilerServices;
 
     /// <summary>
     /// Interaction logic for ConnectionListWindow.xaml
@@ -41,11 +44,6 @@ namespace LobsterWpf.Views
     public partial class ConnectionListWindow : Window, INotifyPropertyChanged
     {
         public ObservableCollection<CodeSourceConfigView> CodeSourceConfigList { get; set; }
-
-        /// <summary>
-        /// The internal value for DatabaseConfigList.
-        /// </summary>
-        public ObservableCollection<ConnectionConfigView> DatabaseConfigList { get; set; }
 
         /// <summary>
         /// Whether the user is currently editing a config file or not.
@@ -65,7 +63,6 @@ namespace LobsterWpf.Views
             this.InitializeComponent();
 
             this.LoadCodeSourceConfigs();
-            //this.LoadDatabaseConnections();
             this.DataContext = this;
         }
 
@@ -150,7 +147,7 @@ namespace LobsterWpf.Views
         /// <remarks>This method is called by the Set accessor of each property.
         /// The CallerMemberName attribute that is applied to the optional propertyName
         /// parameter causes the property name of the caller to be substituted as an argument.</remarks>
-        private void NotifyPropertyChanged(string propertyName = "")
+        private void NotifyPropertyChanged([CallerMemberName]string propertyName = "")
         {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
@@ -161,7 +158,7 @@ namespace LobsterWpf.Views
         /// <returns>True if the user is Ok with cancelling the changes, otherwise false.</returns>
         private bool ConfirmCancelChanges()
         {
-            MessageBoxResult result = MessageBox.Show(
+            /*MessageBoxResult result = MessageBox.Show(
                 $"Are you sure you want to cancel any unsaved changes to {(string.IsNullOrEmpty(this.CurrentConnectionConfigView.Name) ? "Unnamed" : this.CurrentConnectionConfigView.Name)}?",
                 "Cancel",
                 MessageBoxButton.OKCancel);
@@ -175,7 +172,8 @@ namespace LobsterWpf.Views
                 }
             }
 
-            return result == MessageBoxResult.OK;
+            return result == MessageBoxResult.OK;*/
+            return false;
         }
 
         /// <summary>
@@ -190,7 +188,8 @@ namespace LobsterWpf.Views
                 return;
             }
 
-            ConnectionConfigView config = this.DatabaseConfigList[this.connectionListBox.SelectedIndex];
+            //ConnectionConfigView config = this.DatabaseConfigList[this.connectionListBox.SelectedIndex];
+            var config = (ConnectionConfigView)this.connectionListBox.SelectedItem;
 
             this.TryConnectWithConfig(config.BaseConfig);
         }
@@ -273,33 +272,6 @@ namespace LobsterWpf.Views
             this.connectionListBox.SelectedItem = configView;
             this.IsEditingConfig = true;
             this.isEditingNewConfig = true;*/
-        }
-
-        /// <summary>
-        /// The event called when the new connection button is clicked.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments.</param>
-        private void AddExistingButton_Click(object sender, RoutedEventArgs e)
-        {
-            CommonOpenFileDialog dlg = new CommonOpenFileDialog();
-            dlg.IsFolderPicker = true;
-            CommonFileDialogResult result = dlg.ShowDialog();
-            if (result != CommonFileDialogResult.Ok)
-            {
-                return;
-            }
-
-            string errorMessage = null;
-            if (!CodeSourceConfig.ValidateCodeSourceLocation(dlg.FileName, ref errorMessage))
-            {
-                MessageBox.Show(errorMessage);
-                return;
-            }
-
-            CodeSourceConfig.AddCodeSourceDirectory(dlg.FileName);
-
-            this.LoadDatabaseConnections();
         }
 
         /// <summary>
@@ -444,7 +416,98 @@ namespace LobsterWpf.Views
 
         private void codeSourceListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            this.NotifyPropertyChanged("SelectedCodeSourceConfig");
+        }
 
+        public CodeSourceConfigView SelectedCodeSourceConfig
+        {
+            get
+            {
+                return (CodeSourceConfigView)this.codeSourceListBox.SelectedItem;
+            }
+        }
+
+        private void AddCodeSourceButton_Click(object sender, RoutedEventArgs e)
+        {
+            var window = new AddCodeSourceWindow();
+            bool? result = window.ShowDialog();
+            if (!(result ?? false))
+            {
+                return;
+            }
+
+            switch (window.UserSelection)
+            {
+                case AddCodeSourceWindow.Selection.AddPreparedCodeSource:
+                    this.AddExistingCodeSource();
+                    break;
+                case AddCodeSourceWindow.Selection.PrepareNewCodeSource:
+                    this.PrepareNewCodeSource();
+                    break;
+                default:
+                    return;
+            }
+        }
+
+        private void AddExistingCodeSource()
+        {
+            CommonOpenFileDialog dlg = new CommonOpenFileDialog();
+            dlg.IsFolderPicker = true;
+            CommonFileDialogResult result = dlg.ShowDialog();
+            if (result != CommonFileDialogResult.Ok)
+            {
+                return;
+            }
+
+            string errorMessage = null;
+            if (!CodeSourceConfig.ValidateCodeSourceLocation(dlg.FileName, ref errorMessage))
+            {
+                MessageBox.Show(errorMessage);
+                return;
+            }
+
+            CodeSourceConfig.AddCodeSourceDirectory(dlg.FileName);
+
+            this.LoadDatabaseConnections();
+        }
+
+        private void PrepareNewCodeSource()
+        {
+            CommonOpenFileDialog dlg = new CommonOpenFileDialog();
+            dlg.IsFolderPicker = true;
+            CommonFileDialogResult result = dlg.ShowDialog();
+            if (result != CommonFileDialogResult.Ok)
+            {
+                return;
+            }
+
+            string errorMessage = null;
+            if (!CodeSourceConfig.ValidateNewCodeSourceLocation(dlg.FileName, ref errorMessage))
+            {
+                MessageBox.Show(errorMessage);
+                return;
+            }
+
+            CodeSourceConfig codeSourceConfig = null;
+            if (!CodeSourceConfig.InitialiseCodeSourceDirectory(dlg.FileName, ref codeSourceConfig))
+            {
+                return;
+            }
+
+            CodeSourceConfigView configView = new CodeSourceConfigView(codeSourceConfig);
+
+            this.CodeSourceConfigList.Add(configView);
+            this.connectionListBox.SelectedItem = configView;
+            this.IsEditingConfig = true;
+            this.isEditingNewConfig = true;
+        }
+
+        private void RemoveCodeSourceButton_Click(object sender, RoutedEventArgs e)
+        {
+            if(this.codeSourceListBox.SelectedItem != null)
+            {
+                this.CodeSourceConfigList.Remove((CodeSourceConfigView)this.codeSourceListBox.SelectedItem);
+            }
         }
     }
 }

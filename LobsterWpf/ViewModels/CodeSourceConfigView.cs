@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using LobsterModel;
+using System.Collections.ObjectModel;
 
 namespace LobsterWpf.ViewModels
 {
@@ -12,11 +14,15 @@ namespace LobsterWpf.ViewModels
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseConfigView"/> class.
         /// </summary>
-        /// <param name="connectionConfig">The database config to use as the model of this view.</param>
-        public CodeSourceConfigView(CodeSourceConfig connectionConfig)
+        /// <param name="codeSourceConfig">The database config to use as the model of this view.</param>
+        public CodeSourceConfigView(CodeSourceConfig codeSourceConfig)
         {
-            this.BaseConfig = connectionConfig;
+            this.BaseConfig = codeSourceConfig;
+            this.ConnectionConfigViewList = new ObservableCollection<ConnectionConfigView>(
+                this.BaseConfig.ConnectionConfigList.Select(item => new ConnectionConfigView(item)));
         }
+
+        public ObservableCollection<ConnectionConfigView> ConnectionConfigViewList { get; set; }
 
         /// <summary>
         /// The event to be raised when a property is changed.

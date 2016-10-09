@@ -115,6 +115,8 @@ namespace LobsterModel
                 return null;
             }
 
+            config.ConnectionConfigList.ForEach(x => x.Parent = config);
+
             config.FileLocation = configFile.FullName;
             return config;
         }
@@ -142,7 +144,7 @@ namespace LobsterModel
                     continue;
                 }
 
-                CodeSourceConfig connection = CodeSourceConfig.LoadCodeSourceConfig(configFile);
+                CodeSourceConfig connection = CodeSourceConfig.LoadCodeSourceConfig(directoryName);
                 if (connection != null)
                 {
                     configList.Add(connection);

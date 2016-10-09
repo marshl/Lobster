@@ -19,9 +19,31 @@ namespace LobsterWpf.Views
     /// </summary>
     public partial class AddCodeSourceWindow : Window
     {
+        public enum Selection
+        {
+            AddPreparedCodeSource,
+            PrepareNewCodeSource
+        }
+
+        public Selection? UserSelection { get; private set; }
+
         public AddCodeSourceWindow()
         {
             InitializeComponent();
+        }
+
+        private void addPreparedCodeSourceButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.UserSelection = Selection.AddPreparedCodeSource;
+            this.DialogResult = true;
+            this.Close();
+        }
+
+        private void prepareNewCodeSourceButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.UserSelection = Selection.PrepareNewCodeSource;
+            this.DialogResult = true;
+            this.Close();
         }
     }
 }

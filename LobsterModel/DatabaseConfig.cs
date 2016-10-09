@@ -108,10 +108,10 @@ namespace LobsterModel
         /// </summary>
         /// <param name="filename">The file to write to.</param>
         /// <param name="config">The <see cref="DatabaseConfig"/> to serialise.</param>
-        public static void SerialiseToFile(string file, DatabaseConfig config)
+        public static void SerialiseToFile(string filename, DatabaseConfig config)
         {
             XmlSerializer xmls = new XmlSerializer(typeof(DatabaseConfig));
-            using (StreamWriter streamWriter = new StreamWriter(file))
+            using (StreamWriter streamWriter = new StreamWriter(filename))
             {
                 xmls.Serialize(streamWriter, config);
             }

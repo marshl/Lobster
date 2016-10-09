@@ -39,7 +39,6 @@ namespace LobsterWpf.Views
     using LobsterModel;
     using Properties;
     using ViewModels;
-    using Views;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml

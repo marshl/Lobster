@@ -77,12 +77,12 @@ namespace LobsterModel
 
             bool result = Utils.DeserialiseXmlFileUsingSchema("LobsterSettings/MimeTypes.xml", null, out this.mimeTypeList);
 
-            if (!Directory.Exists(this.Config.ParentCodeSourceConfig.CodeSourceDirectory))
+            if (!Directory.Exists(this.Config.Parent.CodeSourceDirectory))
             {
-                throw new SetConnectionException($"Could not find CodeSource directory: {this.Config.ParentCodeSourceConfig.CodeSourceDirectory}");
+                throw new SetConnectionException($"Could not find CodeSource directory: {this.Config.Parent.CodeSourceDirectory}");
             }
 
-            this.clobTypeFileWatcher = new FileSystemWatcher(this.Config.ParentCodeSourceConfig.ClobTypeDirectory);
+            this.clobTypeFileWatcher = new FileSystemWatcher(this.Config.Parent.ClobTypeDirectory);
             this.clobTypeFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.CreationTime;
             this.clobTypeFileWatcher.Changed += new FileSystemEventHandler(this.OnClobTypeChangeEvent);
             this.clobTypeFileWatcher.Created += new FileSystemEventHandler(this.OnClobTypeChangeEvent);
@@ -183,9 +183,9 @@ namespace LobsterModel
                 throw new SetConnectionException($"A connection could not be made to the database: {ex.Message}", ex);
             }
 
-            if (config.ParentCodeSourceConfig.ClobTypeDirectory == null || !Directory.Exists(config.ParentCodeSourceConfig.ClobTypeDirectory))
+            if (config.Parent.ClobTypeDirectory == null || !Directory.Exists(config.Parent.ClobTypeDirectory))
             {
-                throw new SetConnectionException($"The clob type directory {config.ParentCodeSourceConfig.ClobTypeDirectory} could not be found.");
+                throw new SetConnectionException($"The clob type directory {config.Parent.ClobTypeDirectory} could not be found.");
             }
 
             DatabaseConnection databaseConnection = new DatabaseConnection(config, password);
@@ -207,11 +207,11 @@ namespace LobsterModel
         /// <param name="errors">Any errors that are raised during loading.</param>
         public void LoadClobTypes(ref List<ClobTypeLoadException> errors)
         {
-            string clobTypeDir = this.Config.ParentCodeSourceConfig.ClobTypeDirectory;
+            string clobTypeDir = this.Config.Parent.ClobTypeDirectory;
 
 
             this.ClobDirectoryList = new List<ClobDirectory>();
-            if (!Directory.Exists(Config.ParentCodeSourceConfig.ClobTypeDirectory))
+            if (!Directory.Exists(Config.Parent.ClobTypeDirectory))
             {
                 MessageLog.LogWarning($"The directory {clobTypeDir} could not be found when loading connection {this.Config.Name}");
                 errors.Add(new ClobTypeLoadException($"The directory {clobTypeDir} could not be found when loading connection {this.Config.Name}"));
@@ -225,7 +225,7 @@ namespace LobsterModel
             {
                 try
                 {
-                    ClobDirectory clobDir = new ClobDirectory(this.Config.ParentCodeSourceConfig.ClobTypeDirectory, clobType);
+                    ClobDirectory clobDir = new ClobDirectory(this.Config.Parent.CodeSourceDirectory, clobType);
                     clobDir.FileChangeEvent += this.OnClobDirectoryFileChangeEvent;
                     this.ClobDirectoryList.Add(clobDir);
                 }
@@ -357,7 +357,7 @@ namespace LobsterModel
         /// <param name="fullpath">The path of the file as it exists locally.</param>
         public void BackupClobFile(OracleConnection oracleConnection, DBClobFile clobFile, string fullpath)
         {
-            FileInfo backupFile = BackupLog.AddBackup(this.Config.ParentCodeSourceConfig.CodeSourceDirectory, fullpath);
+            FileInfo backupFile = BackupLog.AddBackup(this.Config.Parent.CodeSourceDirectory, fullpath);
             this.DownloadClobDataToFile(clobFile, oracleConnection, backupFile.FullName);
         }
 

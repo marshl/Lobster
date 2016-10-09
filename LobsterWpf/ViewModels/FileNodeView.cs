@@ -359,7 +359,7 @@ namespace LobsterWpf.ViewModels
                 return;
             }
 
-            List<FileBackup> fileBackups = BackupLog.GetBackupsForFile(this.ParentConnectionView.Connection.Config.ParentCodeSourceConfig.CodeSourceDirectory, this.FilePath);
+            List<FileBackup> fileBackups = BackupLog.GetBackupsForFile(this.ParentConnectionView.Connection.Config.Parent.CodeSourceDirectory, this.FilePath);
             if (fileBackups != null)
             {
                 this.FileBackupList = new ObservableCollection<FileBackup>(fileBackups.OrderByDescending(backup => backup.DateCreated));

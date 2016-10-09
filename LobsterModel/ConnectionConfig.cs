@@ -74,10 +74,9 @@ namespace LobsterModel
         /// </summary>
         public bool AllowAutomaticClobbing { get; set; } = true;
         
-        [XmlIgnore]
-        public CodeSourceConfig ParentCodeSourceConfig { get; private set; }
+        public CodeSourceConfig Parent { get; set; }
 
-        public bool IsRestrictedEnvironment { get; private set; }
+        public bool IsRestrictedEnvironment { get; set; }
 
         /// <summary>
         /// Tests if a connection could be made.

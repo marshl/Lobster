@@ -19,8 +19,8 @@
       The CodeSource directory that you want to use may have already been prepared for Lobster, please double-check that no-one else has prepared the directory before using <Bold>Prepare New CodeSource</Bold>
     </TextBlock>
     <StackPanel Grid.Row="1" Orientation="Horizontal">
-      <Button Content="Add Prepared CodeSource" Margin="5"/>
-      <Button Content="Prepare New CodeSource" Margin="5"/>
+      <Button Name="addPreparedCodeSourceButton" Content="Add Prepared CodeSource" Margin="5" Click="addPreparedCodeSourceButton_Click"/>
+      <Button Name="prepareNewCodeSourceButton" Content="Prepare New CodeSource" Margin="5" Click="prepareNewCodeSourceButton_Click"/>
     </StackPanel>
   </Grid>
 </Window>
