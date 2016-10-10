@@ -75,9 +75,15 @@ namespace LobsterModel
         /// </summary>
         public bool AllowAutomaticClobbing { get; set; } = true;
         
+        /// <summary>
+        /// Gets or sets the parent CodeSource directory of this connection.
+        /// </summary>
         [XmlIgnore]
         public CodeSourceConfig Parent { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this database is restricted to only read operations.
+        /// </summary>
         public bool IsRestrictedEnvironment { get; set; }
 
         /// <summary>

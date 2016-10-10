@@ -39,6 +39,7 @@ namespace LobsterModel
         /// <summary>
         /// Constructs an SQL statement to update a row in the database
         /// </summary>
+        /// <param name="table">The table the update statement is being constructed for.</param>
         /// <param name="clobFile">The ClobFile to build an update statement for.</param>
         /// <returns>The update statement.</returns>
         public static string BuildUpdateStatement(Table table, DBClobFile clobFile)
@@ -76,6 +77,7 @@ namespace LobsterModel
         /// <summary>
         /// Constructs an SQL statement to insert a row into the parent table of this table with the given mnemonic.
         /// </summary>
+        /// <param name="table">The table the insert statement is being constructed for.</param>
         /// <param name="mnemonic">The mnemonic for the file to insert.</param>
         /// <returns>The insert statement.</returns>
         public static string BuildInsertParentStatement(Table table, string mnemonic)
@@ -98,6 +100,7 @@ namespace LobsterModel
         /// If this table has a parent, then the parent information will be applied. 
         /// If not, the wile will be inserted normally.
         /// </summary>
+        /// <param name="table">The table the statement is being constructed for.</param>
         /// <param name="mnemonic">The mnemonic for the file to add.</param>
         /// <param name="mimeType">The mime type of the file to add, if applicable.</param>
         /// <returns>The insert SQl statement.</returns>
@@ -177,6 +180,7 @@ namespace LobsterModel
         /// Constructs an SQL query to retrieve the list of files in this table on the database.
         /// If this table has a mime type column, then the value of that column will be included in the query.
         /// </summary>
+        /// <param name="table">The table the file list command is being constructed for.</param>
         /// <returns>The SQL command the retrive the file lists for this table.</returns>
         public static string GetFileListCommand(Table table)
         {
@@ -205,10 +209,10 @@ namespace LobsterModel
             }
         }
 
-
         /// <summary>
-        /// Constructs an SQL statement to get the 
+        /// Constructs an SQL statement to get the data for a given file in a given table.
         /// </summary>
+        /// <param name="table">The table the command is being constructed for.</param>
         /// <param name="clobFile">The ClobFile to build the statement for.</param>
         /// <returns>The SQL command</returns>
         public static string BuildGetDataCommand(Table table, DBClobFile clobFile)

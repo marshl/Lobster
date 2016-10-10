@@ -209,9 +209,8 @@ namespace LobsterModel
         {
             string clobTypeDir = this.Config.Parent.ClobTypeDirectory;
 
-
             this.ClobDirectoryList = new List<ClobDirectory>();
-            if (!Directory.Exists(Config.Parent.ClobTypeDirectory))
+            if (!Directory.Exists(this.Config.Parent.ClobTypeDirectory))
             {
                 MessageLog.LogWarning($"The directory {clobTypeDir} could not be found when loading connection {this.Config.Name}");
                 errors.Add(new ClobTypeLoadException($"The directory {clobTypeDir} could not be found when loading connection {this.Config.Name}"));

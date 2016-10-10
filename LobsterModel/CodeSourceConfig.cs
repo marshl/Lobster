@@ -40,14 +40,20 @@ namespace LobsterModel
         /// </summary>
         public string Name { get; set; }
 
+        /// <summary>
+        /// Gets or sets the databases that this CodeSource cna be connected to.
+        /// </summary>
         public List<ConnectionConfig> ConnectionConfigList { get; set; }
 
         /// <summary>
-        /// Gets or sets the file from which this DatabaseConfig was loaded.
+        /// Gets the path of the file from which this DatabaseConfig was loaded.
         /// </summary>
         [XmlIgnore]
-        public string FileLocation { get; set; }
+        public string FileLocation { get; private set; }
 
+        /// <summary>
+        /// Gets the path of the directory for this CodeSource.
+        /// </summary>
         [XmlIgnore]
         public string CodeSourceDirectory
         {
@@ -93,7 +99,7 @@ namespace LobsterModel
 
             FileInfo configFile = new FileInfo(Path.Combine(codeSourceDirectory, Settings.Default.DatabaseConfigFileName));
 
-            if(!configFile.Exists)
+            if (!configFile.Exists)
             {
                 MessageLog.LogError($"{configFile.FullName} could not be found.");
                 return null;

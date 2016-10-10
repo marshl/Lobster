@@ -161,7 +161,7 @@ namespace LobsterModel
             List<string> invalidDirectories = new List<string>();
             foreach (string directoryName in Settings.Default.CodeSourceDirectories)
             {
-                string configFile =Path.Combine(directoryName, Settings.Default.DatabaseConfigFileName);
+                string configFile = Path.Combine(directoryName, Settings.Default.DatabaseConfigFileName);
                 if (!File.Exists(configFile))
                 {
                     invalidDirectories.Add(directoryName);
