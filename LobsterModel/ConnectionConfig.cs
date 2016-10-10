@@ -36,6 +36,7 @@ namespace LobsterModel
     /// <summary>
     /// Used to store information about a database connection, loaded directly from an XML file.
     /// </summary>
+    [Serializable]
     public class ConnectionConfig
     {
         /// <summary>
@@ -74,6 +75,7 @@ namespace LobsterModel
         /// </summary>
         public bool AllowAutomaticClobbing { get; set; } = true;
         
+        [XmlIgnore]
         public CodeSourceConfig Parent { get; set; }
 
         public bool IsRestrictedEnvironment { get; set; }
