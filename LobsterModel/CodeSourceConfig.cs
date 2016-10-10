@@ -15,8 +15,8 @@
 // </copyright>
 //-----------------------------------------------------------------------
 //
-//      "I have not brought you hither to be instructed by you, but to give you a choice."
-//          - Saruman the Wise
+//      "But great though his lore may be, it must have a source."
+//        - Gandalf the Grey
 //
 //      [ _The Lord of the Rings_, II/ii: "The Council of Elrond"]
 //-----------------------------------------------------------------------
