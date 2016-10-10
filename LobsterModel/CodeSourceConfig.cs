@@ -162,7 +162,7 @@ namespace LobsterModel
         }
 
         /// <summary>
-        /// INitialises the given directory with the necessary configuration files and folders.
+        /// Initialises the given directory with the necessary configuration files and folders.
         /// </summary>
         /// <param name="directory">The directory to initialise.</param>
         /// <param name="newConfig">The database configuration file that is created.</param>
