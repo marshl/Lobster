@@ -50,7 +50,6 @@
   <ItemGroup>
     <Compile Include="BackupLog.cs" />
     <Compile Include="ClobDirectory.cs" />
-    <Compile Include="CodeSourceController.cs" />
     <Compile Include="ConnectionConfig.cs" />
     <Compile Include="EventArguments\ClobDirectoryFileChangeEventArgs.cs" />
     <Compile Include="Exceptions\ClobFileLookupException.cs" />
