@@ -86,6 +86,7 @@
       </ListBox>
       <StackPanel Orientation="Horizontal" Grid.Row="6">
         <Button Content="Connect" Margin="5" Width="100" Click="ConnectButton_Click" IsEnabled="{Binding ElementName=connectionListBox, Path=SelectedItems.Count}"/>
+        <Button Margin="5" Width="75" Height="20" Click="StartEditButton_Click" IsEnabled="{Binding IsEditButtonEnabled, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Content="Edit"/>
         <Button Content="Remove" Margin="5" Width="100" Click="RemoveConnectionButton_Click" IsEnabled="{Binding ElementName=connectionListBox, Path=SelectedItems.Count}"/>
       </StackPanel>
     </Grid>
@@ -142,9 +143,8 @@
           </StackPanel>
         </Grid>
         <StackPanel Grid.Row="10" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5">
-          <Button Margin="5" Width="75" Height="20" Click="StartEditButton_Click" IsEnabled="{Binding Path=IsEditButtonEnabled, RelativeSource={RelativeSource AncestorType=Window}}">Edit</Button>
-          <Button Margin="5" Width="75" Height="20" Click="SaveEditButton_Click" IsEnabled="{Binding Path=IsEditingConfig, RelativeSource={RelativeSource AncestorType=Window}}">Save</Button>
-          <Button Margin="5" Width="75" Height="20" Click="CancelEditButton_Click" IsEnabled="{Binding Path=IsEditingConfig, RelativeSource={RelativeSource AncestorType=Window}}">Cancel</Button>
+          <Button Margin="5" Width="75" Height="20" Click="SaveEditButton_Click" IsEnabled="{Binding IsEditingConfig, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Content="Save"/>
+          <Button Margin="5" Width="75" Height="20" Click="CancelEditButton_Click" IsEnabled="{Binding IsEditingConfig, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Content="Cancel"/>
         </StackPanel>
       </StackPanel>
     </GroupBox>

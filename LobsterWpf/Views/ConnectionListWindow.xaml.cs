@@ -70,6 +70,8 @@ namespace LobsterWpf.Views
         {
             List<CodeSourceConfigView> configViews = CodeSourceConfig.GetConfigList().Select(item => new CodeSourceConfigView(item)).ToList();
             this.CodeSourceConfigList = new ObservableCollection<CodeSourceConfigView>(configViews);
+            this.NotifyPropertyChanged("CodeSourceConfigList");
+            this.NotifyPropertyChanged("SelectedConnectionConfig");
         }
 
         /// <summary>
@@ -201,13 +203,32 @@ namespace LobsterWpf.Views
         /// <param name="e">The event arguments.</param>
         private void RemoveConnectionButton_Click(object sender, RoutedEventArgs e)
         {
-            /*MessageBoxResult result = MessageBox.Show("Are you sure you want to forget this connection? (This will not affect any files on disk)", "Confirm", MessageBoxButton.OKCancel);
+            if (this.SelectedConnectionConfig == null)
+            {
+                return;
+            }
+
+            MessageBoxResult result = MessageBox.Show("Are you sure you want to remove this connection?", "Confirm Connection Removal", MessageBoxButton.OKCancel);
 
             if (result == MessageBoxResult.OK)
             {
-                DatabaseConfig.RemoveCodeSource(this.CurrentConfigView.BaseConfig.ParentCodeSourceConfig.CodeSourceDirectory);
-                this.databaseConfigList.Remove(this.CurrentConfigView);
-            }*/
+                this.SelectedCodeSourceConfig.BaseConfig.ConnectionConfigList.Remove(this.SelectedConnectionConfig.BaseConfig);
+                CodeSourceConfig.SerialiseToFile(this.SelectedCodeSourceConfig.FileLocation, this.SelectedCodeSourceConfig.BaseConfig);
+
+                this.SelectedCodeSourceConfig.ConnectionConfigViewList.Remove(this.SelectedConnectionConfig);
+                this.connectionListBox.SelectedItem = null;
+                this.NotifyPropertyChanged("CodeSourceConfigList");
+                this.NotifyPropertyChanged("ConnectionConfigList");
+                this.NotifyPropertyChanged("SelectedConnectionConfig");
+            }
+        }
+
+        public ConnectionConfigView SelectedConnectionConfig
+        {
+            get
+            {
+                return (ConnectionConfigView)this.connectionListBox.SelectedItem;
+            }
         }
 
         /// <summary>
@@ -447,6 +468,8 @@ namespace LobsterWpf.Views
                 default:
                     return;
             }
+
+            this.NotifyPropertyChanged("CodeSourceConfigList");
         }
 
         private void AddExistingCodeSource()
@@ -467,8 +490,7 @@ namespace LobsterWpf.Views
             }
 
             CodeSourceConfig.AddCodeSourceDirectory(dlg.FileName);
-
-            this.LoadDatabaseConnections();
+            this.LoadCodeSourceConfigs();
         }
 
         private void PrepareNewCodeSource()
@@ -494,18 +516,14 @@ namespace LobsterWpf.Views
                 return;
             }
 
-            CodeSourceConfigView configView = new CodeSourceConfigView(codeSourceConfig);
-
-            this.CodeSourceConfigList.Add(configView);
-            this.connectionListBox.SelectedItem = configView;
-            this.IsEditingConfig = true;
-            this.isEditingNewConfig = true;
+            this.LoadCodeSourceConfigs();
         }
 
         private void RemoveCodeSourceButton_Click(object sender, RoutedEventArgs e)
         {
-            if(this.codeSourceListBox.SelectedItem != null)
+            if (this.codeSourceListBox.SelectedItem != null)
             {
+                CodeSourceConfig.RemoveCodeSource(this.SelectedCodeSourceConfig.BaseConfig.CodeSourceDirectory);
                 this.CodeSourceConfigList.Remove((CodeSourceConfigView)this.codeSourceListBox.SelectedItem);
             }
         }
