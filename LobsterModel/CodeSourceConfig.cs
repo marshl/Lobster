@@ -79,12 +79,12 @@ namespace LobsterModel
         /// </summary>
         /// <param name="filename">The file to write to.</param>
         /// <param name="config">The <see cref="DatabaseConfig"/> to serialise.</param>
-        public static void SerialiseToFile(string filename, CodeSourceConfig config)
+        public void SerialiseToFile()
         {
             XmlSerializer xmls = new XmlSerializer(typeof(CodeSourceConfig));
-            using (StreamWriter streamWriter = new StreamWriter(filename))
+            using (StreamWriter streamWriter = new StreamWriter(this.FileLocation))
             {
-                xmls.Serialize(streamWriter, config);
+                xmls.Serialize(streamWriter, this);
             }
         }
 
@@ -179,9 +179,8 @@ namespace LobsterModel
             {
                 Directory.CreateDirectory(Path.Combine(directory, Settings.Default.ClobTypeDirectoryName));
                 newConfig = new CodeSourceConfig();
-                string configFile = Path.Combine(directory, Settings.Default.DatabaseConfigFileName);
-                CodeSourceConfig.SerialiseToFile(configFile, newConfig);
-                newConfig.FileLocation = configFile;
+                newConfig.FileLocation = Path.Combine(directory, Settings.Default.DatabaseConfigFileName);
+                newConfig.SerialiseToFile();
 
                 if (!AddCodeSourceDirectory(directory))
                 {

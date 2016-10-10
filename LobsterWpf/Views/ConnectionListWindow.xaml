@@ -88,6 +88,7 @@
         <Button Content="Connect" Margin="5" Width="85" Click="ConnectButton_Click" IsEnabled="{Binding ElementName=connectionListBox, Path=SelectedItems.Count}"/>
         <Button Margin="5" Width="85" Click="StartEditButton_Click" IsEnabled="{Binding IsEditButtonEnabled, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Content="Edit"/>
         <Button Content="Remove" Margin="5" Width="85" Click="RemoveConnectionButton_Click" IsEnabled="{Binding ElementName=connectionListBox, Path=SelectedItems.Count}"/>
+        <Button Content="Add" Margin="5" Width="85" Click="AddConnectionButton_Click" IsEnabled="{Binding ElementName=codeSourceListBox, Path=SelectedItems.Count}"/>
       </StackPanel>
     </Grid>
     <GroupBox Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" DataContext="{Binding ElementName=connectionListBox, Path=SelectedItem}" Margin="5">

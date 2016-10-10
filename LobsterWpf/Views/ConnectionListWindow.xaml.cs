@@ -37,6 +37,7 @@ namespace LobsterWpf.Views
     using ViewModels;
     using System.Runtime.Serialization;
     using System.Runtime.CompilerServices;
+    using System.Diagnostics;
 
     /// <summary>
     /// Interaction logic for ConnectionListWindow.xaml
@@ -64,6 +65,12 @@ namespace LobsterWpf.Views
 
             this.LoadCodeSourceConfigs();
             this.DataContext = this;
+
+            // Select the first CodeSource by default
+            if (this.CodeSourceConfigList.Count > 0)
+            {
+                this.codeSourceListBox.SelectedIndex = 0;
+            }
         }
 
         private void LoadCodeSourceConfigs()
@@ -93,6 +100,7 @@ namespace LobsterWpf.Views
             {
                 this.isEditingConfig = value;
                 this.NotifyPropertyChanged("IsEditingConfig");
+                this.NotifyPropertyChanged("IsEditButtonEnabled");
             }
         }
 
@@ -103,7 +111,7 @@ namespace LobsterWpf.Views
         {
             get
             {
-                return this.connectionListBox.SelectedItem != null && !this.IsEditingConfig;
+                return this.SelectedConnectionConfig != null && !this.IsEditingConfig;
             }
         }
 
@@ -115,25 +123,6 @@ namespace LobsterWpf.Views
             get
             {
                 return !this.IsEditingConfig;
-            }
-        }
-
-        /// <summary>
-        /// Gets the <see cref="DatabaseConfigView"/> that is currently selected in the config list.
-        /// </summary>
-        public ConnectionConfigView CurrentConnectionConfigView
-        {
-            get
-            {
-                return this.connectionListBox.SelectedItem as ConnectionConfigView;
-            }
-        }
-
-        public CodeSourceConfigView CurrentCodeSourceConfigView
-        {
-            get
-            {
-                return (CodeSourceConfigView)this.codeSourceListBox.SelectedItem;
             }
         }
 
@@ -160,22 +149,22 @@ namespace LobsterWpf.Views
         /// <returns>True if the user is Ok with cancelling the changes, otherwise false.</returns>
         private bool ConfirmCancelChanges()
         {
-            /*MessageBoxResult result = MessageBox.Show(
-                $"Are you sure you want to cancel any unsaved changes to {(string.IsNullOrEmpty(this.CurrentConnectionConfigView.Name) ? "Unnamed" : this.CurrentConnectionConfigView.Name)}?",
+            MessageBoxResult result = MessageBox.Show(
+                $"Are you sure you want to cancel any unsaved changes to {(string.IsNullOrEmpty(this.SelectedConnectionConfig.Name) ? "Unnamed" : this.SelectedConnectionConfig.Name)}?",
                 "Cancel",
                 MessageBoxButton.OKCancel);
 
-            if (result == MessageBoxResult.OK)
+            if (result != MessageBoxResult.OK)
             {
-                if (this.isEditingNewConfig)
-                {
-                    this.DatabaseConfigList.Remove(this.CurrentConnectionConfigView);
-                    this.isEditingNewConfig = false;
-                }
+                return false;
             }
 
-            return result == MessageBoxResult.OK;*/
-            return false;
+            if (this.isEditingNewConfig)
+            {
+                this.RemoveCurrentConnection();
+                this.isEditingNewConfig = false;
+            }
+            return true;
         }
 
         /// <summary>
@@ -185,15 +174,12 @@ namespace LobsterWpf.Views
         /// <param name="e">The routed event arguments.</param>
         private void ConnectButton_Click(object sender, RoutedEventArgs e)
         {
-            if (this.connectionListBox.SelectedIndex == -1)
+            if (this.SelectedConnectionConfig == null)
             {
                 return;
             }
 
-            //ConnectionConfigView config = this.DatabaseConfigList[this.connectionListBox.SelectedIndex];
-            var config = (ConnectionConfigView)this.connectionListBox.SelectedItem;
-
-            this.TryConnectWithConfig(config.BaseConfig);
+            this.TryConnectWithConfig(this.SelectedConnectionConfig.BaseConfig);
         }
 
         /// <summary>
@@ -212,24 +198,33 @@ namespace LobsterWpf.Views
 
             if (result == MessageBoxResult.OK)
             {
-                this.SelectedCodeSourceConfig.BaseConfig.ConnectionConfigList.Remove(this.SelectedConnectionConfig.BaseConfig);
-                CodeSourceConfig.SerialiseToFile(this.SelectedCodeSourceConfig.FileLocation, this.SelectedCodeSourceConfig.BaseConfig);
-
-                this.SelectedCodeSourceConfig.ConnectionConfigViewList.Remove(this.SelectedConnectionConfig);
-                this.connectionListBox.SelectedItem = null;
-                this.NotifyPropertyChanged("CodeSourceConfigList");
-                this.NotifyPropertyChanged("ConnectionConfigList");
-                this.NotifyPropertyChanged("SelectedConnectionConfig");
+                this.RemoveCurrentConnection();
             }
         }
 
+        private void AddConnectionButton_Click(object sender, RoutedEventArgs e)
+        {
+            if(this.SelectedCodeSourceConfig == null)
+            {
+                return;
+            }
+
+            this.IsEditingConfig = true;
+            this.isEditingNewConfig = true;
+            ConnectionConfig newConfig = new ConnectionConfig();
+            this.SelectedCodeSourceConfig.BaseConfig.ConnectionConfigList.Add(newConfig);
+            ConnectionConfigView newView = new ConnectionConfigView(newConfig);
+            this.SelectedCodeSourceConfig.ConnectionConfigViewList.Add(newView);
+            this.connectionListBox.SelectedItem = newView;
+        }
+        
         private void RemoveCurrentConnection()
         {
             this.SelectedCodeSourceConfig.BaseConfig.ConnectionConfigList.Remove(this.SelectedConnectionConfig.BaseConfig);
             this.SelectedCodeSourceConfig.BaseConfig.SerialiseToFile();
 
             this.SelectedCodeSourceConfig.ConnectionConfigViewList.Remove(this.SelectedConnectionConfig);
-            this.connectionConfigListBox.SelectedItem = null;
+            this.connectionListBox.SelectedItem = null;
             this.NotifyPropertyChanged("CodeSourceConfigList");
             this.NotifyPropertyChanged("ConnectionConfigList");
             this.NotifyPropertyChanged("SelectedConnectionConfig");
@@ -308,22 +303,13 @@ namespace LobsterWpf.Views
         }
 
         /// <summary>
-        /// Loads the database connections from disk, and refreshes the connection list.
-        /// </summary>
-        private void LoadDatabaseConnections()
-        {
-            /*List<DatabaseConfigView> configViews = DatabaseConfig.GetConfigList().Select(item => new DatabaseConfigView(item)).ToList();
-            this.DatabaseConfigList = new ObservableCollection<DatabaseConfigView>(configViews);*/
-        }
-
-        /// <summary>
         /// The event that is called when the test connection button is clicked.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">The event arguments.</param>
         private void TestConnectionButton_Click(object sender, RoutedEventArgs e)
         {
-            PasswordPromptWindow win = new PasswordPromptWindow(this.CurrentConnectionConfigView.Name, this.CurrentConnectionConfigView.Username);
+            PasswordPromptWindow win = new PasswordPromptWindow(this.SelectedConnectionConfig.Name, this.SelectedConnectionConfig.Username);
             win.ShowDialog();
             if (!win.DialogResult.GetValueOrDefault(false))
             {
@@ -332,7 +318,7 @@ namespace LobsterWpf.Views
 
             SecureString password = win.textField.SecurePassword;
             Exception ex = null;
-            bool result = this.CurrentConnectionConfigView.TestConnection(password, ref ex);
+            bool result = this.SelectedConnectionConfig.TestConnection(password, ref ex);
             string message = result ? "Connection test successful" : "Connection test unsuccessful.\n" + ex;
             MessageBox.Show(message);
         }
@@ -359,17 +345,14 @@ namespace LobsterWpf.Views
         {
             if (this.IsEditingConfig)
             {
-                if (this.CurrentConnectionConfigView.ChangesMade && !this.ConfirmCancelChanges())
+                if (this.SelectedConnectionConfig.ChangesMade && !this.ConfirmCancelChanges())
                 {
                     return;
                 }
             }
 
             this.IsEditingConfig = false;
-            this.NotifyPropertyChanged("IsEditButtonEnabled");
-            int selectedIndex = this.connectionListBox.SelectedIndex;
-            this.LoadDatabaseConnections();
-            this.connectionListBox.SelectedIndex = selectedIndex;
+            this.LoadCodeSourceConfigs();
         }
 
         /// <summary>
@@ -394,18 +377,9 @@ namespace LobsterWpf.Views
         /// <param name="e">The event arguments.</param>
         private void SaveEditButton_Click(object sender, RoutedEventArgs e)
         {
-            /*Debug.Assert(this.IsEditingConfig, "The save button should be usable while not in edit mode");
-
-            bool result = this.CurrentConfigView.ApplyChanges();
-            if (!result)
-            {
-                MessageBox.Show("Changes could not be saved.");
-            }
-            else
-            {
-                this.IsEditingConfig = false;
-                this.NotifyPropertyChanged("IsEditButtonEnabled");
-            }*/
+            Debug.Assert(this.IsEditingConfig, "The save button should be usable while not in edit mode");
+            this.SelectedCodeSourceConfig.BaseConfig.SerialiseToFile();
+            this.IsEditingConfig = false;
         }
 
         /// <summary>
@@ -417,7 +391,6 @@ namespace LobsterWpf.Views
         private void StartEditButton_Click(object sender, RoutedEventArgs e)
         {
             this.IsEditingConfig = true;
-            this.NotifyPropertyChanged("IsEditButtonEnabled");
         }
 
         /// <summary>
@@ -425,7 +398,7 @@ namespace LobsterWpf.Views
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">The event arguments.</param>
-        private void ConnectionListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void connectionListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (this.IsEditingConfig)
             {
