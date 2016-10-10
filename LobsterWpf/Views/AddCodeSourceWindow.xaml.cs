@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="AddCodeSourceWindow.cs" company="marshl">
+// <copyright file="AddCodeSourceWindow.xaml.cs" company="marshl">
 // Copyright 2016, Liam Marshall, marshl.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
 // </copyright>
 //-----------------------------------------------------------------------
 //
-//      "But great though his lore may be, it must have a source."
-//        - Gandalf the Grey
 //      "I have not brought you hither to be instructed by you, but to give you a choice."
 //          - Saruman the Wise
 //
@@ -31,27 +29,53 @@ namespace LobsterWpf.Views
     /// </summary>
     public partial class AddCodeSourceWindow : Window
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AddCodeSourceWindow"/> class.
+        /// </summary>
+        public AddCodeSourceWindow()
+        {
+            this.InitializeComponent();
+        }
+
+        /// <summary>
+        /// The enumeration for how the user wants to add a new CodeSource.
+        /// </summary>
         public enum Selection
         {
+            /// <summary>
+            /// The choice to add a CodeSource directory that has already been prepared.
+            /// </summary>
             AddPreparedCodeSource,
+
+            /// <summary>
+            /// The choice to prepare a new CodeSource directory and then add it.
+            /// </summary>
             PrepareNewCodeSource
         }
 
+        /// <summary>
+        /// Gets what option the user selected.
+        /// </summary>
         public Selection? UserSelection { get; private set; }
 
-        public AddCodeSourceWindow()
-        {
-            InitializeComponent();
-        }
-
-        private void addPreparedCodeSourceButton_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// The event handler for when the user clicks the Add Prepared CodeSOurce button.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void AddPreparedCodeSourceButton_Click(object sender, RoutedEventArgs e)
         {
             this.UserSelection = Selection.AddPreparedCodeSource;
             this.DialogResult = true;
             this.Close();
         }
 
-        private void prepareNewCodeSourceButton_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// The event handler for when the user clicks the Prepare New CodeSource button.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void PrepareNewCodeSourceButton_Click(object sender, RoutedEventArgs e)
         {
             this.UserSelection = Selection.PrepareNewCodeSource;
             this.DialogResult = true;
