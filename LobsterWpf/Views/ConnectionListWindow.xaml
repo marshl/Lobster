@@ -30,7 +30,7 @@
         <RowDefinition Height="Auto"/>
       </Grid.RowDefinitions>
       <Label Grid.Row="0" Content="Codesource Directories" FontSize="16"/>
-      <ListBox Name="codeSourceListBox" Grid.Row="1" ItemsSource="{Binding CodeSourceConfigList}" SelectionChanged="CodeSourceListBox_SelectionChanged" IsEnabled="{Binding Path=IsEditingConfig, Converter={StaticResource inverseBooleanConverter}}" MouseDoubleClick="codeSourceListBox_MouseDoubleClick">
+      <ListBox Name="codeSourceListBox" Grid.Row="1" ItemsSource="{Binding CodeSourceConfigList}" SelectionChanged="CodeSourceListBox_SelectionChanged" IsEnabled="{Binding Path=IsEditingConfig, Converter={StaticResource inverseBooleanConverter}}">
         <ListBox.ItemTemplate>
           <DataTemplate DataType="CodeSourceConfigView">
             <StackPanel>
