@@ -26,26 +26,23 @@ namespace LobsterWpf.Views
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.ComponentModel;
-    using System.IO;
+    using System.Diagnostics;
     using System.Linq;
+    using System.Runtime.CompilerServices;
     using System.Security;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Input;
+
     using LobsterModel;
     using Microsoft.WindowsAPICodePack.Dialogs;
     using ViewModels;
-    using System.Runtime.Serialization;
-    using System.Runtime.CompilerServices;
-    using System.Diagnostics;
 
     /// <summary>
     /// Interaction logic for ConnectionListWindow.xaml
     /// </summary>
     public partial class ConnectionListWindow : Window, INotifyPropertyChanged
     {
-        public ObservableCollection<CodeSourceConfigView> CodeSourceConfigList { get; set; }
-
         /// <summary>
         /// Whether the user is currently editing a config file or not.
         /// </summary>
@@ -73,18 +70,37 @@ namespace LobsterWpf.Views
             }
         }
 
-        private void LoadCodeSourceConfigs()
-        {
-            List<CodeSourceConfigView> configViews = CodeSourceConfig.GetConfigList().Select(item => new CodeSourceConfigView(item)).ToList();
-            this.CodeSourceConfigList = new ObservableCollection<CodeSourceConfigView>(configViews);
-            this.NotifyPropertyChanged("CodeSourceConfigList");
-            this.NotifyPropertyChanged("SelectedConnectionConfig");
-        }
-
         /// <summary>
         /// The event for when a property is changed.
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// Gets or sets the list of loaded CodeSource configuration files.
+        /// </summary>
+        public ObservableCollection<CodeSourceConfigView> CodeSourceConfigList { get; set; }
+
+        /// <summary>
+        /// Gets the currently selected connection config from the connection list.
+        /// </summary>
+        public ConnectionConfigView SelectedConnectionConfig
+        {
+            get
+            {
+                return (ConnectionConfigView)this.connectionListBox.SelectedItem;
+            }
+        }
+
+        /// <summary>
+        /// Gets the currently selected CodeSourceConfigView in teh CodeSOurce list.
+        /// </summary>
+        public CodeSourceConfigView SelectedCodeSourceConfig
+        {
+            get
+            {
+                return (CodeSourceConfigView)this.codeSourceListBox.SelectedItem;
+            }
+        }
 
         /// <summary>
         /// Gets or sets a value indicating whether the user is currently editing a config file or not.
@@ -144,6 +160,17 @@ namespace LobsterWpf.Views
         }
 
         /// <summary>
+        /// Loads the CodeSOurce configuration files that Lobster currently knows of.
+        /// </summary>
+        private void LoadCodeSourceConfigs()
+        {
+            List<CodeSourceConfigView> configViews = CodeSourceConfig.GetConfigList().Select(item => new CodeSourceConfigView(item)).ToList();
+            this.CodeSourceConfigList = new ObservableCollection<CodeSourceConfigView>(configViews);
+            this.NotifyPropertyChanged("CodeSourceConfigList");
+            this.NotifyPropertyChanged("SelectedConnectionConfig");
+        }
+
+        /// <summary>
         /// Displays a prompt to the user, confirming that they want to cancel changes to the currently selected database config.
         /// </summary>
         /// <returns>True if the user is Ok with cancelling the changes, otherwise false.</returns>
@@ -161,9 +188,10 @@ namespace LobsterWpf.Views
 
             if (this.isEditingNewConfig)
             {
-                this.RemoveCurrentConnection();
+                this.RemoveSelectedConnection();
                 this.isEditingNewConfig = false;
             }
+
             return true;
         }
 
@@ -198,13 +226,18 @@ namespace LobsterWpf.Views
 
             if (result == MessageBoxResult.OK)
             {
-                this.RemoveCurrentConnection();
+                this.RemoveSelectedConnection();
             }
         }
 
+        /// <summary>
+        /// Adds a new connection to the connection list of the currently selected CodeSource, and begins the edit process.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
         private void AddConnectionButton_Click(object sender, RoutedEventArgs e)
         {
-            if(this.SelectedCodeSourceConfig == null)
+            if (this.SelectedCodeSourceConfig == null)
             {
                 return;
             }
@@ -217,9 +250,17 @@ namespace LobsterWpf.Views
             this.SelectedCodeSourceConfig.ConnectionConfigViewList.Add(newView);
             this.connectionListBox.SelectedItem = newView;
         }
-        
-        private void RemoveCurrentConnection()
+
+        /// <summary>
+        /// Removes the currently selected connection from the connection list.
+        /// </summary>
+        private void RemoveSelectedConnection()
         {
+            if (this.SelectedConnectionConfig == null)
+            {
+                return;
+            }
+
             this.SelectedCodeSourceConfig.BaseConfig.ConnectionConfigList.Remove(this.SelectedConnectionConfig.BaseConfig);
             this.SelectedCodeSourceConfig.BaseConfig.SerialiseToFile();
 
@@ -228,14 +269,6 @@ namespace LobsterWpf.Views
             this.NotifyPropertyChanged("CodeSourceConfigList");
             this.NotifyPropertyChanged("ConnectionConfigList");
             this.NotifyPropertyChanged("SelectedConnectionConfig");
-        }
-
-        public ConnectionConfigView SelectedConnectionConfig
-        {
-            get
-            {
-                return (ConnectionConfigView)this.connectionListBox.SelectedItem;
-            }
         }
 
         /// <summary>
@@ -264,42 +297,6 @@ namespace LobsterWpf.Views
             {
                 MessageBox.Show($"{ex.Message}");
             }
-        }
-
-        /// <summary>
-        /// The event called when the new connection button is clicked.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments.</param>
-        private void NewConnectionButton_Click(object sender, RoutedEventArgs e)
-        {
-            /*CommonOpenFileDialog dlg = new CommonOpenFileDialog();
-            dlg.IsFolderPicker = true;
-            CommonFileDialogResult result = dlg.ShowDialog();
-            if (result != CommonFileDialogResult.Ok)
-            {
-                return;
-            }
-
-            string errorMessage = null;
-            if (!CodeSourceConfig.ValidateNewCodeSourceLocation(dlg.FileName, ref errorMessage))
-            {
-                MessageBox.Show(errorMessage);
-                return;
-            }
-
-            CodeSourceConfig codeSourceConfig = null;
-            if (!CodeSourceConfig.InitialiseCodeSourceDirectory(dlg.FileName, ref codeSourceConfig))
-            {
-                return;
-            }
-
-            CodeSourceConfigView configView = new CodeSourceConfigView(codeSourceConfig);
-
-            this.databaseConfigList.Add(configView);
-            this.connectionListBox.SelectedItem = configView;
-            this.IsEditingConfig = true;
-            this.isEditingNewConfig = true;*/
         }
 
         /// <summary>
@@ -398,7 +395,7 @@ namespace LobsterWpf.Views
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">The event arguments.</param>
-        private void connectionListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ConnectionListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (this.IsEditingConfig)
             {
@@ -409,30 +406,32 @@ namespace LobsterWpf.Views
             this.NotifyPropertyChanged("IsEditButtonEnabled");
         }
 
-        private void codeSourceListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-
-        }
-
-        private void connectionListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        /// <summary>
+        /// The event handler for when the user double clicks a record in the connection list, opening the connection.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void ConnectionListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             ConnectionConfigView configView = ((ListBoxItem)sender).Content as ConnectionConfigView;
             this.TryConnectWithConfig(configView.BaseConfig);
         }
 
-        private void codeSourceListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        /// <summary>
+        /// The event handler for when the user selects a different item of the CodeSource list, changing which connections should be displayed.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void CodeSourceListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             this.NotifyPropertyChanged("SelectedCodeSourceConfig");
         }
 
-        public CodeSourceConfigView SelectedCodeSourceConfig
-        {
-            get
-            {
-                return (CodeSourceConfigView)this.codeSourceListBox.SelectedItem;
-            }
-        }
-
+        /// <summary>
+        /// The event handler for when the Add CodeSource button is pressed, giving the user the ability to choose how they want to add a CodeSource directory.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
         private void AddCodeSourceButton_Click(object sender, RoutedEventArgs e)
         {
             var window = new AddCodeSourceWindow();
@@ -457,6 +456,9 @@ namespace LobsterWpf.Views
             this.NotifyPropertyChanged("CodeSourceConfigList");
         }
 
+        /// <summary>
+        /// Prompts the user for an existing CodeSource folder to select.
+        /// </summary>
         private void AddExistingCodeSource()
         {
             CommonOpenFileDialog dlg = new CommonOpenFileDialog();
@@ -478,6 +480,9 @@ namespace LobsterWpf.Views
             this.LoadCodeSourceConfigs();
         }
 
+        /// <summary>
+        /// Prompts the user for a directory to select and initialise as a new CodeSource directory.
+        /// </summary>
         private void PrepareNewCodeSource()
         {
             CommonOpenFileDialog dlg = new CommonOpenFileDialog();
@@ -504,6 +509,11 @@ namespace LobsterWpf.Views
             this.LoadCodeSourceConfigs();
         }
 
+        /// <summary>
+        /// The event handler for when the Remove CodeSource button is clicked, removing the selected CodeSource.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
         private void RemoveCodeSourceButton_Click(object sender, RoutedEventArgs e)
         {
             if (this.codeSourceListBox.SelectedItem != null)

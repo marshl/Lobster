@@ -30,7 +30,7 @@
         <RowDefinition Height="Auto"/>
       </Grid.RowDefinitions>
       <Label Grid.Row="0" Content="Codesource Directories" FontSize="16"/>
-      <ListBox Name="codeSourceListBox" Grid.Row="1" ItemsSource="{Binding CodeSourceConfigList}" SelectionChanged="codeSourceListBox_SelectionChanged" IsEnabled="{Binding Path=IsEditingConfig, Converter={StaticResource inverseBooleanConverter}}" MouseDoubleClick="codeSourceListBox_MouseDoubleClick">
+      <ListBox Name="codeSourceListBox" Grid.Row="1" ItemsSource="{Binding CodeSourceConfigList}" SelectionChanged="CodeSourceListBox_SelectionChanged" IsEnabled="{Binding Path=IsEditingConfig, Converter={StaticResource inverseBooleanConverter}}" MouseDoubleClick="codeSourceListBox_MouseDoubleClick">
         <ListBox.ItemTemplate>
           <DataTemplate DataType="CodeSourceConfigView">
             <StackPanel>
@@ -46,7 +46,7 @@
       </StackPanel>
       <Line Grid.Row="3"/>
       <Label Content="Database Connections" Grid.Row="4" FontSize="16"/>
-      <ListBox Name="connectionListBox" Grid.Row="5" ItemsSource="{Binding SelectedCodeSourceConfig.ConnectionConfigViewList}" SelectionChanged="connectionListBox_SelectionChanged" IsEnabled="{Binding Path=IsEditingConfig, Converter={StaticResource inverseBooleanConverter}}">
+      <ListBox Name="connectionListBox" Grid.Row="5" ItemsSource="{Binding SelectedCodeSourceConfig.ConnectionConfigViewList}" SelectionChanged="ConnectionListBox_SelectionChanged" IsEnabled="{Binding Path=IsEditingConfig, Converter={StaticResource inverseBooleanConverter}}">
         <ListBox.ItemTemplate>
           <DataTemplate DataType="ConnectionConfigView">
             <DataTemplate.Resources>
@@ -80,7 +80,7 @@
         </ListBox.ItemTemplate>
         <ListBox.ItemContainerStyle>
           <Style TargetType="ListBoxItem">
-            <EventSetter Event="MouseDoubleClick" Handler="connectionListBox_MouseDoubleClick"/>
+            <EventSetter Event="MouseDoubleClick" Handler="ConnectionListBox_MouseDoubleClick"/>
           </Style>
         </ListBox.ItemContainerStyle>
       </ListBox>
