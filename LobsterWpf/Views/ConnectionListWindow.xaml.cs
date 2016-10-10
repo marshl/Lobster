@@ -223,6 +223,18 @@ namespace LobsterWpf.Views
             }
         }
 
+        private void RemoveCurrentConnection()
+        {
+            this.SelectedCodeSourceConfig.BaseConfig.ConnectionConfigList.Remove(this.SelectedConnectionConfig.BaseConfig);
+            this.SelectedCodeSourceConfig.BaseConfig.SerialiseToFile();
+
+            this.SelectedCodeSourceConfig.ConnectionConfigViewList.Remove(this.SelectedConnectionConfig);
+            this.connectionConfigListBox.SelectedItem = null;
+            this.NotifyPropertyChanged("CodeSourceConfigList");
+            this.NotifyPropertyChanged("ConnectionConfigList");
+            this.NotifyPropertyChanged("SelectedConnectionConfig");
+        }
+
         public ConnectionConfigView SelectedConnectionConfig
         {
             get
