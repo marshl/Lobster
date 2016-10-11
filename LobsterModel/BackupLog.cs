@@ -50,7 +50,7 @@ namespace LobsterModel
                 dirInfo.Create();
             }
 
-            string filename = string.Format("{0:yyyy-MM-dd_HH-mm-ss}", DateTime.Now) + Path.GetExtension(originalFilename);
+            string filename = $"{DateTime.Now:yyyy-MM-dd_HH-mm-ss}" + Path.GetExtension(originalFilename);
             string fullpath = Path.Combine(dirInfo.FullName, filename);
             return new FileInfo(fullpath);
         }
