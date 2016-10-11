@@ -46,15 +46,16 @@ namespace LobsterWpf
         public App()
         {
             this.log = MessageLog.Initialise();
-            if (Settings.Default.DeleteBackupFiles)
-            {
-                BackupLog.DeleteOldBackupFiles(Settings.Default.BackupFileLifetimeDays);
-            }
 
 #if !DEBUG
             AppDomain currentDomain = AppDomain.CurrentDomain;
             currentDomain.UnhandledException += new UnhandledExceptionEventHandler(this.GlobalExceptionHandler);
 #endif
+
+            if (Settings.Default.DeleteBackupFiles)
+            {
+                BackupLog.DeleteOldBackupFiles(Settings.Default.BackupFileLifetimeDays);
+            }
         }
 
         /// <summary>
