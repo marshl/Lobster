@@ -87,6 +87,17 @@ namespace LobsterWpf.ViewModels
         }
 
         /// <summary>
+        /// Gets the directory that the base config is for.
+        /// </summary>
+        public string CodeSourceDirectory
+        {
+            get
+            {
+                return this.BaseConfig.CodeSourceDirectory;
+            }
+        }
+
+        /// <summary>
         /// Implementation of the INotifyPropertyChange, to tell WPF when a data value has changed
         /// </summary>
         /// <param name="propertyName">The name of the property that has changed.</param>

@@ -135,7 +135,7 @@
             <Button Grid.Column="1" Click="TestConnectionButton_Click" Width="125" Content="Test Connection"/>
           </Grid>
           <StackPanel Orientation="Horizontal" Grid.Row="7" Grid.ColumnSpan="2" Margin="4,0,0,0">
-            <CheckBox Grid.Column="1" VerticalContentAlignment="Center" IsChecked="{Binding Path=AllowAutomaticUpdates}" Content="Allow Automatic Updates" ToolTip="If checked, Lobster will automatically update the database when a synchronised file is changed."/>
+            <CheckBox Grid.Column="1" VerticalContentAlignment="Center" IsChecked="{Binding Path=AllowAutomaticClobbing}" Content="Allow Automatic Clobbing" ToolTip="If checked, Lobster will automatically clob to the database when a synchronised file is changed."/>
           </StackPanel>
           <StackPanel Grid.Row="10" Grid.Column="1" Margin="3">
             <Button Width="100" HorizontalAlignment="Right" Click="EditClobTypeButton_Click" IsEnabled="False">Clob Types</Button>
