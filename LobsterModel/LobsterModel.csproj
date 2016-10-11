@@ -75,8 +75,8 @@
     <Compile Include="SettingsView.cs" />
     <Compile Include="EventArguments\FileUpdateCompleteEventArgs.cs" />
     <Compile Include="SqlBuilder.cs" />
+    <Compile Include="SqlExtensions.cs" />
     <Compile Include="Utils.cs" />
-    <Compile Include="DatabaseConfig.cs" />
     <Compile Include="DatabaseConnection.cs" />
     <Compile Include="DBClobFile.cs" />
     <Compile Include="MessageLog.cs" />
