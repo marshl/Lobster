@@ -19,7 +19,7 @@
       <RowDefinition Height="*"/>
       <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
-    <Grid Grid.Row="0" Grid.Column="0">
+    <Grid Grid.Row="0" Grid.Column="0"  IsEnabled="{Binding Path=IsEditingConfig, Converter={StaticResource inverseBooleanConverter}}">
       <Grid.RowDefinitions>
         <RowDefinition Height="Auto"/>
         <RowDefinition Height="*"/>
@@ -30,19 +30,19 @@
         <RowDefinition Height="Auto"/>
       </Grid.RowDefinitions>
       <Label Grid.Row="0" Content="Codesource Directories" FontSize="16"/>
-      <ListBox Name="codeSourceListBox" Grid.Row="1" ItemsSource="{Binding CodeSourceConfigList}" SelectionChanged="CodeSourceListBox_SelectionChanged" IsEnabled="{Binding Path=IsEditingConfig, Converter={StaticResource inverseBooleanConverter}}">
+      <ListBox Name="codeSourceListBox" Grid.Row="1" ItemsSource="{Binding CodeSourceConfigList}" SelectionChanged="CodeSourceListBox_SelectionChanged">
         <ListBox.ItemTemplate>
           <DataTemplate DataType="CodeSourceConfigView">
             <StackPanel>
               <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
-              <TextBlock Text="{Binding FileLocation}" FontStyle="Italic"/>
+              <TextBlock Text="{Binding CodeSourceDirectory}" FontStyle="Italic"/>
             </StackPanel>
           </DataTemplate>
         </ListBox.ItemTemplate>
       </ListBox>
       <StackPanel Grid.Row="2" Orientation="Horizontal" DockPanel.Dock="Bottom">
         <Button Content="Add CodeSource" HorizontalAlignment="Left" Margin="5" Click="AddCodeSourceButton_Click"/>
-        <Button Content="Remove CodeSouce" HorizontalAlignment="Left" Margin="5" Click="RemoveCodeSourceButton_Click" IsEnabled="{Binding ElementName=codeSourceListBox, Path=Selec tedItems.Count}"/>
+        <Button Content="Remove CodeSouce" HorizontalAlignment="Left" Margin="5" Click="RemoveCodeSourceButton_Click" IsEnabled="{Binding ElementName=codeSourceListBox, Path=SelectedItems.Count}"/>
       </StackPanel>
       <Line Grid.Row="3"/>
       <Label Content="Database Connections" Grid.Row="4" FontSize="16"/>
