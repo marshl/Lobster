@@ -172,14 +172,16 @@ namespace LobsterModel
         /// </summary>
         /// <param name="directory">The directory to initialise.</param>
         /// <param name="newConfig">The database configuration file that is created.</param>
+        /// <param name="name">The mnemonic for the CodeSource directory.</param>
         /// <returns>True if the directory was set up  correctly, false if there was an issue setting it up, or if the directory already has them.</returns>
-        public static bool InitialiseCodeSourceDirectory(string directory, ref CodeSourceConfig newConfig)
+        public static bool InitialiseCodeSourceDirectory(string directory, string name, ref CodeSourceConfig newConfig)
         {
             try
             {
                 Directory.CreateDirectory(Path.Combine(directory, Settings.Default.ClobTypeDirectoryName));
                 newConfig = new CodeSourceConfig();
                 newConfig.FileLocation = Path.Combine(directory, Settings.Default.DatabaseConfigFileName);
+                newConfig.Name = name;
                 newConfig.SerialiseToFile();
 
                 if (!AddCodeSourceDirectory(directory))
