@@ -132,11 +132,13 @@
     <Compile Include="Views\ClobTypeListWindow.xaml.cs">
       <DependentUpon>ClobTypeListWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\CodeSourceNameWindow.xaml.cs">
+      <DependentUpon>CodeSourceNameWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\ColumnListWindow.xaml.cs">
       <DependentUpon>ColumnListWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\ColumnView.cs" />
-    <Compile Include="ViewModels\DatabaseConfigView.cs" />
     <Compile Include="ViewModels\DatabaseFileView.cs" />
     <Compile Include="Views\DownloadUpdateWindow.xaml.cs">
       <DependentUpon>DownloadUpdateWindow.xaml</DependentUpon>
@@ -177,6 +179,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\ClobTypeListWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\CodeSourceNameWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

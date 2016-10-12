@@ -500,8 +500,15 @@ namespace LobsterWpf.Views
                 return;
             }
 
+            var nameWindow = new CodeSourceNameWindow();
+            bool nameResult = nameWindow.ShowDialog() ?? false;
+            if (!nameResult)
+            {
+                return;
+            }
+
             CodeSourceConfig codeSourceConfig = null;
-            if (!CodeSourceConfig.InitialiseCodeSourceDirectory(dlg.FileName, ref codeSourceConfig))
+            if (!CodeSourceConfig.InitialiseCodeSourceDirectory(dlg.FileName, nameWindow.CodeSourceName, ref codeSourceConfig))
             {
                 return;
             }
