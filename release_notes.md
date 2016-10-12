@@ -1,3 +1,15 @@
+##Release 2.6.0.0
+#####Released: 12-10-2016
+
+####Breaking Changes
+ - Changed the connection system to allow a single CodeSource folder to be connection to many different databases with a list in the new LobsterConfig.xml file located in the CodeSource directory.
+
+####Features
+ - Improved the unhandled exception handler;
+ - Improved the unhandled exception handlers exception handler;
+ - Updated target .Net framework to 4.5;
+ - Improved the adding of existing CodeSource directories, and the creating of new CodeSource directories;
+ 
 ##Release 2.5.0.0
 #####Released: 03-07-2016
 
@@ -10,7 +22,6 @@
  - Fixed #97: Crash on ClobType Select;
  - Changed the auto updater to not wait on the new instance of Lobster to exit before exiting itself;
  
-
 ##Release 2.4.2.0
 #####Released: 01-06-2016
 
