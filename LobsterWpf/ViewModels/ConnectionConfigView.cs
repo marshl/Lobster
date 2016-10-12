@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="DatabaseConfigView.cs" company="marshl">
+// <copyright file="ConnectionConfigView.cs" company="marshl">
 // Copyright 2016, Liam Marshall, marshl.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,18 +26,16 @@ namespace LobsterWpf.ViewModels
 {
     using System;
     using System.ComponentModel;
-    using System.IO;
     using System.Security;
     using LobsterModel;
-    using Microsoft.WindowsAPICodePack.Dialogs;
 
     /// <summary>
-    /// The view of a DatabaseConfig object.
+    /// The view of a ConnectionConfig object.
     /// </summary>
     public class ConnectionConfigView : INotifyPropertyChanged
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="DatabaseConfigView"/> class.
+        /// Initializes a new instance of the <see cref="ConnectionConfigView"/> class.
         /// </summary>
         /// <param name="connectionConfig">The database config to use as the model of this view.</param>
         public ConnectionConfigView(ConnectionConfig connectionConfig)
