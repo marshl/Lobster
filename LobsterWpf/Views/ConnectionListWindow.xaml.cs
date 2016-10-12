@@ -27,6 +27,7 @@ namespace LobsterWpf.Views
     using System.Collections.ObjectModel;
     using System.ComponentModel;
     using System.Diagnostics;
+    using System.IO;
     using System.Linq;
     using System.Runtime.CompilerServices;
     using System.Security;
@@ -375,8 +376,15 @@ namespace LobsterWpf.Views
         private void SaveEditButton_Click(object sender, RoutedEventArgs e)
         {
             Debug.Assert(this.IsEditingConfig, "The save button should be usable while not in edit mode");
-            this.SelectedCodeSourceConfig.BaseConfig.SerialiseToFile();
-            this.IsEditingConfig = false;
+            try
+            {
+                this.SelectedCodeSourceConfig.BaseConfig.SerialiseToFile();
+                this.IsEditingConfig = false;
+            }
+            catch (Exception ex) when (ex is UnauthorizedAccessException || ex is IOException)
+            {
+                MessageBox.Show($"An error occurred when attempting to save the configuration file:\n{ex.Message}");
+            }
         }
 
         /// <summary>
