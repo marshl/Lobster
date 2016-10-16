@@ -70,6 +70,7 @@
     <Compile Include="EventArguments\MimeTypeRequestEventArgs.cs" />
     <Compile Include="EventArguments\TableRequestEventArgs.cs" />
     <Compile Include="CodeSourceConfig.cs" />
+    <Compile Include="SearchRule.cs" />
     <Compile Include="SerializableObject.cs" />
     <Compile Include="Exceptions\SetConnectionException.cs" />
     <Compile Include="SettingsView.cs" />
