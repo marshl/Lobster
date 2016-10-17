@@ -210,5 +210,17 @@ namespace LobsterModel.Properties {
                 this["CodeSourceDirectories"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("LobsterDescriptors")]
+        public string DirectoryDescriptorFolderName {
+            get {
+                return ((string)(this["DirectoryDescriptorFolderName"]));
+            }
+            set {
+                this["DirectoryDescriptorFolderName"] = value;
+            }
+        }
     }
 }

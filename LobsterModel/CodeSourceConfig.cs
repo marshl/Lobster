@@ -63,9 +63,18 @@ namespace LobsterModel
             }
         }
 
+        public string DirectoryDescriptorFolder
+        {
+            get
+            {
+                return Path.Combine(this.CodeSourceDirectory, Settings.Default.DirectoryDescriptorFolderName);
+            }
+        }
+
         /// <summary>
         /// Gets the location of the ClobType directory for this connection.
         /// </summary>
+        [Obsolete]
         public string ClobTypeDirectory
         {
             get

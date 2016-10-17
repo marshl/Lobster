@@ -56,5 +56,8 @@
     <Setting Name="CodeSourceDirectories" Type="System.Collections.Specialized.StringCollection" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="DirectoryDescriptorFolderName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">LobsterDescriptors</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
