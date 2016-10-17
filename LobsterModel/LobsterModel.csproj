@@ -51,6 +51,9 @@
     <Compile Include="BackupLog.cs" />
     <Compile Include="ClobDirectory.cs" />
     <Compile Include="ConnectionConfig.cs" />
+    <Compile Include="DirectoryDescriptor.cs" />
+    <Compile Include="DirectoryWatcher.cs" />
+    <Compile Include="EventArguments\DirectoryWatcherFileChangeEventArgs.cs" />
     <Compile Include="EventArguments\ClobDirectoryFileChangeEventArgs.cs" />
     <Compile Include="Exceptions\ClobFileLookupException.cs" />
     <Compile Include="ClobType.cs" />
