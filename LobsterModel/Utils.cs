@@ -198,16 +198,16 @@ namespace LobsterModel
         public static string BytesToString(long byteCount)
         {
             // Longs run out around EB
-            string[] suf = { "B", "KB", "MB", "GB", "TB", "PB", "EB" };
+            string[] suffixes = { "B", "KB", "MB", "GB", "TB", "PB", "EB" };
             if (byteCount == 0)
             {
-                return "0" + suf[0];
+                return "0" + suffixes[0];
             }
 
             long bytes = Math.Abs(byteCount);
-            int place = Convert.ToInt32(Math.Floor(Math.Log(bytes, 1024)));
-            double num = Math.Round(bytes / Math.Pow(1024, place), 1);
-            return (Math.Sign(byteCount) * num).ToString() + " " + suf[place];
+            int suffixIndex = Convert.ToInt32(Math.Floor(Math.Log(bytes, 1024)));
+            double num = Math.Round(bytes / Math.Pow(1024, suffixIndex), 1);
+            return $"{Math.Sign(byteCount) * num} {suffixes[suffixIndex]}";
         }
 
         /// <summary>
