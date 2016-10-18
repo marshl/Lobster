@@ -294,7 +294,7 @@ namespace LobsterWpf.Views
                 this.DialogResult = true;
                 this.Close();
             }
-            catch (SetConnectionException ex)
+            catch (CreateConnectionException ex)
             {
                 MessageBox.Show($"{ex.Message}");
             }

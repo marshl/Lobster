@@ -78,7 +78,7 @@ namespace LobsterModel
 
             if (!Directory.Exists(this.Config.Parent.CodeSourceDirectory))
             {
-                throw new SetConnectionException($"Could not find CodeSource directory: {this.Config.Parent.CodeSourceDirectory}");
+                throw new CreateConnectionException($"Could not find CodeSource directory: {this.Config.Parent.CodeSourceDirectory}");
             }
 
             this.clobTypeFileWatcher = new FileSystemWatcher(this.Config.Parent.DirectoryDescriptorFolder);
@@ -185,12 +185,12 @@ namespace LobsterModel
             }
             catch (ConnectToDatabaseException ex)
             {
-                throw new SetConnectionException($"A connection could not be made to the database: {ex.Message}", ex);
+                throw new CreateConnectionException($"A connection could not be made to the database: {ex.Message}", ex);
             }
 
             if (!Directory.Exists(config.Parent.DirectoryDescriptorFolder))
             {
-                throw new SetConnectionException($"The clob type directory {config.Parent.DirectoryDescriptorFolder} could not be found.");
+                throw new CreateConnectionException($"The clob type directory {config.Parent.DirectoryDescriptorFolder} could not be found.");
             }
 
             DatabaseConnection databaseConnection = new DatabaseConnection(config, password);

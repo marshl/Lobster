@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="SetConnectionException.cs" company="marshl">
+// <copyright file="CreateConnectionException.cs" company="marshl">
 // Copyright 2016, Liam Marshall, marshl.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,31 +29,31 @@ namespace LobsterModel
     /// <summary>
     /// The exception for when an error occurs when attemtping to open a connection to the database.
     /// </summary>
-    public class SetConnectionException : Exception
+    public class CreateConnectionException : Exception
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="SetConnectionException"/> class.
+        /// Initializes a new instance of the <see cref="CreateConnectionException"/> class.
         /// </summary>
-        public SetConnectionException()
+        public CreateConnectionException()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SetConnectionException"/> class 
+        /// Initializes a new instance of the <see cref="CreateConnectionException"/> class 
         /// with an error message.
         /// </summary>
         /// <param name="message">The message that describes the error.</param>
-        public SetConnectionException(string message) : base(message)
+        public CreateConnectionException(string message) : base(message)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SetConnectionException"/> class with an error 
+        /// Initializes a new instance of the <see cref="CreateConnectionException"/> class with an error 
         /// message and th inner exception tha tcaused this exception.
         /// </summary>
         /// <param name="message">The message that describes the error.</param>
         /// <param name="innerException">The exception that is the cause of this exception..</param>
-        public SetConnectionException(string message, Exception innerException) : base(message, innerException)
+        public CreateConnectionException(string message, Exception innerException) : base(message, innerException)
         {
         }
     }
