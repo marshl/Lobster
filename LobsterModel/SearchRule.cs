@@ -27,15 +27,21 @@ namespace LobsterModel
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Runtime.Serialization;
+    using System.Xml.Serialization;
 
     /// <summary>
     /// Used to find all files in a directory that match a list of rules.
     /// </summary>
+    [DataContract]
+    [XmlInclude(typeof(IncludeRule))]
+    [XmlInclude(typeof(ExcludeRule))]
     public abstract class SearchRule
     {
         /// <summary>
         /// Gets or sets the file pattern to match against.
         /// </summary>
+        [DataMember]
         public string Pattern { get; set; }
 
         /// <summary>
@@ -117,6 +123,7 @@ namespace LobsterModel
         /// <summary>
         /// A search rule that includes the files that match it
         /// </summary>
+        [DataContract]
         public class IncludeRule : SearchRule
         {
         }
@@ -124,6 +131,7 @@ namespace LobsterModel
         /// <summary>
         /// A search rule that excludes any files that match it
         /// </summary>
+        [DataContract]
         public class ExcludeRule : SearchRule
         {
         }

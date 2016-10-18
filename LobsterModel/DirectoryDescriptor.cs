@@ -40,13 +40,13 @@ namespace LobsterModel
         /// Gets or sets the display name for this Descriptor. This value has no functional impact, 
         /// and is used for display purposes only.
         /// </summary>
-        [DataMember]
+        [DataMember(IsRequired = true)]
         public string Name { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the directory in CodeSource to be used for this Descriptor. Directory separators can be used.
         /// </summary>
-        [DataMember]
+        [DataMember(IsRequired = true)]
         public string DirectoryName { get; set; }
 
         /// <summary>
@@ -70,13 +70,13 @@ namespace LobsterModel
         /// <summary>
         /// Gets or sets the SQL statement used to insert a new record into the database.
         /// </summary>
-        [DataMember]
+        [DataMember(IsRequired = true)]
         public string InsertStatement { get; set; }
 
         /// <summary>
         /// Gets or sets the SQL statement used to update an existing record in the database.
         /// </summary>
-        [DataMember]
+        [DataMember(IsRequired = true)]
         public string UpdateStatement { get; set; }
 
         /// <summary>
@@ -88,13 +88,13 @@ namespace LobsterModel
         /// <summary>
         /// Gets or sets the statement used to determine whether the file exists in the database.
         /// </summary>
-        [DataMember]
+        [DataMember(IsRequired = true)]
         public string DatabaseFileExistsStatement { get; set; }
 
         /// <summary>
         /// Gets or sets the statement used to fetch the file data from the database.
         /// </summary>
-        [DataMember]
+        [DataMember(IsRequired = true)]
         public string FetchStatement { get; set; }
 
         /// <summary>
