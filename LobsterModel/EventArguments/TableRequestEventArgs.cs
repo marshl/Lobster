@@ -21,6 +21,7 @@ namespace LobsterModel
     /// <summary>
     /// The event arguments for when the user needs to supply a table to insert into,
     /// </summary>
+    [Obsolete]
     public class TableRequestEventArgs : EventArgs
     {
         /// <summary>

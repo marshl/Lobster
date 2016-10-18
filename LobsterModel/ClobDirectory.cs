@@ -30,6 +30,7 @@ namespace LobsterModel
     /// <summary>
     /// A ClobDirectory maps to a single ClobType, and represents the directory on the file system where the files for that ClobType are found.
     /// </summary>
+    [Obsolete]
     public class ClobDirectory
     {
         /// <summary>

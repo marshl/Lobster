@@ -32,6 +32,7 @@ namespace LobsterModel
     /// <summary>
     /// A ClobType table contains a number of columns that are required to use the table. Each column has a different purpose describing how it affects the table.
     /// </summary>
+    [Obsolete]
     public class Column
     {
         /// <summary>

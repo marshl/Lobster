@@ -26,12 +26,12 @@ namespace LobsterModel
 {
     using System;
     using System.Collections.Generic;
-    using System.Xml.Serialization;
 
     /// <summary>
     /// Rperesents a single SQL table in the database. Used to build commands for 
     /// inserting, updating and querying values from this table.
     /// </summary>
+    [Obsolete]
     public class Table
     {
         /// <summary>

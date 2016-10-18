@@ -32,6 +32,7 @@ namespace LobsterWpf.Views
     /// <summary>
     /// The window for letting the user select a table to insert a new file into.
     /// </summary>
+    [Obsolete]
     public partial class TableSelectorWindow : Window
     {
         /// <summary>

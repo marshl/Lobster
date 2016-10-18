@@ -34,6 +34,7 @@ namespace LobsterModel
     /// <summary>
     /// Used to construct SQL statements from ClobType metadata to then insert, update and query database file information
     /// </summary>
+    [Obsolete]
     public static class SqlBuilder
     {
         /// <summary>

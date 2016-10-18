@@ -28,6 +28,7 @@ namespace LobsterModel
     /// <summary>
     /// An exception thrown when a column isn't found that matches the given mime type
     /// </summary>
+    [Obsolete]
     public class ColumnNotFoundException : Exception
     {
         /// <summary>

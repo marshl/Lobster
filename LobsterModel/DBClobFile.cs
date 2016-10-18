@@ -29,6 +29,7 @@ namespace LobsterModel
     /// <summary>
     /// A DBClobFile describes a row in a table on the database used by a ClobType.
     /// </summary>
+    [Obsolete]
     public class DBClobFile
     {
         /// <summary>

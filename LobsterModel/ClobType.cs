@@ -34,6 +34,7 @@ namespace LobsterModel
     /// A ClobType defines a particular usage of the database. In its most common form, A ClobType contains a single table that maps to a single directory on the file system.
     /// ClobTypes are stored as Xml files which are deserialized into this structure.
     /// </summary>
+    [Obsolete]
     public class ClobType : SerializableObject
     {
         /// <summary>

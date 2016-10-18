@@ -120,6 +120,7 @@ namespace LobsterModel
         /// <param name="schemaFilename">The location of the schema file to validate the XML with.</param>
         /// <param name="result">A new object of type T if it passes validation.</param>
         /// <returns>A value indicating whether the file deserialised successfully, otherwise false.</returns>
+        [Obsolete]
         [SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times", Justification = "The stream readers will be Disposed by 'using'.")]
         public static bool DeserialiseXmlFileUsingSchema<T>(string xmlFilename, string schemaFilename, out T result) where T : SerializableObject, new()
         {

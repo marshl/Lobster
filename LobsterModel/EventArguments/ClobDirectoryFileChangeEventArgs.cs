@@ -22,6 +22,7 @@ namespace LobsterModel
     /// <summary>
     /// The event arguments for a change in any file within a <see cref="ClobDirectory"/>.
     /// </summary>
+    [Obsolete]
     public class ClobDirectoryFileChangeEventArgs : EventArgs
     {
         /// <summary>

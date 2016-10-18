@@ -62,6 +62,7 @@ namespace LobsterModel
         /// <summary>
         /// The internal mime type list.
         /// </summary>
+        [Obsolete]
         private MimeTypeList mimeTypeList;
 
         /// <summary>
