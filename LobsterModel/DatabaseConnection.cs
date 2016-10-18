@@ -76,14 +76,12 @@ namespace LobsterModel
             this.IsAutomaticClobbingEnabled = this.Config.AllowAutomaticClobbing;
             this.Password = password;
 
-            bool result = Utils.DeserialiseXmlFileUsingSchema("LobsterSettings/MimeTypes.xml", null, out this.mimeTypeList);
-
             if (!Directory.Exists(this.Config.Parent.CodeSourceDirectory))
             {
                 throw new SetConnectionException($"Could not find CodeSource directory: {this.Config.Parent.CodeSourceDirectory}");
             }
 
-            this.clobTypeFileWatcher = new FileSystemWatcher(this.Config.Parent.ClobTypeDirectory);
+            this.clobTypeFileWatcher = new FileSystemWatcher(this.Config.Parent.DirectoryDescriptorFolder);
             this.clobTypeFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.CreationTime;
             this.clobTypeFileWatcher.Changed += new FileSystemEventHandler(this.OnClobTypeChangeEvent);
             this.clobTypeFileWatcher.Created += new FileSystemEventHandler(this.OnClobTypeChangeEvent);
@@ -111,11 +109,13 @@ namespace LobsterModel
         /// <summary>
         /// The event for when a Table selection is required by the user.
         /// </summary>
+        [Obsolete]
         public event EventHandler<TableRequestEventArgs> RequestTableEvent;
 
         /// <summary>
         /// The event for when a mime type is needed.
         /// </summary>
+        [Obsolete]
         public event EventHandler<MimeTypeRequestEventArgs> RequestMimeTypeEvent;
 
         /// <summary>
@@ -126,6 +126,7 @@ namespace LobsterModel
         /// <summary>
         /// Gets or sets the list of mime types that are used to translate from file names to database mnemonics and vice-sersa.
         /// </summary>
+        [Obsolete]
         public MimeTypeList MimeTypeList
         {
             get
@@ -148,12 +149,15 @@ namespace LobsterModel
         /// <summary>
         /// Gets the configuration file for this connection.
         /// </summary>
-        public ConnectionConfig Config { get; private set; }
+        public ConnectionConfig Config { get; }
 
         /// <summary>
         /// Gets the list of ClobDirectories for each ClobType located in directory in the configuration settings.
         /// </summary>
+        [Obsolete]
         public List<ClobDirectory> ClobDirectoryList { get; private set; }
+
+        public List<DirectoryWatcher> DirectoryWatcherList { get; private set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the database should be automatically updated when a file is changed.
@@ -184,28 +188,56 @@ namespace LobsterModel
                 throw new SetConnectionException($"A connection could not be made to the database: {ex.Message}", ex);
             }
 
-            if (config.Parent.ClobTypeDirectory == null || !Directory.Exists(config.Parent.ClobTypeDirectory))
+            if (!Directory.Exists(config.Parent.DirectoryDescriptorFolder))
             {
-                throw new SetConnectionException($"The clob type directory {config.Parent.ClobTypeDirectory} could not be found.");
+                throw new SetConnectionException($"The clob type directory {config.Parent.DirectoryDescriptorFolder} could not be found.");
             }
 
             DatabaseConnection databaseConnection = new DatabaseConnection(config, password);
 
+            //TODO: Display these errors to the user somehow
             List<ClobTypeLoadException> errors = new List<ClobTypeLoadException>();
             List<FileListRetrievalException> fileLoadErrors = new List<FileListRetrievalException>();
 
-            databaseConnection.LoadClobTypes(ref errors);
-            databaseConnection.GetDatabaseFileLists(ref fileLoadErrors);
+            databaseConnection.LoadDirectoryDescriptors(ref errors);
 
             MessageLog.LogInfo("Connection change successful");
 
             return databaseConnection;
         }
 
+        public void LoadDirectoryDescriptors(ref List<ClobTypeLoadException> errors)
+        {
+            this.DirectoryWatcherList = new List<DirectoryWatcher>();
+            if (!Directory.Exists(this.Config.Parent.DirectoryDescriptorFolder))
+            {
+                string errorMsg = $"The directory {this.Config.Parent.DirectoryDescriptorFolder} could not be found loading connection {this.Config.Name}";
+                MessageLog.LogWarning(errorMsg);
+                errors.Add(new ClobTypeLoadException(errorMsg));
+                return;
+            }
+
+            var directoryDescriptors = DirectoryDescriptor.GetDirectoryDescriptorList(this.Config.Parent.DirectoryDescriptorFolder);
+            foreach(var dirDesc in directoryDescriptors)
+            {
+                try
+                {
+                    DirectoryWatcher dirWatcher = new DirectoryWatcher(this.Config.Parent.CodeSourceDirectory, dirDesc);
+                    //TODO: dirWatcher.FileChangeEvent += this.OnClobDirectoryFileChangeEvent;
+                    this.DirectoryWatcherList.Add(dirWatcher);
+                }
+                catch(ClobTypeLoadException ex)
+                {
+                    MessageLog.LogError($"An error occurred when loading the DirectoryDescriptor {dirDesc.Name}: {ex}");
+                }
+            }
+        }
+
         /// <summary>
         /// Loads each of the xml files in the ClobTypeDir (if they are valid).
         /// </summary>
         /// <param name="errors">Any errors that are raised during loading.</param>
+        [Obsolete]
         public void LoadClobTypes(ref List<ClobTypeLoadException> errors)
         {
             string clobTypeDir = this.Config.Parent.ClobTypeDirectory;
@@ -244,6 +276,7 @@ namespace LobsterModel
         /// <param name="fullpath">The full name of the file being inserted.</param>
         /// <param name="tables">The list of table that the user can select from.</param>
         /// <returns>The user selected table (if any)</returns>
+        [Obsolete]
         public Table OnTableRequest(object sender, string fullpath, Table[] tables)
         {
             var handler = this.RequestTableEvent;
@@ -283,6 +316,7 @@ namespace LobsterModel
         /// <summary>
         /// Reloads the list of ClobTypes without destorying the connection.
         /// </summary>
+        [Obsolete]
         public void ReloadClobTypes()
         {
             List<ClobTypeLoadException> errors = new List<ClobTypeLoadException>();
@@ -295,6 +329,7 @@ namespace LobsterModel
         /// Queries the database for all files in all ClobDireectories and stores them in the directory.
         /// </summary>
         /// <param name="errorList">The list of errors that were encountered when getting the database files.</param>
+        [Obsolete]
         public void GetDatabaseFileLists(ref List<FileListRetrievalException> errorList)
         {
             OracleConnection oracleConnection = this.Config.OpenSqlConnection(this.Password);
@@ -328,6 +363,7 @@ namespace LobsterModel
         /// <param name="clobDir">The directoy that the file reside in.</param>
         /// <param name="targetFilename">The file to update the database record for.</param>
         /// <param name="sourceFilename">The file to get the data fro the update the record with.</param>
+        [Obsolete]
         public void UpdateClobWithExternalFile(ClobDirectory clobDir, string targetFilename, string sourceFilename)
         {
             try
@@ -355,6 +391,7 @@ namespace LobsterModel
         /// <param name="oracleConnection">The database connection to download the file with.</param>
         /// <param name="clobFile">The file information that is going to be backed up.</param>
         /// <param name="fullpath">The path of the file as it exists locally.</param>
+        [Obsolete]
         public void BackupClobFile(OracleConnection oracleConnection, DBClobFile clobFile, string fullpath)
         {
             FileInfo backupFile = BackupLog.AddBackup(this.Config.Parent.CodeSourceDirectory, fullpath);
@@ -366,6 +403,7 @@ namespace LobsterModel
         /// </summary>
         /// <param name="clobDir">The directory that the file was updated in.</param>
         /// <param name="fullpath">The file to update.</param>
+        [Obsolete]
         public void SendUpdateClobMessage(ClobDirectory clobDir, string fullpath)
         {
             this.UpdateClobWithExternalFile(clobDir, fullpath, fullpath);
@@ -379,6 +417,7 @@ namespace LobsterModel
         /// <param name="fullpath">The path of the file to insert.</param>
         /// <param name="returnFile">The database file that represents what was just inserted.</param>
         /// <returns>A value indicating whether the insert was followed through.</returns>
+        [Obsolete]
         public bool SendInsertClobMessage(ClobDirectory clobDir, string fullpath, ref DBClobFile returnFile)
         {
             Table table = null;
@@ -429,6 +468,7 @@ namespace LobsterModel
         /// </summary>
         /// <param name="databaseFile">The file name to download the file for.</param>
         /// <returns>The path of the resulting file.</returns>
+        [Obsolete]
         public string SendDownloadClobDataToFileMessage(DBClobFile databaseFile)
         {
             OracleConnection oracleConnection = this.Config.OpenSqlConnection(this.Password);
@@ -457,6 +497,7 @@ namespace LobsterModel
         /// <param name="table">The table the file would be inserted into.</param>
         /// <param name="mimeType">The mime type the file would be inserted as.</param>
         /// <returns>The database mnemonic representation of the file.</returns>
+        [Obsolete]
         public string ConvertFilenameToMnemonic(string fullpath, Table table, string mimeType)
         {
             string mnemonic = Path.GetFileNameWithoutExtension(fullpath);
@@ -490,6 +531,7 @@ namespace LobsterModel
         /// <param name="mimeType">The mimetype to insert the file as.</param>
         /// <param name="oracleConnection">The Oracle connection to use.</param>
         /// <returns>True if the file was inserted successfully, otherwise false.</returns>
+        [Obsolete]
         public DBClobFile InsertDatabaseClob(string fullpath, ClobDirectory clobDir, Table table, string mimeType, OracleConnection oracleConnection)
         {
             OracleCommand command = oracleConnection.CreateCommand();
@@ -559,6 +601,7 @@ namespace LobsterModel
         /// <param name="clobFile">The file to download.</param>
         /// <param name="oracleConnection">The connection to use.</param>
         /// <param name="filename">The filepath to download the data into.</param>
+        [Obsolete]
         public void DownloadClobDataToFile(DBClobFile clobFile, OracleConnection oracleConnection, string filename)
         {
             OracleCommand command = oracleConnection.CreateCommand();
@@ -639,6 +682,7 @@ namespace LobsterModel
         /// </summary>
         /// <param name="clobDir">The directory to get the file lists for.</param>
         /// <param name="oracleConnection">The Oracle connection to use.</param>
+        [Obsolete]
         public void GetDatabaseFileListForDirectory(ClobDirectory clobDir, OracleConnection oracleConnection)
         {
             clobDir.DatabaseFileList = new List<DBClobFile>();
@@ -666,6 +710,7 @@ namespace LobsterModel
         /// <param name="clobDirectory">The clob directory to add the file to.</param>
         /// <param name="oracleCommand">The command to execut.</param>
         /// <param name="table">The table to insert with.</param>
+        [Obsolete]
         public void ProcessFileList(ClobDirectory clobDirectory, OracleCommand oracleCommand, Table table)
         {
             try
@@ -711,6 +756,7 @@ namespace LobsterModel
         /// <param name="clobFile">The file to insert into the database.</param>
         /// <param name="clobDir">The clob directory that the file is being inserted into.</param>
         /// <param name="oracleConnection">The Oracle connction to use.</param>
+        [Obsolete]
         public void UpdateDatabaseClob(string fullpath, DBClobFile clobFile, ClobDirectory clobDir, OracleConnection oracleConnection)
         {
             OracleTransaction trans = oracleConnection.BeginTransaction();
@@ -805,6 +851,15 @@ namespace LobsterModel
                 this.clobTypeFileWatcher = null;
             }
 
+            if (this.DirectoryWatcherList != null)
+            {
+                foreach (DirectoryWatcher watcher in this.DirectoryWatcherList)
+                {
+                    watcher.Dispose();
+                }
+                this.DirectoryWatcherList = null;
+            }
+
             foreach (string filename in this.TempFileList)
             {
                 try
@@ -840,6 +895,7 @@ namespace LobsterModel
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="args">The event arguments.</param>
+        [Obsolete]
         private void OnClobDirectoryFileChangeEvent(object sender, ClobDirectoryFileChangeEventArgs args)
         {
             Thread thread = new Thread(() => this.EnqueueFileEvent(args.ClobDir, args.Args));
@@ -851,6 +907,7 @@ namespace LobsterModel
         /// </summary>
         /// <param name="clobDirectory">The directory from where the event originated.</param>
         /// <param name="args">The event arguments.</param>
+        [Obsolete]
         private void EnqueueFileEvent(ClobDirectory clobDirectory, FileSystemEventArgs args)
         {
             this.LogFileEvent($"File change event of type {args.ChangeType} for file {args.FullPath} with a write time of " + File.GetLastWriteTime(args.FullPath).ToString("yyyy-MM-dd HH:mm:ss.fff"));
@@ -904,6 +961,7 @@ namespace LobsterModel
         /// </summary>
         /// <param name="clobDirectory">The clob directory that the event was raised from.</param>
         /// <param name="e">The event to process.</param>
+        [Obsolete]
         private void ProcessFileEvent(ClobDirectory clobDirectory, FileSystemEventArgs e)
         {
             this.LogFileEvent($"Processing file event of type {e.ChangeType} for file {e.FullPath}");
@@ -964,7 +1022,7 @@ namespace LobsterModel
 
             try
             {
-                this.SendUpdateClobMessage(clobDirectory, e.FullPath);
+                //this.SendUpdateClobMessage(clobDirectory, e.FullPath);
             }
             catch (FileUpdateException)
             {
@@ -1027,6 +1085,7 @@ namespace LobsterModel
         /// <param name="table">The table the mnemonic is from (can be null).</param>
         /// <param name="mimeType">The mime type of the database file, if applicable.</param>
         /// <returns>The name as converted from the mnemonic.</returns>
+        [Obsolete]
         private string ConvertMnemonicToFilename(string mnemonic, Table table, string mimeType)
         {
             string filename = mnemonic;
