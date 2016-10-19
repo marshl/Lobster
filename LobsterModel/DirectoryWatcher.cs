@@ -37,16 +37,16 @@ namespace LobsterModel
         public DirectoryWatcher(string codeSourceDirectory, DirectoryDescriptor descriptor)
         {
             this.Descriptor = descriptor;
-            var directory = new DirectoryInfo(Path.Combine(codeSourceDirectory, this.Descriptor.DirectoryName));
+            this.DirectoryPath = Path.Combine(codeSourceDirectory, this.Descriptor.DirectoryName);
 
-            if (!directory.Exists)
+            if (!Directory.Exists(this.DirectoryPath))
             {
-                throw new ClobTypeLoadException($"The ClobDirectory {directory.FullName} could not be found.");
+                throw new ClobTypeLoadException($"The ClobDirectory {this.DirectoryPath} could not be found.");
             }
 
             try
             {
-                this.fileWatcher = new FileSystemWatcher(directory.FullName);
+                this.fileWatcher = new FileSystemWatcher(this.DirectoryPath);
             }
             catch (ArgumentException ex)
             {
@@ -62,6 +62,8 @@ namespace LobsterModel
 
             this.fileWatcher.EnableRaisingEvents = true;
         }
+
+        public string DirectoryPath { get; }
 
         /// <summary>
         /// The event for when a mime type is needed.
