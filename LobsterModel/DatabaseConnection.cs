@@ -385,6 +385,12 @@ namespace LobsterModel
             }
         }
 
+        public void BackupFile(OracleConnection oracleConnection, DirectoryWatcher watcher, string filename)
+        {
+            FileInfo backupFile = BackupLog.AddBackup(this.Config.Parent.CodeSourceDirectory, filename);
+            this.DownloadDatabaseFile(oracleConnection, watcher, filename, backupFile.FullName);
+        }
+
         /// <summary>
         /// Downloads a copy of the given DBClobFile and stores a copy in the backup folder located in settings.
         /// </summary>
@@ -674,6 +680,71 @@ namespace LobsterModel
             {
                 MessageLog.LogError($"Error retrieving data when executing command {command.CommandText} {e}");
                 throw new FileDownloadException($"An exception ocurred when executing the command {command.CommandText}");
+            }
+        }
+
+        public void DownloadDatabaseFile(OracleConnection connection, DirectoryWatcher watcher, string sourceFilename, string outputFile)
+        {
+            OracleCommand oracleCommand = connection.CreateCommand();
+            this.BindParametersToCommand(connection, oracleCommand, watcher, sourceFilename);
+
+            string dataType = this.GetDataTypeForFile(connection, watcher, sourceFilename);
+            if (dataType == "BLOB")
+            {
+                oracleCommand.CommandText = watcher.Descriptor.FetchBinaryStatement;
+            }
+            else
+            {
+                oracleCommand.CommandText = watcher.Descriptor.FetchStatement;
+            }
+
+            try
+            {
+                OracleDataReader reader = oracleCommand.ExecuteReader();
+
+                if (!reader.Read())
+                {
+                    string msg = $"No data found on clob retrieval of {sourceFilename} when executing command: {oracleCommand.CommandText}";
+                    MessageLog.LogError(msg);
+                    throw new FileDownloadException(msg);
+                }
+
+                using (FileStream fs = Utils.WaitForFile(outputFile, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
+                {
+                    if (dataType == "BLOB")
+                    {
+                        byte[] b = new byte[reader.GetBytes(0, 0, null, 0, int.MaxValue)];
+                        reader.GetBytes(0, 0, b, 0, b.Length);
+                        fs.Write(b, 0, b.Length);
+                    }
+                    else
+                    {
+                        string result = reader.GetString(0);
+                        using (StreamWriter streamWriter = new StreamWriter(fs))
+                        {
+                            streamWriter.NewLine = "\n";
+                            streamWriter.Write(result);
+                        }
+                    }
+                }
+
+                if (!reader.Read())
+                {
+                    reader.Close();
+                    return;
+                }
+                else
+                {
+                    // Too many rows
+                    reader.Close();
+                    MessageLog.LogError($"Too many rows found on clob retrieval of {sourceFilename}");
+                    throw new FileDownloadException($"Too many rows were found for the given command {oracleCommand.CommandText}");
+                }
+            }
+            catch (Exception e) when (e is InvalidOperationException || e is OracleException || e is OracleNullValueException || e is IOException)
+            {
+                MessageLog.LogError($"Error retrieving data when executing command {oracleCommand.CommandText} {e}");
+                throw new FileDownloadException($"An exception ocurred when executing the command {oracleCommand.CommandText}");
             }
         }
 
