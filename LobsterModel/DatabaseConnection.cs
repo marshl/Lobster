@@ -357,6 +357,41 @@ namespace LobsterModel
             }
         }
 
+        public void UpdateDatabaseFile(DirectoryWatcher watcher, string filepath)
+        {
+            OracleConnection oracleConnection = this.Config.OpenSqlConnection(this.Password);
+            if (Settings.Default.BackupEnabled)
+            {
+                this.BackupFile(oracleConnection, watcher, filepath);
+            }
+            
+            OracleCommand oracleCommand = oracleConnection.CreateCommand();
+
+            oracleCommand.CommandText = watcher.Descriptor.UpdateStatement;
+            this.BindParametersToCommand(oracleConnection, oracleCommand, watcher, filepath);
+            
+            try
+            {
+                MessageLog.LogInfo($"Executing Update query: {oracleCommand.CommandText}");
+                int rowsAffected = oracleCommand.ExecuteNonQuery();
+
+                // The row check can't be relied upon when using a custom loader, as it may be in an anonymous block
+                if (rowsAffected != 1)
+                {
+                    MessageLog.LogError($"In invalid number of rows ({rowsAffected}) were updated for command: {oracleCommand.CommandText}");
+                    throw new FileUpdateException($"{rowsAffected} rows were affected during the update (expected only 1). The transaction has been rolled back.");
+                }
+
+                MessageLog.LogInfo($"Clob file update successful: {filepath}");
+                return;
+            }
+            catch (Exception ex) when (ex is OracleException || ex is InvalidOperationException)
+            {
+                MessageLog.LogError($"Clob update failed for command: {oracleCommand.CommandText} {ex}");
+                throw new FileUpdateException($"An invalid operation occurred when updating the database: {ex.Message}", ex);
+            }
+        }
+
         /// <summary>
         /// Updates the database record of the target file with the data from the source file (which are normally the same file).
         /// </summary>
