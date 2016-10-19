@@ -222,6 +222,7 @@ namespace LobsterModel
                 {
                     DirectoryWatcher dirWatcher = new DirectoryWatcher(this.Config.Parent.CodeSourceDirectory, dirDesc);
                     //TODO: dirWatcher.FileChangeEvent += this.OnClobDirectoryFileChangeEvent;
+                    dirWatcher.FileChangeEvent += this.OnDirectoryWatcherFileChangeEvent;
                     this.DirectoryWatcherList.Add(dirWatcher);
                 }
                 catch (ClobTypeLoadException ex)
@@ -256,7 +257,7 @@ namespace LobsterModel
                 try
                 {
                     ClobDirectory clobDir = new ClobDirectory(this.Config.Parent.CodeSourceDirectory, clobType);
-                    clobDir.FileChangeEvent += this.OnClobDirectoryFileChangeEvent;
+                    //clobDir.FileChangeEvent += this.OnClobDirectoryFileChangeEvent;
                     this.ClobDirectoryList.Add(clobDir);
                 }
                 catch (ClobTypeLoadException ex)
@@ -363,12 +364,12 @@ namespace LobsterModel
             {
                 this.BackupFile(oracleConnection, watcher, filepath);
             }
-            
+
             OracleCommand oracleCommand = oracleConnection.CreateCommand();
 
             oracleCommand.CommandText = watcher.Descriptor.UpdateStatement;
             this.BindParametersToCommand(oracleConnection, oracleCommand, watcher, filepath);
-            
+
             try
             {
                 MessageLog.LogInfo($"Executing Update query: {oracleCommand.CommandText}");
@@ -465,7 +466,7 @@ namespace LobsterModel
                 MessageLog.LogError($"Error creating new clob when executing command: {command.CommandText} {ex}");
                 throw new FileInsertException("An exception ocurred when attempting to insert a file into the child table.", ex);
             }
-            
+
             MessageLog.LogInfo($"Clob file creation successful: {filepath}");
         }
 
@@ -1110,6 +1111,7 @@ namespace LobsterModel
                 {
                     watcher.Dispose();
                 }
+
                 this.DirectoryWatcherList = null;
             }
 
@@ -1148,20 +1150,24 @@ namespace LobsterModel
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="args">The event arguments.</param>
-        [Obsolete]
+        /*[Obsolete]
         private void OnClobDirectoryFileChangeEvent(object sender, ClobDirectoryFileChangeEventArgs args)
         {
             Thread thread = new Thread(() => this.EnqueueFileEvent(args.ClobDir, args.Args));
             thread.Start();
+        }*/
+
+        private void OnDirectoryWatcherFileChangeEvent(object sender, DirectoryWatcherFileChangeEventArgs args)
+        {
+            Thread thread = new Thread(() => this.EnqueueFileEvent(args.Watcher, args.Args));
         }
 
         /// <summary>
         /// Takes a single file event, and pushes it onto the event stack, before processing that event.
         /// </summary>
-        /// <param name="clobDirectory">The directory from where the event originated.</param>
+        /// <param name="watcher">The directory from where the event originated.</param>
         /// <param name="args">The event arguments.</param>
-        [Obsolete]
-        private void EnqueueFileEvent(ClobDirectory clobDirectory, FileSystemEventArgs args)
+        private void EnqueueFileEvent(DirectoryWatcher watcher, FileSystemEventArgs args)
         {
             this.LogFileEvent($"File change event of type {args.ChangeType} for file {args.FullPath} with a write time of " + File.GetLastWriteTime(args.FullPath).ToString("yyyy-MM-dd HH:mm:ss.fff"));
 
@@ -1194,7 +1200,7 @@ namespace LobsterModel
             lock (this.fileEventProcessingSemaphore)
             {
                 this.LogFileEvent("Lock achieved, processing event.");
-                this.ProcessFileEvent(clobDirectory, args);
+                this.ProcessFileEvent(watcher, args);
 
                 lock (this.fileEventQueue)
                 {
@@ -1212,10 +1218,9 @@ namespace LobsterModel
         /// <summary>
         /// Processes a single file event. Sending a file update to the database if necessary.
         /// </summary>
-        /// <param name="clobDirectory">The clob directory that the event was raised from.</param>
+        /// <param name="watcher">The clob directory that the event was raised from.</param>
         /// <param name="e">The event to process.</param>
-        [Obsolete]
-        private void ProcessFileEvent(ClobDirectory clobDirectory, FileSystemEventArgs e)
+        private void ProcessFileEvent(DirectoryWatcher watcher, FileSystemEventArgs e)
         {
             this.LogFileEvent($"Processing file event of type {e.ChangeType} for file {e.FullPath}");
 
@@ -1245,31 +1250,32 @@ namespace LobsterModel
                 return;
             }
 
-            if (!clobDirectory.ClobType.AllowAutomaticUpdates)
+            if (!watcher.Descriptor.PushAutomatically)
             {
                 this.LogFileEvent("The ClobType does not allow autuomatic file updates, and the file will be skipped.");
                 return;
             }
 
+            // TODO: Check whether the file will appear in the descriptor
             // "IncludeSubDirectories" check
-            if (!clobDirectory.ClobType.IncludeSubDirectories && fileInfo.Directory.FullName != clobDirectory.Directory.FullName)
+            /*if (!watcher.Descriptor.IncludeSubDirectories && fileInfo.Directory.FullName != watcher.DirectoryPath)
             {
                 this.LogFileEvent("The ClobType does not include sub directories, and the file will be skipped.");
                 return;
-            }
-
-            DBClobFile clobFile = clobDirectory.GetDatabaseFileForFullpath(e.FullPath);
+            }*/
+            /*
+            DBClobFile clobFile = watcher.GetDatabaseFileForFullpath(e.FullPath);
             if (clobFile == null)
             {
                 this.LogFileEvent($"The file does not have a DBClobFile and will be skipped {e.FullPath}");
                 return;
-            }
+            }*/
 
-            if (clobFile.LastUpdatedTime.AddMilliseconds(Settings.Default.FileUpdateTimeoutMilliseconds) > DateTime.Now)
+            /*if (clobFile.LastUpdatedTime.AddMilliseconds(Settings.Default.FileUpdateTimeoutMilliseconds) > DateTime.Now)
             {
                 this.LogFileEvent("The file was updated within the cooldown period, and will be skipped.");
                 return;
-            }
+            }*/
 
             this.LogFileEvent($"Auto-updating file {e.FullPath}");
 
