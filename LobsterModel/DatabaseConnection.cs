@@ -201,8 +201,6 @@ namespace LobsterModel
 
             databaseConnection.LoadDirectoryDescriptors(ref errors);
 
-            MessageLog.LogInfo("Connection change successful");
-
             return databaseConnection;
         }
 
@@ -218,7 +216,7 @@ namespace LobsterModel
             }
 
             var directoryDescriptors = DirectoryDescriptor.GetDirectoryDescriptorList(this.Config.Parent.DirectoryDescriptorFolder);
-            foreach(var dirDesc in directoryDescriptors)
+            foreach (var dirDesc in directoryDescriptors)
             {
                 try
                 {
@@ -226,7 +224,7 @@ namespace LobsterModel
                     //TODO: dirWatcher.FileChangeEvent += this.OnClobDirectoryFileChangeEvent;
                     this.DirectoryWatcherList.Add(dirWatcher);
                 }
-                catch(ClobTypeLoadException ex)
+                catch (ClobTypeLoadException ex)
                 {
                     MessageLog.LogError($"An error occurred when loading the DirectoryDescriptor {dirDesc.Name}: {ex}");
                 }
@@ -299,6 +297,7 @@ namespace LobsterModel
         /// <param name="fullpath">The fullpath of the file that requires a mime type to be specified.</param>
         /// <param name="mimeTypes">The list of possible mime types that can be used.</param>
         /// <returns>The mime type to insert the new record as.</returns>
+        [Obsolete]
         public string OnMimeTypeRequest(object sender, string fullpath, string[] mimeTypes)
         {
             var handler = this.RequestMimeTypeEvent;
