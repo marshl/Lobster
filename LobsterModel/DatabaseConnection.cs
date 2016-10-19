@@ -677,6 +677,134 @@ namespace LobsterModel
             }
         }
 
+        private void BindParametersToCommand(OracleConnection connection, OracleCommand command, DirectoryWatcher watcher, string path)
+        {
+            string dataType = this.GetDataTypeForFile(connection, watcher, path);
+
+            if (command.ContainsParameter("filename"))
+            {
+                var param = new OracleParameter("filename", Path.GetFileName(path));
+                command.Parameters.Add(param);
+            }
+
+            if (command.ContainsParameter("filename_without_extension"))
+            {
+                var param = new OracleParameter("filename_without_extension", Path.GetFileName(path));
+                command.Parameters.Add(param);
+            }
+
+            if (command.ContainsParameter("file_extension"))
+            {
+                var param = new OracleParameter("file_extension", Path.GetExtension(path));
+                command.Parameters.Add(param);
+            }
+
+            if (command.ContainsParameter("relative_path"))
+            {
+                Uri baseUri = new Uri(watcher.DirectoryPath);
+                Uri fileUri = new Uri(path);
+                Uri relativeUri = baseUri.MakeRelativeUri(fileUri);
+                var param = new OracleParameter("relative_path", relativeUri.OriginalString);
+                command.Parameters.Add(param);
+            }
+
+            if (command.ContainsParameter("parent_directory"))
+            {
+                var param = new OracleParameter("parent_directory", new FileInfo(path).Directory.Name);
+                command.Parameters.Add(param);
+            }
+
+            if (command.ContainsParameter("full_path"))
+            {
+                var param = new OracleParameter("full_path", path);
+                command.Parameters.Add(param);
+            }
+
+            if (command.ContainsParameter("data_type"))
+            {
+                var param = new OracleParameter();
+                param.ParameterName = "data_type";
+
+                param.Value = dataType;
+
+                command.Parameters.Add(param);
+            }
+
+            if (command.ContainsParameter("file_data_clob"))
+            {
+                OracleParameter param = new OracleParameter();
+                param.ParameterName = "file_data_clob";
+
+                // Wait for the file to unlock
+                using (FileStream fs = Utils.WaitForFile(
+                    path,
+                    FileMode.Open,
+                    FileAccess.Read,
+                    FileShare.ReadWrite))
+                {
+                    // Binary mode
+                    if (dataType == "BLOB")
+                    {
+                        byte[] fileData = new byte[fs.Length];
+                        fs.Read(fileData, 0, Convert.ToInt32(fs.Length));
+
+                        param.Value = fileData;
+                        param.OracleDbType = OracleDbType.Blob;
+                    }
+                    else
+                    {
+                        // Text mode
+                        var tr = new StreamReader(fs);
+
+                        string contents = tr.ReadToEnd();
+
+                        if (Settings.Default.AppendFooterToDatabaseFiles)
+                        {
+                            //TODO: Add Clob Footer Message
+                            //contents += MimeTypeList.GetClobFooterMessage(mimeType);
+                        }
+
+                        param.Value = contents;
+                        param.OracleDbType = OracleDbType.Clob;
+                    }
+                }
+            }
+        }
+
+        private string GetDataTypeForFile(OracleConnection connection, DirectoryWatcher watcher, string path)
+        {
+            // Default to CLOB if there is no default or statement
+            if (watcher.Descriptor.FileDataTypeStatement == null && watcher.Descriptor.DefaultDataType == null)
+            {
+                return "CLOB";
+            }
+
+            // Use the default if there is no statement (but there is a default)
+            if (watcher.Descriptor.FileDataTypeStatement == null)
+            {
+                return watcher.Descriptor.DefaultDataType;
+            }
+
+            // Otherwise use the statement
+            OracleCommand command = connection.CreateCommand();
+            command.CommandText = watcher.Descriptor.FileDataTypeStatement;
+            if (command.ContainsParameter("data_type"))
+            {
+                throw new InvalidOperationException("The FileDataTypeStatement cannot contain the \"data_type\" parameter");
+            }
+
+            this.BindParametersToCommand(connection, command, watcher, path);
+
+            object result = command.ExecuteScalar();
+
+            if (!(result is string))
+            {
+                throw new InvalidOperationException("The FileDataTypeStatement should return a single string");
+            }
+
+            return (string)result;
+        }
+
         /// <summary>
         /// Finds all DBClobFIles from the tables in the given ClobDirectory and populates its lists with them.
         /// </summary>
