@@ -76,7 +76,7 @@
     <Compile Include="CodeSourceConfig.cs" />
     <Compile Include="SearchRule.cs" />
     <Compile Include="SerializableObject.cs" />
-    <Compile Include="Exceptions\SetConnectionException.cs" />
+    <Compile Include="Exceptions\CreateConnectionException.cs" />
     <Compile Include="SettingsView.cs" />
     <Compile Include="EventArguments\FileUpdateCompleteEventArgs.cs" />
     <Compile Include="SqlBuilder.cs" />
