@@ -450,6 +450,26 @@ namespace LobsterModel
             this.UpdateClobWithExternalFile(clobDir, fullpath, fullpath);
         }
 
+        public void InsertFile(DirectoryWatcher watcher, string filepath)
+        {
+            OracleConnection oracleConnection = this.Config.OpenSqlConnection(this.Password);
+            OracleCommand command = oracleConnection.CreateCommand();
+            this.BindParametersToCommand(oracleConnection, command, watcher, filepath);
+
+            try
+            {
+                command.ExecuteNonQuery();
+                command.Dispose();
+            }
+            catch (Exception ex) when (ex is InvalidOperationException || ex is OracleException || ex is IOException)
+            {
+                MessageLog.LogError($"Error creating new clob when executing command: {command.CommandText} {ex}");
+                throw new FileInsertException("An exception ocurred when attempting to insert a file into the child table.", ex);
+            }
+            
+            MessageLog.LogInfo($"Clob file creation successful: {filepath}");
+        }
+
         /// <summary>
         /// Inserts the given file into the database, polling the event listener 
         /// for table and mimetype information if required.
