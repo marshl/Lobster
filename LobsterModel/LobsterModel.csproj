@@ -95,6 +95,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="Table.cs" />
+    <Compile Include="WatchedFile.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

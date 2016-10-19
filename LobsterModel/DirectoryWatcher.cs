@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="ClobDirectory.cs" company="marshl">
+// <copyright file="DirectoryWatcher.cs" company="marshl">
 // Copyright 2016, Liam Marshall, marshl.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,10 +15,11 @@
 // </copyright>
 //-----------------------------------------------------------------------
 //
-//      A box without hinges, key, or lid,
-//      Yet golden treasure inside is hid,
+//      For the moment there was no whispering or movement among the branches; 
+//      but they all got an uncomfortable feeling that they were being watched 
+//      with disapproval, deepening to dislike and even enmity.
 //
-//      [ _The Hobbit_, V: "Riddles in the Dark"]
+//      [ _The Lord of the Rings_, I/vi: "The Old Forest"]
 //
 //-----------------------------------------------------------------------
 namespace LobsterModel
@@ -26,6 +27,7 @@ namespace LobsterModel
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
 
     public class DirectoryWatcher
     {
@@ -61,6 +63,8 @@ namespace LobsterModel
             this.fileWatcher.Renamed += new RenamedEventHandler(this.OnFileSystemEvent);
 
             this.fileWatcher.EnableRaisingEvents = true;
+
+            this.GetFiles();
         }
 
         public string DirectoryPath { get; }
@@ -74,6 +78,8 @@ namespace LobsterModel
         /// Gets the ClobType that controls this directory
         /// </summary>
         public DirectoryDescriptor Descriptor { get; }
+
+        public List<WatchedFile> WatchedFiles { get; private set; }
 
         /// <summary>
         /// The event listener for the file system watcher.
@@ -109,6 +115,12 @@ namespace LobsterModel
                 this.fileWatcher.Dispose();
                 this.fileWatcher = null;
             }
+        }
+
+        public void GetFiles()
+        {
+            List<string> files = SearchRule.GetFiles(this.DirectoryPath, this.Descriptor.SearchRules);
+            this.WatchedFiles = files.Select(x => new WatchedFile(x)).ToList();
         }
     }
 }

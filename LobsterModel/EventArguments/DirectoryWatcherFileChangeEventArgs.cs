@@ -25,7 +25,7 @@ namespace LobsterModel
     public class DirectoryWatcherFileChangeEventArgs : EventArgs
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ClobDirectoryFileChangeEventArgs"/> class.
+        /// Initializes a new instance of the <see cref="DirectoryWatcherFileChangeEventArgs"/> class.
         /// </summary>
         /// <param name="watcher">The directory of the event.</param>
         /// <param name="args">The file system event arguments.</param>
