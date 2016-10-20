@@ -28,33 +28,35 @@ namespace LobsterModel
     using System.Xml;
     using System.Xml.Schema;
     using System.Xml.Serialization;
+    using System.Runtime.Serialization;
     using Properties;
 
     /// <summary>
     /// Used to store information about a database connection, loaded directly from an XML file.
     /// </summary>
+    [DataContract(IsReference = true)]
     public class CodeSourceConfig : SerializableObject
     {
         /// <summary>
         /// Gets or sets the name of the connection. This is for display purposes only.
         /// </summary>
+        [DataMember]
         public string Name { get; set; }
 
         /// <summary>
         /// Gets or sets the databases that this CodeSource cna be connected to.
         /// </summary>
+        [DataMember]
         public List<ConnectionConfig> ConnectionConfigList { get; set; }
 
         /// <summary>
         /// Gets the path of the file from which this DatabaseConfig was loaded.
         /// </summary>
-        [XmlIgnore]
-        public string FileLocation { get; private set; }
+        public string FileLocation { get; set; }
 
         /// <summary>
         /// Gets the path of the directory for this CodeSource.
         /// </summary>
-        [XmlIgnore]
         public string CodeSourceDirectory
         {
             get
@@ -111,29 +113,25 @@ namespace LobsterModel
             if (!configFile.Exists)
             {
                 MessageLog.LogError($"{configFile.FullName} could not be found.");
+                //TODO: Return this error to the user
                 return null;
             }
 
             CodeSourceConfig config;
-            string schema = Settings.Default.DatabaseConfigSchemaFilename;
             try
             {
-                bool result = Utils.DeserialiseXmlFileUsingSchema(configFile.FullName, schema, out config);
-                if (!result)
-                {
-                    config.Name = Path.GetDirectoryName(codeSourceDirectory);
-                }
+                FileStream fileStream = new FileStream(configFile.FullName, FileMode.Open, FileAccess.Read);
+                XmlSerializer xmls = new XmlSerializer(typeof(CodeSourceConfig));
+                config = (CodeSourceConfig)xmls.Deserialize(fileStream);
+                config.FileLocation = configFile.FullName;
+                return config;
             }
             catch (Exception e) when (e is FileNotFoundException || e is InvalidOperationException || e is XmlException || e is XmlSchemaValidationException || e is IOException)
             {
                 MessageLog.LogError($"An error occurred when loading the ClobType {configFile.FullName}: {e}");
+                //TODO: Return this error to the user
                 return null;
             }
-
-            config.ConnectionConfigList.ForEach(x => x.Parent = config);
-
-            config.FileLocation = configFile.FullName;
-            return config;
         }
 
         /// <summary>

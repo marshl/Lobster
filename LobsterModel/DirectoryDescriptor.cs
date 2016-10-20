@@ -34,6 +34,7 @@ namespace LobsterModel
     /// <summary>
     /// 
     /// </summary>
+    [DataContract]
     public class DirectoryDescriptor
     {
         /// <summary>
