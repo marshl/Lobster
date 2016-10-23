@@ -114,6 +114,34 @@ namespace LobsterModel
         }
 
         /// <summary>
+        /// Disposes this object.
+        /// </summary>
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Disposes this object.
+        /// </summary>
+        /// <param name="disposing">Whether this object is being disposed or not.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposing)
+            {
+                return;
+            }
+
+            if (this.fileWatcher != null)
+            {
+                this.fileWatcher.EnableRaisingEvents = false;
+                this.fileWatcher.Dispose();
+                this.fileWatcher = null;
+            }
+        }
+
+        /// <summary>
         /// The event listener for the file system watcher.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>

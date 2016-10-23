@@ -804,6 +804,16 @@ namespace LobsterModel
                 this.clobTypeFileWatcher = null;
             }
 
+            if (this.ClobDirectoryList != null)
+            {
+                foreach (ClobDirectory clobDir in this.ClobDirectoryList)
+                {
+                    clobDir.Dispose();
+                }
+
+                this.ClobDirectoryList = null;
+            }
+
             foreach (string filename in this.TempFileList)
             {
                 try
