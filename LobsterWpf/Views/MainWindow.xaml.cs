@@ -398,10 +398,11 @@ namespace LobsterWpf.Views
         {
             if (this.connectionView.SelectedFileNode != null)
             {
-                var clobDirView = (ClobDirectoryView)this.clobTypeListBox.SelectedItem;
+                var watcherView = (DirectoryWatcherView)this.clobTypeListBox.SelectedItem;
                 string filename = this.connectionView.SelectedFileNode.FilePath;
                 try
                 {
+                    this.connectionView.Connection.InsertDatabaseClob()
                     DBClobFile databaseFile = null;
                     bool result = this.connectionView.Connection.SendInsertClobMessage(clobDirView.BaseClobDirectory, filename, ref databaseFile);
 
@@ -490,6 +491,7 @@ namespace LobsterWpf.Views
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">The event arguments.</param>
+        [Obsolete]
         private void RequeryDatabaseMenuItem_Click(object sender, RoutedEventArgs e)
         {
             List<FileListRetrievalException> errorList = new List<FileListRetrievalException>();
@@ -643,6 +645,7 @@ namespace LobsterWpf.Views
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="args">The event arguments</param>
+        [Obsolete]
         private void PromptForTable(object sender, TableRequestEventArgs args)
         {
             TableSelectorWindow tsw = new TableSelectorWindow(args.FullPath, args.Tables);
@@ -659,6 +662,7 @@ namespace LobsterWpf.Views
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="args">The event arguments</param>
+        [Obsolete]
         private void PromptForMimeType(object sender, MimeTypeRequestEventArgs args)
         {
             MimeTypeSelectorWindow msw = new MimeTypeSelectorWindow(args.FullPath, args.MimeTypes);

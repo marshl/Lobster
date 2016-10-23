@@ -24,6 +24,7 @@
 //-----------------------------------------------------------------------
 namespace LobsterWpf.ViewModels
 {
+    using System;
     using System.Collections.ObjectModel;
     using System.IO;
     using System.Windows.Media;
@@ -33,6 +34,7 @@ namespace LobsterWpf.ViewModels
     /// <summary>
     /// A view representing a single local file, with a possible database file connection.
     /// </summary>
+    [Obsolete]
     public sealed class LocalFileView : FileNodeView
     {
         /// <summary>

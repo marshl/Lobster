@@ -24,6 +24,7 @@
 //-----------------------------------------------------------------------
 namespace LobsterWpf.ViewModels
 {
+    using System;
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.IO;
@@ -34,6 +35,7 @@ namespace LobsterWpf.ViewModels
     /// <summary>
     /// A view for a model clob type.
     /// </summary>
+    [Obsolete]
     public class ClobTypeView : INotifyPropertyChanged
     {
         /// <summary>

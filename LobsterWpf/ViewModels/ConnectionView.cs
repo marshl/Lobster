@@ -29,7 +29,6 @@ namespace LobsterWpf.ViewModels
     using System.Collections.ObjectModel;
     using System.ComponentModel;
     using System.IO;
-    using System.Windows.Forms;
     using LobsterModel;
 
     /// <summary>
@@ -96,11 +95,13 @@ namespace LobsterWpf.ViewModels
         /// <summary>
         /// Gets or sets the root level file for the currently selected clob directory.
         /// </summary>
+        [Obsolete]
         public FileNodeView RootFile { get; set; }
 
         /// <summary>
         /// Gets or sets the currenclty selected file in this connection.
         /// </summary>
+        [Obsolete]
         public FileNodeView SelectedFileNode
         {
             get

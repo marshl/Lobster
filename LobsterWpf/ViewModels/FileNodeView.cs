@@ -37,6 +37,7 @@ namespace LobsterWpf.ViewModels
     /// <summary>
     /// An abstract node to display either a database or local file 
     /// </summary>
+    [Obsolete]
     public abstract class FileNodeView : INotifyPropertyChanged
     {
         /// <summary>

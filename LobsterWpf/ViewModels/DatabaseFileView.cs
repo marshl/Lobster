@@ -24,6 +24,7 @@
 //-----------------------------------------------------------------------
 namespace LobsterWpf.ViewModels
 {
+    using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.IO;
@@ -35,6 +36,7 @@ namespace LobsterWpf.ViewModels
     /// <summary>
     /// The view for a file that is on the database, and may also be found locally.
     /// </summary>
+    [Obsolete]
     public class DatabaseFileView : FileNodeView
     {
         /// <summary>

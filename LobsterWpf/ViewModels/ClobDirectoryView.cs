@@ -23,12 +23,14 @@
 //-----------------------------------------------------------------------
 namespace LobsterWpf.ViewModels
 {
+    using System;
     using System.Windows;
     using LobsterModel;
 
     /// <summary>
     /// The view for the ClobDirectory model.
     /// </summary>
+    [Obsolete]
     public class ClobDirectoryView
     {
         /// <summary>

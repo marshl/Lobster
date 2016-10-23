@@ -25,10 +25,12 @@ namespace LobsterWpf.Views
 {
     using System.Collections.ObjectModel;
     using System.Windows;
+    using System;
 
     /// <summary>
     /// The window for the user to select a mime type to insert a file as.
     /// </summary>
+    [Obsolete]
     public partial class MimeTypeSelectorWindow : Window
     {
         /// <summary>
