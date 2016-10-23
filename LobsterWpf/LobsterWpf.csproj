@@ -126,6 +126,7 @@
     <Compile Include="ViewModels\ClobDirectoryView.cs" />
     <Compile Include="ViewModels\CodeSourceConfigView.cs" />
     <Compile Include="ViewModels\ConnectionConfigView.cs" />
+    <Compile Include="ViewModels\DirectoryWatcherView.cs" />
     <Compile Include="Views\AddCodeSourceWindow.xaml.cs">
       <DependentUpon>AddCodeSourceWindow.xaml</DependentUpon>
     </Compile>
