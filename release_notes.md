@@ -1,3 +1,9 @@
+##Release 2.6.1.0
+#####Released: 24-10-2016
+
+####Bug Fixes
+ - Fixed #105: Connections Remain Open after Changing Connection
+ 
 ##Release 2.6.0.0
 #####Released: 12-10-2016
 
