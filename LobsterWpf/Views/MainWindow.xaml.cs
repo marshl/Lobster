@@ -122,12 +122,9 @@ namespace LobsterWpf.Views
                 }
 
                 this.ConnectionContainer.DataContext = this.connectionView = new ConnectionView(window.DatabaseConnection);
-                this.connectionView.SelectedFileNode = null;
                 this.RepopulateFileListView(true);
-                
+
                 this.connectionView.Connection.FileProcessingFinishedEvent += this.OnFileProcessingFinished;
-                this.connectionView.Connection.RequestMimeTypeEvent += this.PromptForMimeType;
-                this.connectionView.Connection.RequestTableEvent += this.PromptForTable;
                 this.connectionView.Connection.StartChangeProcessingEvent += this.OnEventProcessingStart;
                 this.connectionView.Connection.UpdateCompleteEvent += this.OnAutoUpdateComplete;
                 this.connectionView.Connection.ClobTypeChangedEvent += this.ReloadLobsterTypesMenuItem_Click;
@@ -244,7 +241,7 @@ namespace LobsterWpf.Views
         /// <param name="fullRebuild">WHether a full rebuild of the file list needs to be performed.</param>
         private void RepopulateFileListView(bool fullRebuild)
         {
-            if (this.clobTypeListBox.SelectedIndex == -1)
+            /*if (this.clobTypeListBox.SelectedIndex == -1)
             {
                 this.connectionView.PopulateFileTreeForClobDirectory(null);
                 this.localFileTreeView.ItemsSource = null;
@@ -266,8 +263,8 @@ namespace LobsterWpf.Views
             {
                 this.connectionView.RootFile.RefreshFileInformation(true);
             }
-
-            this.localFileTreeView.ItemsSource = this.connectionView.RootFile.Children;
+            
+            this.localFileTreeView.ItemsSource = this.connectionView.RootFile.Children;*/
         }
 
         /// <summary>
@@ -287,7 +284,7 @@ namespace LobsterWpf.Views
         /// <param name="e">The event arguments.</param>
         private void PushButton_Click(object sender, RoutedEventArgs e)
         {
-            if (this.connectionView.SelectedFileNode == null)
+            /*if (this.connectionView.SelectedFileNode == null)
             {
                 return;
             }
@@ -320,7 +317,7 @@ namespace LobsterWpf.Views
             }
 
             this.DisplayUpdateNotification(filename, true);
-            this.connectionView.SelectedFileNode.RefreshBackupList();
+            this.connectionView.SelectedFileNode.RefreshBackupList();*/
         }
 
         /// <summary>
@@ -330,7 +327,7 @@ namespace LobsterWpf.Views
         /// <param name="e">The event arguments.</param>
         private void PullButton_Click(object sender, RoutedEventArgs e)
         {
-            if (this.connectionView?.SelectedFileNode?.DatabaseFile == null)
+            /*if (this.connectionView?.SelectedFileNode?.DatabaseFile == null)
             {
                 return;
             }
@@ -343,7 +340,7 @@ namespace LobsterWpf.Views
             catch (FileDownloadException ex)
             {
                 System.Windows.MessageBox.Show($"The file download failed: {ex}");
-            }
+            }*/
         }
 
         /// <summary>
@@ -353,7 +350,7 @@ namespace LobsterWpf.Views
         /// <param name="e">The event arguments.</param>
         private void DiffButton_Click(object sender, RoutedEventArgs e)
         {
-            if (this.connectionView?.SelectedFileNode?.DatabaseFile == null)
+            /*if (this.connectionView?.SelectedFileNode?.DatabaseFile == null)
             {
                 return;
             }
@@ -373,7 +370,7 @@ namespace LobsterWpf.Views
             {
                 System.Windows.MessageBox.Show(ex.Message);
                 return;
-            }
+            }*/
         }
 
         /// <summary>
@@ -383,9 +380,9 @@ namespace LobsterWpf.Views
         /// <param name="e">The event arguments.</param>
         private void ExploreButton_Click(object sender, RoutedEventArgs e)
         {
-            if (this.connectionView.SelectedFileNode != null)
+            if (this.connectionView.SelectedNode != null)
             {
-                Utils.OpenFileInExplorer(this.connectionView.SelectedFileNode.FilePath);
+                Utils.OpenFileInExplorer(this.connectionView.SelectedNode.BaseNode.Path);
             }
         }
 
@@ -396,22 +393,15 @@ namespace LobsterWpf.Views
         /// <param name="e">The event arguments.</param>
         private void InsertButton_Click(object sender, RoutedEventArgs e)
         {
-            if (this.connectionView.SelectedFileNode != null)
+            if (this.connectionView.SelectedNode != null)
             {
                 var watcherView = (DirectoryWatcherView)this.clobTypeListBox.SelectedItem;
-                string filename = this.connectionView.SelectedFileNode.FilePath;
+                string filename = this.connectionView.SelectedNode.BaseNode.Path;
                 try
                 {
-                    this.connectionView.Connection.InsertDatabaseClob()
-                    DBClobFile databaseFile = null;
-                    bool result = this.connectionView.Connection.SendInsertClobMessage(clobDirView.BaseClobDirectory, filename, ref databaseFile);
+                    this.connectionView.Connection.InsertFile(watcherView.Watcher, filename);
 
-                    if (result)
-                    {
-                        this.DisplayUpdateNotification(filename, true);
-                        this.connectionView.SelectedFileNode.DatabaseFile = databaseFile;
-                        this.connectionView.SelectedFileNode.RefreshFileInformation(false);
-                    }
+                    this.DisplayUpdateNotification(filename, true);
                 }
                 catch (FileInsertException ex)
                 {
@@ -428,8 +418,7 @@ namespace LobsterWpf.Views
         /// <param name="e">The event arguments.</param>
         private void LocalFileTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            this.connectionView.SelectedFileNode = (FileNodeView)e.NewValue;
-            this.connectionView.SelectedFileNode?.RefreshBackupList();
+            this.connectionView.SelectedNode = (WatchedNodeView)e.NewValue;
         }
 
         /// <summary>
@@ -439,7 +428,7 @@ namespace LobsterWpf.Views
         /// <param name="success">Whether the file was updated successfulyl or not.</param>
         private void DisplayUpdateNotification(string filename, bool success)
         {
-            string message = "File update " + (success ? "succeeded" : "failed") + " for " + Path.GetFileName(filename);
+            string message = $"File update {(success ? "succeeded" : "failed")} for {Path.GetFileName(filename)}";
             NotificationWindow nw = new NotificationWindow(message, success);
             nw.Show();
 
@@ -460,7 +449,7 @@ namespace LobsterWpf.Views
         /// <param name="e">The event arguments.</param>
         private void PushBackupButton_Click(object sender, EventArgs e)
         {
-            FileBackup fileBackup = ((FrameworkElement)sender).DataContext as FileBackup;
+            /*FileBackup fileBackup = ((FrameworkElement)sender).DataContext as FileBackup;
             var clobDirView = (ClobDirectoryView)this.clobTypeListBox.SelectedItem;
             try
             {
@@ -472,7 +461,7 @@ namespace LobsterWpf.Views
                 return;
             }
 
-            this.DisplayUpdateNotification(fileBackup.BackupFilename, true);
+            this.DisplayUpdateNotification(fileBackup.BackupFilename, true);*/
         }
 
         /// <summary>
@@ -507,13 +496,13 @@ namespace LobsterWpf.Views
         /// <param name="e">The event arguments.</param>
         private void OnToggleViewModeRadioClicked(object sender, RoutedEventArgs e)
         {
-            if (this.connectionView == null)
+            /*if (this.connectionView == null)
             {
                 return;
             }
 
             this.connectionView.CurrentDisplayMode = this.LocalOnlyFilesRadio.IsChecked.Value ? ConnectionView.DisplayMode.LocalFiles : ConnectionView.DisplayMode.DatabaseFiles;
-            this.RepopulateFileListView(true);
+            this.RepopulateFileListView(true);*/
         }
 
         /// <summary>
@@ -711,7 +700,7 @@ namespace LobsterWpf.Views
             this.Dispatcher.Invoke((MethodInvoker)delegate
             {
                 this.connectionView.ReloadClobTypes();
-                this.connectionView.SelectedFileNode = null;
+                this.connectionView.SelectedNode = null;
                 this.clobTypeListBox.SelectedIndex = -1;
                 this.RepopulateFileListView(true);
             });

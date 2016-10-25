@@ -39,12 +39,15 @@ namespace LobsterWpf.ViewModels
         /// <summary>
         /// The file that is currently selected in the file tree view.
         /// </summary>
-        private FileNodeView selectedFileNode;
+        private WatchedNodeView selectedFileNode;
 
         /// <summary>
         /// Whether this connection is currently enabled in the interface or not.
         /// </summary>
         private bool isEnabled = true;
+
+        public WatchedNodeView SelectedNode { get; set; }
+
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConnectionView"/> class.
@@ -55,9 +58,10 @@ namespace LobsterWpf.ViewModels
             this.Connection = con;
             this.ExpandedDirectoryNames = new List<string>();
 
-            foreach (ClobDirectory clobDir in con.ClobDirectoryList)
+            this.DirectoryWatcherViews = new ObservableCollection<DirectoryWatcherView>();
+            foreach (DirectoryWatcher watchedDir in con.DirectoryWatcherList)
             {
-                this.ClobDirectories.Add(new ClobDirectoryView(this.Connection, clobDir));
+                this.DirectoryWatcherViews.Add(new DirectoryWatcherView(watchedDir));
             }
         }
 
@@ -65,22 +69,6 @@ namespace LobsterWpf.ViewModels
         /// The event to be raised when a property is changed.
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
-
-        /// <summary>
-        /// The different display modes.
-        /// </summary>
-        public enum DisplayMode
-        {
-            /// <summary>
-            /// Files will be shown as a tree view of local files (linked to their database files where possible).
-            /// </summary>
-            LocalFiles,
-
-            /// <summary>
-            /// Files will be shown as a list of database files (linked to their local files where possible).
-            /// </summary>
-            DatabaseFiles,
-        }
 
         /// <summary>
         /// Gets the list of directory names that have been expanded.
@@ -95,26 +83,7 @@ namespace LobsterWpf.ViewModels
         /// <summary>
         /// Gets or sets the root level file for the currently selected clob directory.
         /// </summary>
-        [Obsolete]
-        public FileNodeView RootFile { get; set; }
-
-        /// <summary>
-        /// Gets or sets the currenclty selected file in this connection.
-        /// </summary>
-        [Obsolete]
-        public FileNodeView SelectedFileNode
-        {
-            get
-            {
-                return this.selectedFileNode;
-            }
-
-            set
-            {
-                this.selectedFileNode = value;
-                this.NotifyPropertyChanged("SelectedFileNode");
-            }
-        }
+        public WatchedNodeView RootFile { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether read only files should be displayed or not.
@@ -124,7 +93,7 @@ namespace LobsterWpf.ViewModels
         /// <summary>
         /// Gets or sets the list of clob types currently found for this connection.
         /// </summary>
-        public ObservableCollection<ClobDirectoryView> ClobDirectories { get; set; } = new ObservableCollection<ClobDirectoryView>();
+        //public ObservableCollection<ClobDirectoryView> ClobDirectories { get; set; } = new ObservableCollection<ClobDirectoryView>();
 
         /// <summary>
         /// Gets or sets a value indicating whether this connection is currently enabled.
@@ -161,11 +130,18 @@ namespace LobsterWpf.ViewModels
             }
         }
 
-        /// <summary>
-        /// Gets or sets the way files are displayed in the interface.
-        /// </summary>
-        public DisplayMode CurrentDisplayMode { get; set; } = DisplayMode.LocalFiles;
+        public ObservableCollection<DirectoryWatcherView> DirectoryWatcherViews { get; }
 
+        public void PopulateFileTreeForDirectoryWatcher(DirectoryWatcher dirWatcher)
+        {
+            this.RootFile = null;
+
+            if (dirWatcher == null)
+            {
+                return;
+            }
+        }
+        /*
         /// <summary>
         /// Populates the root file with files from the given clob directory.
         /// </summary>
@@ -213,20 +189,20 @@ namespace LobsterWpf.ViewModels
             }
 
             this.NotifyPropertyChanged("RootFile");
-        }
+        }*/
 
         /// <summary>
         /// Reloads the ClobTypes for the current connection.
         /// </summary>
         public void ReloadClobTypes()
         {
-            this.Connection.ReloadClobTypes();
+            /*this.Connection.ReloadClobTypes();
             this.ClobDirectories.Clear();
 
             foreach (ClobDirectory clobDir in this.Connection.ClobDirectoryList)
             {
                 this.ClobDirectories.Add(new ClobDirectoryView(this.Connection, clobDir));
-            }
+            }*/
         }
 
         /// <summary>

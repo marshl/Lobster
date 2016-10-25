@@ -20,7 +20,7 @@ namespace LobsterModel
 {
     public class WatchedDirectory : WatchedNode
     {
-        public List<WatchedNode> ChildNodes { get; }
+        public List<WatchedNode> ChildNodes { get; } = new List<WatchedNode>();
 
         public WatchedDirectory(string path, WatchedDirectory parent) : base(path, parent)
         {
