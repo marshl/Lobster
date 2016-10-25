@@ -35,7 +35,7 @@ namespace LobsterModel
     /// Used to store information about a database connection, loaded directly from an XML file.
     /// </summary>
     [DataContract(IsReference = true)]
-    public class CodeSourceConfig : SerializableObject
+    public class CodeSourceConfig
     {
         /// <summary>
         /// Gets or sets the name of the connection. This is for display purposes only.
@@ -92,10 +92,12 @@ namespace LobsterModel
         /// <param name="config">The <see cref="DatabaseConfig"/> to serialise.</param>
         public void SerialiseToFile()
         {
-            XmlSerializer xmls = new XmlSerializer(typeof(CodeSourceConfig));
+            DataContractSerializer xmls = new DataContractSerializer(typeof(CodeSourceConfig));
             using (StreamWriter streamWriter = new StreamWriter(this.FileLocation))
+            using (XmlWriter xmlWriter = XmlWriter.Create(streamWriter))
             {
-                xmls.Serialize(streamWriter, this);
+                xmlWriter.Settings.Indent = true;
+                xmls.WriteObject(xmlWriter, this);
             }
         }
 
@@ -120,13 +122,17 @@ namespace LobsterModel
             CodeSourceConfig config;
             try
             {
-                FileStream fileStream = new FileStream(configFile.FullName, FileMode.Open, FileAccess.Read);
-                XmlSerializer xmls = new XmlSerializer(typeof(CodeSourceConfig));
-                config = (CodeSourceConfig)xmls.Deserialize(fileStream);
-                config.FileLocation = configFile.FullName;
+                DataContractSerializer xmls = new DataContractSerializer(typeof(CodeSourceConfig));
+                using (FileStream fileStream = new FileStream(configFile.FullName, FileMode.Open, FileAccess.Read))
+                {
+                    config = (CodeSourceConfig)xmls.ReadObject(fileStream);
+                    config.FileLocation = configFile.FullName;
+                    config.ConnectionConfigList.ForEach(x => x.Parent = config);
+                }
+
                 return config;
             }
-            catch (Exception e) when (e is FileNotFoundException || e is InvalidOperationException || e is XmlException || e is XmlSchemaValidationException || e is IOException)
+            catch (Exception e) when (e is FileNotFoundException || e is InvalidOperationException || e is SerializationException || e is IOException)
             {
                 MessageLog.LogError($"An error occurred when loading the ClobType {configFile.FullName}: {e}");
                 //TODO: Return this error to the user
