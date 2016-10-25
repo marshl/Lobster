@@ -79,8 +79,6 @@ namespace LobsterModel
         /// </summary>
         public DirectoryDescriptor Descriptor { get; }
 
-        public List<WatchedFile> WatchedFiles { get; private set; }
-
         /// <summary>
         /// The event listener for the file system watcher.
         /// </summary>
@@ -120,7 +118,45 @@ namespace LobsterModel
         public void GetFiles()
         {
             List<string> files = SearchRule.GetFiles(this.DirectoryPath, this.Descriptor.SearchRules);
-            this.WatchedFiles = files.Select(x => new WatchedFile(x)).ToList();
+            List<string> directories = SearchRule.GetDirectories(this.DirectoryPath, this.Descriptor.SearchRules);
+            
+            this.RootDirectory = new WatchedDirectory(this.DirectoryPath, null);
+            this.PopulateWatchedDirectory(this.RootDirectory, files, directories);
         }
+
+        private void PopulateWatchedDirectory(WatchedDirectory watchedDir, List<string> validFiles, List<string> validDirectories)
+        {
+            DirectoryInfo dirInfo = new DirectoryInfo(watchedDir.Path);
+            if (!dirInfo.Exists)
+            {
+                return;
+            }
+
+            foreach(FileInfo fileInfo in dirInfo.GetFiles())
+            {
+                if(!validFiles.Contains(fileInfo.FullName))
+                {
+                    continue;
+                }
+
+                WatchedFile newFile = new WatchedFile(fileInfo.FullName, watchedDir);
+                watchedDir.ChildNodes.Add(newFile);
+            }
+            
+            foreach (DirectoryInfo dir in dirInfo.GetDirectories())
+            {
+                if (!validDirectories.Contains(dir.FullName))
+                {
+                    continue;
+                }
+
+                WatchedDirectory newDir = new WatchedDirectory(dir.FullName, watchedDir);
+                watchedDir.ChildNodes.Add(newDir);
+
+                this.PopulateWatchedDirectory(newDir, validFiles, validDirectories);
+            }
+        }
+
+        public WatchedDirectory RootDirectory { get; private set; }
     }
 }
