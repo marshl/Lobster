@@ -805,8 +805,9 @@ namespace LobsterModel
 
         private void BindParametersToCommand(OracleConnection connection, OracleCommand command, DirectoryWatcher watcher, string path)
         {
+            command.BindByName = true;
             string dataType = this.GetDataTypeForFile(connection, watcher, path);
-
+            
             if (command.ContainsParameter("filename"))
             {
                 var param = new OracleParameter("filename", Path.GetFileName(path));
