@@ -1161,6 +1161,7 @@ namespace LobsterModel
         private void OnDirectoryWatcherFileChangeEvent(object sender, DirectoryWatcherFileChangeEventArgs args)
         {
             Thread thread = new Thread(() => this.EnqueueFileEvent(args.Watcher, args.Args));
+            thread.Start();
         }
 
         /// <summary>
