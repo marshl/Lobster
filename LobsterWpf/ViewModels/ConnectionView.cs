@@ -37,11 +37,6 @@ namespace LobsterWpf.ViewModels
     public sealed class ConnectionView : INotifyPropertyChanged, IDisposable
     {
         /// <summary>
-        /// The file that is currently selected in the file tree view.
-        /// </summary>
-        private WatchedNodeView selectedFileNode;
-
-        /// <summary>
         /// Whether this connection is currently enabled in the interface or not.
         /// </summary>
         private bool isEnabled = true;
