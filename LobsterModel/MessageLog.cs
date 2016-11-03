@@ -176,6 +176,9 @@ namespace LobsterModel
                 {
                     Console.WriteLine(msg.ToString());
                     this.streamWriter.WriteLine(msg.ToString());
+#if DEBUG
+                    this.streamWriter.Flush();
+#endif
                 }
             }
 
