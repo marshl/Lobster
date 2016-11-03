@@ -1,3 +1,9 @@
+      "There need not be, there would not be, any real change in our designs, only in our means."
+        - Saruman
+    
+      [ _The Lord of the Rings_, II/ii: "The Council of Elrond"]
+
+
 ##Lobster
 
 Lobster is a file synchronisation program for Oracle databases, designed to automatically push files into the database when local changes are made.
