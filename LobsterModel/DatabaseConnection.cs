@@ -1284,6 +1284,7 @@ namespace LobsterModel
             try
             {
                 //this.SendUpdateClobMessage(clobDirectory, e.FullPath);
+                this.UpdateDatabaseFile(watcher, e.FullPath);
             }
             catch (FileUpdateException)
             {
