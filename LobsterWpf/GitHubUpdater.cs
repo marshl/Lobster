@@ -27,12 +27,12 @@ namespace LobsterWpf
     using System.ComponentModel;
     using System.Diagnostics;
     using System.IO;
+    using System.IO.Compression;
     using System.Net;
     using System.Reflection;
     using System.Runtime.Serialization;
     using System.Runtime.Serialization.Json;
     using System.Text.RegularExpressions;
-    using Ionic.Zip;
     using LobsterModel;
     using RestSharp;
 
@@ -181,13 +181,18 @@ namespace LobsterWpf
             }
 
             MessageLog.LogInfo($"Extracting file from {this.fileDownloadLocation} to {this.zipUnpackDirectory}");
-            ZipFile zipFile = ZipFile.Read(this.fileDownloadLocation);
-            zipFile.ExtractAll(this.zipUnpackDirectory, ExtractExistingFileAction.OverwriteSilently);
 
-            string dirName = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            FileStream stream = File.OpenRead(this.fileDownloadLocation);
+            ZipArchive archive = new ZipArchive(stream);
 
-            // Go up one directory
-            dirName = new DirectoryInfo(dirName).Parent.FullName;
+            if (Directory.Exists(this.zipUnpackDirectory))
+            {
+                Directory.Delete(this.zipUnpackDirectory, true);
+            }
+
+            archive.ExtractToDirectory(this.zipUnpackDirectory);
+
+            string dirName = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
             string script = this.CreateAutoUpdateScript(this.zipUnpackDirectory, dirName);
 
             MessageLog.LogInfo($"Starting batch script {script}");
@@ -214,8 +219,8 @@ if not errorlevel 1 (
     goto :loop
 )
 
-xcopy /s/e/y ""{source}"" ""{destination}""
-start ""{Assembly.GetExecutingAssembly().Location}""
+xcopy /s/e/y ""{source}\\Lobster"" ""{destination}""
+start """" ""{Assembly.GetExecutingAssembly().Location}""
 ";
 
             using (StreamWriter stream = new StreamWriter(scriptFilePath))
