@@ -37,9 +37,9 @@
         <ColumnDefinition Width="1*"/>
         <ColumnDefinition Width="3*"/>
       </Grid.ColumnDefinitions>
-      <ListBox Name="clobTypeListBox" Grid.Column="0" Grid.Row="1" ItemsSource="{Binding ClobDirectories}" SelectionChanged="ClobTypeListBox_SelectionChanged">
+      <ListBox Name="directoryWatcherListBox" Grid.Column="0" Grid.Row="1" ItemsSource="{Binding DirectoryWatchers}" SelectionChanged="DirectoryWatcherListBox_SelectionChanged">
         <ListBox.ItemTemplate>
-          <DataTemplate DataType="ClobDirectoryView">
+          <DataTemplate DataType="DirectoryWatcherView">
             <DataTemplate.Resources>
               <Style TargetType="{x:Type TextBlock}">
                 <Style.Triggers>
@@ -73,17 +73,16 @@
             <RowDefinition Height="35"/>
             <RowDefinition Height="35"/>
           </Grid.RowDefinitions>
-          <TreeView Grid.Row="0" Name="localFileTreeView" SelectedItemChanged="LocalFileTreeView_SelectedItemChanged" Background="{StaticResource BackgroundKey}">
+          <TreeView Grid.Row="0" Name="fileTree" SelectedItemChanged="FileTree_SelectedItemChanged" Background="{StaticResource BackgroundKey}" ItemsSource="{Binding}">
             <TreeView.ItemContainerStyle>
               <Style TargetType="{x:Type TreeViewItem}">
                 <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
               </Style>
             </TreeView.ItemContainerStyle>
             <TreeView.ItemTemplate>
-              <HierarchicalDataTemplate DataType="{x:Type viewmodels:FileNodeView}" ItemsSource="{Binding Children}">
+              <HierarchicalDataTemplate ItemsSource="{Binding Path=RootDirectoryView.ChildNodes}">
                 <StackPanel Orientation="Horizontal">
-                  <Image Source="{Binding ImageUrl}" Height="18"/>
-                  <TextBlock Text="{Binding Path=DisplayName}" Foreground="{Binding Path=ForegroundColour}"  VerticalAlignment="Center"/>
+                  <TextBlock Text="{Binding Path=FileName}"/>
                 </StackPanel>
               </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>

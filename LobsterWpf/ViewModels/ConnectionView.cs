@@ -43,20 +43,18 @@ namespace LobsterWpf.ViewModels
 
         public WatchedNodeView SelectedNode { get; set; }
 
-
         /// <summary>
         /// Initializes a new instance of the <see cref="ConnectionView"/> class.
         /// </summary>
         /// <param name="con">The model connection this object is viewing.</param>
         public ConnectionView(DatabaseConnection con)
         {
-            this.Connection = con;
-            this.ExpandedDirectoryNames = new List<string>();
+            this.BaseConnection = con;
 
-            this.DirectoryWatcherViews = new ObservableCollection<DirectoryWatcherView>();
+            this.DirectoryWatchers = new ObservableCollection<DirectoryWatcherView>();
             foreach (DirectoryWatcher watchedDir in con.DirectoryWatcherList)
             {
-                this.DirectoryWatcherViews.Add(new DirectoryWatcherView(watchedDir));
+                this.DirectoryWatchers.Add(new DirectoryWatcherView(watchedDir));
             }
         }
 
@@ -64,31 +62,20 @@ namespace LobsterWpf.ViewModels
         /// The event to be raised when a property is changed.
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
-
-        /// <summary>
-        /// Gets the list of directory names that have been expanded.
-        /// </summary>
-        public List<string> ExpandedDirectoryNames { get; }
-
+        
         /// <summary>
         /// Gets the connection model for this view.
         /// </summary>
-        public DatabaseConnection Connection { get; private set; }
-
-        /// <summary>
-        /// Gets or sets the root level file for the currently selected clob directory.
-        /// </summary>
-        public WatchedNodeView RootFile { get; set; }
+        public DatabaseConnection BaseConnection { get; private set; }
+        
+        public DirectoryWatcherView SelectedDirectoryWatcher { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether read only files should be displayed or not.
         /// </summary>
         public bool ShowReadOnlyFiles { get; set; } = true;
 
-        /// <summary>
-        /// Gets or sets the list of clob types currently found for this connection.
-        /// </summary>
-        //public ObservableCollection<ClobDirectoryView> ClobDirectories { get; set; } = new ObservableCollection<ClobDirectoryView>();
+        public WatchedDirectoryView RootDirectoryView { get; private set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether this connection is currently enabled.
@@ -115,76 +102,75 @@ namespace LobsterWpf.ViewModels
         {
             get
             {
-                return this.Connection.IsAutomaticClobbingEnabled;
+                return this.BaseConnection.IsAutomaticClobbingEnabled;
             }
 
             set
             {
-                this.Connection.IsAutomaticClobbingEnabled = value;
+                this.BaseConnection.IsAutomaticClobbingEnabled = value;
                 this.NotifyPropertyChanged("IsAutoUpdateEnabled");
             }
         }
 
-        public ObservableCollection<DirectoryWatcherView> DirectoryWatcherViews { get; }
-
-        public void PopulateFileTreeForDirectoryWatcher(DirectoryWatcher dirWatcher)
+        public ObservableCollection<DirectoryWatcherView> DirectoryWatchers { get; }
+        
+        public void ChangeCurrentDirectoryWatcher(DirectoryWatcherView dirWatcherFiew)
         {
-            this.RootFile = null;
-
-            if (dirWatcher == null)
+            if(this.SelectedDirectoryWatcher == dirWatcherFiew)
             {
                 return;
             }
+
+            if(!this.DirectoryWatchers.Contains(dirWatcherFiew))
+            {
+                throw new ArgumentException("The given DirectoryWatcherView is not in the list of DirectoryWatcherViews for this ConnectionView.");
+            }
+
+            this.SelectedDirectoryWatcher = dirWatcherFiew;
+            this.PopulateFileList();
         }
-        /*
+        
+        public void PopulateFileList()
+        {
+            if(this.SelectedDirectoryWatcher == null)
+            {
+                this.RootDirectoryView = null;
+                return;
+            }
+
+            this.RootDirectoryView = new WatchedDirectoryView(this.SelectedDirectoryWatcher.Watcher.RootDirectory);
+            this.NotifyPropertyChanged("RootDirectoryView");
+        }
+
         /// <summary>
         /// Populates the root file with files from the given clob directory.
         /// </summary>
-        /// <param name="clobDir">The directory to populate the file list for.</param>
-        public void PopulateFileTreeForClobDirectory(ClobDirectory clobDir)
+        /// <param name="dirWatcher">The directory to populate the file list for.</param>
+        //public void PopulateFileTreeForClobDirectory(DirectoryWatcherView dirWatcher)
+        //{
+        //    this.SelectedDirectoryWatcher = dirWatcher;
+        //    if(dirWatcher == null)
+        //    {
+        //        return;
+        //    }
+
+        //    if (!dirWatcher.DirectoryExists)
+        //    {
+        //        return;
+        //    }
+            
+        //    this.NotifyPropertyChanged("RootDirectory");
+        //}
+
+        public void CheckFileSynchronisation()
         {
-            if (clobDir == null)
-            {
-                if (this.RootFile != null)
-                {
-                    this.RootFile.Children = null;
-                }
-
-                this.RootFile = null;
-                return;
-            }
-
-            if (!clobDir.Directory.Exists)
+            if(this.RootDirectoryView == null)
             {
                 return;
             }
 
-            if (this.CurrentDisplayMode == DisplayMode.LocalFiles)
-            {
-                this.RootFile = new LocalFileView(this, clobDir, clobDir.Directory.FullName, clobDir.ClobType.IncludeSubDirectories);
-            }
-            else if (this.CurrentDisplayMode == DisplayMode.DatabaseFiles)
-            {
-                this.RootFile = new DatabaseFileView(this, null, null);
-                this.RootFile.Children = new ObservableCollection<FileNodeView>();
-
-                FileInfo[] files = clobDir.Directory.GetFiles(".", SearchOption.AllDirectories);
-
-                foreach (DBClobFile df in clobDir.DatabaseFileList)
-                {
-                    FileInfo fileInfo = Array.Find(files, x => x.Name.Equals(df.Filename, StringComparison.OrdinalIgnoreCase));
-                    if (!this.ShowReadOnlyFiles && fileInfo != null && fileInfo.IsReadOnly)
-                    {
-                        continue;
-                    }
-
-                    DatabaseFileView dfv = new DatabaseFileView(this, df, fileInfo?.FullName);
-                    this.RootFile.Children.Add(dfv);
-                }
-            }
-
-            this.NotifyPropertyChanged("RootFile");
-        }*/
+            this.RootDirectoryView.CheckFileSynchronisation(this, this.SelectedDirectoryWatcher);
+        }
 
         /// <summary>
         /// Reloads the ClobTypes for the current connection.
@@ -220,10 +206,10 @@ namespace LobsterWpf.ViewModels
                 return;
             }
 
-            if (this.Connection != null)
+            if (this.BaseConnection != null)
             {
-                this.Connection.Dispose();
-                this.Connection = null;
+                this.BaseConnection.Dispose();
+                this.BaseConnection = null;
             }
         }
 
@@ -236,10 +222,7 @@ namespace LobsterWpf.ViewModels
         /// parameter causes the property name of the caller to be substituted as an argument.</remarks>
         private void NotifyPropertyChanged(string propertyName = "")
         {
-            if (this.PropertyChanged != null)
-            {
-                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

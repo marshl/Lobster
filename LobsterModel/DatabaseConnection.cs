@@ -803,11 +803,33 @@ namespace LobsterModel
             }
         }
 
+        public bool IsFileSynchronised(DirectoryWatcher dirWatcher, WatchedFile watchedFile)
+        {
+            OracleConnection oracleConnection = this.Config.OpenSqlConnection(this.Password);
+
+            OracleCommand oracleCommand = oracleConnection.CreateCommand();
+
+            oracleCommand.CommandText = dirWatcher.Descriptor.DatabaseFileExistsStatement;
+            this.BindParametersToCommand(oracleConnection, oracleCommand, dirWatcher, watchedFile.FilePath);
+
+            try
+            {
+                MessageLog.LogInfo($"Executing file existence query: {oracleCommand.CommandText}");
+                int result = (int)oracleCommand.ExecuteScalar();
+                return result >= 1;
+            }
+            catch (Exception ex) when (ex is OracleException || ex is InvalidOperationException)
+            {
+                MessageLog.LogError($"File existence check failed for command: {oracleCommand.CommandText} {ex}");
+                throw new FileUpdateException($"An exception occurred when determining whether {watchedFile.FilePath} is in the database: {ex.Message}", ex);
+            }
+        }
+
         private void BindParametersToCommand(OracleConnection connection, OracleCommand command, DirectoryWatcher watcher, string path)
         {
             command.BindByName = true;
             string dataType = this.GetDataTypeForFile(connection, watcher, path);
-            
+
             if (command.ContainsParameter("filename"))
             {
                 var param = new OracleParameter("filename", Path.GetFileName(path));

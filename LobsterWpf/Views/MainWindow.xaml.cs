@@ -28,7 +28,6 @@ namespace LobsterWpf.Views
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
-    using System.Diagnostics;
     using System.Drawing;
     using System.IO;
     using System.Media;
@@ -37,7 +36,6 @@ namespace LobsterWpf.Views
     using System.Windows.Controls;
     using System.Windows.Forms;
     using LobsterModel;
-    using Properties;
     using ViewModels;
 
     /// <summary>
@@ -124,10 +122,10 @@ namespace LobsterWpf.Views
                 this.ConnectionContainer.DataContext = this.connectionView = new ConnectionView(window.DatabaseConnection);
                 this.RepopulateFileListView(true);
 
-                this.connectionView.Connection.FileProcessingFinishedEvent += this.OnFileProcessingFinished;
-                this.connectionView.Connection.StartChangeProcessingEvent += this.OnEventProcessingStart;
-                this.connectionView.Connection.UpdateCompleteEvent += this.OnAutoUpdateComplete;
-                this.connectionView.Connection.ClobTypeChangedEvent += this.ReloadLobsterTypesMenuItem_Click;
+                this.connectionView.BaseConnection.FileProcessingFinishedEvent += this.OnFileProcessingFinished;
+                this.connectionView.BaseConnection.StartChangeProcessingEvent += this.OnEventProcessingStart;
+                this.connectionView.BaseConnection.UpdateCompleteEvent += this.OnAutoUpdateComplete;
+                this.connectionView.BaseConnection.ClobTypeChangedEvent += this.ReloadLobsterTypesMenuItem_Click;
             }
         }
 
@@ -230,7 +228,7 @@ namespace LobsterWpf.Views
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">The event arguments.</param>
-        private void ClobTypeListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void DirectoryWatcherListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             this.RepopulateFileListView(true);
         }
@@ -241,10 +239,10 @@ namespace LobsterWpf.Views
         /// <param name="fullRebuild">WHether a full rebuild of the file list needs to be performed.</param>
         private void RepopulateFileListView(bool fullRebuild)
         {
-            /*if (this.clobTypeListBox.SelectedIndex == -1)
+            if (this.directoryWatcherListBox.SelectedIndex == -1)
             {
-                this.connectionView.PopulateFileTreeForClobDirectory(null);
-                this.localFileTreeView.ItemsSource = null;
+                this.connectionView.ChangeCurrentDirectoryWatcher(null);
+                //this.fileTree.ItemsSource = null;
                 return;
             }
 
@@ -253,18 +251,13 @@ namespace LobsterWpf.Views
                 return;
             }
 
-            ClobDirectoryView clobDirView = (ClobDirectoryView)this.clobTypeListBox.SelectedItem;
+            DirectoryWatcherView dirWatcherView = (DirectoryWatcherView)this.directoryWatcherListBox.SelectedItem;
 
-            if (fullRebuild)
+            this.connectionView.ChangeCurrentDirectoryWatcher(dirWatcherView);
+            if (this.connectionView.RootDirectoryView != null)
             {
-                this.connectionView.PopulateFileTreeForClobDirectory(clobDirView.BaseClobDirectory);
+                this.fileTree.ItemsSource = this.connectionView.RootDirectoryView.ChildNodes;
             }
-            else
-            {
-                this.connectionView.RootFile.RefreshFileInformation(true);
-            }
-            
-            this.localFileTreeView.ItemsSource = this.connectionView.RootFile.Children;*/
         }
 
         /// <summary>
@@ -382,7 +375,7 @@ namespace LobsterWpf.Views
         {
             if (this.connectionView.SelectedNode != null)
             {
-                Utils.OpenFileInExplorer(this.connectionView.SelectedNode.BaseNode.Path);
+                Utils.OpenFileInExplorer(this.connectionView.SelectedNode.BaseNode.FilePath);
             }
         }
 
@@ -395,11 +388,11 @@ namespace LobsterWpf.Views
         {
             if (this.connectionView.SelectedNode != null)
             {
-                var watcherView = (DirectoryWatcherView)this.clobTypeListBox.SelectedItem;
-                string filename = this.connectionView.SelectedNode.BaseNode.Path;
+                var watcherView = (DirectoryWatcherView)this.directoryWatcherListBox.SelectedItem;
+                string filename = this.connectionView.SelectedNode.BaseNode.FilePath;
                 try
                 {
-                    this.connectionView.Connection.InsertFile(watcherView.Watcher, filename);
+                    this.connectionView.BaseConnection.InsertFile(watcherView.Watcher, filename);
 
                     this.DisplayUpdateNotification(filename, true);
                 }
@@ -416,7 +409,7 @@ namespace LobsterWpf.Views
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">The event arguments.</param>
-        private void LocalFileTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        private void FileTree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             this.connectionView.SelectedNode = (WatchedNodeView)e.NewValue;
         }
@@ -485,7 +478,7 @@ namespace LobsterWpf.Views
         {
             List<FileListRetrievalException> errorList = new List<FileListRetrievalException>();
 
-            this.connectionView.Connection.GetDatabaseFileLists(ref errorList);
+            this.connectionView.BaseConnection.GetDatabaseFileLists(ref errorList);
             this.RepopulateFileListView(true);
         }
 
@@ -701,7 +694,7 @@ namespace LobsterWpf.Views
             {
                 this.connectionView.ReloadClobTypes();
                 this.connectionView.SelectedNode = null;
-                this.clobTypeListBox.SelectedIndex = -1;
+                this.directoryWatcherListBox.SelectedIndex = -1;
                 this.RepopulateFileListView(true);
             });
         }

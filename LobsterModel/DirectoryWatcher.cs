@@ -126,7 +126,7 @@ namespace LobsterModel
 
         private void PopulateWatchedDirectory(WatchedDirectory watchedDir, List<string> validFiles, List<string> validDirectories)
         {
-            DirectoryInfo dirInfo = new DirectoryInfo(watchedDir.Path);
+            DirectoryInfo dirInfo = new DirectoryInfo(watchedDir.FilePath);
             if (!dirInfo.Exists)
             {
                 return;

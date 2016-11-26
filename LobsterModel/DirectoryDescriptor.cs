@@ -158,7 +158,7 @@ namespace LobsterModel
             }
             catch (Exception e) when (e is FileNotFoundException || e is InvalidOperationException || e is XmlException || e is IOException)
             {
-                MessageLog.LogError($"An error occurred when loading the ClobType {fullpath}: {e}");
+                MessageLog.LogError($"An error occurred when loading the DirectoryDescriptor {fullpath}: {e}");
                 return null;
             }
 

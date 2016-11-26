@@ -36,7 +36,7 @@ namespace LobsterModel
 
         public WatchedFile(string path, WatchedDirectory parent) : base(path, parent)
         {
-            FileInfo fileInfo = new FileInfo(this.Path);
+            FileInfo fileInfo = new FileInfo(this.FilePath);
 
             if (fileInfo.Exists)
             {
@@ -57,8 +57,13 @@ namespace LobsterModel
         /// </summary>
         public void RefreshBackupList(CodeSourceConfig codeSource)
         {
-            List<FileBackup> fileBackups = BackupLog.GetBackupsForFile(codeSource.CodeSourceDirectory, this.Path);
+            List<FileBackup> fileBackups = BackupLog.GetBackupsForFile(codeSource.CodeSourceDirectory, this.FilePath);
             this.FileBackupList = new List<FileBackup>(fileBackups.OrderByDescending(backup => backup.DateCreated));
+        }
+
+        public bool IsSynchonisedWithDatabase(DatabaseConnection connection, DirectoryWatcher dirWatcher)
+        {
+            return connection.IsFileSynchronised(dirWatcher, this);
         }
     }
 }

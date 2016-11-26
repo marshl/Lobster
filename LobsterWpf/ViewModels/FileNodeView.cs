@@ -276,14 +276,14 @@ namespace LobsterWpf.ViewModels
                     this.isExpanded = value;
                     this.NotifyPropertyChanged("IsExpanded");
 
-                    if (this.isExpanded)
+                    /*if (this.isExpanded)
                     {
                         this.parentConnectionView.ExpandedDirectoryNames.Add(this.FilePath);
                     }
                     else
                     {
                         this.parentConnectionView.ExpandedDirectoryNames.Remove(this.FilePath);
-                    }
+                    }*/
                 }
             }
         }
@@ -360,7 +360,7 @@ namespace LobsterWpf.ViewModels
                 return;
             }
 
-            List<FileBackup> fileBackups = BackupLog.GetBackupsForFile(this.ParentConnectionView.Connection.Config.Parent.CodeSourceDirectory, this.FilePath);
+            List<FileBackup> fileBackups = BackupLog.GetBackupsForFile(this.ParentConnectionView.BaseConnection.Config.Parent.CodeSourceDirectory, this.FilePath);
             if (fileBackups != null)
             {
                 this.FileBackupList = new ObservableCollection<FileBackup>(fileBackups.OrderByDescending(backup => backup.DateCreated));

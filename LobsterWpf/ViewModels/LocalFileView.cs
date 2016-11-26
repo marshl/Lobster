@@ -74,7 +74,7 @@ namespace LobsterWpf.ViewModels
                     }
                 }
 
-                this.IsExpanded = this.ParentConnectionView.ExpandedDirectoryNames.Contains(this.FilePath);
+                //this.IsExpanded = this.ParentConnectionView.ExpandedDirectoryNames.Contains(this.FilePath);
             }
             else 
             {

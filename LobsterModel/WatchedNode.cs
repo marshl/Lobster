@@ -18,13 +18,13 @@ namespace LobsterModel
 {
     public abstract class WatchedNode
     {
-        public WatchedNode(string path, WatchedDirectory parent)
+        public WatchedNode(string filePath, WatchedDirectory parent)
         {
-            this.Path = path;
+            this.FilePath = filePath;
             this.ParentDirectory = parent;
         }
 
-        public string Path { get; }
+        public string FilePath { get; }
 
         public WatchedDirectory ParentDirectory { get; }
 

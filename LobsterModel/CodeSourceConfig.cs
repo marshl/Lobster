@@ -134,7 +134,7 @@ namespace LobsterModel
             }
             catch (Exception e) when (e is FileNotFoundException || e is InvalidOperationException || e is SerializationException || e is IOException)
             {
-                MessageLog.LogError($"An error occurred when loading the ClobType {configFile.FullName}: {e}");
+                MessageLog.LogError($"An error occurred when loading the CodeSourceConfig {configFile.FullName}: {e}");
                 //TODO: Return this error to the user
                 return null;
             }
