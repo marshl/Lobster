@@ -80,7 +80,7 @@
               </Style>
             </TreeView.ItemContainerStyle>
             <TreeView.ItemTemplate>
-              <HierarchicalDataTemplate ItemsSource="{Binding Path=RootDirectoryView.ChildNodes}">
+              <HierarchicalDataTemplate ItemsSource="{Binding Path=ChildNodes}">
                 <StackPanel Orientation="Horizontal">
                   <TextBlock Text="{Binding Path=FileName}" Foreground="{Binding Path=ForegroundColour}"/>
                 </StackPanel>
