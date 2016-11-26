@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Windows.Media;
 using LobsterModel;
 
 namespace LobsterWpf.ViewModels
@@ -35,6 +36,17 @@ namespace LobsterWpf.ViewModels
             foreach (WatchedNodeView child in this.ChildNodes)
             {
                 child.CheckFileSynchronisation(connectionView, watcherView);
+            }
+        }
+
+        /// <summary>
+        /// Gets the colour to use for the Name of this file.
+        /// </summary>
+        public override string ForegroundColour
+        {
+            get
+            {
+                return Colors.White.ToString();
             }
         }
     }

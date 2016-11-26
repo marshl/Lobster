@@ -21,5 +21,10 @@ namespace LobsterWpf.ViewModels
                 return Path.GetFileName(this.BaseNode.FilePath);
             }
         }
+
+        /// <summary>
+        /// Gets the colour to use for the Name of this file.
+        /// </summary>
+        public abstract string ForegroundColour { get; }
     }
 }
