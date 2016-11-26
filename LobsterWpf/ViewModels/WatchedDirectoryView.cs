@@ -49,5 +49,17 @@ namespace LobsterWpf.ViewModels
                 return Colors.White.ToString();
             }
         }
+
+        /// <summary>
+        /// Gets the image tha is used to represent this file.
+        /// </summary>
+        public override ImageSource ImageUrl
+        {
+            get
+            {
+                string resourceName = this.ChildNodes.Count > 0 ? "FullDirectoryImageSource" : "EmptyDirectoryImageSource";
+                return (ImageSource)System.Windows.Application.Current.FindResource(resourceName);
+            }
+        }
     }
 }

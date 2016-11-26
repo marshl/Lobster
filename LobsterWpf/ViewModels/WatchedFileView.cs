@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -37,6 +38,26 @@ namespace LobsterWpf.ViewModels
             get
             {
                 return Colors.White.ToString();
+            }
+        }
+
+        public bool IsReadOnly
+        {
+            get
+            {
+                return this.WatchedFile.IsReadOnly;
+            }
+        }
+
+        /// <summary>
+        /// Gets the image tha is used to represent this file.
+        /// </summary>
+        public override ImageSource ImageUrl
+        {
+            get
+            {
+                string resourceName = this.IsReadOnly ? "LockedFileImageSource" : "NormalFileImageSource";
+                return (ImageSource)System.Windows.Application.Current.FindResource(resourceName);
             }
         }
     }

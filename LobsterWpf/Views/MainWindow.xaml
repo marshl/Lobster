@@ -82,6 +82,7 @@
             <TreeView.ItemTemplate>
               <HierarchicalDataTemplate ItemsSource="{Binding Path=ChildNodes}">
                 <StackPanel Orientation="Horizontal">
+                  <Image Source="{Binding ImageUrl}" Height="18"/>
                   <TextBlock Text="{Binding Path=FileName}" Foreground="{Binding Path=ForegroundColour}"/>
                 </StackPanel>
               </HierarchicalDataTemplate>

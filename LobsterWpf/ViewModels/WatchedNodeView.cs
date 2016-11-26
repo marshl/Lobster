@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Windows.Media;
 using LobsterModel;
 
 namespace LobsterWpf.ViewModels
@@ -26,5 +27,10 @@ namespace LobsterWpf.ViewModels
         /// Gets the colour to use for the Name of this file.
         /// </summary>
         public abstract string ForegroundColour { get; }
+
+        /// <summary>
+        /// Gets the image tha is used to represent this file.
+        /// </summary>
+        public abstract ImageSource ImageUrl { get; }
     }
 }
