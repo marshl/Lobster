@@ -277,20 +277,19 @@ namespace LobsterWpf.Views
         /// <param name="e">The event arguments.</param>
         private void PushButton_Click(object sender, RoutedEventArgs e)
         {
-            /*if (this.connectionView.SelectedFileNode == null)
+            if (this.connectionView.SelectedNode == null || this.connectionView.SelectedNode is WatchedDirectoryView)
             {
                 return;
             }
 
-            var clobDirView = (ClobDirectoryView)this.clobTypeListBox.SelectedItem;
-            string filename = this.connectionView.SelectedFileNode.FilePath;
+            var fileView = (WatchedFileView)this.connectionView.SelectedNode;
+            string filepath = this.connectionView.SelectedNode.FileName;
 
-            FileInfo fi = new FileInfo(filename);
-            if (fi.IsReadOnly)
+            if (fileView.IsReadOnly)
             {
                 MessageBoxResult result = System.Windows.MessageBox.Show(
-                    $"{this.connectionView.SelectedFileNode.DisplayName} is locked. Are you sure you want to clob it?",
-                    "File is Locked",
+                    $"{Path.GetFileName(filepath)} is read-only. Are you sure you want to push it?",
+                    "File is Read-Only",
                     MessageBoxButton.OKCancel);
 
                 if (result != MessageBoxResult.OK)
@@ -301,16 +300,16 @@ namespace LobsterWpf.Views
 
             try
             {
-                this.connectionView.Connection.SendUpdateClobMessage(clobDirView.BaseClobDirectory, filename);
+                this.connectionView.BaseConnection.UpdateDatabaseFile(this.connectionView.SelectedDirectoryWatcher.BaseWatcher, filepath);
             }
             catch (FileUpdateException)
             {
-                this.DisplayUpdateNotification(filename, false);
+                this.DisplayUpdateNotification(filepath, false);
                 return;
             }
 
-            this.DisplayUpdateNotification(filename, true);
-            this.connectionView.SelectedFileNode.RefreshBackupList();*/
+            this.DisplayUpdateNotification(filepath, true);
+            fileView.WatchedFile.RefreshBackupList(this.connectionView.BaseConnection.Config.Parent);
         }
 
         /// <summary>
@@ -392,7 +391,7 @@ namespace LobsterWpf.Views
                 string filename = this.connectionView.SelectedNode.BaseNode.FilePath;
                 try
                 {
-                    this.connectionView.BaseConnection.InsertFile(watcherView.Watcher, filename);
+                    this.connectionView.BaseConnection.InsertFile(watcherView.BaseWatcher, filename);
 
                     this.DisplayUpdateNotification(filename, true);
                 }

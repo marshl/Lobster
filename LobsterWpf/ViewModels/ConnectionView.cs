@@ -138,7 +138,7 @@ namespace LobsterWpf.ViewModels
                 return;
             }
 
-            this.RootDirectoryView = new WatchedDirectoryView(this.SelectedDirectoryWatcher.Watcher.RootDirectory);
+            this.RootDirectoryView = new WatchedDirectoryView(this.SelectedDirectoryWatcher.BaseWatcher.RootDirectory);
             this.NotifyPropertyChanged("RootDirectoryView");
         }
 

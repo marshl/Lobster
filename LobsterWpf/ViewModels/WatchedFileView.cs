@@ -27,7 +27,7 @@ namespace LobsterWpf.ViewModels
 
         public override void CheckFileSynchronisation(ConnectionView connectionView, DirectoryWatcherView watcherView)
         {
-            connectionView.BaseConnection.IsFileSynchronised(watcherView.Watcher, this.WatchedFile);
+            connectionView.BaseConnection.IsFileSynchronised(watcherView.BaseWatcher, this.WatchedFile);
         }
 
         /// <summary>

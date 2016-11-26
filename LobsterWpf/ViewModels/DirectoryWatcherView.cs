@@ -6,16 +6,16 @@ namespace LobsterWpf.ViewModels
     {
         public DirectoryWatcherView(DirectoryWatcher watcher)
         {
-            this.Watcher = watcher;
+            this.BaseWatcher = watcher;
         }
 
-        public DirectoryWatcher Watcher { get; }
+        public DirectoryWatcher BaseWatcher { get; }
         
         public string Name
         {
             get
             {
-                return this.Watcher.Descriptor.Name;
+                return this.BaseWatcher.Descriptor.Name;
             }
         }
 
@@ -26,7 +26,7 @@ namespace LobsterWpf.ViewModels
         {
             get
             {
-                return this.Watcher.Descriptor.DirectoryName;
+                return this.BaseWatcher.Descriptor.DirectoryName;
             }
         }
 
@@ -37,7 +37,7 @@ namespace LobsterWpf.ViewModels
         {
             get
             {
-                return System.IO.Directory.Exists(this.Watcher.DirectoryPath);
+                return System.IO.Directory.Exists(this.BaseWatcher.DirectoryPath);
             }
         }
     }
