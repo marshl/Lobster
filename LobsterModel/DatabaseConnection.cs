@@ -920,6 +920,13 @@ namespace LobsterModel
                 }
                 command.Parameters.Add(param);
             }
+
+            MessageLog.LogInfo("Parameters bound to query, parameters are as follows:");
+
+            foreach(OracleParameter parameter in command.Parameters)
+            {
+                MessageLog.LogInfo($"Added parameter \"{parameter.ParameterName}\" with value \"{parameter.Value.ToString().Substring(0,255)}\"");
+            }
         }
 
         private string GetDataTypeForFile(OracleConnection connection, DirectoryWatcher watcher, string path)
