@@ -472,12 +472,9 @@ namespace LobsterWpf.Views
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">The event arguments.</param>
-        [Obsolete]
         private void RequeryDatabaseMenuItem_Click(object sender, RoutedEventArgs e)
         {
             List<FileListRetrievalException> errorList = new List<FileListRetrievalException>();
-
-            this.connectionView.BaseConnection.GetDatabaseFileLists(ref errorList);
             this.RepopulateFileListView(true);
         }
 
