@@ -918,6 +918,7 @@ namespace LobsterModel
                         param.OracleDbType = OracleDbType.Clob;
                     }
                 }
+                command.Parameters.Add(param);
             }
         }
 
