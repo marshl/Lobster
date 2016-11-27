@@ -25,6 +25,7 @@ namespace LobsterModel
 {
     using System;
     using System.Collections.Generic;
+    using System.Data;
     using System.IO;
     using System.Linq;
     using System.Security;
@@ -59,6 +60,24 @@ namespace LobsterModel
         /// </summary>
         private object fileEventProcessingSemaphore = new object();
 
+        private OracleConnection StoredConnection;
+
+        public OracleConnection GetOracleConnection()
+        {
+            if(this.StoredConnection == null || this.StoredConnection.State == ConnectionState.Closed || this.StoredConnection.State == ConnectionState.Broken)
+            {
+                this.StoredConnection = this.Config.OpenSqlConnection(this.Password);
+            }
+
+            return this.StoredConnection;
+        }
+
+        private void CloseConnection()
+        {
+            this.StoredConnection.Close();
+            this.StoredConnection = null;
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseConnection"/> class.
         /// </summary>
@@ -83,6 +102,8 @@ namespace LobsterModel
             this.clobTypeFileWatcher.Renamed += new RenamedEventHandler(this.OnClobTypeChangeEvent);
 
             this.clobTypeFileWatcher.EnableRaisingEvents = true;
+
+            this.GetOracleConnection();
         }
 
         /// <summary>
@@ -193,7 +214,7 @@ namespace LobsterModel
 
         public void UpdateDatabaseFile(DirectoryWatcher watcher, string filepath)
         {
-            OracleConnection oracleConnection = this.Config.OpenSqlConnection(this.Password);
+            OracleConnection oracleConnection = this.GetOracleConnection();
             if (Settings.Default.BackupEnabled)
             {
                 this.BackupFile(oracleConnection, watcher, filepath);
@@ -234,7 +255,7 @@ namespace LobsterModel
 
         public void InsertFile(DirectoryWatcher watcher, string filepath)
         {
-            OracleConnection oracleConnection = this.Config.OpenSqlConnection(this.Password);
+            OracleConnection oracleConnection = this.GetOracleConnection();
             OracleCommand command = oracleConnection.CreateCommand();
             this.BindParametersToCommand(oracleConnection, command, watcher, filepath);
 
@@ -319,7 +340,7 @@ namespace LobsterModel
 
         public bool IsFileSynchronised(DirectoryWatcher dirWatcher, WatchedFile watchedFile)
         {
-            OracleConnection oracleConnection = this.Config.OpenSqlConnection(this.Password);
+            OracleConnection oracleConnection = this.GetOracleConnection();
 
             OracleCommand oracleCommand = oracleConnection.CreateCommand();
 
@@ -515,6 +536,13 @@ namespace LobsterModel
                 {
                     MessageLog.LogInfo($"An error occurred when deleting temporary file {filename}");
                 }
+            }
+
+            if(this.StoredConnection != null)
+            {
+                this.StoredConnection.Close();
+                this.StoredConnection.Dispose();
+                this.StoredConnection = null;
             }
         }
 
