@@ -99,12 +99,12 @@ namespace LobsterModel
         /// The event for when a file update has completed (successfully or not).
         /// </summary>
         public event EventHandler<FileUpdateCompleteEventArgs> UpdateCompleteEvent;
-        
+
         /// <summary>
         /// The event for when a ClobType in the LobsterTypes directory has changed.
         /// </summary>
         public event EventHandler<FileSystemEventArgs> ClobTypeChangedEvent;
-        
+
         /// <summary>
         /// Gets the list of temporary files that have been downloaded so far.
         /// These files are deleted when the model is disposed.
@@ -115,12 +115,6 @@ namespace LobsterModel
         /// Gets the configuration file for this connection.
         /// </summary>
         public ConnectionConfig Config { get; }
-
-        /// <summary>
-        /// Gets the list of ClobDirectories for each ClobType located in directory in the configuration settings.
-        /// </summary>
-        [Obsolete]
-        public List<ClobDirectory> ClobDirectoryList { get; private set; }
 
         public List<DirectoryWatcher> DirectoryWatcherList { get; private set; }
 
@@ -197,41 +191,6 @@ namespace LobsterModel
             }
         }
 
-        /// <summary>
-        /// Loads each of the xml files in the ClobTypeDir (if they are valid).
-        /// </summary>
-        /// <param name="errors">Any errors that are raised during loading.</param>
-        [Obsolete]
-        public void LoadClobTypes(ref List<ClobTypeLoadException> errors)
-        {
-            string clobTypeDir = this.Config.Parent.ClobTypeDirectory;
-
-            this.ClobDirectoryList = new List<ClobDirectory>();
-            if (!Directory.Exists(this.Config.Parent.ClobTypeDirectory))
-            {
-                MessageLog.LogWarning($"The directory {clobTypeDir} could not be found when loading connection {this.Config.Name}");
-                errors.Add(new ClobTypeLoadException($"The directory {clobTypeDir} could not be found when loading connection {this.Config.Name}"));
-                return;
-            }
-
-            List<ClobType> clobTypes = ClobType.GetClobTypeList(clobTypeDir);
-            clobTypes.ForEach(x => x.Initialise());
-
-            foreach (ClobType clobType in clobTypes)
-            {
-                try
-                {
-                    ClobDirectory clobDir = new ClobDirectory(this.Config.Parent.CodeSourceDirectory, clobType);
-                    //clobDir.FileChangeEvent += this.OnClobDirectoryFileChangeEvent;
-                    this.ClobDirectoryList.Add(clobDir);
-                }
-                catch (ClobTypeLoadException ex)
-                {
-                    MessageLog.LogError($"An error occurred when loading the ClobType {clobType.Directory}: {ex}");
-                }
-            }
-        }
-        
         public void UpdateDatabaseFile(DirectoryWatcher watcher, string filepath)
         {
             OracleConnection oracleConnection = this.Config.OpenSqlConnection(this.Password);
@@ -292,7 +251,7 @@ namespace LobsterModel
 
             MessageLog.LogInfo($"Clob file creation successful: {filepath}");
         }
-        
+
         public void DownloadDatabaseFile(OracleConnection connection, DirectoryWatcher watcher, string sourceFilename, string outputFile)
         {
             OracleCommand oracleCommand = connection.CreateCommand();
@@ -508,7 +467,7 @@ namespace LobsterModel
 
             return (string)result;
         }
-        
+
         /// <summary>
         /// Disposes this object.
         /// </summary>
