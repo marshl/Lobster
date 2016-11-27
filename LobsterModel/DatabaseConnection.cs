@@ -815,13 +815,14 @@ namespace LobsterModel
             try
             {
                 MessageLog.LogInfo($"Executing file existence query: {oracleCommand.CommandText}");
-                int result = (int)oracleCommand.ExecuteScalar();
-                return result >= 1;
+                object result = oracleCommand.ExecuteScalar();
+                decimal count = (decimal)result;
+                return count >= 1;
             }
-            catch (Exception ex) when (ex is OracleException || ex is InvalidOperationException)
+            catch (Exception ex) when (ex is OracleException || ex is InvalidOperationException || ex is InvalidCastException)
             {
                 MessageLog.LogError($"File existence check failed for command: {oracleCommand.CommandText} {ex}");
-                throw new FileUpdateException($"An exception occurred when determining whether {watchedFile.FilePath} is in the database: {ex.Message}", ex);
+                throw new FileSynchronisationCheckException($"An exception occurred when determining whether {watchedFile.FilePath} is in the database: {ex.Message}", ex);
             }
         }
 

@@ -27,8 +27,17 @@ namespace LobsterWpf.ViewModels
 
         public override void CheckFileSynchronisation(ConnectionView connectionView, DirectoryWatcherView watcherView)
         {
-            connectionView.BaseConnection.IsFileSynchronised(watcherView.BaseWatcher, this.WatchedFile);
+            try
+            {
+                this.IsSynchronised = this.WatchedFile.IsSynchonisedWithDatabase(connectionView.BaseConnection, watcherView.BaseWatcher);
+            }
+            catch (FileSynchronisationCheckException)
+            {
+
+            }
         }
+
+        public bool IsSynchronised { get; private set; } = false;
 
         /// <summary>
         /// Gets the colour to use for the Name of this file.
