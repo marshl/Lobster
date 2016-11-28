@@ -361,64 +361,73 @@ namespace LobsterModel
             }
         }
 
+        private const string filenameParameterName = "p_filename";
+        private const string filenameWithoutExtensionParameterName = "p_filename_without_extension";
+        private const string fileExtensionParameterName = "p_file_extension";
+        private const string relativePathParameterName = "p_relative_path";
+        private const string parentDirectoryParameterName = "p_parent_directory";
+        private const string fullPathParameterName = "p_full_path";
+        private const string dataTypeParameterName = "p_data_type";
+        private const string fileContentClobParameterName = "p_file_content_clob";
+        private const string fileContentBlobParameterName = "p_file_content_blob";
+
         private void BindParametersToCommand(OracleConnection connection, OracleCommand command, DirectoryWatcher watcher, string path)
         {
             command.BindByName = true;
             string dataType = this.GetDataTypeForFile(connection, watcher, path);
 
-            if (command.ContainsParameter("filename"))
+            if (command.ContainsParameter(filenameParameterName))
             {
-                var param = new OracleParameter("filename", Path.GetFileName(path));
+                var param = new OracleParameter(filenameParameterName, Path.GetFileName(path));
                 command.Parameters.Add(param);
             }
 
-            if (command.ContainsParameter("filename_without_extension"))
+            if (command.ContainsParameter(filenameWithoutExtensionParameterName))
             {
-                var param = new OracleParameter("filename_without_extension", Path.GetFileName(path));
+                var param = new OracleParameter(filenameWithoutExtensionParameterName, Path.GetFileName(path));
                 command.Parameters.Add(param);
             }
 
-            if (command.ContainsParameter("file_extension"))
+            if (command.ContainsParameter(fileExtensionParameterName))
             {
-                var param = new OracleParameter("file_extension", Path.GetExtension(path));
+                var param = new OracleParameter(fileExtensionParameterName, Path.GetExtension(path));
                 command.Parameters.Add(param);
             }
 
-            if (command.ContainsParameter("relative_path"))
+            if (command.ContainsParameter(relativePathParameterName))
             {
                 Uri baseUri = new Uri(watcher.DirectoryPath);
                 Uri fileUri = new Uri(path);
                 Uri relativeUri = baseUri.MakeRelativeUri(fileUri);
-                var param = new OracleParameter("relative_path", relativeUri.OriginalString);
+                var param = new OracleParameter(relativePathParameterName, relativeUri.OriginalString);
                 command.Parameters.Add(param);
             }
 
-            if (command.ContainsParameter("parent_directory"))
+            if (command.ContainsParameter(parentDirectoryParameterName))
             {
-                var param = new OracleParameter("parent_directory", new FileInfo(path).Directory.Name);
+                var param = new OracleParameter(parentDirectoryParameterName, new FileInfo(path).Directory.Name);
                 command.Parameters.Add(param);
             }
 
-            if (command.ContainsParameter("full_path"))
+            if (command.ContainsParameter(fullPathParameterName))
             {
-                var param = new OracleParameter("full_path", path);
+                var param = new OracleParameter(fullPathParameterName, path);
                 command.Parameters.Add(param);
             }
 
-            if (command.ContainsParameter("data_type"))
+            if (command.ContainsParameter(dataTypeParameterName))
             {
                 var param = new OracleParameter();
-                param.ParameterName = "data_type";
+                param.ParameterName = dataTypeParameterName;
 
                 param.Value = dataType;
 
                 command.Parameters.Add(param);
             }
 
-            if (command.ContainsParameter("file_data_clob"))
+            if (command.ContainsParameter(fileContentClobParameterName) || command.ContainsParameter(fileContentBlobParameterName))
             {
                 OracleParameter param = new OracleParameter();
-                param.ParameterName = "file_data_clob";
 
                 // Wait for the file to unlock
                 using (FileStream fs = Utils.WaitForFile(
