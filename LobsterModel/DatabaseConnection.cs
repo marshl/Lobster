@@ -354,7 +354,7 @@ namespace LobsterModel
                 decimal count = (decimal)result;
                 return count >= 1;
             }
-            catch (Exception ex) when (ex is OracleException || ex is InvalidOperationException || ex is InvalidCastException)
+            catch (Exception ex) when (ex is OracleException || ex is InvalidOperationException || ex is InvalidCastException || ex is ArgumentException)
             {
                 MessageLog.LogError($"File existence check failed for command: {oracleCommand.CommandText} {ex}");
                 throw new FileSynchronisationCheckException($"An exception occurred when determining whether {watchedFile.FilePath} is in the database: {ex.Message}", ex);
@@ -384,7 +384,7 @@ namespace LobsterModel
 
             if (command.ContainsParameter(filenameWithoutExtensionParameterName))
             {
-                var param = new OracleParameter(filenameWithoutExtensionParameterName, Path.GetFileName(path));
+                var param = new OracleParameter(filenameWithoutExtensionParameterName, Path.GetFileNameWithoutExtension(path));
                 command.Parameters.Add(param);
             }
 
@@ -427,8 +427,6 @@ namespace LobsterModel
 
             if (command.ContainsParameter(fileContentClobParameterName) || command.ContainsParameter(fileContentBlobParameterName))
             {
-                OracleParameter param = new OracleParameter();
-
                 // Wait for the file to unlock
                 using (FileStream fs = Utils.WaitForFile(
                     path,
@@ -442,11 +440,13 @@ namespace LobsterModel
                         byte[] fileData = new byte[fs.Length];
                         fs.Read(fileData, 0, Convert.ToInt32(fs.Length));
 
+                        OracleParameter param = new OracleParameter();
                         param.Value = fileData;
                         param.OracleDbType = OracleDbType.Blob;
                         param.ParameterName = fileContentBlobParameterName;
                     }
-                    else
+
+                    if (command.ContainsParameter(fileContentBlobParameterName))
                     {
                         // Text mode
                         var tr = new StreamReader(fs);
@@ -459,12 +459,12 @@ namespace LobsterModel
                             //contents += MimeTypeList.GetClobFooterMessage(mimeType);
                         }
 
+                        OracleParameter param = new OracleParameter();
                         param.Value = contents;
                         param.OracleDbType = OracleDbType.Clob;
                         param.ParameterName = fileContentClobParameterName;
                     }
                 }
-                command.Parameters.Add(param);
             }
 
             MessageLog.LogInfo("Parameters bound to query, parameters are as follows:");
