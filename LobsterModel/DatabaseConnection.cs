@@ -64,7 +64,7 @@ namespace LobsterModel
 
         public OracleConnection GetOracleConnection()
         {
-            if(this.StoredConnection == null || this.StoredConnection.State == ConnectionState.Closed || this.StoredConnection.State == ConnectionState.Broken)
+            if (this.StoredConnection == null || this.StoredConnection.State == ConnectionState.Closed || this.StoredConnection.State == ConnectionState.Broken)
             {
                 this.StoredConnection = this.Config.OpenSqlConnection(this.Password);
             }
@@ -469,11 +469,15 @@ namespace LobsterModel
 
             MessageLog.LogInfo("Parameters bound to query, parameters are as follows:");
 
-            foreach(OracleParameter parameter in command.Parameters)
+            foreach (OracleParameter parameter in command.Parameters)
             {
-                MessageLog.LogInfo($"Added parameter \"{parameter.ParameterName}\" with value \"{parameter.Value.ToString().Substring(0,255)}\"");
+                string parameterValue = parameter.Value.ToString();
+                parameterValue = parameterValue.Substring(0, parameterValue.Length < parameterLogLength ? parameterValue.Length : parameterLogLength);
+                MessageLog.LogInfo($"Added parameter \"{parameter.ParameterName}\" with value \"{parameterValue}\"");
             }
         }
+
+        private const int parameterLogLength = 255;
 
         private string GetDataTypeForFile(OracleConnection connection, DirectoryWatcher watcher, string path)
         {
@@ -558,7 +562,7 @@ namespace LobsterModel
                 }
             }
 
-            if(this.StoredConnection != null)
+            if (this.StoredConnection != null)
             {
                 this.StoredConnection.Close();
                 this.StoredConnection.Dispose();
