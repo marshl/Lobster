@@ -41,6 +41,8 @@ namespace LobsterModel
         /// <returns>True if the command contains the parameter, otherwise false.</returns>
         public static bool ContainsParameter(this DbCommand command, string parameter)
         {
+            // Use a lookahead assertion to ensure the parameter isn't followed by a wordy character
+            // That way a parameter like :p_filename and :p_filename_without_extension can't be confused
             return Regex.IsMatch(command.CommandText, $":{parameter}(?![\\w])");
         }
     }
