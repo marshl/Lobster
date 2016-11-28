@@ -123,7 +123,7 @@ namespace LobsterWpf.ViewModels
 
             if(!this.DirectoryWatchers.Contains(dirWatcherFiew))
             {
-                throw new ArgumentException("The given DirectoryWatcherView is not in the list of DirectoryWatcherViews for this ConnectionView.");
+                return;
             }
 
             this.SelectedDirectoryWatcher = dirWatcherFiew;
