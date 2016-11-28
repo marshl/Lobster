@@ -444,6 +444,7 @@ namespace LobsterModel
 
                         param.Value = fileData;
                         param.OracleDbType = OracleDbType.Blob;
+                        param.ParameterName = fileContentBlobParameterName;
                     }
                     else
                     {
@@ -460,6 +461,7 @@ namespace LobsterModel
 
                         param.Value = contents;
                         param.OracleDbType = OracleDbType.Clob;
+                        param.ParameterName = fileContentClobParameterName;
                     }
                 }
                 command.Parameters.Add(param);
