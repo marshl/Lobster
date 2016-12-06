@@ -340,8 +340,9 @@ namespace LobsterModel
 
         public bool IsFileSynchronised(DirectoryWatcher dirWatcher, WatchedFile watchedFile)
         {
-            OracleConnection oracleConnection = this.GetOracleConnection();
+            MessageLog.LogInfo($"Checking file synchronisation of {watchedFile.FilePath}");
 
+            OracleConnection oracleConnection = this.GetOracleConnection();
             OracleCommand oracleCommand = oracleConnection.CreateCommand();
 
             oracleCommand.CommandText = dirWatcher.Descriptor.DatabaseFileExistsStatement;
@@ -435,7 +436,7 @@ namespace LobsterModel
                     FileShare.ReadWrite))
                 {
                     // Binary mode
-                    if (dataType == "BLOB")
+                    if (command.ContainsParameter(fileContentBlobParameterName))
                     {
                         byte[] fileData = new byte[fs.Length];
                         fs.Read(fileData, 0, Convert.ToInt32(fs.Length));
@@ -444,9 +445,10 @@ namespace LobsterModel
                         param.Value = fileData;
                         param.OracleDbType = OracleDbType.Blob;
                         param.ParameterName = fileContentBlobParameterName;
+                        command.Parameters.Add(param);
                     }
 
-                    if (command.ContainsParameter(fileContentBlobParameterName))
+                    if (command.ContainsParameter(fileContentClobParameterName))
                     {
                         // Text mode
                         var tr = new StreamReader(fs);
@@ -460,9 +462,11 @@ namespace LobsterModel
                         }
 
                         OracleParameter param = new OracleParameter();
+                        param.OracleDbType = OracleDbType.Clob;
                         param.Value = contents;
                         param.OracleDbType = OracleDbType.Clob;
                         param.ParameterName = fileContentClobParameterName;
+                        command.Parameters.Add(param);
                     }
                 }
             }
