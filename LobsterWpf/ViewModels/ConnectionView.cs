@@ -163,16 +163,6 @@ namespace LobsterWpf.ViewModels
         //    this.NotifyPropertyChanged("RootDirectory");
         //}
 
-        public void CheckFileSynchronisation()
-        {
-            if(this.RootDirectoryView == null)
-            {
-                return;
-            }
-
-            this.RootDirectoryView.CheckFileSynchronisation(this, this.SelectedDirectoryWatcher);
-        }
-
         /// <summary>
         /// Reloads the ClobTypes for the current connection.
         /// </summary>
