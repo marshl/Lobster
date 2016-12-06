@@ -45,7 +45,17 @@ namespace LobsterWpf.ViewModels
         {
             get
             {
-                return Colors.White.ToString();
+                if(this.IsSynchronised)
+                {
+                    return Colors.White.ToString();
+                }
+
+                if (this.SynchronisationErrors.Count > 0)
+                {
+                    return Colors.Red.ToString();
+                }
+
+                return Colors.Green.ToString();
             }
         }
 
@@ -70,5 +80,12 @@ namespace LobsterWpf.ViewModels
         }
 
         public List<FileSynchronisationCheckException> SynchronisationErrors { get; set; }
+        
+        public enum SynchronisationStatus
+        {
+            Unknown,
+            Synchronised,
+            LocalOnly,
+        }
     }
 }
