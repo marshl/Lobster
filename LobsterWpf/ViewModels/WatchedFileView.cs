@@ -14,14 +14,13 @@ namespace LobsterWpf.ViewModels
         public WatchedFileView(WatchedFile watchedFile) : base(watchedFile)
         {
             this.WatchedFile = watchedFile;
+            this.SynchronisationErrors = new List<FileSynchronisationCheckException>();
         }
 
         public WatchedFile WatchedFile { get; }
 
         public bool IsSynchronisedWithDatabase()
         {
-
-
             return false;
         }
 
@@ -31,9 +30,9 @@ namespace LobsterWpf.ViewModels
             {
                 this.IsSynchronised = this.WatchedFile.IsSynchonisedWithDatabase(connectionView.BaseConnection, watcherView.BaseWatcher);
             }
-            catch (FileSynchronisationCheckException)
+            catch (FileSynchronisationCheckException ex)
             {
-
+                this.SynchronisationErrors.Add(ex);
             }
         }
 
@@ -69,5 +68,7 @@ namespace LobsterWpf.ViewModels
                 return (ImageSource)System.Windows.Application.Current.FindResource(resourceName);
             }
         }
+
+        public List<FileSynchronisationCheckException> SynchronisationErrors { get; set; }
     }
 }
