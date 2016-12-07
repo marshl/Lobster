@@ -719,7 +719,7 @@ namespace LobsterModel
                 //this.SendUpdateClobMessage(clobDirectory, e.FullPath);
                 this.UpdateDatabaseFile(watcher, e.FullPath);
             }
-            catch (FileUpdateException)
+            catch (Exception ex) when (ex is FileDownloadException || ex is FileUpdateException)
             {
                 this.OnAutoUpdateComplete(e.FullPath, false);
                 return;
