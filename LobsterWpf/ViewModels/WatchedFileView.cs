@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Media;
 using LobsterModel;
 
@@ -14,29 +16,29 @@ namespace LobsterWpf.ViewModels
         public WatchedFileView(WatchedFile watchedFile) : base(watchedFile)
         {
             this.WatchedFile = watchedFile;
-            this.SynchronisationErrors = new List<FileSynchronisationCheckException>();
         }
 
         public WatchedFile WatchedFile { get; }
 
-        public bool IsSynchronisedWithDatabase()
-        {
-            return false;
-        }
-
         public override void CheckFileSynchronisation(ConnectionView connectionView, DirectoryWatcherView watcherView)
         {
-            try
+            var th = new Thread(delegate()
             {
-                this.IsSynchronised = this.WatchedFile.IsSynchonisedWithDatabase(connectionView.BaseConnection, watcherView.BaseWatcher);
-            }
-            catch (FileSynchronisationCheckException ex)
-            {
-                this.SynchronisationErrors.Add(ex);
-            }
+                try
+                {
+                    this.LastSyncError = null;
+                    this.SyncStatus = SynchronisationStatus.Unknown;
+                    bool result = this.WatchedFile.IsSynchonisedWithDatabase(connectionView.BaseConnection, watcherView.BaseWatcher);
+                    this.SyncStatus = result ? SynchronisationStatus.Synchronised : SynchronisationStatus.LocalOnly;
+                }
+                catch (FileSynchronisationCheckException ex)
+                {
+                    this.LastSyncError = ex;
+                    this.SyncStatus = SynchronisationStatus.Error;
+                }
+            });
+            th.Start();
         }
-
-        public bool IsSynchronised { get; private set; } = false;
 
         /// <summary>
         /// Gets the colour to use for the Name of this file.
@@ -45,17 +47,19 @@ namespace LobsterWpf.ViewModels
         {
             get
             {
-                if(this.IsSynchronised)
+                switch (this.SyncStatus)
                 {
-                    return Colors.White.ToString();
+                    case SynchronisationStatus.Synchronised:
+                        return Colors.White.ToString();
+                    case SynchronisationStatus.LocalOnly:
+                        return Colors.Green.ToString();
+                    case SynchronisationStatus.Error:
+                        return Colors.Red.ToString();
+                    case SynchronisationStatus.Unknown:
+                        return Colors.Gray.ToString();
+                    default:
+                        throw new ArgumentException($"Unknown SynchronisationStatus {this.SyncStatus}");
                 }
-
-                if (this.SynchronisationErrors.Count > 0)
-                {
-                    return Colors.Red.ToString();
-                }
-
-                return Colors.Green.ToString();
             }
         }
 
@@ -75,17 +79,34 @@ namespace LobsterWpf.ViewModels
             get
             {
                 string resourceName = this.IsReadOnly ? "LockedFileImageSource" : "NormalFileImageSource";
-                return (ImageSource)System.Windows.Application.Current.FindResource(resourceName);
+                return (ImageSource)Application.Current.FindResource(resourceName);
             }
         }
 
-        public List<FileSynchronisationCheckException> SynchronisationErrors { get; set; }
-        
+        public FileSynchronisationCheckException LastSyncError { get; private set; }
+
         public enum SynchronisationStatus
         {
             Unknown,
             Synchronised,
             LocalOnly,
+            Error,
+        }
+
+        private SynchronisationStatus syncStatus = SynchronisationStatus.Unknown;
+
+        public SynchronisationStatus SyncStatus
+        {
+            get
+            {
+                return this.syncStatus;
+            }
+            private set
+            {
+                this.syncStatus = value;
+                this.NotifyPropertyChanged("SyncStatus");
+                this.NotifyPropertyChanged("ForegroundColour");
+            }
         }
     }
 }

@@ -275,6 +275,7 @@ namespace LobsterModel
 
         public void DownloadDatabaseFile(OracleConnection connection, DirectoryWatcher watcher, string sourceFilename, string outputFile)
         {
+            MessageLog.LogInfo($"Downlloading the database file for {sourceFilename}{(sourceFilename != outputFile ? " to " + outputFile : "")}");
             OracleCommand oracleCommand = connection.CreateCommand();
             this.BindParametersToCommand(connection, oracleCommand, watcher, sourceFilename);
 

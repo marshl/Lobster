@@ -1,10 +1,11 @@
-﻿using System.IO;
+﻿using System.ComponentModel;
+using System.IO;
 using System.Windows.Media;
 using LobsterModel;
 
 namespace LobsterWpf.ViewModels
 {
-    public abstract class WatchedNodeView
+    public abstract class WatchedNodeView : INotifyPropertyChanged
     {
         public WatchedNode BaseNode { get; }
 
@@ -32,5 +33,20 @@ namespace LobsterWpf.ViewModels
         /// Gets the image tha is used to represent this file.
         /// </summary>
         public abstract ImageSource ImageUrl { get; }
+
+
+        /// <summary>
+        /// The event to be raised when a property is changed.
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="propertyName"></param>
+        protected void NotifyPropertyChanged(string propertyName = null)
+        {
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }
