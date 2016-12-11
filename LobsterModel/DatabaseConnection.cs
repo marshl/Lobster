@@ -281,7 +281,7 @@ namespace LobsterModel
         {
             MessageLog.LogInfo($"Downlloading the database file for {sourceFilename}{(sourceFilename != outputFile ? " to " + outputFile : "")}");
             OracleCommand oracleCommand = connection.CreateCommand();
-            this.BindParametersToCommand(connection, oracleCommand, watcher, sourceFilename);
+
 
             string dataType = this.GetDataTypeForFile(connection, watcher, sourceFilename);
             if (dataType == "BLOB")
@@ -292,6 +292,8 @@ namespace LobsterModel
             {
                 oracleCommand.CommandText = watcher.Descriptor.FetchStatement;
             }
+
+            this.BindParametersToCommand(connection, oracleCommand, watcher, sourceFilename);
 
             try
             {
@@ -379,6 +381,8 @@ namespace LobsterModel
 
         private void BindParametersToCommand(OracleConnection connection, OracleCommand command, DirectoryWatcher watcher, string path)
         {
+            MessageLog.LogInfo($"Binding parameters to command: \n{command.CommandText}");
+
             command.BindByName = true;
             string dataType = this.GetDataTypeForFile(connection, watcher, path);
 
@@ -475,8 +479,6 @@ namespace LobsterModel
                     }
                 }
             }
-
-            MessageLog.LogInfo("Parameters bound to query, parameters are as follows:");
 
             foreach (OracleParameter parameter in command.Parameters)
             {
