@@ -220,6 +220,7 @@ namespace LobsterModel
                 this.BackupFile(oracleConnection, watcher, filepath);
             }
 
+            OracleTransaction trans = oracleConnection.BeginTransaction();
             OracleCommand oracleCommand = oracleConnection.CreateCommand();
 
             oracleCommand.CommandText = watcher.Descriptor.UpdateStatement;
@@ -230,13 +231,16 @@ namespace LobsterModel
                 MessageLog.LogInfo($"Executing Update query: {oracleCommand.CommandText}");
                 int rowsAffected = oracleCommand.ExecuteNonQuery();
 
-                // The row check can't be relied upon when using a custom loader, as it may be in an anonymous block
-                if (rowsAffected != 1)
+                // Ensure that only one row was affected by the uopdate.
+                // If the update statement was an anonymous block, then -1 is returned, which can be ignored
+                if (rowsAffected != 1 && rowsAffected != -1)
                 {
+                    trans.Rollback();
                     MessageLog.LogError($"In invalid number of rows ({rowsAffected}) were updated for command: {oracleCommand.CommandText}");
                     throw new FileUpdateException($"{rowsAffected} rows were affected during the update (expected only 1). The transaction has been rolled back.");
                 }
 
+                trans.Commit();
                 MessageLog.LogInfo($"Clob file update successful: {filepath}");
                 return;
             }
