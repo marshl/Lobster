@@ -22,7 +22,7 @@ namespace LobsterWpf.ViewModels
 
         public override void CheckFileSynchronisation(ConnectionView connectionView, DirectoryWatcherView watcherView)
         {
-            var th = new Thread(delegate()
+            var th = new Thread(delegate ()
             {
                 try
                 {
@@ -37,6 +37,7 @@ namespace LobsterWpf.ViewModels
                     this.SyncStatus = SynchronisationStatus.Error;
                 }
             });
+
             th.Start();
         }
 
@@ -106,6 +107,47 @@ namespace LobsterWpf.ViewModels
                 this.syncStatus = value;
                 this.NotifyPropertyChanged("SyncStatus");
                 this.NotifyPropertyChanged("ForegroundColour");
+            }
+        }
+
+
+        public override bool CanBeUpdated
+        {
+            get
+            {
+                return this.syncStatus == SynchronisationStatus.Synchronised;
+            }
+        }
+
+        public override bool CanBeDownloaded
+        {
+            get
+            {
+                return this.syncStatus == SynchronisationStatus.Synchronised;
+            }
+        }
+
+        public override bool CanBeCompared
+        {
+            get
+            {
+                return this.syncStatus == SynchronisationStatus.Synchronised;
+            }
+        }
+
+        public override bool CanBeDeleted
+        {
+            get
+            {
+                return this.syncStatus == SynchronisationStatus.Synchronised;
+            }
+        }
+
+        public override bool CanBeExplored
+        {
+            get
+            {
+                return true;
             }
         }
     }

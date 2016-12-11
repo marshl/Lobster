@@ -61,5 +61,45 @@ namespace LobsterWpf.ViewModels
                 return (ImageSource)System.Windows.Application.Current.FindResource(resourceName);
             }
         }
+
+        public override bool CanBeUpdated
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        public override bool CanBeDownloaded
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        public override bool CanBeCompared
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        public override bool CanBeDeleted
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        public override bool CanBeExplored
+        {
+            get
+            {
+                return true;
+            }
+        }
     }
 }

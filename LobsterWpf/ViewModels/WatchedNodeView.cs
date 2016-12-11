@@ -40,6 +40,16 @@ namespace LobsterWpf.ViewModels
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
+        public abstract bool CanBeUpdated { get; }
+
+        public abstract bool CanBeDownloaded { get; }
+
+        public abstract bool CanBeCompared { get; }
+
+        public abstract bool CanBeDeleted { get; }
+
+        public abstract bool CanBeExplored { get; }
+
         /// <summary>
         /// 
         /// </summary>
