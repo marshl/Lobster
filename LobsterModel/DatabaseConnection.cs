@@ -328,11 +328,19 @@ namespace LobsterModel
                     }
                     else
                     {
-                        string result = reader.GetString(0);
-                        using (StreamWriter streamWriter = new StreamWriter(fs))
+                        try
                         {
-                            streamWriter.NewLine = "\n";
-                            streamWriter.Write(result);
+                            string result = reader.GetString(0);
+                            using (StreamWriter streamWriter = new StreamWriter(fs))
+                            {
+                                streamWriter.NewLine = "\n";
+                                streamWriter.Write(result);
+                            }
+                        }
+                        catch (InvalidCastException ex)
+                        {
+                            MessageLog.LogError($"There was an error casting the result to a string: {ex}");
+                            throw new FileDownloadException("An exception occurred when casting the result to a string", ex);
                         }
                     }
                 }
@@ -350,10 +358,10 @@ namespace LobsterModel
                     throw new FileDownloadException($"Too many rows were found for the given command {oracleCommand.CommandText}");
                 }
             }
-            catch (Exception e) when (e is InvalidOperationException || e is OracleException || e is OracleNullValueException || e is IOException)
+            catch (Exception ex) when (ex is InvalidOperationException || ex is OracleException || ex is OracleNullValueException || ex is IOException)
             {
-                MessageLog.LogError($"Error retrieving data when executing command {oracleCommand.CommandText} {e}");
-                throw new FileDownloadException($"An exception ocurred when executing the command {oracleCommand.CommandText}");
+                MessageLog.LogError($"An error occured when retrieving data when executing command {oracleCommand.CommandText} for file {sourceFilename}: {ex}");
+                throw new FileDownloadException($"An exception ocurred when downloading the file: {ex}");
             }
         }
 
