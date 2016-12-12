@@ -168,11 +168,11 @@ namespace LobsterModel
         private void InternalLog(Message.TYPE messageType, string message)
         {
             Message msg = new Message(message, messageType, DateTime.Now);
-            this.MessageList.Add(msg);
 
-            if (messageType != Message.TYPE.SENSITIVE || Settings.Default.LogSensitiveMessages)
+            lock (this.fileLock)
             {
-                lock (this.fileLock)
+                this.MessageList.Add(msg);
+                if (messageType != Message.TYPE.SENSITIVE || Settings.Default.LogSensitiveMessages)
                 {
                     this.streamWriter.WriteLine(msg.ToString());
                     this.streamWriter.Flush();
