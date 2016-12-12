@@ -261,6 +261,7 @@ namespace LobsterModel
         {
             OracleConnection oracleConnection = this.GetOracleConnection();
             OracleCommand command = oracleConnection.CreateCommand();
+            command.CommandText = watcher.Descriptor.InsertStatement;
             this.BindParametersToCommand(oracleConnection, command, watcher, filepath);
 
             try
