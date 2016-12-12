@@ -48,7 +48,7 @@ namespace LobsterWpf.ViewModels
 
         public abstract bool CanBeDeleted { get; }
 
-        public abstract bool CanBeExplored { get; }
+        public abstract bool CanBeExploredTo { get; }
 
         /// <summary>
         /// 

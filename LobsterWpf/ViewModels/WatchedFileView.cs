@@ -143,7 +143,7 @@ namespace LobsterWpf.ViewModels
             }
         }
 
-        public override bool CanBeExplored
+        public override bool CanBeExploredTo
         {
             get
             {
