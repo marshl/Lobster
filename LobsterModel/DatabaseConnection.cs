@@ -215,9 +215,18 @@ namespace LobsterModel
         public void UpdateDatabaseFile(DirectoryWatcher watcher, string filepath)
         {
             OracleConnection oracleConnection = this.GetOracleConnection();
+
             if (Settings.Default.BackupEnabled)
             {
-                this.BackupFile(oracleConnection, watcher, filepath);
+                try
+                {
+                    this.BackupFile(oracleConnection, watcher, filepath);
+                }
+                catch (FileDownloadException ex)
+                {
+                    MessageLog.LogError($"An exception occurred when attempting to backup the file: {ex}");
+                    throw new FileUpdateException("An exception occurred when backing up the file.", ex);
+                }
             }
 
             OracleTransaction trans = oracleConnection.BeginTransaction();
