@@ -174,7 +174,6 @@ namespace LobsterModel
             {
                 lock (this.fileLock)
                 {
-                    Console.WriteLine(msg.ToString());
                     this.streamWriter.WriteLine(msg.ToString());
                     this.streamWriter.Flush();
                 }
