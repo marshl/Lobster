@@ -95,31 +95,31 @@
           <CheckBox x:Name="showReadOnlyFilesCheckbox" Grid.Row="2" Content="Show Readonly Files" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5" Checked="HideReadonlyCheckbox_Toggled" Unchecked="HideReadonlyCheckbox_Toggled" IsChecked="{Binding Path=ShowReadOnlyFiles, Mode=TwoWay}" ToolTip="Whether to show files that are locked or not. "/>
         </Grid>
         <StackPanel Background="{StaticResource BackgroundKey}">
-          <Button x:Name="pushButton" Grid.Column="0" Height="65" Margin="0" Click="PushButton_Click" IsEnabled="{Binding Path=SelectedFileNode.CanBeUpdated, FallbackValue=false}" ToolTip="Updates the database file with the version on your computer.">
+          <Button x:Name="pushButton" Grid.Column="0" Height="65" Margin="0" Click="PushButton_Click" IsEnabled="{Binding Path=SelectedNode.CanBeUpdated, FallbackValue=false}" ToolTip="Updates the database file with the version on your computer.">
             <StackPanel>
               <Image Source="{DynamicResource PushImageSource}" VerticalAlignment="Top" Height="30"/>
               <TextBlock HorizontalAlignment="Center" MinHeight="15" VerticalAlignment="Bottom">Push</TextBlock>
             </StackPanel>
           </Button>
-          <Button Grid.Column="0" Height="65" Click="PullButton_Click" IsEnabled="{Binding Path=SelectedFileNode.CanBePulled, FallbackValue=false}" ToolTip="Downloads the file from the database and opens it.">
+          <Button Grid.Column="0" Height="65" Click="PullButton_Click" IsEnabled="{Binding Path=SelectedNode.CanBeDownloaded, FallbackValue=false}" ToolTip="Downloads the file from the database and opens it.">
             <StackPanel>
               <Image Source="{DynamicResource PullImageSource}" VerticalAlignment="Top" Height="30"/>
               <TextBlock HorizontalAlignment="Center" MinHeight="15" VerticalAlignment="Bottom">Pull</TextBlock>
             </StackPanel>
           </Button>
-          <Button x:Name="diffButton" Grid.Column="0" Height="65" Click="DiffButton_Click" IsEnabled="{Binding Path=SelectedFileNode.CanBeDiffed, FallbackValue=false}" ToolTip="Downloads the file from the database and compares it with the version on your computer.">
+          <Button x:Name="diffButton" Grid.Column="0" Height="65" Click="DiffButton_Click" IsEnabled="{Binding Path=SelectedNode.CanBeCompared, FallbackValue=false}" ToolTip="Downloads the file from the database and compares it with the version on your computer.">
             <StackPanel>
               <Image Source="{DynamicResource MergeImageSource}" VerticalAlignment="Top" Height="30"/>
               <TextBlock HorizontalAlignment="Center" MinHeight="15" VerticalAlignment="Bottom">Diff</TextBlock>
             </StackPanel>
           </Button>
-          <Button x:Name="exploreButton" Grid.Column="0" Height="65" Click="ExploreButton_Click" IsEnabled="{Binding Path=SelectedFileNode.CanBeExploredTo, FallbackValue=false}" ToolTip="Shows the location of the file in Windows Explorer.">
+          <Button x:Name="exploreButton" Grid.Column="0" Height="65" Click="ExploreButton_Click" IsEnabled="{Binding Path=SelectedNode.CanBeExploredTo, FallbackValue=false}" ToolTip="Shows the location of the file in Windows Explorer.">
             <StackPanel>
               <Image Source="{DynamicResource FolderImageSource}" VerticalAlignment="Top" Height="30"/>
               <TextBlock HorizontalAlignment="Center" MinHeight="15" VerticalAlignment="Bottom">Explore</TextBlock>
             </StackPanel>
           </Button>
-          <Button x:Name="insertButton" Grid.Column="0" Height="65" Click="InsertButton_Click" IsEnabled="{Binding Path=SelectedFileNode.CanBeInserted, FallbackValue=false}" ToolTip="Inserts the file as a new record in the database.">
+          <Button x:Name="insertButton" Grid.Column="0" Height="65" Click="InsertButton_Click" IsEnabled="{Binding Path=SelectedNode.CanBeInserted, FallbackValue=false}" ToolTip="Inserts the file as a new record in the database.">
             <StackPanel>
               <Image Source="{DynamicResource InsertImageSource}" VerticalAlignment="Top" Height="30"/>
               <TextBlock HorizontalAlignment="Center" MinHeight="15" VerticalAlignment="Bottom">Insert</TextBlock>

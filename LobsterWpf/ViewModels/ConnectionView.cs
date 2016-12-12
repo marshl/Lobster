@@ -41,7 +41,20 @@ namespace LobsterWpf.ViewModels
         /// </summary>
         private bool isEnabled = true;
 
-        public WatchedNodeView SelectedNode { get; set; }
+        private WatchedNodeView selectedNode;
+
+        public WatchedNodeView SelectedNode
+        {
+            get
+            {
+                return this.selectedNode;
+            }
+            set
+            {
+                this.selectedNode = value;
+                this.NotifyPropertyChanged("SelectedNode");
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConnectionView"/> class.

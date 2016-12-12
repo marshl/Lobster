@@ -102,11 +102,19 @@ namespace LobsterWpf.ViewModels
             {
                 return this.syncStatus;
             }
+
             private set
             {
                 this.syncStatus = value;
                 this.NotifyPropertyChanged("SyncStatus");
                 this.NotifyPropertyChanged("ForegroundColour");
+
+                this.NotifyPropertyChanged("CanBeInserted");
+                this.NotifyPropertyChanged("CanBeUpdated");
+                this.NotifyPropertyChanged("CanBeDownloaded");
+                this.NotifyPropertyChanged("CanBeCompared");
+                this.NotifyPropertyChanged("CanBeDeleted");
+                this.NotifyPropertyChanged("CanBeExplored");
             }
         }
 
