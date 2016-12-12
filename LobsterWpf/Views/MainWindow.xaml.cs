@@ -283,7 +283,7 @@ namespace LobsterWpf.Views
             }
 
             var fileView = (WatchedFileView)this.connectionView.SelectedNode;
-            string filepath = this.connectionView.SelectedNode.FileName;
+            string filepath = this.connectionView.SelectedNode.FilePath;
 
             if (fileView.IsReadOnly)
             {

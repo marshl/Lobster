@@ -16,6 +16,14 @@ namespace LobsterWpf.ViewModels
 
         public abstract void CheckFileSynchronisation(ConnectionView connectionView, DirectoryWatcherView watcherView);
 
+        public string FilePath
+        {
+            get
+            {
+                return this.BaseNode.FilePath;
+            }
+        }
+
         public string FileName
         {
             get
