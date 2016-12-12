@@ -28,6 +28,7 @@ namespace LobsterWpf.Views
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
+    using System.Diagnostics;
     using System.Drawing;
     using System.IO;
     using System.Media;
@@ -319,20 +320,23 @@ namespace LobsterWpf.Views
         /// <param name="e">The event arguments.</param>
         private void PullButton_Click(object sender, RoutedEventArgs e)
         {
-            /*if (this.connectionView?.SelectedFileNode?.DatabaseFile == null)
+            if (this.connectionView?.SelectedNode == null || !this.connectionView.SelectedNode.CanBeDownloaded)
             {
                 return;
             }
 
+            var watcherView = (DirectoryWatcherView)this.directoryWatcherListBox.SelectedItem;
+
             try
             {
-                string resultPath = this.connectionView.Connection.SendDownloadClobDataToFileMessage(this.connectionView.SelectedFileNode.DatabaseFile);
-                Process.Start(resultPath);
+                string tempPath = Utils.GetTempFilepath(this.connectionView.SelectedNode.FileName);
+                this.connectionView.BaseConnection.DownloadDatabaseFile(watcherView.BaseWatcher, this.connectionView.SelectedNode.FilePath, tempPath);
+                Process.Start(tempPath);
             }
             catch (FileDownloadException ex)
             {
                 System.Windows.MessageBox.Show($"The file download failed: {ex}");
-            }*/
+            }
         }
 
         /// <summary>
