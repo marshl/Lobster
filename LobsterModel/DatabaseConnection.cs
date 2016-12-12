@@ -62,7 +62,7 @@ namespace LobsterModel
 
         private OracleConnection StoredConnection;
 
-        public OracleConnection GetOracleConnection()
+        public OracleConnection OpenConnection()
         {
             if (this.StoredConnection == null || this.StoredConnection.State == ConnectionState.Closed || this.StoredConnection.State == ConnectionState.Broken)
             {
@@ -103,7 +103,7 @@ namespace LobsterModel
 
             this.clobTypeFileWatcher.EnableRaisingEvents = true;
 
-            this.GetOracleConnection();
+            this.OpenConnection();
         }
 
         /// <summary>
@@ -214,13 +214,13 @@ namespace LobsterModel
 
         public void UpdateDatabaseFile(DirectoryWatcher watcher, string filepath)
         {
-            OracleConnection oracleConnection = this.GetOracleConnection();
+            OracleConnection oracleConnection = this.OpenConnection();
 
             if (Settings.Default.BackupEnabled)
             {
                 try
                 {
-                    this.BackupFile(oracleConnection, watcher, filepath);
+                    this.BackupFile(watcher, filepath);
                 }
                 catch (FileDownloadException ex)
                 {
@@ -260,15 +260,15 @@ namespace LobsterModel
             }
         }
 
-        public void BackupFile(OracleConnection oracleConnection, DirectoryWatcher watcher, string filename)
+        public void BackupFile(DirectoryWatcher watcher, string filename)
         {
             FileInfo backupFile = BackupLog.AddBackup(this.Config.Parent.CodeSourceDirectory, filename);
-            this.DownloadDatabaseFile(oracleConnection, watcher, filename, backupFile.FullName);
+            this.DownloadDatabaseFile(watcher, filename, backupFile.FullName);
         }
 
         public void InsertFile(DirectoryWatcher watcher, string filepath)
         {
-            OracleConnection oracleConnection = this.GetOracleConnection();
+            OracleConnection oracleConnection = this.OpenConnection();
             OracleCommand command = oracleConnection.CreateCommand();
             command.CommandText = watcher.Descriptor.InsertStatement;
             this.BindParametersToCommand(oracleConnection, command, watcher, filepath);
@@ -287,13 +287,15 @@ namespace LobsterModel
             MessageLog.LogInfo($"Clob file creation successful: {filepath}");
         }
 
-        public void DownloadDatabaseFile(OracleConnection connection, DirectoryWatcher watcher, string sourceFilename, string outputFile)
+        public void DownloadDatabaseFile(DirectoryWatcher watcher, string sourceFilename, string outputFile)
         {
+            OracleConnection connection = this.OpenConnection();
+
             MessageLog.LogInfo($"Downlloading the database file for {sourceFilename}{(sourceFilename != outputFile ? " to " + outputFile : "")}");
             OracleCommand oracleCommand = connection.CreateCommand();
 
 
-            string dataType = this.GetDataTypeForFile(connection, watcher, sourceFilename);
+            string dataType = this.GetDataTypeForFile(watcher, sourceFilename);
             if (dataType == "BLOB")
             {
                 oracleCommand.CommandText = watcher.Descriptor.FetchBinaryStatement;
@@ -359,7 +361,7 @@ namespace LobsterModel
         {
             MessageLog.LogInfo($"Checking file synchronisation of {watchedFile.FilePath}");
 
-            OracleConnection oracleConnection = this.GetOracleConnection();
+            OracleConnection oracleConnection = this.OpenConnection();
             OracleCommand oracleCommand = oracleConnection.CreateCommand();
 
             oracleCommand.CommandText = dirWatcher.Descriptor.DatabaseFileExistsStatement;
@@ -394,7 +396,7 @@ namespace LobsterModel
             MessageLog.LogInfo($"Binding parameters to command: \n{command.CommandText}");
 
             command.BindByName = true;
-            string dataType = this.GetDataTypeForFile(connection, watcher, path);
+            string dataType = this.GetDataTypeForFile(watcher, path);
 
             if (command.ContainsParameter(filenameParameterName))
             {
@@ -500,8 +502,10 @@ namespace LobsterModel
 
         private const int parameterLogLength = 255;
 
-        private string GetDataTypeForFile(OracleConnection connection, DirectoryWatcher watcher, string path)
+        private string GetDataTypeForFile(DirectoryWatcher watcher, string path)
         {
+            OracleConnection connection = this.OpenConnection();
+
             // Default to CLOB if there is no default or statement
             if (watcher.Descriptor.FileDataTypeStatement == null && watcher.Descriptor.DefaultDataType == null)
             {
