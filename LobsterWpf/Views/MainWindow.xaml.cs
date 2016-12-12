@@ -37,6 +37,7 @@ namespace LobsterWpf.Views
     using System.Windows.Controls;
     using System.Windows.Forms;
     using LobsterModel;
+    using Properties;
     using ViewModels;
 
     /// <summary>
@@ -346,27 +347,29 @@ namespace LobsterWpf.Views
         /// <param name="e">The event arguments.</param>
         private void DiffButton_Click(object sender, RoutedEventArgs e)
         {
-            /*if (this.connectionView?.SelectedFileNode?.DatabaseFile == null)
+            if (this.connectionView?.SelectedNode == null || !this.connectionView.SelectedNode.CanBeCompared)
             {
                 return;
             }
 
             try
             {
-                string filename = this.connectionView.SelectedFileNode.FilePath;
-                string downloadedFile = this.connectionView.Connection.SendDownloadClobDataToFileMessage(this.connectionView.SelectedFileNode.DatabaseFile);
+                var watcherView = (DirectoryWatcherView)this.directoryWatcherListBox.SelectedItem;
+
+                string tempPath = Utils.GetTempFilepath(this.connectionView.SelectedNode.FileName);
+                this.connectionView.BaseConnection.DownloadDatabaseFile(watcherView.BaseWatcher, this.connectionView.SelectedNode.FilePath, tempPath);
+
                 string args = string.Format(
                     Settings.Default.DiffProgramArguments,
-                    downloadedFile,
-                    filename);
+                    tempPath,
+                    this.connectionView.SelectedNode.FilePath);
 
                 Process.Start(Settings.Default.DiffProgramName, args);
             }
             catch (FileDownloadException ex)
             {
-                System.Windows.MessageBox.Show(ex.Message);
-                return;
-            }*/
+                System.Windows.MessageBox.Show($"The file download failed: {ex}");
+            }
         }
 
         /// <summary>
