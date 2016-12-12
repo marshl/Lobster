@@ -62,6 +62,15 @@ namespace LobsterWpf.ViewModels
             }
         }
 
+
+        public override bool CanBeInserted
+        {
+            get
+            {
+                return false;
+            }
+        }
+
         public override bool CanBeUpdated
         {
             get

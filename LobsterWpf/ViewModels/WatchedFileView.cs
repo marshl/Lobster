@@ -111,6 +111,14 @@ namespace LobsterWpf.ViewModels
         }
 
 
+        public override bool CanBeInserted
+        {
+            get
+            {
+                return this.SyncStatus == SynchronisationStatus.LocalOnly;
+            }
+        }
+
         public override bool CanBeUpdated
         {
             get
