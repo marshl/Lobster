@@ -115,7 +115,7 @@ namespace LobsterWpf.ViewModels
         {
             get
             {
-                return this.syncStatus == SynchronisationStatus.Synchronised;
+                return this.SyncStatus == SynchronisationStatus.Synchronised;
             }
         }
 
@@ -123,7 +123,7 @@ namespace LobsterWpf.ViewModels
         {
             get
             {
-                return this.syncStatus == SynchronisationStatus.Synchronised;
+                return this.SyncStatus == SynchronisationStatus.Synchronised;
             }
         }
 
@@ -131,7 +131,7 @@ namespace LobsterWpf.ViewModels
         {
             get
             {
-                return this.syncStatus == SynchronisationStatus.Synchronised;
+                return this.SyncStatus == SynchronisationStatus.Synchronised;
             }
         }
 
@@ -139,7 +139,7 @@ namespace LobsterWpf.ViewModels
         {
             get
             {
-                return this.syncStatus == SynchronisationStatus.Synchronised;
+                return this.SyncStatus == SynchronisationStatus.Synchronised;
             }
         }
 
