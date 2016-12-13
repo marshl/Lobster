@@ -400,7 +400,7 @@
     <None Include="Resources\Images\Close.ico" />
     <None Include="Resources\Images\copy.ico" />
     <None Include="Resources\Images\CPU.ico" />
-    <None Include="Resources\Images\delete.ico" />
+    <Resource Include="Resources\Images\delete.ico" />
     <None Include="Resources\Images\Favorites.ico" />
     <None Include="Resources\Images\FloppyDisk.ico" />
     <None Include="Resources\Images\folder.ico" />

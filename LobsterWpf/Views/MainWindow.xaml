@@ -125,6 +125,12 @@
               <TextBlock HorizontalAlignment="Center" MinHeight="15" VerticalAlignment="Bottom">Insert</TextBlock>
             </StackPanel>
           </Button>
+          <Button x:Name="deleteButton" Grid.Column="0" Height="65" Click="DeleteButton_Click" IsEnabled="{Binding Path=SelectedNode.CanBeDeleted, FallbackValue=false}" ToolTip="Deletes the database record for the file.">
+            <StackPanel>
+              <Image Source="{DynamicResource DeleteImageSource}" VerticalAlignment="Top" Height="30"/>
+              <TextBlock HorizontalAlignment="Center" MinHeight="15" VerticalAlignment="Bottom">Delete</TextBlock>
+            </StackPanel>
+          </Button>
         </StackPanel>
         <GridSplitter x:Name="gridSplitter2" HorizontalAlignment="Left" Width="5" Grid.Column="2"/>
 

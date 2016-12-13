@@ -6,6 +6,7 @@
     <ResourceDictionary>
       <BitmapImage x:Key="FolderImageSource"          UriSource="/Lobster;component/Resources/Images/folder_open.ico"/>
       <BitmapImage x:Key="InsertImageSource"          UriSource="/Lobster;component/Resources/Images/112_Plus_Green.ico"/>
+      <BitmapImage x:Key="DeleteImageSource"          UriSource="/Lobster;component/Resources/Images/delete.ico"/>
       <BitmapImage x:Key="MergeImageSource"           UriSource="/Lobster;component/Resources/Images/041_Sort.ico"/>
       <BitmapImage x:Key="PushImageSource"            UriSource="/Lobster;component/Resources/Images/112_UpArrowShort_Orange.ico"/>
       <BitmapImage x:Key="PullImageSource"            UriSource="/Lobster;component/Resources/Images/010_LowPriority.ico"/>

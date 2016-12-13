@@ -410,6 +410,11 @@ namespace LobsterWpf.Views
             }
         }
 
+        private void DeleteButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
         /// <summary>
         /// The event that is called when a different file is selected.
         /// </summary>
