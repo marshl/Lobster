@@ -392,27 +392,44 @@ namespace LobsterWpf.Views
         /// <param name="e">The event arguments.</param>
         private void InsertButton_Click(object sender, RoutedEventArgs e)
         {
-            if (this.connectionView.SelectedNode != null)
+            if (this.connectionView?.SelectedNode == null)
             {
-                var watcherView = (DirectoryWatcherView)this.directoryWatcherListBox.SelectedItem;
-                string filename = this.connectionView.SelectedNode.BaseNode.FilePath;
-                try
-                {
-                    this.connectionView.BaseConnection.InsertFile(watcherView.BaseWatcher, filename);
+                return;
+            }
 
-                    this.DisplayUpdateNotification(filename, true);
-                }
-                catch (FileInsertException ex)
-                {
-                    System.Windows.MessageBox.Show($"The file insert failed: {ex}");
-                    this.DisplayUpdateNotification(filename, false);
-                }
+            var watcherView = (DirectoryWatcherView)this.directoryWatcherListBox.SelectedItem;
+            string filename = this.connectionView.SelectedNode.BaseNode.FilePath;
+            try
+            {
+                this.connectionView.BaseConnection.InsertFile(watcherView.BaseWatcher, filename);
+
+                this.DisplayUpdateNotification(filename, true);
+            }
+            catch (FileInsertException ex)
+            {
+                System.Windows.MessageBox.Show($"The file insert failed: {ex}");
+                this.DisplayUpdateNotification(filename, false);
             }
         }
 
         private void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
+            if (this.connectionView?.SelectedNode == null)
+            {
+                return;
+            }
 
+            var watcherView = (DirectoryWatcherView)this.directoryWatcherListBox.SelectedItem;
+            var fileView = (WatchedFileView)this.connectionView.SelectedNode;
+
+            try
+            {
+                this.connectionView.BaseConnection.DeleteDatabaseFile(watcherView.BaseWatcher, fileView.WatchedFile);
+            }
+            catch (FileDeleteException ex)
+            {
+                System.Windows.MessageBox.Show($"The file delete failed: {ex}");
+            }
         }
 
         /// <summary>
