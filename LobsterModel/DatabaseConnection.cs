@@ -365,26 +365,47 @@ namespace LobsterModel
             }
         }
 
-        public bool IsFileSynchronised(DirectoryWatcher dirWatcher, WatchedFile watchedFile)
+        public void DeleteDatabaseFile(DirectoryWatcher dirWatcher, WatchedFile watchedFile)
         {
-            MessageLog.LogInfo($"Checking file synchronisation of {watchedFile.FilePath}");
+            MessageLog.LogInfo($"Deleing the database file of {watchedFile.FilePath}");
 
-            OracleConnection oracleConnection = this.OpenConnection();
-            OracleCommand oracleCommand = oracleConnection.CreateCommand();
+            OracleConnection connection = this.OpenConnection();
+            OracleCommand oracleCommand = connection.CreateCommand();
 
-            oracleCommand.CommandText = dirWatcher.Descriptor.DatabaseFileExistsStatement;
-            this.BindParametersToCommand(oracleConnection, oracleCommand, dirWatcher, watchedFile.FilePath);
+            oracleCommand.CommandText = dirWatcher.Descriptor.DeleteStatement;
+
+            this.BindParametersToCommand(connection, oracleCommand, dirWatcher, watchedFile.FilePath);
 
             try
             {
+                oracleCommand.ExecuteNonQuery();
+            }
+            catch (Exception ex) when (ex is OracleException)
+            {
+                MessageLog.LogError($"An error occurred when deleting the database file for the file {watchedFile.FilePath}");
+                throw new FileDeleteException($"An exception occurred when deleting the file {watchedFile.FilePath}", ex);
+            }
+        }
+
+        public bool IsFileSynchronised(DirectoryWatcher dirWatcher, WatchedFile watchedFile)
+        {
+            MessageLog.LogInfo($"Checking file synchronisation of {watchedFile.FilePath}");
+            try
+            {
+                OracleConnection oracleConnection = this.OpenConnection();
+                OracleCommand oracleCommand = oracleConnection.CreateCommand();
+                
+                oracleCommand.CommandText = dirWatcher.Descriptor.DatabaseFileExistsStatement;
+                this.BindParametersToCommand(oracleConnection, oracleCommand, dirWatcher, watchedFile.FilePath);
+
                 MessageLog.LogInfo($"Executing file existence query: {oracleCommand.CommandText}");
                 object result = oracleCommand.ExecuteScalar();
                 decimal count = (decimal)result;
                 return count >= 1;
             }
-            catch (Exception ex) when (ex is OracleException || ex is InvalidOperationException || ex is InvalidCastException || ex is ArgumentException)
+            catch (Exception ex) when (ex is OracleException || ex is InvalidOperationException || ex is InvalidCastException || ex is ArgumentException || ex is ConnectToDatabaseException)
             {
-                MessageLog.LogError($"File existence check failed for command: {oracleCommand.CommandText} {ex}");
+                MessageLog.LogError($"An exception occurred when determining whether {watchedFile.FilePath} is in the database: {ex.Message}");
                 throw new FileSynchronisationCheckException($"An exception occurred when determining whether {watchedFile.FilePath} is in the database: {ex.Message}", ex);
             }
         }

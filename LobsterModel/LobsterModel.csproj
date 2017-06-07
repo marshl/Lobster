@@ -62,6 +62,7 @@
     <Compile Include="Exceptions\ColumnNotFoundException.cs" />
     <Compile Include="Exceptions\ConnectToDatabaseException.cs" />
     <Compile Include="Exceptions\ClobTypeLoadException.cs" />
+    <Compile Include="Exceptions\FileDeleteException.cs" />
     <Compile Include="Exceptions\FileSynchronisationCheckException.cs" />
     <Compile Include="FileBackup.cs" />
     <Compile Include="EventArguments\FileChangeEventArgs.cs" />
