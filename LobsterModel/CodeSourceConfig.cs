@@ -93,10 +93,12 @@ namespace LobsterModel
         public void SerialiseToFile()
         {
             DataContractSerializer xmls = new DataContractSerializer(typeof(CodeSourceConfig));
+            XmlWriterSettings writerSettings = new XmlWriterSettings();
+            writerSettings.Indent = true;
+            writerSettings.IndentChars = "  ";
             using (StreamWriter streamWriter = new StreamWriter(this.FileLocation))
-            using (XmlWriter xmlWriter = XmlWriter.Create(streamWriter))
+            using (XmlWriter xmlWriter = XmlWriter.Create(streamWriter, writerSettings))
             {
-                xmlWriter.Settings.Indent = true;
                 xmls.WriteObject(xmlWriter, this);
             }
         }
