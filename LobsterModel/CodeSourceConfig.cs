@@ -74,18 +74,6 @@ namespace LobsterModel
         }
 
         /// <summary>
-        /// Gets the location of the ClobType directory for this connection.
-        /// </summary>
-        [Obsolete]
-        public string ClobTypeDirectory
-        {
-            get
-            {
-                return Path.Combine(this.CodeSourceDirectory, Settings.Default.ClobTypeDirectoryName);
-            }
-        }
-
-        /// <summary>
         /// Writes a <see cref="DatabaseConfig"/> out to file.
         /// </summary>
         /// <param name="filename">The file to write to.</param>

@@ -648,40 +648,6 @@ namespace LobsterWpf.Views
         }
 
         /// <summary>
-        /// The callback for when the user needs to select a table to insert a file into.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="args">The event arguments</param>
-        [Obsolete]
-        private void PromptForTable(object sender, TableRequestEventArgs args)
-        {
-            TableSelectorWindow tsw = new TableSelectorWindow(args.FullPath, args.Tables);
-            tsw.Owner = this;
-            bool? result = tsw.ShowDialog();
-            if (result ?? false)
-            {
-                args.SelectedTable = tsw.SelectedTable;
-            }
-        }
-
-        /// <summary>
-        /// The callback for when the user is needed to select a mime type for a file to be inserted as.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="args">The event arguments</param>
-        [Obsolete]
-        private void PromptForMimeType(object sender, MimeTypeRequestEventArgs args)
-        {
-            MimeTypeSelectorWindow msw = new MimeTypeSelectorWindow(args.FullPath, args.MimeTypes);
-            msw.Owner = this;
-            bool? result = msw.ShowDialog();
-            if (result ?? false)
-            {
-                args.SelectedMimeType = msw.SelectedMimeType;
-            }
-        }
-
-        /// <summary>
         /// The callback for when a file event is initially received.
         /// </summary>\
         /// <param name="sender">The sender of the event.</param>

@@ -50,16 +50,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BackupLog.cs" />
-    <Compile Include="ClobDirectory.cs" />
     <Compile Include="ConnectionConfig.cs" />
     <Compile Include="DirectoryDescriptor.cs" />
     <Compile Include="DirectoryWatcher.cs" />
     <Compile Include="EventArguments\DirectoryWatcherFileChangeEventArgs.cs" />
-    <Compile Include="EventArguments\ClobDirectoryFileChangeEventArgs.cs" />
     <Compile Include="Exceptions\ClobFileLookupException.cs" />
-    <Compile Include="ClobType.cs" />
-    <Compile Include="Column.cs" />
-    <Compile Include="Exceptions\ColumnNotFoundException.cs" />
     <Compile Include="Exceptions\ConnectToDatabaseException.cs" />
     <Compile Include="Exceptions\ClobTypeLoadException.cs" />
     <Compile Include="Exceptions\FileDeleteException.cs" />
@@ -74,20 +69,16 @@
     <Compile Include="IMessageLogEventListener.cs" />
     <Compile Include="Exceptions\MimeTypeNotFoundException.cs" />
     <Compile Include="EventArguments\MimeTypeRequestEventArgs.cs" />
-    <Compile Include="EventArguments\TableRequestEventArgs.cs" />
     <Compile Include="CodeSourceConfig.cs" />
     <Compile Include="SearchRule.cs" />
     <Compile Include="SerializableObject.cs" />
     <Compile Include="Exceptions\CreateConnectionException.cs" />
     <Compile Include="SettingsView.cs" />
     <Compile Include="EventArguments\FileUpdateCompleteEventArgs.cs" />
-    <Compile Include="SqlBuilder.cs" />
     <Compile Include="SqlExtensions.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="DatabaseConnection.cs" />
-    <Compile Include="DBClobFile.cs" />
     <Compile Include="MessageLog.cs" />
-    <Compile Include="MimeTypeList.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
@@ -96,7 +87,6 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Table.cs" />
     <Compile Include="WatchedDirectory.cs" />
     <Compile Include="WatchedFile.cs" />
     <Compile Include="WatchedNode.cs" />

@@ -112,69 +112,6 @@ namespace LobsterModel
         }
 
         /// <summary>
-        /// Parses the given file and returns an objcet of the templated type.
-        /// Throws anXmlSchemaValidationException if the file does not pass the schema check.
-        /// </summary>
-        /// <typeparam name="T">The type of the object to parse the file as, and the type returned.</typeparam>
-        /// <param name="xmlFilename">The location of the xml file to parse.</param>
-        /// <param name="schemaFilename">The location of the schema file to validate the XML with.</param>
-        /// <param name="result">A new object of type T if it passes validation.</param>
-        /// <returns>A value indicating whether the file deserialised successfully, otherwise false.</returns>
-        [Obsolete]
-        [SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times", Justification = "The stream readers will be Disposed by 'using'.")]
-        public static bool DeserialiseXmlFileUsingSchema<T>(string xmlFilename, string schemaFilename, out T result) where T : SerializableObject, new()
-        {
-            T obj = new T();
-            XmlReaderSettings readerSettings = null;
-            List<ValidationEventArgs> validationEvents = new List<ValidationEventArgs>();
-            if (schemaFilename != null)
-            {
-                readerSettings = new XmlReaderSettings();
-                readerSettings.Schemas.Add(null, schemaFilename);
-                readerSettings.ValidationType = ValidationType.Schema;
-                readerSettings.ValidationFlags |= XmlSchemaValidationFlags.ProcessInlineSchema;
-                readerSettings.ValidationFlags |= XmlSchemaValidationFlags.ProcessSchemaLocation;
-                readerSettings.ValidationFlags |= XmlSchemaValidationFlags.ReportValidationWarnings;
-
-                readerSettings.ValidationEventHandler += new ValidationEventHandler(
-                (o, e) =>
-                {
-                    if (e.Severity == XmlSeverityType.Warning)
-                    {
-                        MessageLog.LogError($"A validation warning occured when parsing {Path.GetFileName(xmlFilename)}: {e.Message}");
-                    }
-                    else if (e.Severity == XmlSeverityType.Error)
-                    {
-                        MessageLog.LogError($"A validation error occured when parsing {Path.GetFileName(xmlFilename)}: {e.Message}");
-                    }
-
-                    validationEvents.Add(e);
-                });
-            }
-
-            XmlSerializer xmls = new XmlSerializer(typeof(T));
-
-            try
-            {
-                using (FileStream fileStream = File.OpenRead(xmlFilename))
-                using (XmlReader xmlReader = XmlReader.Create(fileStream, readerSettings))
-                {
-                    obj = (T)xmls.Deserialize(xmlReader);
-                    obj.ErrorList = validationEvents.Select(item => item.Message).ToList();
-                    result = obj;
-                    return true;
-                }
-            }
-            catch (Exception ex) when (ex is InvalidOperationException || ex is UnauthorizedAccessException)
-            {
-                obj = new T();
-                obj.ErrorList.Add(ex.Message);
-                result = obj;
-                return false;
-            }
-        }
-
-        /// <summary>
         /// Returns the path in the directory of a temporary file with the name of the given original file plus a UID.
         /// </summary>
         /// <param name="originalFilename">The name of the original file, if it existed.</param>

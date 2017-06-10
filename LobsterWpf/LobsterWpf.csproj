@@ -118,7 +118,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="ViewModels\ClobDirectoryView.cs" />
     <Compile Include="ViewModels\CodeSourceConfigView.cs" />
     <Compile Include="ViewModels\ConnectionConfigView.cs" />
     <Compile Include="ViewModels\DirectoryWatcherView.cs" />
@@ -128,32 +127,14 @@
     <Compile Include="Views\AddCodeSourceWindow.xaml.cs">
       <DependentUpon>AddCodeSourceWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\ClobTypeListWindow.xaml.cs">
-      <DependentUpon>ClobTypeListWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Views\CodeSourceNameWindow.xaml.cs">
       <DependentUpon>CodeSourceNameWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\ColumnListWindow.xaml.cs">
-      <DependentUpon>ColumnListWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="ViewModels\ColumnView.cs" />
-    <Compile Include="ViewModels\DatabaseFileView.cs" />
     <Compile Include="Views\DownloadUpdateWindow.xaml.cs">
       <DependentUpon>DownloadUpdateWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\EditClobTypeWindow.xaml.cs">
-      <DependentUpon>EditClobTypeWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\EditColumnWindow.xaml.cs">
-      <DependentUpon>EditColumnWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\EditTableWindow.xaml.cs">
-      <DependentUpon>EditTableWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="GitHubUpdater.cs" />
     <Compile Include="InverseBooleanConverter.cs" />
-    <Compile Include="ViewModels\LocalFileView.cs" />
     <Compile Include="Views\MessageListWindow.xaml.cs">
       <DependentUpon>MessageListWindow.xaml</DependentUpon>
     </Compile>
@@ -163,13 +144,6 @@
     <Compile Include="Views\SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\TableListWindow.xaml.cs">
-      <DependentUpon>TableListWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\TableSelectorWindow.xaml.cs">
-      <DependentUpon>TableSelectorWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="ViewModels\TableView.cs" />
     <Compile Include="Views\PasswordPromptWindow.xaml.cs">
       <DependentUpon>PasswordPromptWindow.xaml</DependentUpon>
     </Compile>
@@ -177,15 +151,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\ClobTypeListWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Views\CodeSourceNameWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\ColumnListWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -197,18 +163,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\EditClobTypeWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\EditColumnWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\EditTableWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -217,12 +171,10 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ViewModels\ClobTypeView.cs" />
     <Compile Include="Views\ConnectionListWindow.xaml.cs">
       <DependentUpon>ConnectionListWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\ConnectionView.cs" />
-    <Compile Include="ViewModels\FileNodeView.cs" />
     <Compile Include="Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -231,23 +183,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\MimeTypeSelectorWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Views\NotificationWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\SettingsWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\TableListWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\TableSelectorWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -273,9 +213,6 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Views\MimeTypeSelectorWindow.xaml.cs">
-      <DependentUpon>MimeTypeSelectorWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Views\NotificationWindow.xaml.cs">
       <DependentUpon>NotificationWindow.xaml</DependentUpon>
     </Compile>
