@@ -165,10 +165,19 @@ namespace LobsterWpf.Views
         /// </summary>
         private void LoadCodeSourceConfigs()
         {
-            List<CodeSourceConfigView> configViews = CodeSourceConfig.GetConfigList().Select(item => new CodeSourceConfigView(item)).ToList();
+            CodeSourceConfigLoader configLoader = new CodeSourceConfigLoader();
+            configLoader.CodeSourceLoadErrorEvent += this.OnCodeSourceConfigLoadError;
+            configLoader.Load();
+
+            List<CodeSourceConfigView> configViews = configLoader.CodeSourceConfigList.Select(item => new CodeSourceConfigView(item)).ToList();
             this.CodeSourceConfigList = new ObservableCollection<CodeSourceConfigView>(configViews);
             this.NotifyPropertyChanged("CodeSourceConfigList");
             this.NotifyPropertyChanged("SelectedConnectionConfig");
+        }
+
+        private void OnCodeSourceConfigLoadError(object sender, CodeSourceConfigLoader.CodeSourceLoadErrorEventArgs e)
+        {
+            MessageBox.Show($"An error occurred when loading the CodeSourceConfig file \"{e.FilePath}\": {e.ExceptionObj?.Message}");
         }
 
         /// <summary>
@@ -317,7 +326,7 @@ namespace LobsterWpf.Views
             SecureString password = win.textField.SecurePassword;
             Exception ex = null;
             bool result = this.SelectedConnectionConfig.TestConnection(password, ref ex);
-            string message = result ? "Connection test successful" : "Connection test unsuccessful.\n" + ex;
+            string message = result ? "Connection test successful" : "Connection test unsuccessful:\n" + ex.Message;
             MessageBox.Show(message);
         }
 
@@ -478,13 +487,13 @@ namespace LobsterWpf.Views
             }
 
             string errorMessage = null;
-            if (!CodeSourceConfig.ValidateCodeSourceLocation(dlg.FileName, ref errorMessage))
+            if (!CodeSourceConfigLoader.ValidateCodeSourceLocation(dlg.FileName, ref errorMessage))
             {
                 MessageBox.Show(errorMessage);
                 return;
             }
 
-            CodeSourceConfig.AddCodeSourceDirectory(dlg.FileName);
+            CodeSourceConfigLoader.AddCodeSourceDirectory(dlg.FileName);
             this.LoadCodeSourceConfigs();
         }
 
@@ -502,7 +511,7 @@ namespace LobsterWpf.Views
             }
 
             string errorMessage = null;
-            if (!CodeSourceConfig.ValidateNewCodeSourceLocation(dlg.FileName, ref errorMessage))
+            if (!CodeSourceConfigLoader.ValidateNewCodeSourceLocation(dlg.FileName, ref errorMessage))
             {
                 MessageBox.Show(errorMessage);
                 return;
@@ -516,7 +525,7 @@ namespace LobsterWpf.Views
             }
 
             CodeSourceConfig codeSourceConfig = null;
-            if (!CodeSourceConfig.InitialiseCodeSourceDirectory(dlg.FileName, nameWindow.CodeSourceName, ref codeSourceConfig))
+            if (!CodeSourceConfigLoader.InitialiseCodeSourceDirectory(dlg.FileName, nameWindow.CodeSourceName, ref codeSourceConfig))
             {
                 return;
             }
@@ -533,7 +542,7 @@ namespace LobsterWpf.Views
         {
             if (this.codeSourceListBox.SelectedItem != null)
             {
-                CodeSourceConfig.RemoveCodeSource(this.SelectedCodeSourceConfig.BaseConfig.CodeSourceDirectory);
+                CodeSourceConfigLoader.RemoveCodeSource(this.SelectedCodeSourceConfig.BaseConfig.CodeSourceDirectory);
                 this.CodeSourceConfigList.Remove((CodeSourceConfigView)this.codeSourceListBox.SelectedItem);
             }
         }

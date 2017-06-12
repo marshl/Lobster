@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BackupLog.cs" />
+    <Compile Include="CodeSourceConfigLoader.cs" />
     <Compile Include="ConnectionConfig.cs" />
     <Compile Include="DirectoryDescriptor.cs" />
     <Compile Include="DirectoryWatcher.cs" />
