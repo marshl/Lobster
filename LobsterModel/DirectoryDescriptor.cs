@@ -112,60 +112,6 @@ namespace LobsterModel
 
         public string FilePath { get; set; }
 
-        /// <summary>
-        /// Loads each of the  <see cref="DatabaseConfig"/> files in the connection directory, and returns the list.
-        /// </summary>
-        /// <param name="clobTypeDirectory">The directory to load the clob types from.</param>
-        /// <returns>All valid config files in the connection directory.</returns>
-        public static List<DirectoryDescriptor> GetDirectoryDescriptorList(string directoryDescriptorFolder)
-        {
-            List<DirectoryDescriptor> dirDescList = new List<DirectoryDescriptor>();
-
-            DirectoryInfo dir = new DirectoryInfo(directoryDescriptorFolder);
-
-            if (!dir.Exists)
-            {
-                return dirDescList;
-            }
-
-            foreach (FileInfo filename in dir.GetFiles("*.xml"))
-            {
-                var dirDesc = DirectoryDescriptor.LoadDirectoryDescriptor(filename.FullName);
-                if (dirDesc != null)
-                {
-                    dirDescList.Add(dirDesc);
-                }
-            }
-
-            return dirDescList;
-        }
-
-        /// <summary>
-        /// Loads the clob type with the given filepath and returns it.
-        /// </summary>
-        /// <param name="fullpath">The name of the file to load.</param>
-        /// <returns>The ClobType, if loaded successfully, otherwise null.</returns>
-        public static DirectoryDescriptor LoadDirectoryDescriptor(string fullpath)
-        {
-            MessageLog.LogInfo($"Loading ClobType {fullpath}");
-            DirectoryDescriptor dirDesc;
-            try
-            {
-                string schema = Settings.Default.ClobTypeSchemaFilename;
-                XmlSerializer xmls = new XmlSerializer(typeof(DirectoryDescriptor));
-                FileStream stream = new FileStream(fullpath, FileMode.Open);
-                dirDesc = (DirectoryDescriptor)xmls.Deserialize(stream);
-            }
-            catch (Exception e) when (e is FileNotFoundException || e is InvalidOperationException || e is XmlException || e is IOException)
-            {
-                MessageLog.LogError($"An error occurred when loading the DirectoryDescriptor {fullpath}: {e}");
-                return null;
-            }
-
-            dirDesc.FilePath = fullpath;
-            return dirDesc;
-        }
-
         public void Save()
         {
             using (FileStream output = new FileStream(this.FilePath, FileMode.OpenOrCreate))

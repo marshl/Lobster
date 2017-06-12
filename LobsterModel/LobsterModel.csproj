@@ -53,6 +53,7 @@
     <Compile Include="CodeSourceConfigLoader.cs" />
     <Compile Include="ConnectionConfig.cs" />
     <Compile Include="DirectoryDescriptor.cs" />
+    <Compile Include="DirectoryDescriptorLoader.cs" />
     <Compile Include="DirectoryWatcher.cs" />
     <Compile Include="EventArguments\DirectoryWatcherFileChangeEventArgs.cs" />
     <Compile Include="Exceptions\ClobFileLookupException.cs" />

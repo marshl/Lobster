@@ -119,7 +119,7 @@ namespace LobsterModel
         {
             List<string> files = SearchRule.GetFiles(this.DirectoryPath, this.Descriptor.SearchRules);
             List<string> directories = SearchRule.GetDirectories(this.DirectoryPath, this.Descriptor.SearchRules);
-            
+
             this.RootDirectory = new WatchedDirectory(this.DirectoryPath, null);
             this.PopulateWatchedDirectory(this.RootDirectory, files, directories);
         }
@@ -132,9 +132,9 @@ namespace LobsterModel
                 return;
             }
 
-            foreach(FileInfo fileInfo in dirInfo.GetFiles())
+            foreach (FileInfo fileInfo in dirInfo.GetFiles())
             {
-                if(!validFiles.Contains(fileInfo.FullName))
+                if (!validFiles.Contains(fileInfo.FullName))
                 {
                     continue;
                 }
@@ -142,7 +142,7 @@ namespace LobsterModel
                 WatchedFile newFile = new WatchedFile(fileInfo.FullName, watchedDir);
                 watchedDir.ChildNodes.Add(newFile);
             }
-            
+
             foreach (DirectoryInfo dir in dirInfo.GetDirectories())
             {
                 if (!validDirectories.Contains(dir.FullName))

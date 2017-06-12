@@ -158,6 +158,12 @@ namespace LobsterModel
         public static DatabaseConnection CreateDatabaseConnection(ConnectionConfig config, SecureString password)
         {
             MessageLog.LogInfo($"Changing connection to {config.Name}");
+
+            if (!Directory.Exists(config.Parent.DirectoryDescriptorFolder))
+            {
+                throw new CreateConnectionException($"The clob type directory {config.Parent.DirectoryDescriptorFolder} could not be found.");
+            }
+
             try
             {
                 OracleConnection con = config.OpenSqlConnection(password);
@@ -165,21 +171,10 @@ namespace LobsterModel
             }
             catch (ConnectToDatabaseException ex)
             {
-                throw new CreateConnectionException($"A connection could not be made to the database: {ex.Message}", ex);
-            }
-
-            if (!Directory.Exists(config.Parent.DirectoryDescriptorFolder))
-            {
-                throw new CreateConnectionException($"The clob type directory {config.Parent.DirectoryDescriptorFolder} could not be found.");
+                throw new CreateConnectionException($"A test connection could not be made to the database: {ex.Message}", ex);
             }
 
             DatabaseConnection databaseConnection = new DatabaseConnection(config, password);
-
-            //TODO: Display these errors to the user somehow
-            List<ClobTypeLoadException> errors = new List<ClobTypeLoadException>();
-            List<FileListRetrievalException> fileLoadErrors = new List<FileListRetrievalException>();
-
-            databaseConnection.LoadDirectoryDescriptors(ref errors);
 
             return databaseConnection;
         }
@@ -195,13 +190,14 @@ namespace LobsterModel
                 return;
             }
 
-            var directoryDescriptors = DirectoryDescriptor.GetDirectoryDescriptorList(this.Config.Parent.DirectoryDescriptorFolder);
-            foreach (var dirDesc in directoryDescriptors)
+            var dirDescLoader = new DirectoryDescriptorLoader(this.Config.Parent.DirectoryDescriptorFolder);
+            var dirDescList = dirDescLoader.GetDirectoryDescriptorList();
+
+            foreach (var dirDesc in dirDescList)
             {
                 try
                 {
                     DirectoryWatcher dirWatcher = new DirectoryWatcher(this.Config.Parent.CodeSourceDirectory, dirDesc);
-                    //TODO: dirWatcher.FileChangeEvent += this.OnClobDirectoryFileChangeEvent;
                     dirWatcher.FileChangeEvent += this.OnDirectoryWatcherFileChangeEvent;
                     this.DirectoryWatcherList.Add(dirWatcher);
                 }
@@ -394,7 +390,7 @@ namespace LobsterModel
             {
                 OracleConnection oracleConnection = this.OpenConnection();
                 OracleCommand oracleCommand = oracleConnection.CreateCommand();
-                
+
                 oracleCommand.CommandText = dirWatcher.Descriptor.DatabaseFileExistsStatement;
                 this.BindParametersToCommand(oracleConnection, oracleCommand, dirWatcher, watchedFile.FilePath);
 
