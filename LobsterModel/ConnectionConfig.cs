@@ -110,6 +110,28 @@ namespace LobsterModel
             }
         }
 
+        public string GetSqlConnectionString(SecureString password)
+        {
+            return "User Id=" + this.Username + ";"
+                    + (password.Length == 0 ? null : ";Password=" + Utils.SecureStringToString(password)) + ";"
+                    + $@"Data Source=(
+                         DESCRIPTION=(
+                           ADDRESS_LIST=(
+                             ADDRESS=
+                               (PROTOCOL=TCP)
+                               (HOST={this.Host})
+                               (PORT={this.Port})
+                           )
+                         )
+                         (
+                           CONNECT_DATA=
+                             (SID={this.SID})
+                             (SERVER=DEDICATED)
+                         )
+                       )"
+                    + $";Pooling=" + (this.UsePooling ? "true" : "false");
+        }
+
         /// <summary>
         /// Opens a new OracleConnection and returns it.
         /// </summary>
@@ -119,22 +141,14 @@ namespace LobsterModel
         {
             try
             {
-                OracleConnection con = new OracleConnection();
-                con.ConnectionString = "User Id=" + this.Username
-                    + (password.Length == 0 ? null : ";Password=" + Utils.SecureStringToString(password))
-                    + ";Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)("
-                    + $"HOST={this.Host})"
-                    + $"(PORT={this.Port})))(CONNECT_DATA="
-                    + $"(SID={this.SID})(SERVER=DEDICATED)))"
-                    + $";Pooling=" + (this.UsePooling ? "true" : "false");
-
-                MessageLog.LogInfo($"Connecting to database {this.Name}");
+                OracleConnection con = new OracleConnection(this.GetSqlConnectionString(password));
+                MessageLog.LogInfo($"Open connection to database {this.Name}");
                 con.Open();
                 return con;
             }
             catch (Exception e) when (e is InvalidOperationException || e is OracleException || e is ArgumentException || e is SocketException)
             {
-                MessageLog.LogError($"Connection to Oracle failed: {e.Message}");
+                MessageLog.LogError($"Connection to Oracle failed: {e}");
                 throw new ConnectToDatabaseException($"Failed to open connection: {e.Message}", e);
             }
         }
