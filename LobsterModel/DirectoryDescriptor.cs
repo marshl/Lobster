@@ -23,16 +23,13 @@
 //-----------------------------------------------------------------------
 namespace LobsterModel
 {
-    using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.Xml;
-    using System.Xml.Serialization;
-    using Properties;
     using System.Runtime.Serialization;
+    using System.Xml.Serialization;
 
     /// <summary>
-    /// 
+    /// A class used for serialising and deserialising the configuration optiosn for a managed directory within a CodeSource directory.
     /// </summary>
     [DataContract]
     public class DirectoryDescriptor
@@ -110,8 +107,14 @@ namespace LobsterModel
         [DataMember]
         public string FileDataTypeStatement { get; set; }
 
+        /// <summary>
+        /// Gets or sets the path where this descriptor was loaded from and will be saved to when <see cref="Save"/> is called.
+        /// </summary>
         public string FilePath { get; set; }
 
+        /// <summary>
+        /// Saves this DirectoryDescriptor to file with the path <see cref="FilePath"/> .
+        /// </summary>
         public void Save()
         {
             using (FileStream output = new FileStream(this.FilePath, FileMode.OpenOrCreate))
