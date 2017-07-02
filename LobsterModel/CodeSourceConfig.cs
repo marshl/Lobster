@@ -22,13 +22,10 @@
 //-----------------------------------------------------------------------
 namespace LobsterModel
 {
-    using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.Xml;
-    using System.Xml.Schema;
-    using System.Xml.Serialization;
     using System.Runtime.Serialization;
+    using System.Xml;
     using Properties;
 
     /// <summary>
@@ -66,6 +63,9 @@ namespace LobsterModel
             }
         }
 
+        /// <summary>
+        /// Gets the path of the directory where the directory descriptors are stored.
+        /// </summary>
         public string DirectoryDescriptorFolder
         {
             get
@@ -75,10 +75,8 @@ namespace LobsterModel
         }
 
         /// <summary>
-        /// Writes a <see cref="DatabaseConfig"/> out to file.
+        /// Writes this object to file.
         /// </summary>
-        /// <param name="filename">The file to write to.</param>
-        /// <param name="config">The <see cref="DatabaseConfig"/> to serialise.</param>
         public void SerialiseToFile()
         {
             DataContractSerializer xmls = new DataContractSerializer(typeof(CodeSourceConfig));
