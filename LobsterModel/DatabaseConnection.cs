@@ -27,7 +27,6 @@ namespace LobsterModel
     using System.Collections.Generic;
     using System.Data;
     using System.IO;
-    using System.Linq;
     using System.Security;
     using System.Threading;
     using Oracle.ManagedDataAccess.Client;
@@ -39,6 +38,56 @@ namespace LobsterModel
     /// </summary>
     public class DatabaseConnection : IDisposable
     {
+        /// <summary>
+        /// The number of characters of a database parameter that will be logged (all the rest will be truncated)
+        /// </summary>
+        private const int ParameterLogLength = 255;
+
+        /// <summary>
+        /// The parameter for the name of the file (including the file extension)
+        /// </summary>
+        private const string FilenameParameterName = "p_filename";
+
+        /// <summary>
+        /// The parameter for the name of the file without the extension
+        /// </summary>
+        private const string FilenameWithoutExtensionParameterName = "p_filename_without_extension";
+
+        /// <summary>
+        /// The parameter for the extension of the file (exlcuding the .)
+        /// </summary>
+        private const string FileExtensionParameterName = "p_file_extension";
+
+        /// <summary>
+        /// The parameter for the path of the file, relative to the CodeSource directory
+        /// </summary>
+        private const string RelativePathParameterName = "p_relative_path";
+
+        /// <summary>
+        /// The parameter for the parent directory of the file
+        /// </summary>
+        private const string ParentDirectoryParameterName = "p_parent_directory";
+
+        /// <summary>
+        /// The parameter for the full path of the file
+        /// </summary>
+        private const string FullPathParameterName = "p_full_path";
+
+        /// <summary>
+        /// The parameter for the data type of the file (has to be computed using another SQL statement)
+        /// </summary>
+        private const string DataTypeParameterName = "p_data_type";
+
+        /// <summary>
+        /// The parameter for the CLOB data of the file
+        /// </summary>
+        private const string FileContentClobParameterName = "p_file_content_clob";
+
+        /// <summary>
+        /// The parameter for the BLOB data of the file
+        /// </summary>
+        private const string FileContentBlobParameterName = "p_file_content_blob";
+
         /// <summary>
         /// The file watcher for the directory where the clob types are stored.
         /// </summary>
@@ -60,23 +109,10 @@ namespace LobsterModel
         /// </summary>
         private object fileEventProcessingSemaphore = new object();
 
-        private OracleConnection StoredConnection;
-
-        public OracleConnection OpenConnection()
-        {
-            if (this.StoredConnection == null || this.StoredConnection.State == ConnectionState.Closed || this.StoredConnection.State == ConnectionState.Broken)
-            {
-                this.StoredConnection = this.Config.OpenSqlConnection(this.Password);
-            }
-
-            return this.StoredConnection;
-        }
-
-        private void CloseConnection()
-        {
-            this.StoredConnection.Close();
-            this.StoredConnection = null;
-        }
+        /// <summary>
+        /// The cached connection to the database.
+        /// </summary>
+        private OracleConnection storedConnection;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseConnection"/> class.
@@ -137,6 +173,9 @@ namespace LobsterModel
         /// </summary>
         public ConnectionConfig Config { get; }
 
+        /// <summary>
+        /// Gets the list of watchers for this connection.
+        /// </summary>
         public List<DirectoryWatcher> DirectoryWatcherList { get; private set; }
 
         /// <summary>
@@ -179,6 +218,24 @@ namespace LobsterModel
             return databaseConnection;
         }
 
+        /// <summary>
+        /// Opens a connection to the database.
+        /// </summary>
+        /// <returns>The connection to the database.</returns>
+        public OracleConnection OpenConnection()
+        {
+            if (this.storedConnection == null || this.storedConnection.State == ConnectionState.Closed || this.storedConnection.State == ConnectionState.Broken)
+            {
+                this.storedConnection = this.Config.OpenSqlConnection(this.Password);
+            }
+
+            return this.storedConnection;
+        }
+
+        /// <summary>
+        /// Loads the <see cref="DirectoryDescriptor"/>s in the CodeSource folder of this connection.
+        /// </summary>
+        /// <param name="errors">The list of errors that occurred when loading the descriptors</param>
         public void LoadDirectoryDescriptors(ref List<ClobTypeLoadException> errors)
         {
             this.DirectoryWatcherList = new List<DirectoryWatcher>();
@@ -208,6 +265,11 @@ namespace LobsterModel
             }
         }
 
+        /// <summary>
+        /// Updates a file in the database using its synchronised local version.
+        /// </summary>
+        /// <param name="watcher">The watcher of the file to update.</param>
+        /// <param name="filepath">The file to update.</param>
         public void UpdateDatabaseFile(DirectoryWatcher watcher, string filepath)
         {
             OracleConnection oracleConnection = this.OpenConnection();
@@ -256,12 +318,22 @@ namespace LobsterModel
             }
         }
 
+        /// <summary>
+        /// Backs up a single file using its watcher
+        /// </summary>
+        /// <param name="watcher">The watcher that manages the file to be backed up.</param>
+        /// <param name="filename">The file to backup.</param>
         public void BackupFile(DirectoryWatcher watcher, string filename)
         {
             FileInfo backupFile = BackupLog.AddBackup(this.Config.Parent.CodeSourceDirectory, filename);
             this.DownloadDatabaseFile(watcher, filename, backupFile.FullName);
         }
 
+        /// <summary>
+        /// Inserts a single file into the database
+        /// </summary>
+        /// <param name="watcher">The watcer that manages the file to be inserted.</param>
+        /// <param name="filepath">The path od the file to insert.</param>
         public void InsertFile(DirectoryWatcher watcher, string filepath)
         {
             OracleConnection oracleConnection = this.OpenConnection();
@@ -283,13 +355,18 @@ namespace LobsterModel
             MessageLog.LogInfo($"Clob file creation successful: {filepath}");
         }
 
+        /// <summary>
+        /// Downloads the contents of a file stored in the database to a local directory.
+        /// </summary>
+        /// <param name="watcher">The directory watcher of the file to downlaod.</param>
+        /// <param name="sourceFilename">The file to download the data for.</param>
+        /// <param name="outputFile">The file to download the data to.</param>
         public void DownloadDatabaseFile(DirectoryWatcher watcher, string sourceFilename, string outputFile)
         {
             OracleConnection connection = this.OpenConnection();
 
             MessageLog.LogInfo($"Downlloading the database file for {sourceFilename}{(sourceFilename != outputFile ? " to " + outputFile : "")}");
             OracleCommand oracleCommand = connection.CreateCommand();
-
 
             string dataType = this.GetDataTypeForFile(watcher, sourceFilename);
             if (dataType == "BLOB")
@@ -361,6 +438,11 @@ namespace LobsterModel
             }
         }
 
+        /// <summary>
+        /// Deletes a watched file from the database.
+        /// </summary>
+        /// <param name="dirWatcher">The directory watcher that manages the file.</param>
+        /// <param name="watchedFile">The file to delete.</param>
         public void DeleteDatabaseFile(DirectoryWatcher dirWatcher, WatchedFile watchedFile)
         {
             MessageLog.LogInfo($"Deleing the database file of {watchedFile.FilePath}");
@@ -383,6 +465,12 @@ namespace LobsterModel
             }
         }
 
+        /// <summary>
+        /// Gets whether the given file is synchronised with the database or not.
+        /// </summary>
+        /// <param name="dirWatcher">The directory watcher that manages the file.</param>
+        /// <param name="watchedFile">The file to check for synchronisation.</param>
+        /// <returns>True if the file exists on the database, otherwise false.</returns>
         public bool IsFileSynchronised(DirectoryWatcher dirWatcher, WatchedFile watchedFile)
         {
             MessageLog.LogInfo($"Checking file synchronisation of {watchedFile.FilePath}");
@@ -404,163 +492,6 @@ namespace LobsterModel
                 MessageLog.LogError($"An exception occurred when determining whether {watchedFile.FilePath} is in the database: {ex.Message}");
                 throw new FileSynchronisationCheckException($"An exception occurred when determining whether {watchedFile.FilePath} is in the database: {ex.Message}", ex);
             }
-        }
-
-        private const string filenameParameterName = "p_filename";
-        private const string filenameWithoutExtensionParameterName = "p_filename_without_extension";
-        private const string fileExtensionParameterName = "p_file_extension";
-        private const string relativePathParameterName = "p_relative_path";
-        private const string parentDirectoryParameterName = "p_parent_directory";
-        private const string fullPathParameterName = "p_full_path";
-        private const string dataTypeParameterName = "p_data_type";
-        private const string fileContentClobParameterName = "p_file_content_clob";
-        private const string fileContentBlobParameterName = "p_file_content_blob";
-
-        private void BindParametersToCommand(OracleConnection connection, OracleCommand command, DirectoryWatcher watcher, string path)
-        {
-            MessageLog.LogInfo($"Binding parameters to command: \n{command.CommandText}");
-
-            command.BindByName = true;
-            string dataType = this.GetDataTypeForFile(watcher, path);
-
-            if (command.ContainsParameter(filenameParameterName))
-            {
-                var param = new OracleParameter(filenameParameterName, Path.GetFileName(path));
-                command.Parameters.Add(param);
-            }
-
-            if (command.ContainsParameter(filenameWithoutExtensionParameterName))
-            {
-                var param = new OracleParameter(filenameWithoutExtensionParameterName, Path.GetFileNameWithoutExtension(path));
-                command.Parameters.Add(param);
-            }
-
-            if (command.ContainsParameter(fileExtensionParameterName))
-            {
-                var param = new OracleParameter(fileExtensionParameterName, Path.GetExtension(path));
-                command.Parameters.Add(param);
-            }
-
-            if (command.ContainsParameter(relativePathParameterName))
-            {
-                Uri baseUri = new Uri(watcher.DirectoryPath);
-                Uri fileUri = new Uri(path);
-                Uri relativeUri = baseUri.MakeRelativeUri(fileUri);
-                var param = new OracleParameter(relativePathParameterName, relativeUri.OriginalString);
-                command.Parameters.Add(param);
-            }
-
-            if (command.ContainsParameter(parentDirectoryParameterName))
-            {
-                var param = new OracleParameter(parentDirectoryParameterName, new FileInfo(path).Directory.Name);
-                command.Parameters.Add(param);
-            }
-
-            if (command.ContainsParameter(fullPathParameterName))
-            {
-                var param = new OracleParameter(fullPathParameterName, path);
-                command.Parameters.Add(param);
-            }
-
-            if (command.ContainsParameter(dataTypeParameterName))
-            {
-                var param = new OracleParameter();
-                param.ParameterName = dataTypeParameterName;
-
-                param.Value = dataType;
-
-                command.Parameters.Add(param);
-            }
-
-            if (command.ContainsParameter(fileContentClobParameterName) || command.ContainsParameter(fileContentBlobParameterName))
-            {
-                // Wait for the file to unlock
-                using (FileStream fs = Utils.WaitForFile(
-                    path,
-                    FileMode.Open,
-                    FileAccess.Read,
-                    FileShare.ReadWrite))
-                {
-                    // Binary mode
-                    if (command.ContainsParameter(fileContentBlobParameterName))
-                    {
-                        byte[] fileData = new byte[fs.Length];
-                        fs.Read(fileData, 0, Convert.ToInt32(fs.Length));
-
-                        OracleParameter param = new OracleParameter();
-                        param.Value = fileData;
-                        param.OracleDbType = OracleDbType.Blob;
-                        param.ParameterName = fileContentBlobParameterName;
-                        command.Parameters.Add(param);
-                    }
-
-                    if (command.ContainsParameter(fileContentClobParameterName))
-                    {
-                        // Text mode
-                        var tr = new StreamReader(fs);
-
-                        string contents = tr.ReadToEnd();
-
-                        if (Settings.Default.AppendFooterToDatabaseFiles)
-                        {
-                            //TODO: Add Clob Footer Message
-                            //contents += MimeTypeList.GetClobFooterMessage(mimeType);
-                        }
-
-                        OracleParameter param = new OracleParameter();
-                        param.OracleDbType = OracleDbType.Clob;
-                        param.Value = contents;
-                        param.OracleDbType = OracleDbType.Clob;
-                        param.ParameterName = fileContentClobParameterName;
-                        command.Parameters.Add(param);
-                    }
-                }
-            }
-
-            foreach (OracleParameter parameter in command.Parameters)
-            {
-                string parameterValue = parameter.Value.ToString();
-                parameterValue = parameterValue.Substring(0, parameterValue.Length < parameterLogLength ? parameterValue.Length : parameterLogLength);
-                MessageLog.LogInfo($"Added parameter \"{parameter.ParameterName}\" with value \"{parameterValue}\"");
-            }
-        }
-
-        private const int parameterLogLength = 255;
-
-        private string GetDataTypeForFile(DirectoryWatcher watcher, string path)
-        {
-            OracleConnection connection = this.OpenConnection();
-
-            // Default to CLOB if there is no default or statement
-            if (watcher.Descriptor.FileDataTypeStatement == null && watcher.Descriptor.DefaultDataType == null)
-            {
-                return "CLOB";
-            }
-
-            // Use the default if there is no statement (but there is a default)
-            if (watcher.Descriptor.FileDataTypeStatement == null)
-            {
-                return watcher.Descriptor.DefaultDataType;
-            }
-
-            // Otherwise use the statement
-            OracleCommand command = connection.CreateCommand();
-            command.CommandText = watcher.Descriptor.FileDataTypeStatement;
-            if (command.ContainsParameter("data_type"))
-            {
-                throw new InvalidOperationException("The FileDataTypeStatement cannot contain the \"data_type\" parameter");
-            }
-
-            this.BindParametersToCommand(connection, command, watcher, path);
-
-            object result = command.ExecuteScalar();
-
-            if (!(result is string))
-            {
-                throw new InvalidOperationException("The FileDataTypeStatement should return a single string");
-            }
-
-            return (string)result;
         }
 
         /// <summary>
@@ -606,18 +537,186 @@ namespace LobsterModel
                     MessageLog.LogInfo($"Deleting temporary file {filename}");
                     File.Delete(filename);
                 }
-                catch (IOException)
+                catch (IOException ex)
                 {
-                    MessageLog.LogInfo($"An error occurred when deleting temporary file {filename}");
+                    MessageLog.LogInfo($"An error occurred when deleting temporary file {filename}: {ex}");
                 }
             }
 
-            if (this.StoredConnection != null)
+            if (this.storedConnection != null)
             {
-                this.StoredConnection.Close();
-                this.StoredConnection.Dispose();
-                this.StoredConnection = null;
+                this.storedConnection.Close();
+                this.storedConnection.Dispose();
+                this.storedConnection = null;
             }
+        }
+
+        /// <summary>
+        /// Closes the current connection to the database.
+        /// </summary>
+        private void CloseConnection()
+        {
+            this.storedConnection.Close();
+            this.storedConnection = null;
+        }
+
+        /// <summary>
+        /// Binds all available parameters to the given command.
+        /// This can be called by itself if the data type of the file is required (this can cause an infinite loop if the data type SQL needs the data type)
+        /// </summary>
+        /// <param name="connection">The Oracle connection to use.</param>
+        /// <param name="command">The command to bind parameters to.</param>
+        /// <param name="watcher">The parent directory watcher of the file.</param>
+        /// <param name="path">The path of the file to bind the parameters for.</param>
+        private void BindParametersToCommand(OracleConnection connection, OracleCommand command, DirectoryWatcher watcher, string path)
+        {
+            MessageLog.LogInfo($"Binding parameters to command: \n{command.CommandText}");
+
+            command.BindByName = true;
+            string dataType = this.GetDataTypeForFile(watcher, path);
+
+            if (command.ContainsParameter(FilenameParameterName))
+            {
+                var param = new OracleParameter(FilenameParameterName, Path.GetFileName(path));
+                command.Parameters.Add(param);
+            }
+
+            if (command.ContainsParameter(FilenameWithoutExtensionParameterName))
+            {
+                var param = new OracleParameter(FilenameWithoutExtensionParameterName, Path.GetFileNameWithoutExtension(path));
+                command.Parameters.Add(param);
+            }
+
+            if (command.ContainsParameter(FileExtensionParameterName))
+            {
+                var param = new OracleParameter(FileExtensionParameterName, Path.GetExtension(path));
+                command.Parameters.Add(param);
+            }
+
+            if (command.ContainsParameter(RelativePathParameterName))
+            {
+                Uri baseUri = new Uri(watcher.DirectoryPath);
+                Uri fileUri = new Uri(path);
+                Uri relativeUri = baseUri.MakeRelativeUri(fileUri);
+                var param = new OracleParameter(RelativePathParameterName, relativeUri.OriginalString);
+                command.Parameters.Add(param);
+            }
+
+            if (command.ContainsParameter(ParentDirectoryParameterName))
+            {
+                var param = new OracleParameter(ParentDirectoryParameterName, new FileInfo(path).Directory.Name);
+                command.Parameters.Add(param);
+            }
+
+            if (command.ContainsParameter(FullPathParameterName))
+            {
+                var param = new OracleParameter(FullPathParameterName, path);
+                command.Parameters.Add(param);
+            }
+
+            if (command.ContainsParameter(DataTypeParameterName))
+            {
+                var param = new OracleParameter();
+                param.ParameterName = DataTypeParameterName;
+
+                param.Value = dataType;
+
+                command.Parameters.Add(param);
+            }
+
+            if (command.ContainsParameter(FileContentClobParameterName) || command.ContainsParameter(FileContentBlobParameterName))
+            {
+                // Wait for the file to unlock
+                using (FileStream fs = Utils.WaitForFile(
+                    path,
+                    FileMode.Open,
+                    FileAccess.Read,
+                    FileShare.ReadWrite))
+                {
+                    // Binary mode
+                    if (command.ContainsParameter(FileContentBlobParameterName))
+                    {
+                        byte[] fileData = new byte[fs.Length];
+                        fs.Read(fileData, 0, Convert.ToInt32(fs.Length));
+
+                        OracleParameter param = new OracleParameter();
+                        param.Value = fileData;
+                        param.OracleDbType = OracleDbType.Blob;
+                        param.ParameterName = FileContentBlobParameterName;
+                        command.Parameters.Add(param);
+                    }
+
+                    if (command.ContainsParameter(FileContentClobParameterName))
+                    {
+                        // Text mode
+                        var tr = new StreamReader(fs);
+
+                        string contents = tr.ReadToEnd();
+
+                        if (Settings.Default.AppendFooterToDatabaseFiles)
+                        {
+                            // TODO: Add Clob Footer Message
+                            // contents += MimeTypeList.GetClobFooterMessage(mimeType);
+                        }
+
+                        OracleParameter param = new OracleParameter();
+                        param.OracleDbType = OracleDbType.Clob;
+                        param.Value = contents;
+                        param.OracleDbType = OracleDbType.Clob;
+                        param.ParameterName = FileContentClobParameterName;
+                        command.Parameters.Add(param);
+                    }
+                }
+            }
+
+            foreach (OracleParameter parameter in command.Parameters)
+            {
+                string parameterValue = parameter.Value.ToString();
+                parameterValue = parameterValue.Substring(0, parameterValue.Length < ParameterLogLength ? parameterValue.Length : ParameterLogLength);
+                MessageLog.LogInfo($"Added parameter '{parameter.ParameterName}' with value '{parameterValue}'");
+            }
+        }
+
+        /// <summary>
+        /// Queires the database for the data type for the content of the given file.
+        /// </summary>
+        /// <param name="watcher">The directory watcher that the given file is the parent of.</param>
+        /// <param name="path">The path of the file to find the data type for.</param>
+        /// <returns>"BLOB" if the given file is a binary file, otherwise "CLOB".</returns>
+        private string GetDataTypeForFile(DirectoryWatcher watcher, string path)
+        {
+            OracleConnection connection = this.OpenConnection();
+
+            // Default to CLOB if there is no default or statement
+            if (watcher.Descriptor.FileDataTypeStatement == null && watcher.Descriptor.DefaultDataType == null)
+            {
+                return "CLOB";
+            }
+
+            // Use the default if there is no statement (but there is a default)
+            if (watcher.Descriptor.FileDataTypeStatement == null)
+            {
+                return watcher.Descriptor.DefaultDataType;
+            }
+
+            // Otherwise use the statement
+            OracleCommand command = connection.CreateCommand();
+            command.CommandText = watcher.Descriptor.FileDataTypeStatement;
+            if (command.ContainsParameter("data_type"))
+            {
+                throw new InvalidOperationException("The FileDataTypeStatement cannot contain the \"data_type\" parameter");
+            }
+
+            this.BindParametersToCommand(connection, command, watcher, path);
+
+            object result = command.ExecuteScalar();
+
+            if (!(result is string))
+            {
+                throw new InvalidOperationException("The FileDataTypeStatement should return a single string");
+            }
+
+            return (string)result;
         }
 
         /// <summary>
@@ -636,6 +735,11 @@ namespace LobsterModel
             }
         }
 
+        /// <summary>
+        /// Called when a file changes in a watched directory.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="args">The event arguments</param>
         private void OnDirectoryWatcherFileChangeEvent(object sender, DirectoryWatcherFileChangeEventArgs args)
         {
             Thread thread = new Thread(() => this.EnqueueFileEvent(args.Watcher, args.Args));
@@ -736,32 +840,10 @@ namespace LobsterModel
                 return;
             }
 
-            // TODO: Check whether the file will appear in the descriptor
-            // "IncludeSubDirectories" check
-            /*if (!watcher.Descriptor.IncludeSubDirectories && fileInfo.Directory.FullName != watcher.DirectoryPath)
-            {
-                this.LogFileEvent("The ClobType does not include sub directories, and the file will be skipped.");
-                return;
-            }*/
-            /*
-            DBClobFile clobFile = watcher.GetDatabaseFileForFullpath(e.FullPath);
-            if (clobFile == null)
-            {
-                this.LogFileEvent($"The file does not have a DBClobFile and will be skipped {e.FullPath}");
-                return;
-            }*/
-
-            /*if (clobFile.LastUpdatedTime.AddMilliseconds(Settings.Default.FileUpdateTimeoutMilliseconds) > DateTime.Now)
-            {
-                this.LogFileEvent("The file was updated within the cooldown period, and will be skipped.");
-                return;
-            }*/
-
             this.LogFileEvent($"Auto-updating file {e.FullPath}");
 
             try
             {
-                //this.SendUpdateClobMessage(clobDirectory, e.FullPath);
                 this.UpdateDatabaseFile(watcher, e.FullPath);
             }
             catch (Exception ex) when (ex is FileDownloadException || ex is FileUpdateException)
