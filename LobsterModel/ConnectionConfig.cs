@@ -110,6 +110,11 @@ namespace LobsterModel
             }
         }
 
+        /// <summary>
+        /// Gets the connection string used to connect to the database
+        /// </summary>
+        /// <param name="password">The password.</param>
+        /// <returns>The connection string.</returns>
         public string GetSqlConnectionString(SecureString password)
         {
             return "User Id=" + this.Username + ";"
