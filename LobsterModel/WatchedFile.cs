@@ -28,12 +28,16 @@ namespace LobsterModel
     using System.IO;
     using System.Linq;
 
+    /// <summary>
+    /// A subclass of <see cref="WatchedNode"/> used only for files (but not directories).
+    /// </summary>
     public class WatchedFile : WatchedNode
     {
-        public DateTime LastUpdateDateTime { get; set; } = DateTime.MinValue;
-
-        public List<FileBackup> FileBackupList { get; private set; }
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WatchedFile"/> class.
+        /// </summary>
+        /// <param name="path">The path of the file.</param>
+        /// <param name="parent">The parent directory of the file.</param>
         public WatchedFile(string path, WatchedDirectory parent) : base(path, parent)
         {
             FileInfo fileInfo = new FileInfo(this.FilePath);
@@ -46,21 +50,41 @@ namespace LobsterModel
         }
 
         /// <summary>
+        /// Gets or sets the last time that this file was updated.
+        /// </summary>
+        public DateTime LastUpdateDateTime { get; set; } = DateTime.MinValue;
+
+        /// <summary>
+        /// Gets the list of backup files that have ever been taken for this file.
+        /// </summary>
+        public List<FileBackup> FileBackupList { get; private set; }
+
+        /// <summary>
         /// Whether the file this node represents is read only.
         /// </summary>
         public bool IsReadOnly { get; private set; }
 
+        /// <summary>
+        /// Gets the number of bytes in this file.
+        /// </summary>
         public long FileLength { get; private set; }
 
         /// <summary>
         /// Refreshes the cache of backup files from the backup directory.
         /// </summary>
+        /// <param name="codeSource">The configuration for this file.</param>
         public void RefreshBackupList(CodeSourceConfig codeSource)
         {
             List<FileBackup> fileBackups = BackupLog.GetBackupsForFile(codeSource.CodeSourceDirectory, this.FilePath);
             this.FileBackupList = new List<FileBackup>(fileBackups.OrderByDescending(backup => backup.DateCreated));
         }
 
+        /// <summary>
+        /// Gets a value indicating whether this file is stored with the database or not.
+        /// </summary>
+        /// <param name="connection">The connection to check syncronisation against.</param>
+        /// <param name="dirWatcher">The directory watcher that this file falls within.</param>
+        /// <returns>True if this file is stored in the database, otherwise false.</returns>
         public bool IsSynchonisedWithDatabase(DatabaseConnection connection, DirectoryWatcher dirWatcher)
         {
             return connection.IsFileSynchronised(dirWatcher, this);
