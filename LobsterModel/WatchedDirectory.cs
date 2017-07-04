@@ -14,17 +14,27 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
-using System.Collections.Generic;
-
 namespace LobsterModel
 {
+    using System.Collections.Generic;
+
+    /// <summary>
+    /// A kind of <see cref="WatchedNode"/> that represents a directory (instead of a file).
+    /// </summary>
     public class WatchedDirectory : WatchedNode
     {
-        public List<WatchedNode> ChildNodes { get; } = new List<WatchedNode>();
-
+        /// <summary>
+        /// Initializes an instance of the <see cref="WatchedDirectory"/> class.
+        /// </summary>
+        /// <param name="path">The path to the directory.</param>
+        /// <param name="parent">The parent directory.</param>
         public WatchedDirectory(string path, WatchedDirectory parent) : base(path, parent)
         {
-
         }
+
+        /// <summary>
+        /// Gets the list of<see cref="WatchedNode"/> that are children of this directory.
+        /// </summary>
+        public List<WatchedNode> ChildNodes { get; } = new List<WatchedNode>();
     }
 }
