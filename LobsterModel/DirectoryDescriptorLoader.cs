@@ -1,25 +1,51 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml;
-using System.Xml.Serialization;
-using LobsterModel.Properties;
-
+﻿//-----------------------------------------------------------------------
+// <copyright file="DirectoryDescriptorLoader.cs" company="marshl">
+// Copyright 2016, Liam Marshall, marshl.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 namespace LobsterModel
 {
-    class DirectoryDescriptorLoader
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Xml;
+    using System.Xml.Serialization;
+    using Properties;
+
+    /// <summary>
+    /// A utility class for loading <see cref="DirectoryDescriptor"/>s.
+    /// </summary>
+    public class DirectoryDescriptorLoader
     {
-        public List<DirectoryDescriptor> loadedDescriptors = new List<DirectoryDescriptor>();
-
-        public string DescriptorFolderPath { get; }
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DirectoryDescriptorLoader"/> class.
+        /// </summary>
+        /// <param name="directoryDescriptorFolder">A path to the folder where the descriptors will be loaded from.</param>
         public DirectoryDescriptorLoader(string directoryDescriptorFolder)
         {
             this.DescriptorFolderPath = directoryDescriptorFolder;
         }
+
+        /// <summary>
+        /// The event called whenever an error occurs when loading the a <see cref="DirectoryDescriptor"/>.
+        /// </summary>
+        public event EventHandler DirectoryDescriptorLoadError;
+
+        /// <summary>
+        /// Gets the folder where the directory descriptors are loaded from.
+        /// </summary>
+        public string DescriptorFolderPath { get; }
 
         /// <summary>
         /// Loads each of the  <see cref="DatabaseConfig"/> files in the connection directory, and returns the list.
@@ -53,7 +79,8 @@ namespace LobsterModel
         /// Loads the clob type with the given filepath and returns it.
         /// </summary>
         /// <param name="filePath">The full path of the file to load.</param>
-        /// <returns>The ClobType, if loaded successfully, otherwise null.</returns>
+        /// <param name="directoryDescriptor">The loaded directory descriptor.</param>
+        /// <returns>True uf the descriptor was loaded successfully, otherwise false.</returns>
         public bool LoadDirectoryDescriptor(string filePath, out DirectoryDescriptor directoryDescriptor)
         {
             MessageLog.LogInfo($"Loading ClobType {filePath}");
@@ -75,24 +102,40 @@ namespace LobsterModel
             }
         }
 
-        public event EventHandler DirectoryDescriptorLoadError;
-
-        protected virtual void OnDirectoryDescriptorLoadError(EventArgs e)
+        /// <summary>
+        /// Invokes <see cref="DirectoryDescriptorLoadError"/> with the given event arguments.
+        /// </summary>
+        /// <param name="eventArgs">The event arguments.</param>
+        protected virtual void OnDirectoryDescriptorLoadError(EventArgs eventArgs)
         {
-            DirectoryDescriptorLoadError?.Invoke(this, e);
+            this.DirectoryDescriptorLoadError?.Invoke(this, eventArgs);
         }
 
-        class DirectoryDescriptorLoadErrorEventArgs : EventArgs
+        /// <summary>
+        /// The event arguments for the <see cref="DirectoryDescriptorLoadError"/> event.
+        /// </summary>
+        public class DirectoryDescriptorLoadErrorEventArgs : EventArgs
         {
-            public string FilePath { get; }
-
-            public Exception RaisedException { get; }
-
+            /// <summary>
+            /// Initializes an instance of the <see cref="DirectoryDescriptorLoadError"/> class.
+            /// </summary>
+            /// <param name="filePath">The path of the <see cref="DirectoryDescriptor"/> file that failed to load.</param>
+            /// <param name="ex">The exception that was raised when loading the <see cref="DirectoryDescriptor"/>.</param>
             public DirectoryDescriptorLoadErrorEventArgs(string filePath, Exception ex)
             {
                 this.FilePath = filePath;
                 this.RaisedException = ex;
             }
+
+            /// <summary>
+            /// Gets the path of the <see cref="DirectoryDescriptor"/> that failed to load.
+            /// </summary>
+            public string FilePath { get; }
+
+            /// <summary>
+            /// Gets the exception that was raised when loading the <see cref="DirectoryDescriptor"/>.
+            /// </summary>
+            public Exception RaisedException { get; }
         }
     }
 }
