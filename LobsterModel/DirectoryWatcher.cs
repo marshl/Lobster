@@ -27,8 +27,10 @@ namespace LobsterModel
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
 
+    /// <summary>
+    /// A class used to manage file files inside a <see cref="DirectoryDescriptor"/>.
+    /// </summary>
     public class DirectoryWatcher
     {
         /// <summary>
@@ -36,6 +38,11 @@ namespace LobsterModel
         /// </summary>
         private FileSystemWatcher fileWatcher;
 
+        /// <summary>
+        /// Initializes an instance of the <see cref="DirectoryWatcher"/> class.
+        /// </summary>
+        /// <param name="codeSourceDirectory"></param>
+        /// <param name="descriptor"></param>
         public DirectoryWatcher(string codeSourceDirectory, DirectoryDescriptor descriptor)
         {
             this.Descriptor = descriptor;
@@ -67,12 +74,15 @@ namespace LobsterModel
             this.GetFiles();
         }
 
-        public string DirectoryPath { get; }
-
         /// <summary>
         /// The event for when a mime type is needed.
         /// </summary>
         public event EventHandler<DirectoryWatcherFileChangeEventArgs> FileChangeEvent;
+
+        /// <summary>
+        /// Gets the path of the managed directory this instance is watching.
+        /// </summary>
+        public string DirectoryPath { get; }
 
         /// <summary>
         /// Gets the ClobType that controls this directory
@@ -80,21 +90,25 @@ namespace LobsterModel
         public DirectoryDescriptor Descriptor { get; }
 
         /// <summary>
-        /// The event listener for the file system watcher.
+        /// Gets the root <see cref="WatchedDirectory"/> of this watcher.
         /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="eventArgs">The file system event arguments.</param>
-        private void OnFileSystemEvent(object sender, FileSystemEventArgs eventArgs)
-        {
-            var handler = this.FileChangeEvent;
+        public WatchedDirectory RootDirectory { get; private set; }
 
-            if (handler != null)
-            {
-                var args = new DirectoryWatcherFileChangeEventArgs(this, eventArgs);
-                handler(this, args);
-            }
+        /// <summary>
+        /// Finds the files and directories that match the SearchRules of the <see cref="DirectoryDescriptor"/> for this watcher.
+        /// </summary>
+        public void GetFiles()
+        {
+            List<string> files = SearchRule.GetFiles(this.DirectoryPath, this.Descriptor.SearchRules);
+            List<string> directories = SearchRule.GetDirectories(this.DirectoryPath, this.Descriptor.SearchRules);
+
+            this.RootDirectory = new WatchedDirectory(this.DirectoryPath, null);
+            this.PopulateWatchedDirectory(this.RootDirectory, files, directories);
         }
 
+        /// <summary>
+        /// Disposes of this object.
+        /// </summary>
         public void Dispose()
         {
             this.Dispose(true);
@@ -115,15 +129,28 @@ namespace LobsterModel
             }
         }
 
-        public void GetFiles()
+        /// <summary>
+        /// The event listener for the file system watcher.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="eventArgs">The file system event arguments.</param>
+        private void OnFileSystemEvent(object sender, FileSystemEventArgs eventArgs)
         {
-            List<string> files = SearchRule.GetFiles(this.DirectoryPath, this.Descriptor.SearchRules);
-            List<string> directories = SearchRule.GetDirectories(this.DirectoryPath, this.Descriptor.SearchRules);
+            var handler = this.FileChangeEvent;
 
-            this.RootDirectory = new WatchedDirectory(this.DirectoryPath, null);
-            this.PopulateWatchedDirectory(this.RootDirectory, files, directories);
+            if (handler != null)
+            {
+                var args = new DirectoryWatcherFileChangeEventArgs(this, eventArgs);
+                handler(this, args);
+            }
         }
 
+        /// <summary>
+        /// Creates <see cref="WatchedFile"/> and <see cref="WatchedDirectory"/>  nodes for the files contained in this watcher.
+        /// </summary>
+        /// <param name="watchedDir"></param>
+        /// <param name="validFiles"></param>
+        /// <param name="validDirectories"></param>
         private void PopulateWatchedDirectory(WatchedDirectory watchedDir, List<string> validFiles, List<string> validDirectories)
         {
             DirectoryInfo dirInfo = new DirectoryInfo(watchedDir.FilePath);
@@ -156,7 +183,5 @@ namespace LobsterModel
                 this.PopulateWatchedDirectory(newDir, validFiles, validDirectories);
             }
         }
-
-        public WatchedDirectory RootDirectory { get; private set; }
     }
 }
