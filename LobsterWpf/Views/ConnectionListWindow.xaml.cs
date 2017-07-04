@@ -175,9 +175,14 @@ namespace LobsterWpf.Views
             this.NotifyPropertyChanged("SelectedConnectionConfig");
         }
 
+        /// <summary>
+        /// Handles the event of an error occurring when loading a CodeSourceConfig file.
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
         private void OnCodeSourceConfigLoadError(object sender, CodeSourceConfigLoader.CodeSourceLoadErrorEventArgs e)
         {
-            MessageBox.Show($"An error occurred when loading the CodeSourceConfig file \"{e.FilePath}\": {e.ExceptionObj?.Message}");
+            MessageBox.Show($"An error occurred when loading the CodeSourceConfig file '{e.FilePath}': {e.ExceptionObj?.Message}");
         }
 
         /// <summary>
