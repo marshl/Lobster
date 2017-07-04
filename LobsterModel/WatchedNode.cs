@@ -16,18 +16,35 @@
 //-----------------------------------------------------------------------
 namespace LobsterModel
 {
+    /// <summary>
+    /// A single file or directory that is monitored for changes
+    /// </summary>
     public abstract class WatchedNode
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WatchedNode"/> class.
+        /// </summary>
+        /// <param name="filePath">The path of the file or directory.</param>
+        /// <param name="parent">The parent directory of this node.</param>
         public WatchedNode(string filePath, WatchedDirectory parent)
         {
             this.FilePath = filePath;
             this.ParentDirectory = parent;
         }
 
+        /// <summary>
+        /// Gets the full path of this node.
+        /// </summary>
         public string FilePath { get; }
 
+        /// <summary>
+        /// Gets the directory that is the parent of this node
+        /// </summary>
         public WatchedDirectory ParentDirectory { get; }
 
+        /// <summary>
+        /// Gets a value indicating whether this node has a parent or not.
+        /// </summary>
         public bool HasParent
         {
             get
