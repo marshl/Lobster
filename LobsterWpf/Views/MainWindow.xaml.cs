@@ -244,7 +244,6 @@ namespace LobsterWpf.Views
             if (this.directoryWatcherListBox.SelectedIndex == -1)
             {
                 this.connectionView.ChangeCurrentDirectoryWatcher(null);
-                //this.fileTree.ItemsSource = null;
                 return;
             }
 
@@ -412,6 +411,11 @@ namespace LobsterWpf.Views
             }
         }
 
+        /// <summary>
+        /// The handler for when the user clicks on the Delete button
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
         private void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
             if (this.connectionView?.SelectedNode == null)
