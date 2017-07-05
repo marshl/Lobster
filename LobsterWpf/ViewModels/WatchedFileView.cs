@@ -226,7 +226,7 @@ namespace LobsterWpf.ViewModels
         /// <param name="watcherView">The parent directory watcher.</param>
         public override void CheckFileSynchronisation(ConnectionView connectionView, DirectoryWatcherView watcherView)
         {
-            var th = new Thread(delegate ()
+            var th = new Thread(() =>
             {
                 try
                 {

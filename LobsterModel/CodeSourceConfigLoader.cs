@@ -220,7 +220,6 @@ namespace LobsterModel
         /// <summary>
         /// Loads each of the  <see cref="DatabaseConfig"/> files in the connection directory, and returns the list.
         /// </summary>
-        /// <returns>All valid config files in the connection directory.</returns>
         public void Load()
         {
             if (Settings.Default.CodeSourceDirectories == null || Settings.Default.CodeSourceDirectories.Count == 0)
@@ -277,12 +276,12 @@ namespace LobsterModel
         }
 
         /// <summary>
-        /// The event arguments for the <see cref="CodeSourceLoadErrorEvent"/> event.
+        /// The event arguments for the <see cref="CodeSourceLoadErrorEventArgs"/> event.
         /// </summary>
         public class CodeSourceLoadErrorEventArgs : EventArgs
         {
             /// <summary>
-            /// Initializes an instance of the <see cref="CodeSourceLoadErrorEvent"/> class.
+            /// Initializes a new instance of the <see cref="CodeSourceLoadErrorEventArgs"/> class.
             /// </summary>
             /// <param name="filePath">The path of the file that failed to laod.</param>
             public CodeSourceLoadErrorEventArgs(string filePath)
@@ -291,7 +290,7 @@ namespace LobsterModel
             }
 
             /// <summary>
-            /// Initializes an instance of the <see cref="CodeSourceLoadErrorEvent"/> class.
+            /// Initializes a new instance of the <see cref="CodeSourceLoadErrorEventArgs"/> class.
             /// </summary>
             /// <param name="filePath">The path of the file that failed to load.</param>
             /// <param name="ex">The exception that was raised when loading the file.</param>

@@ -40,7 +40,7 @@ namespace LobsterModel
         /// <summary>
         /// The event called whenever an error occurs when loading the a <see cref="DirectoryDescriptor"/>.
         /// </summary>
-        public event EventHandler DirectoryDescriptorLoadError;
+        public event EventHandler<DirectoryDescriptorLoadErrorEventArgs> DirectoryDescriptorLoadError;
 
         /// <summary>
         /// Gets the folder where the directory descriptors are loaded from.
@@ -50,7 +50,6 @@ namespace LobsterModel
         /// <summary>
         /// Loads each of the  <see cref="DatabaseConfig"/> files in the connection directory, and returns the list.
         /// </summary>
-        /// <param name="clobTypeDirectory">The directory to load the clob types from.</param>
         /// <returns>All valid config files in the connection directory.</returns>
         public List<DirectoryDescriptor> GetDirectoryDescriptorList()
         {
@@ -106,7 +105,7 @@ namespace LobsterModel
         /// Invokes <see cref="DirectoryDescriptorLoadError"/> with the given event arguments.
         /// </summary>
         /// <param name="eventArgs">The event arguments.</param>
-        protected virtual void OnDirectoryDescriptorLoadError(EventArgs eventArgs)
+        protected virtual void OnDirectoryDescriptorLoadError(DirectoryDescriptorLoadErrorEventArgs eventArgs)
         {
             this.DirectoryDescriptorLoadError?.Invoke(this, eventArgs);
         }
@@ -117,7 +116,7 @@ namespace LobsterModel
         public class DirectoryDescriptorLoadErrorEventArgs : EventArgs
         {
             /// <summary>
-            /// Initializes an instance of the <see cref="DirectoryDescriptorLoadError"/> class.
+            /// Initializes a new instance of the <see cref="DirectoryDescriptorLoadErrorEventArgs"/> class.
             /// </summary>
             /// <param name="filePath">The path of the <see cref="DirectoryDescriptor"/> file that failed to load.</param>
             /// <param name="ex">The exception that was raised when loading the <see cref="DirectoryDescriptor"/>.</param>

@@ -39,10 +39,10 @@ namespace LobsterModel
         private FileSystemWatcher fileWatcher;
 
         /// <summary>
-        /// Initializes an instance of the <see cref="DirectoryWatcher"/> class.
+        /// Initializes a new instance of the <see cref="DirectoryWatcher"/> class.
         /// </summary>
-        /// <param name="codeSourceDirectory"></param>
-        /// <param name="descriptor"></param>
+        /// <param name="codeSourceDirectory">The path of the code source directory.</param>
+        /// <param name="descriptor">The descriptor of this watcher</param>
         public DirectoryWatcher(string codeSourceDirectory, DirectoryDescriptor descriptor)
         {
             this.Descriptor = descriptor;
@@ -148,9 +148,9 @@ namespace LobsterModel
         /// <summary>
         /// Creates <see cref="WatchedFile"/> and <see cref="WatchedDirectory"/>  nodes for the files contained in this watcher.
         /// </summary>
-        /// <param name="watchedDir"></param>
-        /// <param name="validFiles"></param>
-        /// <param name="validDirectories"></param>
+        /// <param name="watchedDir">The root directory that is being watched.</param>
+        /// <param name="validFiles">The files that have been found.</param>
+        /// <param name="validDirectories">The directories that have been found.</param>
         private void PopulateWatchedDirectory(WatchedDirectory watchedDir, List<string> validFiles, List<string> validDirectories)
         {
             DirectoryInfo dirInfo = new DirectoryInfo(watchedDir.FilePath);

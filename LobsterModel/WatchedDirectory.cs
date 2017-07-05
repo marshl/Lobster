@@ -24,7 +24,7 @@ namespace LobsterModel
     public class WatchedDirectory : WatchedNode
     {
         /// <summary>
-        /// Initializes an instance of the <see cref="WatchedDirectory"/> class.
+        /// Initializes a new instance of the <see cref="WatchedDirectory"/> class.
         /// </summary>
         /// <param name="path">The path to the directory.</param>
         /// <param name="parent">The parent directory.</param>

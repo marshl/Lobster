@@ -48,7 +48,7 @@ namespace LobsterModel
         public List<ConnectionConfig> ConnectionConfigList { get; set; } = new List<ConnectionConfig>();
 
         /// <summary>
-        /// Gets the path of the file from which this DatabaseConfig was loaded.
+        /// Gets or sets the path of the file from which this DatabaseConfig was loaded.
         /// </summary>
         public string FileLocation { get; set; }
 

@@ -60,7 +60,7 @@ namespace LobsterModel
         public List<FileBackup> FileBackupList { get; private set; }
 
         /// <summary>
-        /// Whether the file this node represents is read only.
+        /// Gets a value indicating whether the file this node represents is read only.
         /// </summary>
         public bool IsReadOnly { get; private set; }
 
