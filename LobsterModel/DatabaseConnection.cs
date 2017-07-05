@@ -163,6 +163,11 @@ namespace LobsterModel
         public event EventHandler<FileSystemEventArgs> ClobTypeChangedEvent;
 
         /// <summary>
+        /// The event for when an error occurs when loading the directory descriptors
+        /// </summary>
+        public event EventHandler<ConnectionLoadErrorEventArgs> ConnectionLoadErrorEvent;
+
+        /// <summary>
         /// Gets the list of temporary files that have been downloaded so far.
         /// These files are deleted when the model is disposed.
         /// </summary>
@@ -214,6 +219,7 @@ namespace LobsterModel
             }
 
             DatabaseConnection databaseConnection = new DatabaseConnection(config, password);
+            databaseConnection.LoadDirectoryDescriptors();
 
             return databaseConnection;
         }
@@ -235,19 +241,23 @@ namespace LobsterModel
         /// <summary>
         /// Loads the <see cref="DirectoryDescriptor"/>s in the CodeSource folder of this connection.
         /// </summary>
-        /// <param name="errors">The list of errors that occurred when loading the descriptors</param>
-        public void LoadDirectoryDescriptors(ref List<ClobTypeLoadException> errors)
+        public void LoadDirectoryDescriptors()
         {
             this.DirectoryWatcherList = new List<DirectoryWatcher>();
             if (!Directory.Exists(this.Config.Parent.DirectoryDescriptorFolder))
             {
                 string errorMsg = $"The directory {this.Config.Parent.DirectoryDescriptorFolder} could not be found loading connection {this.Config.Name}";
                 MessageLog.LogWarning(errorMsg);
-                errors.Add(new ClobTypeLoadException(errorMsg));
+                this.OnConnectionLoadError(errorMsg);
                 return;
             }
 
             var dirDescLoader = new DirectoryDescriptorLoader(this.Config.Parent.DirectoryDescriptorFolder);
+            dirDescLoader.DirectoryDescriptorLoadError += (object sender, DirectoryDescriptorLoader.DirectoryDescriptorLoadErrorEventArgs e) =>
+            {
+                this.OnConnectionLoadError($"An error occurred when loading DirectoryDescriptor {e.FilePath}: {e.RaisedException}");
+            };
+
             var dirDescList = dirDescLoader.GetDirectoryDescriptorList();
 
             foreach (var dirDesc in dirDescList)
@@ -898,6 +908,35 @@ namespace LobsterModel
             var handler = this.FileProcessingFinishedEvent;
             var args = new FileProcessingFinishedEventArgs(fileTreeChange);
             handler?.Invoke(this, args);
+        }
+
+        /// <summary>
+        /// Signals that an error occurred when loading the directory descriptors
+        /// </summary>
+        /// <param name="errorMessage">The message for the error that occurred.</param>
+        private void OnConnectionLoadError(string errorMessage)
+        {
+            this.ConnectionLoadErrorEvent?.Invoke(this, new ConnectionLoadErrorEventArgs(errorMessage));
+        }
+
+        /// <summary>
+        /// The arguments in case of an error during connection creation.
+        /// </summary>
+        public class ConnectionLoadErrorEventArgs : EventArgs
+        {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="ConnectionLoadErrorEventArgs"/> class. 
+            /// </summary>
+            /// <param name="errorMessage">The error message.</param>
+            public ConnectionLoadErrorEventArgs(string errorMessage)
+            {
+                this.ErrorMessage = errorMessage;
+            }
+
+            /// <summary>
+            /// Gets the message of this event.
+            /// </summary>
+            public string ErrorMessage { get; }
         }
     }
 }

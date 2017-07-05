@@ -304,9 +304,23 @@ namespace LobsterWpf.Views
 
             try
             {
-                this.DatabaseConnection = DatabaseConnection.CreateDatabaseConnection(config, password);
-                this.DialogResult = true;
-                this.Close();
+                bool loadSuccess = true;
+
+                var databaseConnection = DatabaseConnection.CreateDatabaseConnection(config, password);
+                databaseConnection.ConnectionLoadErrorEvent += (object sender, DatabaseConnection.ConnectionLoadErrorEventArgs e) =>
+                {
+                    MessageBox.Show(e.ErrorMessage);
+                    loadSuccess = false;
+                };
+
+                databaseConnection.LoadDirectoryDescriptors();
+
+                if (loadSuccess)
+                {
+                    this.DatabaseConnection = databaseConnection;
+                    this.DialogResult = true;
+                    this.Close();
+                }
             }
             catch (CreateConnectionException ex)
             {
