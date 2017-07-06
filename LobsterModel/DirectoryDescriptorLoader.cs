@@ -87,8 +87,11 @@ namespace LobsterModel
             {
                 string schema = Settings.Default.ClobTypeSchemaFilename;
                 XmlSerializer xmls = new XmlSerializer(typeof(DirectoryDescriptor));
-                FileStream stream = new FileStream(filePath, FileMode.Open);
-                directoryDescriptor = (DirectoryDescriptor)xmls.Deserialize(stream);
+                using (FileStream stream = new FileStream(filePath, FileMode.Open))
+                {
+                    directoryDescriptor = (DirectoryDescriptor)xmls.Deserialize(stream);
+                }
+
                 directoryDescriptor.FilePath = filePath;
                 return true;
             }
