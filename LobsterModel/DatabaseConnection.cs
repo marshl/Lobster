@@ -583,7 +583,6 @@ namespace LobsterModel
             MessageLog.LogInfo($"Binding parameters to command: \n{command.CommandText}");
 
             command.BindByName = true;
-            string dataType = this.GetDataTypeForFile(watcher, path);
 
             if (command.ContainsParameter(FilenameParameterName))
             {
@@ -624,13 +623,13 @@ namespace LobsterModel
                 command.Parameters.Add(param);
             }
 
+            // You need to be very careful here, if the GetDataTypeForFile query needs the data type parameter, an infinite loop will occur
             if (command.ContainsParameter(DataTypeParameterName))
             {
+                string dataType = this.GetDataTypeForFile(watcher, path);
                 var param = new OracleParameter();
                 param.ParameterName = DataTypeParameterName;
-
                 param.Value = dataType;
-
                 command.Parameters.Add(param);
             }
 
@@ -697,24 +696,26 @@ namespace LobsterModel
         {
             OracleConnection connection = this.OpenConnection();
 
-            // Default to CLOB if there is no default or statement
-            if (watcher.Descriptor.FileDataTypeStatement == null && watcher.Descriptor.DefaultDataType == null)
-            {
-                return "CLOB";
-            }
-
-            // Use the default if there is no statement (but there is a default)
             if (watcher.Descriptor.FileDataTypeStatement == null)
             {
-                return watcher.Descriptor.DefaultDataType;
+                if (watcher.Descriptor.DefaultDataType == null)
+                {
+                    // Default to CLOB if there is no default or statement
+                    return "CLOB";
+                }
+                else
+                {
+                    // Use the default if there is no statement (but there is a default)
+                    return watcher.Descriptor.DefaultDataType;
+                }
             }
-
+            
             // Otherwise use the statement
             OracleCommand command = connection.CreateCommand();
             command.CommandText = watcher.Descriptor.FileDataTypeStatement;
-            if (command.ContainsParameter("data_type"))
+            if (command.ContainsParameter(DataTypeParameterName))
             {
-                throw new InvalidOperationException("The FileDataTypeStatement cannot contain the \"data_type\" parameter");
+                throw new InvalidOperationException($"The FileDataTypeStatement cannot contain the '{DataTypeParameterName}' parameter");
             }
 
             this.BindParametersToCommand(connection, command, watcher, path);
