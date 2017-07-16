@@ -25,10 +25,8 @@
 namespace LobsterWpf.ViewModels
 {
     using System;
-    using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.ComponentModel;
-    using System.IO;
     using LobsterModel;
 
     /// <summary>
@@ -47,25 +45,25 @@ namespace LobsterWpf.ViewModels
         private WatchedNodeView selectedNode;
 
         /// <summary>
+        /// The currently selected <see cref="DirectoryWatcherView"/>.
+        /// </summary>
+        private DirectoryWatcherView selectedDirectoryWatcher;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ConnectionView"/> class.
         /// </summary>
         /// <param name="con">The model connection this object is viewing.</param>
         public ConnectionView(DatabaseConnection con)
         {
             this.BaseConnection = con;
-
-            this.DirectoryWatchers = new ObservableCollection<DirectoryWatcherView>();
-            foreach (DirectoryWatcher watchedDir in con.DirectoryWatcherList)
-            {
-                this.DirectoryWatchers.Add(new DirectoryWatcherView(watchedDir));
-            }
+            this.SetDirectoryWatcherViews();
         }
 
         /// <summary>
         /// The event to be raised when a property is changed.
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
-
+        
         /// <summary>
         /// Gets or sets the currently selected node.
         /// </summary>
@@ -91,7 +89,19 @@ namespace LobsterWpf.ViewModels
         /// <summary>
         /// Gets or sets the current selected directroy watcher.
         /// </summary>
-        public DirectoryWatcherView SelectedDirectoryWatcher { get; set; }
+        public DirectoryWatcherView SelectedDirectoryWatcher
+        {
+            get
+            {
+                return this.selectedDirectoryWatcher;
+            }
+
+            set
+            {
+                this.selectedDirectoryWatcher = value;
+                this.NotifyPropertyChanged("SelectedDirectoryWatcher");
+            }
+        }
 
         /// <summary>
         /// Gets or sets a value indicating whether read only files should be displayed or not.
@@ -141,7 +151,21 @@ namespace LobsterWpf.ViewModels
         /// <summary>
         /// Gets the directory watchers for this connection.
         /// </summary>
-        public ObservableCollection<DirectoryWatcherView> DirectoryWatchers { get; }
+        public ObservableCollection<DirectoryWatcherView> DirectoryWatchers { get; private set; }
+
+        /// <summary>
+        /// Reloads the <see cref="DirectoryWatcherView"/> list for this view.
+        /// </summary>
+        public void SetDirectoryWatcherViews()
+        {
+            this.DirectoryWatchers = new ObservableCollection<DirectoryWatcherView>();
+            foreach (DirectoryWatcher watchedDir in this.BaseConnection.DirectoryWatcherList)
+            {
+                this.DirectoryWatchers.Add(new DirectoryWatcherView(watchedDir));
+            }
+
+            this.NotifyPropertyChanged("DirectoryWatchers");
+        }
 
         /// <summary>
         /// Changes the current directory watcher.
@@ -149,42 +173,36 @@ namespace LobsterWpf.ViewModels
         /// <param name="dirWatcherFiew">The <see cref="DirectoryWatcherView"/> to change to.</param>
         public void ChangeCurrentDirectoryWatcher(DirectoryWatcherView dirWatcherFiew)
         {
-            if (this.SelectedDirectoryWatcher == dirWatcherFiew)
-            {
-                return;
-            }
-
-            if (!this.DirectoryWatchers.Contains(dirWatcherFiew))
-            {
-                return;
-            }
-
             this.SelectedDirectoryWatcher = dirWatcherFiew;
-            this.PopulateFileList();
+            this.PopulateRootDirectory();
         }
 
         /// <summary>
         /// Repopulates the file list with the files in the connection.
         /// </summary>
-        public void PopulateFileList()
+        public void PopulateRootDirectory()
         {
             if (this.SelectedDirectoryWatcher == null)
             {
                 this.RootDirectoryView = null;
-                return;
+            }
+            else
+            {
+                this.RootDirectoryView = new WatchedDirectoryView(this.SelectedDirectoryWatcher.BaseWatcher.RootDirectory);
+                this.RootDirectoryView.CheckFileSynchronisation(this, this.SelectedDirectoryWatcher);
             }
 
-            this.RootDirectoryView = new WatchedDirectoryView(this.SelectedDirectoryWatcher.BaseWatcher.RootDirectory);
-            this.RootDirectoryView.CheckFileSynchronisation(this, this.SelectedDirectoryWatcher);
             this.NotifyPropertyChanged("RootDirectoryView");
         }
 
         /// <summary>
-        /// Reloads the ClobTypes for the current connection.
+        /// Reloads the DirectoryDescriptors for the current connection.
         /// </summary>
-        public void ReloadClobTypes()
+        public void ReloadDirectoryDescriptors()
         {
-            throw new NotImplementedException();
+            this.ChangeCurrentDirectoryWatcher(null);
+            this.BaseConnection.LoadDirectoryDescriptors();
+            this.SetDirectoryWatcherViews();
         }
 
         /// <summary>

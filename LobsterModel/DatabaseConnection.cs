@@ -359,7 +359,7 @@ namespace LobsterModel
             catch (Exception ex) when (ex is InvalidOperationException || ex is OracleException || ex is IOException)
             {
                 MessageLog.LogError($"Error creating new clob when executing command: {command.CommandText} {ex}");
-                throw new FileInsertException("An exception ocurred when attempting to insert a file into the child table.", ex);
+                throw new FileInsertException("An exception ocurred when attempting to insert a file.", ex);
             }
 
             MessageLog.LogInfo($"Clob file creation successful: {filepath}");

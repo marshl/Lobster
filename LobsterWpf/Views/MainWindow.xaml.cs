@@ -46,11 +46,6 @@ namespace LobsterWpf.Views
     public sealed partial class MainWindow : Window, IDisposable
     {
         /// <summary>
-        /// The view of the current connection, if crrently connected.
-        /// </summary>
-        private ConnectionView connectionView;
-
-        /// <summary>
         /// The sound played when an automatic update is successful.
         /// </summary>
         private SoundPlayer successSound;
@@ -64,6 +59,11 @@ namespace LobsterWpf.Views
         /// The system tray icon that can be used to minimise and maximise the window.
         /// </summary>
         private NotifyIcon notifyIcon;
+
+        /// <summary>
+        /// A list of the connection controls within the connection tab list.
+        /// </summary>
+        private List<ConnectionControl> connectionControlList = new List<ConnectionControl>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow"/> class.
@@ -116,18 +116,16 @@ namespace LobsterWpf.Views
             bool? result = window.ShowDialog();
             if (result.HasValue && result.Value)
             {
-                if (this.connectionView != null)
+                ConnectionView connectionView = new ConnectionView(window.DatabaseConnection);
+                ConnectionControl control = new ConnectionControl(connectionView);
+
+                this.connectionControlList.Add(control);
+                this.ConnectionTabControl.Items.Add(new TabItem()
                 {
-                    this.connectionView.Dispose();
-                }
-
-                this.ConnectionContainer.DataContext = this.connectionView = new ConnectionView(window.DatabaseConnection);
-                this.RepopulateFileListView(true);
-
-                this.connectionView.BaseConnection.FileProcessingFinishedEvent += this.OnFileProcessingFinished;
-                this.connectionView.BaseConnection.StartChangeProcessingEvent += this.OnEventProcessingStart;
-                this.connectionView.BaseConnection.UpdateCompleteEvent += this.OnAutoUpdateComplete;
-                this.connectionView.BaseConnection.ClobTypeChangedEvent += this.ReloadLobsterTypesMenuItem_Click;
+                    Content = control,
+                    Header = connectionView.BaseConnection.Config.Name,
+                    IsSelected = true
+                });
             }
         }
 
@@ -226,281 +224,6 @@ namespace LobsterWpf.Views
         }
 
         /// <summary>
-        /// The event that is called when the a different clob type is selected.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments.</param>
-        private void DirectoryWatcherListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            this.RepopulateFileListView(true);
-        }
-
-        /// <summary>
-        /// Clears the file list and populates with the files of the currently selected clob directory.
-        /// </summary>
-        /// <param name="fullRebuild">WHether a full rebuild of the file list needs to be performed.</param>
-        private void RepopulateFileListView(bool fullRebuild)
-        {
-            if (this.directoryWatcherListBox.SelectedIndex == -1)
-            {
-                this.connectionView.ChangeCurrentDirectoryWatcher(null);
-                return;
-            }
-
-            if (this.connectionView == null)
-            {
-                return;
-            }
-
-            DirectoryWatcherView dirWatcherView = (DirectoryWatcherView)this.directoryWatcherListBox.SelectedItem;
-
-            this.connectionView.ChangeCurrentDirectoryWatcher(dirWatcherView);
-            if (this.connectionView.RootDirectoryView != null)
-            {
-                this.fileTree.ItemsSource = this.connectionView.RootDirectoryView.ChildNodes;
-            }
-        }
-
-        /// <summary>
-        /// The event that is called when the show/hide readonly files checkbox is checked or unchecked.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments</param>
-        private void HideReadonlyCheckbox_Toggled(object sender, RoutedEventArgs e)
-        {
-            this.RepopulateFileListView(true);
-        }
-
-        /// <summary>
-        /// The event that is called when the push file button is clicked.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments.</param>
-        private void PushButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (this.connectionView.SelectedNode == null || this.connectionView.SelectedNode is WatchedDirectoryView)
-            {
-                return;
-            }
-
-            var fileView = (WatchedFileView)this.connectionView.SelectedNode;
-            string filepath = this.connectionView.SelectedNode.FilePath;
-
-            if (fileView.IsReadOnly)
-            {
-                MessageBoxResult result = System.Windows.MessageBox.Show(
-                    $"{Path.GetFileName(filepath)} is read-only. Are you sure you want to push it?",
-                    "File is Read-Only",
-                    MessageBoxButton.OKCancel);
-
-                if (result != MessageBoxResult.OK)
-                {
-                    return;
-                }
-            }
-
-            try
-            {
-                this.connectionView.BaseConnection.UpdateDatabaseFile(this.connectionView.SelectedDirectoryWatcher.BaseWatcher, filepath);
-            }
-            catch (FileUpdateException)
-            {
-                this.DisplayUpdateNotification(filepath, false);
-                return;
-            }
-
-            this.DisplayUpdateNotification(filepath, true);
-            fileView.WatchedFile.RefreshBackupList(this.connectionView.BaseConnection.Config.Parent);
-        }
-
-        /// <summary>
-        /// The event that is called when the pull file button is clicked.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments.</param>
-        private void PullButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (this.connectionView?.SelectedNode == null || !this.connectionView.SelectedNode.CanBeDownloaded)
-            {
-                return;
-            }
-
-            var watcherView = (DirectoryWatcherView)this.directoryWatcherListBox.SelectedItem;
-
-            try
-            {
-                string tempPath = Utils.GetTempFilepath(this.connectionView.SelectedNode.FileName);
-                this.connectionView.BaseConnection.DownloadDatabaseFile(watcherView.BaseWatcher, this.connectionView.SelectedNode.FilePath, tempPath);
-                Process.Start(tempPath);
-            }
-            catch (FileDownloadException ex)
-            {
-                System.Windows.MessageBox.Show($"The file download failed: {ex}");
-            }
-        }
-
-        /// <summary>
-        /// The event that is called when the 
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments.</param>
-        private void DiffButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (this.connectionView?.SelectedNode == null || !this.connectionView.SelectedNode.CanBeCompared)
-            {
-                return;
-            }
-
-            try
-            {
-                var watcherView = (DirectoryWatcherView)this.directoryWatcherListBox.SelectedItem;
-
-                string tempPath = Utils.GetTempFilepath(this.connectionView.SelectedNode.FileName);
-                this.connectionView.BaseConnection.DownloadDatabaseFile(watcherView.BaseWatcher, this.connectionView.SelectedNode.FilePath, tempPath);
-
-                string args = string.Format(
-                    Settings.Default.DiffProgramArguments,
-                    tempPath,
-                    this.connectionView.SelectedNode.FilePath);
-
-                Process.Start(Settings.Default.DiffProgramName, args);
-            }
-            catch (FileDownloadException ex)
-            {
-                System.Windows.MessageBox.Show($"The file download failed: {ex}");
-            }
-        }
-
-        /// <summary>
-        /// The event that is called when the explore button is clicked.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments.</param>
-        private void ExploreButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (this.connectionView.SelectedNode != null)
-            {
-                Utils.OpenFileInExplorer(this.connectionView.SelectedNode.BaseNode.FilePath);
-            }
-        }
-
-        /// <summary>
-        /// The event that is called when the insert file button is clicked.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments.</param>
-        private void InsertButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (this.connectionView?.SelectedNode == null)
-            {
-                return;
-            }
-
-            var watcherView = (DirectoryWatcherView)this.directoryWatcherListBox.SelectedItem;
-            string filename = this.connectionView.SelectedNode.BaseNode.FilePath;
-            try
-            {
-                this.connectionView.BaseConnection.InsertFile(watcherView.BaseWatcher, filename);
-
-                this.DisplayUpdateNotification(filename, true);
-            }
-            catch (FileInsertException ex)
-            {
-                System.Windows.MessageBox.Show($"The file insert failed: {ex}");
-                this.DisplayUpdateNotification(filename, false);
-            }
-        }
-
-        /// <summary>
-        /// The handler for when the user clicks on the Delete button
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments.</param>
-        private void DeleteButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (this.connectionView?.SelectedNode == null)
-            {
-                return;
-            }
-
-            var watcherView = (DirectoryWatcherView)this.directoryWatcherListBox.SelectedItem;
-            var fileView = (WatchedFileView)this.connectionView.SelectedNode;
-
-            try
-            {
-                this.connectionView.BaseConnection.DeleteDatabaseFile(watcherView.BaseWatcher, fileView.WatchedFile);
-            }
-            catch (FileDeleteException ex)
-            {
-                System.Windows.MessageBox.Show($"The file delete failed: {ex}");
-            }
-        }
-
-        /// <summary>
-        /// The event that is called when a different file is selected.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments.</param>
-        private void FileTree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
-        {
-            this.connectionView.SelectedNode = (WatchedNodeView)e.NewValue;
-        }
-
-        /// <summary>
-        /// Displays a notification window showing the status of a file update.
-        /// </summary>
-        /// <param name="filename">The full path of the file that was updated.</param>
-        /// <param name="success">Whether the file was updated successfulyl or not.</param>
-        private void DisplayUpdateNotification(string filename, bool success)
-        {
-            string message = $"File update {(success ? "succeeded" : "failed")} for {Path.GetFileName(filename)}";
-            NotificationWindow nw = new NotificationWindow(message, success);
-            nw.Show();
-
-            try
-            {
-                (success ? this.successSound : this.failureSound).Play();
-            }
-            catch (FileNotFoundException ex)
-            {
-                MessageLog.LogError($"An error occurred when attempting to play a sound: {ex}");
-            }
-        }
-
-        /// <summary>
-        /// The event for when the push file button is clicked.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments.</param>
-        private void PushBackupButton_Click(object sender, EventArgs e)
-        {
-            /*FileBackup fileBackup = ((FrameworkElement)sender).DataContext as FileBackup;
-            var clobDirView = (ClobDirectoryView)this.clobTypeListBox.SelectedItem;
-            try
-            {
-                this.connectionView.Connection.UpdateClobWithExternalFile(clobDirView.BaseClobDirectory, fileBackup.OriginalFilename, fileBackup.BackupFilename);
-            }
-            catch (FileUpdateException)
-            {
-                this.DisplayUpdateNotification(fileBackup.BackupFilename, false);
-                return;
-            }
-
-            this.DisplayUpdateNotification(fileBackup.BackupFilename, true);*/
-        }
-
-        /// <summary>
-        /// The event for when the open file button is clicked.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments.</param>
-        private void OpenBackupButton_Click(object sender, EventArgs e)
-        {
-            FileBackup fileBackup = ((FrameworkElement)sender).DataContext as FileBackup;
-            Utils.OpenFileInExplorer(fileBackup.BackupFilename);
-        }
-
-        /// <summary>
         /// The event for when the requery database menu item is clicked.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
@@ -508,23 +231,10 @@ namespace LobsterWpf.Views
         private void RequeryDatabaseMenuItem_Click(object sender, RoutedEventArgs e)
         {
             List<FileListRetrievalException> errorList = new List<FileListRetrievalException>();
-            this.RepopulateFileListView(true);
-        }
-
-        /// <summary>
-        /// The event for when either of the display mode radio buttons are clicked.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments.</param>
-        private void OnToggleViewModeRadioClicked(object sender, RoutedEventArgs e)
-        {
-            /*if (this.connectionView == null)
+            foreach (ConnectionControl control in this.connectionControlList)
             {
-                return;
+                control.RepopulateFileListView(true);
             }
-
-            this.connectionView.CurrentDisplayMode = this.LocalOnlyFilesRadio.IsChecked.Value ? ConnectionView.DisplayMode.LocalFiles : ConnectionView.DisplayMode.DatabaseFiles;
-            this.RepopulateFileListView(true);*/
         }
 
         /// <summary>
@@ -613,10 +323,9 @@ namespace LobsterWpf.Views
                 return;
             }
 
-            if (this.connectionView != null)
+            foreach (ConnectionControl connectionControl in this.connectionControlList)
             {
-                this.connectionView.Dispose();
-                this.connectionView = null;
+                connectionControl.Dispose();
             }
 
             if (this.failureSound != null)
@@ -639,59 +348,16 @@ namespace LobsterWpf.Views
         }
 
         /// <summary>
-        /// The callback for when a automatic file update is completed.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="args">The event arguments</param>
-        private void OnAutoUpdateComplete(object sender, FileUpdateCompleteEventArgs args)
-        {
-            this.Dispatcher.Invoke((MethodInvoker)delegate
-            {
-                this.DisplayUpdateNotification(args.Fullpath, args.Success);
-            });
-        }
-
-        /// <summary>
-        /// The callback for when a file event is initially received.
-        /// </summary>\
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="args">The event arguments</param>
-        private void OnEventProcessingStart(object sender, FileChangeEventArgs args)
-        {
-            this.Dispatcher.Invoke((MethodInvoker)delegate
-            {
-                this.connectionView.IsEnabled = false;
-            });
-        }
-
-        /// <summary>
-        /// The callback for when the last file event in the event queue is processed.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="args">The event arguments</param>
-        private void OnFileProcessingFinished(object sender, FileProcessingFinishedEventArgs args)
-        {
-            this.Dispatcher.Invoke((MethodInvoker)delegate
-            {
-                this.connectionView.IsEnabled = true;
-                this.RepopulateFileListView(args.FileTreeChange);
-            });
-        }
-
-        /// <summary>
         /// The handler for when the Reload Lobster Types menu item is clicked.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">The event arguments.</param>
         private void ReloadLobsterTypesMenuItem_Click(object sender, EventArgs e)
         {
-            this.Dispatcher.Invoke((MethodInvoker)delegate
+            foreach (ConnectionControl control in this.connectionControlList)
             {
-                this.connectionView.ReloadClobTypes();
-                this.connectionView.SelectedNode = null;
-                this.directoryWatcherListBox.SelectedIndex = -1;
-                this.RepopulateFileListView(true);
-            });
+                control.ReloadLobsterTypes();
+            }
         }
     }
 }
