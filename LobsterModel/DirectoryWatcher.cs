@@ -65,9 +65,6 @@ namespace LobsterModel
             this.fileWatcher.IncludeSubdirectories = true;
             this.fileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.CreationTime | NotifyFilters.Attributes;
             this.fileWatcher.Changed += new FileSystemEventHandler(this.OnFileSystemEvent);
-            this.fileWatcher.Created += new FileSystemEventHandler(this.OnFileSystemEvent);
-            this.fileWatcher.Deleted += new FileSystemEventHandler(this.OnFileSystemEvent);
-            this.fileWatcher.Renamed += new RenamedEventHandler(this.OnFileSystemEvent);
 
             this.fileWatcher.EnableRaisingEvents = true;
 
@@ -136,13 +133,8 @@ namespace LobsterModel
         /// <param name="eventArgs">The file system event arguments.</param>
         private void OnFileSystemEvent(object sender, FileSystemEventArgs eventArgs)
         {
-            var handler = this.FileChangeEvent;
-
-            if (handler != null)
-            {
-                var args = new DirectoryWatcherFileChangeEventArgs(this, eventArgs);
-                handler(this, args);
-            }
+            var args = new DirectoryWatcherFileChangeEventArgs(this, eventArgs);
+            this.FileChangeEvent?.Invoke(this, args);
         }
 
         /// <summary>
