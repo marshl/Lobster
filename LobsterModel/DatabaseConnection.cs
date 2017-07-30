@@ -383,20 +383,20 @@ namespace LobsterModel
             MessageLog.LogInfo($"Downlloading the database file for {sourceFilename}{(sourceFilename != outputFile ? " to " + outputFile : "")}");
             OracleCommand oracleCommand = connection.CreateCommand();
 
-            string dataType = this.GetDataTypeForFile(watcher, sourceFilename);
-            if (dataType == "BLOB")
-            {
-                oracleCommand.CommandText = watcher.Descriptor.FetchBinaryStatement;
-            }
-            else
-            {
-                oracleCommand.CommandText = watcher.Descriptor.FetchStatement;
-            }
-
-            this.BindParametersToCommand(connection, oracleCommand, watcher, sourceFilename);
-
             try
             {
+                string dataType = this.GetDataTypeForFile(watcher, sourceFilename);
+                if (dataType == "BLOB")
+                {
+                    oracleCommand.CommandText = watcher.Descriptor.FetchBinaryStatement;
+                }
+                else
+                {
+                    oracleCommand.CommandText = watcher.Descriptor.FetchStatement;
+                }
+
+                this.BindParametersToCommand(connection, oracleCommand, watcher, sourceFilename);
+
                 OracleDataReader reader = oracleCommand.ExecuteReader();
 
                 if (!reader.Read())
