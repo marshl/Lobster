@@ -313,8 +313,6 @@ namespace LobsterWpf.Views
                     loadSuccess = false;
                 };
 
-                databaseConnection.LoadDirectoryDescriptors();
-
                 if (loadSuccess)
                 {
                     this.DatabaseConnection = databaseConnection;
