@@ -133,7 +133,16 @@ namespace LobsterModel
         /// <param name="eventArgs">The file system event arguments.</param>
         private void OnFileSystemEvent(object sender, FileSystemEventArgs eventArgs)
         {
-            var args = new DirectoryWatcherFileChangeEventArgs(this, eventArgs);
+            WatchedNode node = this.RootDirectory.FindNode(eventArgs.FullPath);
+
+            if (node == null)
+            {
+                return;
+            }
+
+            WatchedFile file = node as WatchedFile;
+
+            var args = new DirectoryWatcherFileChangeEventArgs(this, file, eventArgs);
             this.FileChangeEvent?.Invoke(this, args);
         }
 

@@ -36,5 +36,29 @@ namespace LobsterModel
         /// Gets the list of<see cref="WatchedNode"/> that are children of this directory.
         /// </summary>
         public List<WatchedNode> ChildNodes { get; } = new List<WatchedNode>();
+
+        /// <summary>
+        /// Finds the node that matches the given filepath
+        /// </summary>
+        /// <param name="filepath">The full file path to search for.</param>
+        /// <returns>The node if it is found, otherwise null.</returns>
+        public override WatchedNode FindNode(string filepath)
+        {
+            if (base.FindNode(filepath) != null)
+            {
+                return this;
+            }
+
+            foreach (WatchedNode child in this.ChildNodes)
+            {
+                WatchedNode result = child.FindNode(filepath);
+                if (result != null)
+                {
+                    return result;
+                }
+            }
+
+            return null;
+        }
     }
 }

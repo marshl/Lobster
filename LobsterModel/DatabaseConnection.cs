@@ -115,6 +115,11 @@ namespace LobsterModel
         private OracleConnection storedConnection;
 
         /// <summary>
+        /// The thread which is delayed after a time after the last file change event, and which processes the changes.
+        /// </summary>
+        private Timer eventProcessingTimer;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseConnection"/> class.
         /// </summary>
         /// <param name="config">The configuration file to base this connection off.</param>
@@ -192,11 +197,6 @@ namespace LobsterModel
         /// Gets the password the user entered for this connection (set on initialisation).
         /// </summary>
         public SecureString Password { get; }
-
-        /// <summary>
-        /// Gets or sets the thread which is delayed after a time after the last file change event, and which processes the changes.
-        /// </summary>
-        private Timer EventProcessingThread { get; set; }
 
         /// <summary>
         /// Sets the current connection to the given connection, if able.
@@ -558,6 +558,9 @@ namespace LobsterModel
                 }
             }
 
+            this.eventProcessingTimer?.Dispose();
+            this.eventProcessingTimer = null;
+
             if (this.storedConnection != null)
             {
                 this.storedConnection.Close();
@@ -758,7 +761,7 @@ namespace LobsterModel
         /// <param name="args">The event arguments</param>
         private void OnDirectoryWatcherFileChangeEvent(object sender, DirectoryWatcherFileChangeEventArgs args)
         {
-            Thread thread = new Thread(() => this.EnqueueFileEvent(args.Watcher, args.Args));
+            Thread thread = new Thread(() => this.EnqueueFileEvent(args.Watcher, args.WatchedFile, args.Args));
             thread.Start();
         }
 
@@ -766,8 +769,9 @@ namespace LobsterModel
         /// Takes a single file event, and pushes it onto the event stack, before processing that event.
         /// </summary>
         /// <param name="watcher">The directory from where the event originated.</param>
+        /// <param name="watchedFile">The file that caused the event.</param>
         /// <param name="args">The event arguments.</param>
-        private void EnqueueFileEvent(DirectoryWatcher watcher, FileSystemEventArgs args)
+        private void EnqueueFileEvent(DirectoryWatcher watcher, WatchedFile watchedFile, FileSystemEventArgs args)
         {
             this.LogFileEvent($"File change event of type {args.ChangeType} for file {args.FullPath} with a write time of " + File.GetLastWriteTime(args.FullPath).ToString("yyyy-MM-dd HH:mm:ss.fff"));
 
@@ -794,23 +798,23 @@ namespace LobsterModel
 
                 this.fileEventQueue.Add(new FileChangeEvent(watcher, args));
 
-                this.LogFileEvent("Awaiting semaphore...");
-
-                if (this.EventProcessingThread == null)
+                if (this.eventProcessingTimer == null)
                 {
-                    this.EventProcessingThread = new Timer(_ => this.BulkProcessFileEvents());
+                    this.eventProcessingTimer = new Timer(_ => this.BulkProcessFileEvents());
                 }
 
-                this.EventProcessingThread.Change(TimeSpan.FromMilliseconds(Settings.Default.FileUpdateTimeoutMilliseconds), TimeSpan.FromDays(1));
+                // Start the delayed event (or restart if it has already been started)
+                this.eventProcessingTimer.Change(TimeSpan.FromMilliseconds(Settings.Default.FileUpdateTimeoutMilliseconds), TimeSpan.Zero);
             }
         }
 
         /// <summary>
         /// Processes all file events waiting in the queue.
-        /// This method is run on <see cref="EventProcessingThread"/>.
+        /// This method is run on <see cref="eventProcessingTimer"/>.
         /// </summary>
         private void BulkProcessFileEvents()
         {
+            this.eventProcessingTimer.Change(Timeout.Infinite, Timeout.Infinite);
             lock (this.fileEventProcessingSemaphore)
             {
                 while (this.fileEventQueue.Count > 0)
@@ -822,13 +826,6 @@ namespace LobsterModel
             }
 
             this.LogFileEvent("Event stack empty.");
-
-            if (this.EventProcessingThread != null)
-            {
-                this.EventProcessingThread.Dispose();
-                this.EventProcessingThread = null;
-            }
-
             this.OnFileProcessingFinished(this.fileTreeChangeInQueue);
         }
 
@@ -963,7 +960,7 @@ namespace LobsterModel
         }
 
         /// <summary>
-        /// A class used to cache file events until they are processed by the <see cref="EventProcessingThread"/>. 
+        /// A class used to cache file events until they are processed by the <see cref="eventProcessingTimer"/>. 
         /// </summary>
         private class FileChangeEvent
         {

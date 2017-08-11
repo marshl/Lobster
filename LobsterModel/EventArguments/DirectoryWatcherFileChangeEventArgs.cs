@@ -28,10 +28,12 @@ namespace LobsterModel
         /// Initializes a new instance of the <see cref="DirectoryWatcherFileChangeEventArgs"/> class.
         /// </summary>
         /// <param name="watcher">The directory of the event.</param>
+        /// <param name="watchedFile">The file that changed.</param>
         /// <param name="args">The file system event arguments.</param>
-        public DirectoryWatcherFileChangeEventArgs(DirectoryWatcher watcher, FileSystemEventArgs args)
+        public DirectoryWatcherFileChangeEventArgs(DirectoryWatcher watcher, WatchedFile watchedFile, FileSystemEventArgs args)
         {
             this.Watcher = watcher;
+            this.WatchedFile = watchedFile;
             this.Args = args;
         }
 
@@ -39,6 +41,11 @@ namespace LobsterModel
         /// Gets the directory the event was raised in.
         /// </summary>
         public DirectoryWatcher Watcher { get; }
+
+        /// <summary>
+        /// Gets the file that changed
+        /// </summary>
+        public WatchedFile WatchedFile { get; }
 
         /// <summary>
         /// Gets the file system event arguments.

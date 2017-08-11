@@ -52,5 +52,20 @@ namespace LobsterModel
                 return this.ParentDirectory != null;
             }
         }
+
+        /// <summary>
+        /// Find the node that matches the given file path.
+        /// </summary>
+        /// <param name="filepath">The full path to search for.</param>
+        /// <returns>The node if it is found, otherwise null.</returns>
+        public virtual WatchedNode FindNode(string filepath)
+        {
+            if (this.FilePath.Equals(filepath, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return this;
+            }
+
+            return null;
+        }
     }
 }
