@@ -21,6 +21,11 @@
       <Extension>.png</Extension>
     </MimeType>
     <MimeType>
+      <Name>image/svg</Name>
+      <Prefix>img</Prefix>
+      <Extension>.svg</Extension>
+    </MimeType>
+    <MimeType>
       <Name>image/x-icon</Name>
       <Prefix>img</Prefix>
       <Extension>.ico</Extension>
