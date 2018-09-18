@@ -69,8 +69,6 @@
     <Compile Include="EventArguments\FileProcessingFinishedEventArgs.cs" />
     <Compile Include="Exceptions\FileUpdateException.cs" />
     <Compile Include="IMessageLogEventListener.cs" />
-    <Compile Include="Exceptions\MimeTypeNotFoundException.cs" />
-    <Compile Include="EventArguments\MimeTypeRequestEventArgs.cs" />
     <Compile Include="CodeSourceConfig.cs" />
     <Compile Include="SearchRule.cs" />
     <Compile Include="SerializableObject.cs" />
