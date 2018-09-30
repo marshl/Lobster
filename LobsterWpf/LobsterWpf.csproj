@@ -138,9 +138,6 @@
     </Compile>
     <Compile Include="GitHubUpdater.cs" />
     <Compile Include="InverseBooleanConverter.cs" />
-    <Compile Include="Views\MessageListWindow.xaml.cs">
-      <DependentUpon>MessageListWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="ViewModels\MessageLogView.cs" />
     <Compile Include="ViewModels\MessageView.cs" />
     <Compile Include="ViewModels\SettingsView.cs" />
@@ -186,10 +183,6 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Views\MessageListWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Views\NotificationWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

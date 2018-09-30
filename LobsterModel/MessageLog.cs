@@ -279,5 +279,10 @@ namespace LobsterModel
                 return $"{this.DateCreated:yyyy-MM-dd HH:mm:ss.fff} [{this.MessageType }]: {this.Text}";
             }
         }
+
+        public void OpenLogFile()
+        {
+            System.Diagnostics.Process.Start(Settings.Default.LogFilename);
+        }
     }
 }

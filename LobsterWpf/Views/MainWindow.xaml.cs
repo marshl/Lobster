@@ -250,21 +250,13 @@ namespace LobsterWpf.Views
         }
 
         /// <summary>
-        /// The event called when the settings button is clicked, opening a new settings window.
+        /// The event called when the View Log button is clicked
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">The event arguments.</param>
-        private void MessagesMenuItem_Click(object sender, RoutedEventArgs e)
+        private void ViewLogMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageListWindow.Instance != null)
-            {
-                MessageListWindow.Instance.Activate();
-            }
-            else
-            {
-                MessageListWindow window = new MessageListWindow();
-                window.Show();
-            }
+            MessageLog.Instance.OpenLogFile();
         }
 
         /// <summary>
@@ -304,11 +296,6 @@ namespace LobsterWpf.Views
         /// <param name="e">The event arguments.</param>
         private void Window_Closing(object sender, CancelEventArgs e)
         {
-            if (MessageListWindow.Instance != null)
-            {
-                MessageListWindow.Instance.Close();
-            }
-
             this.Dispose();
         }
 
