@@ -864,7 +864,7 @@ namespace LobsterModel
                 return;
             }
 
-            if (!watcher.Descriptor.PushAutomatically)
+            if (!watcher.Descriptor.PushOnFileChange)
             {
                 this.LogFileEvent("The ClobType does not allow autuomatic file updates, and the file will be skipped.");
                 return;

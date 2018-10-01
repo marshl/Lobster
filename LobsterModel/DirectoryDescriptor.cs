@@ -57,7 +57,7 @@ namespace LobsterModel
         /// Gets or sets a value indicating whether or not a file modified in this directory will trigger an update.
         /// </summary>
         [DataMember]
-        public bool PushAutomatically { get; set; } = true;
+        public bool PushOnFileChange { get; set; } = true;
 
         /// <summary>
         /// Gets or sets the data type that will be used if the <see cref="FileDataTypeStatement"/> does not exist (if it does, it will instead be used to get the file data type)
