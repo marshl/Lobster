@@ -20,7 +20,7 @@ namespace LobsterModel
     using System.IO;
 
     /// <summary>
-    /// The event arguments for a change in any file within a <see cref="ClobDirectory"/>.
+    /// The event arguments for a change in any file within a <see cref="DirectoryDescriptor"/>.
     /// </summary>
     public class DirectoryWatcherFileChangeEventArgs : EventArgs
     {

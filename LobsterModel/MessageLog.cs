@@ -38,6 +38,11 @@ namespace LobsterModel
     public sealed class MessageLog : IDisposable
     {
         /// <summary>
+        /// The instance of this <see cref="MessageLog"/>
+        /// </summary>
+        private static MessageLog instance;
+
+        /// <summary>
         /// The file stream this logger writes to.
         /// </summary>
         private FileStream outStream;
@@ -57,8 +62,7 @@ namespace LobsterModel
         /// </summary>
         private MessageLog()
         {
-            MessageLog.Instance = this;
-
+            instance = this;
             this.MessageList = new List<Message>();
             this.outStream = new FileStream(Settings.Default.LogFilename, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
             this.streamWriter = new StreamWriter(this.outStream);
@@ -71,7 +75,18 @@ namespace LobsterModel
         /// <summary>
         /// Gets the instance of this logger.
         /// </summary>
-        public static MessageLog Instance { get; private set; }
+        public static MessageLog Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = new MessageLog();
+                }
+
+                return instance;
+            }
+        }
 
         /// <summary>
         /// Gets the messages that have been created by this program since startup.
@@ -82,20 +97,6 @@ namespace LobsterModel
         /// Gets or sets the listener of events this log raises (such as when a new message is received).
         /// </summary>
         public IMessageLogEventListener EventListener { get; set; }
-
-        /// <summary>
-        /// Initalizes a new instance of the <see cref="MessageLog"/> class.
-        /// </summary>
-        /// <returns>The old instance of the log if it exists. Otherwise the new instance.</returns>
-        public static MessageLog Initialise()
-        {
-            if (Instance == null)
-            {
-                Instance = new MessageLog();
-            }
-
-            return Instance;
-        }
 
         /// <summary>
         /// Flushes the stream buffer.
@@ -156,7 +157,6 @@ namespace LobsterModel
         {
             MessageLog.LogInfo("Lobster Stopped");
             Instance.Dispose();
-            Instance = null;
         }
 
         /// <summary>
@@ -216,7 +216,7 @@ namespace LobsterModel
                 this.outStream = null;
             }
 
-            MessageLog.Instance = null;
+            instance = null;
         }
 
         /// <summary>

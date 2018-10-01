@@ -48,7 +48,7 @@ namespace LobsterModel
         public string DescriptorFolderPath { get; }
 
         /// <summary>
-        /// Loads each of the  <see cref="DatabaseConfig"/> files in the connection directory, and returns the list.
+        /// Loads each of the  <see cref="DirectoryDescriptor"/> files in the connection directory, and returns the list.
         /// </summary>
         /// <returns>All valid config files in the connection directory.</returns>
         public List<DirectoryDescriptor> GetDirectoryDescriptorList()
