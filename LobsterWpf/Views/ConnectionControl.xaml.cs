@@ -35,10 +35,12 @@ namespace LobsterWpf.Views
         /// Initializes a new instance of the <see cref="ConnectionControl"/> class.
         /// </summary>
         /// <param name="connectionView">The connection.</param>
-        public ConnectionControl(ConnectionView connectionView)
+        /// <param name="parentWindow">The parent <see cref="MainWindow"/> of this connection</param>
+        public ConnectionControl(ConnectionView connectionView, MainWindow parentWindow)
         {
             this.InitializeComponent();
 
+            this.ParentWindow = parentWindow;
             this.ConnectionView = connectionView;
 
             this.ConnectionView.BaseConnection.FileProcessingFinishedEvent += this.OnFileProcessingFinished;
@@ -54,6 +56,11 @@ namespace LobsterWpf.Views
         /// Gets the view of the current connection, if crrently connected.
         /// </summary>
         public ConnectionView ConnectionView { get; }
+
+        /// <summary>
+        /// Gets the parent window of this connection
+        /// </summary>
+        public MainWindow ParentWindow { get; }
 
         /// <summary>
         /// Clears the file list and populates with the files of the currently selected clob directory.
@@ -315,16 +322,14 @@ namespace LobsterWpf.Views
             NotificationWindow nw = new NotificationWindow(message, success);
             nw.Show();
 
-            // TODO: Sounds
-            /*
-            try
+            if (success)
             {
-                (success ? this.successSound : this.failureSound).Play();
+                this.ParentWindow.PlaySuccessSound();
             }
-            catch (FileNotFoundException ex)
+            else
             {
-                MessageLog.LogError($"An error occurred when attempting to play a sound: {ex}");
-            }*/
+                this.ParentWindow.PlayFailureSound();
+            }
         }
 
         /// <summary>

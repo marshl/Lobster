@@ -142,6 +142,14 @@ namespace LobsterModel
         }
 
         /// <summary>
+        /// Executes the log file
+        /// </summary>
+        public static void OpenLogFile()
+        {
+            System.Diagnostics.Process.Start(Settings.Default.LogFilename);
+        }
+
+        /// <summary>
         /// Closes his message log
         /// </summary>
         public static void Close()
@@ -278,11 +286,6 @@ namespace LobsterModel
             {
                 return $"{this.DateCreated:yyyy-MM-dd HH:mm:ss.fff} [{this.MessageType }]: {this.Text}";
             }
-        }
-
-        public void OpenLogFile()
-        {
-            System.Diagnostics.Process.Start(Settings.Default.LogFilename);
         }
     }
 }

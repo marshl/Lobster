@@ -72,8 +72,15 @@ namespace LobsterWpf.Views
         {
             this.InitializeComponent();
 
-            this.successSound = new SoundPlayer(Path.Combine(Environment.CurrentDirectory, @"Resources\Audio\success.wav"));
-            this.failureSound = new SoundPlayer(Path.Combine(Environment.CurrentDirectory, @"Resources\Audio\failure.wav"));
+            try
+            {
+                this.successSound = new SoundPlayer(Path.Combine(Environment.CurrentDirectory, Settings.Default.SuccessSoundFile));
+                this.failureSound = new SoundPlayer(Path.Combine(Environment.CurrentDirectory, Settings.Default.FailureSoundFile));
+            }
+            catch (Exception ex)
+            {
+                MessageLog.LogError("An error occurred when loading the sound effects: " + ex);
+            }
         }
 
         /// <summary>
@@ -83,6 +90,36 @@ namespace LobsterWpf.Views
         {
             this.Dispose(true);
             GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Plays a success sound
+        /// </summary>
+        public void PlaySuccessSound()
+        {
+            try
+            {
+                this.successSound?.Play();
+            }
+            catch (Exception ex)
+            {
+                MessageLog.LogError(ex.ToString());
+            }
+        }
+
+        /// <summary>
+        /// Plays a failure sound
+        /// </summary>
+        public void PlayFailureSound()
+        {
+            try
+            {
+                this.failureSound?.Play();
+            }
+            catch (Exception ex)
+            {
+                MessageLog.LogError(ex.ToString());
+            }
         }
 
         /// <summary>
@@ -117,7 +154,7 @@ namespace LobsterWpf.Views
             if (result.HasValue && result.Value)
             {
                 ConnectionView connectionView = new ConnectionView(window.DatabaseConnection);
-                ConnectionControl control = new ConnectionControl(connectionView);
+                ConnectionControl control = new ConnectionControl(connectionView, this);
 
                 this.connectionControlList.Add(control);
                 this.ConnectionTabControl.Items.Add(new TabItem()
@@ -256,7 +293,7 @@ namespace LobsterWpf.Views
         /// <param name="e">The event arguments.</param>
         private void ViewLogMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            MessageLog.Instance.OpenLogFile();
+            MessageLog.OpenLogFile();
         }
 
         /// <summary>

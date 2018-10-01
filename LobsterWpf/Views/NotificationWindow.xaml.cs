@@ -106,7 +106,7 @@ namespace LobsterWpf.Views
                 fadeAnimation.Duration = new Duration(fadeDuration);
 
                 heightAnimation.KeyFrames.Add(new EasingDoubleKeyFrame(screenCorner.Y, KeyTime.FromTimeSpan(TimeSpan.Zero)));
-                heightAnimation.KeyFrames.Add(new EasingDoubleKeyFrame(screenCorner.Y - this.ActualHeight * (windowIndex + 1), KeyTime.FromTimeSpan(slideDuration)));
+                heightAnimation.KeyFrames.Add(new EasingDoubleKeyFrame(screenCorner.Y - (this.ActualHeight * (windowIndex + 1)), KeyTime.FromTimeSpan(slideDuration)));
                 fadeAnimation.KeyFrames.Add(new EasingDoubleKeyFrame(1, KeyTime.FromTimeSpan(slideDuration + pauseDuration)));
                 fadeAnimation.KeyFrames.Add(new EasingDoubleKeyFrame(0, KeyTime.FromTimeSpan(fadeDuration)));
 
