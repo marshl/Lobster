@@ -74,6 +74,11 @@ namespace LobsterModel
         private const string FullPathParameterName = "p_full_path";
 
         /// <summary>
+        /// The parameter for the mime type of the file (has to be computed using another SQL statement)
+        /// </summary>
+        private const string MimeTypeParameterName = "p_mime_type";
+
+        /// <summary>
         /// The parameter for the data type of the file (has to be computed using another SQL statement)
         /// </summary>
         private const string DataTypeParameterName = "p_data_type";
@@ -631,6 +636,15 @@ namespace LobsterModel
                 command.Parameters.Add(param);
             }
 
+            if (command.ContainsParameter(MimeTypeParameterName))
+            {
+                string mimeType = this.GetMimeTypeForFile(watcher, path);
+                var param = new OracleParameter();
+                param.ParameterName = MimeTypeParameterName;
+                param.Value = mimeType;
+                command.Parameters.Add(param);
+            }
+
             // You need to be very careful here, if the GetDataTypeForFile query needs the data type parameter, an infinite loop will occur
             if (command.ContainsParameter(DataTypeParameterName))
             {
@@ -695,7 +709,7 @@ namespace LobsterModel
         }
 
         /// <summary>
-        /// Queires the database for the data type for the content of the given file.
+        /// Queries the database for the data type for the content of the given file.
         /// </summary>
         /// <param name="watcher">The directory watcher that the given file is the parent of.</param>
         /// <param name="path">The path of the file to find the data type for.</param>
@@ -717,7 +731,7 @@ namespace LobsterModel
                     return watcher.Descriptor.DefaultDataType;
                 }
             }
-            
+
             // Otherwise use the statement
             OracleCommand command = connection.CreateCommand();
             command.CommandText = watcher.Descriptor.FileDataTypeStatement;
@@ -733,6 +747,35 @@ namespace LobsterModel
             if (!(result is string))
             {
                 throw new InvalidOperationException("The FileDataTypeStatement should return a single string");
+            }
+
+            return (string)result;
+        }
+
+        /// <summary>
+        /// Queries the database for the mimetype of the given file
+        /// </summary>
+        /// <param name="watcher">The directory watcher that the given file is the parent of.</param>
+        /// <param name="path">The path of the file to find the data type for.</param>
+        /// <returns>The mime type of the file</returns>
+        private string GetMimeTypeForFile(DirectoryWatcher watcher, string path)
+        {
+            OracleConnection connection = this.OpenConnection();
+
+            OracleCommand command = connection.CreateCommand();
+            command.CommandText = watcher.Descriptor.FileMimeTypeStatement;
+            if (command.ContainsParameter(MimeTypeParameterName))
+            {
+                throw new InvalidOperationException($"The FileDataTypeStatement cannot contain the '{DataTypeParameterName}' parameter");
+            }
+
+            this.BindParametersToCommand(connection, command, watcher, path);
+
+            object result = command.ExecuteScalar();
+
+            if (!(result is string))
+            {
+                throw new InvalidOperationException($"No MimeType was returned for {path}");
             }
 
             return (string)result;

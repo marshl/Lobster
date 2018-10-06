@@ -102,6 +102,12 @@ namespace LobsterModel
         public string FetchBinaryStatement { get; set; }
 
         /// <summary>
+        /// Gets or sets the statement used to determine the mime type of the file.
+        /// </summary>
+        [DataMember]
+        public string FileMimeTypeStatement { get; set; }
+
+        /// <summary>
         /// Gets or sets the statement used to determine the type of data in the database (either CLOB or BLOB).
         /// </summary>
         [DataMember]
