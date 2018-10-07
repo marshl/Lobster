@@ -138,8 +138,6 @@
     </Compile>
     <Compile Include="GitHubUpdater.cs" />
     <Compile Include="InverseBooleanConverter.cs" />
-    <Compile Include="ViewModels\MessageLogView.cs" />
-    <Compile Include="ViewModels\MessageView.cs" />
     <Compile Include="ViewModels\SettingsView.cs" />
     <Compile Include="Views\SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
