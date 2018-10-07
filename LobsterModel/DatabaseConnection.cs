@@ -921,11 +921,11 @@ namespace LobsterModel
             }
             catch (Exception ex)
             {
-                this.OnAutoUpdateComplete(e.FullPath, false);
+                this.OnAutoUpdateComplete(e.FullPath, false, ex);
                 return;
             }
 
-            this.OnAutoUpdateComplete(e.FullPath, true);
+            this.OnAutoUpdateComplete(e.FullPath, true, null);
         }
 
         /// <summary>
@@ -955,10 +955,11 @@ namespace LobsterModel
         /// </summary>
         /// <param name="filename">The path of the file that was updated.</param>
         /// <param name="success">Whether the update was a success or not.</param>
-        private void OnAutoUpdateComplete(string filename, bool success)
+        /// <param name="ex">The exception that was thrown (on failure)</param>
+        private void OnAutoUpdateComplete(string filename, bool success, Exception ex)
         {
             var handler = this.UpdateCompleteEvent;
-            FileUpdateCompleteEventArgs args = new FileUpdateCompleteEventArgs(filename, success);
+            FileUpdateCompleteEventArgs args = new FileUpdateCompleteEventArgs(filename, success, ex);
             handler?.Invoke(this, args);
         }
 

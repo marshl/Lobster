@@ -393,6 +393,11 @@ namespace LobsterWpf.Views
             {
                 this.DisplayUpdateNotification(args.Fullpath, args.Success);
             });
+
+            if (args.ExceptionThrown != null)
+            {
+                System.Windows.MessageBox.Show($"An exception occurred when updating the file automatically ({args.Fullpath}): {args.ExceptionThrown}");
+            }
         }
 
         /// <summary>
