@@ -6,6 +6,10 @@
              xmlns:local="clr-namespace:LobsterWpf.Views"
              mc:Ignorable="d" MinHeight="325" MinWidth="600">
 
+  <UserControl.Resources>
+    <BooleanToVisibilityConverter x:Key="bool2vis"></BooleanToVisibilityConverter>
+  </UserControl.Resources>
+  
   <Grid Grid.Row="1" IsEnabled="{Binding IsEnabled, FallbackValue=false}">
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="1*"/>
@@ -28,7 +32,6 @@
               <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
               <TextBlock Text="{Binding Directory}" FontStyle="Italic" FontSize="10.667"/>
             </StackPanel>
-            <Image Source="{DynamicResource WarningImageSource}" VerticalAlignment="Center" Margin="5,0,0,0" Visibility="{Binding Path=WarningVisibility}" ToolTip="One or more warnings found. Check the log for details."/>
           </StackPanel>
         </DataTemplate>
       </ListBox.ItemTemplate>
