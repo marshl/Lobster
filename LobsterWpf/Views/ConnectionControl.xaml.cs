@@ -127,16 +127,6 @@ namespace LobsterWpf.Views
         }
 
         /// <summary>
-        /// The event that is called when the show/hide readonly files checkbox is checked or unchecked.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments</param>
-        private void HideReadonlyCheckbox_Toggled(object sender, RoutedEventArgs e)
-        {
-            this.RepopulateFileListView(true);
-        }
-
-        /// <summary>
         /// The event that is called when the push file button is clicked.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
@@ -398,22 +388,6 @@ namespace LobsterWpf.Views
             {
                 System.Windows.MessageBox.Show($"An exception occurred when updating the file automatically ({args.Fullpath}): {args.ExceptionThrown}");
             }
-        }
-
-        /// <summary>
-        /// The event for when either of the display mode radio buttons are clicked.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments.</param>
-        private void OnToggleViewModeRadioClicked(object sender, RoutedEventArgs e)
-        {
-            /*if (this.connectionView == null)
-            {
-                return;
-            }
-
-            this.connectionView.CurrentDisplayMode = this.LocalOnlyFilesRadio.IsChecked.Value ? ConnectionView.DisplayMode.LocalFiles : ConnectionView.DisplayMode.DatabaseFiles;
-            this.RepopulateFileListView(true);*/
         }
 
         /// <summary>

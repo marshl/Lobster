@@ -77,6 +77,9 @@ namespace LobsterWpf.ViewModels
         /// </summary>
         public WatchedFile WatchedFile { get; }
 
+        /// <summary>
+        /// Gets the last write time of the watched file (if possible)
+        /// </summary>
         public override DateTime? LastWriteTime
         {
             get

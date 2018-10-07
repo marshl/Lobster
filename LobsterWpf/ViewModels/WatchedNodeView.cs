@@ -68,6 +68,9 @@ namespace LobsterWpf.ViewModels
             }
         }
 
+        /// <summary>
+        /// Gets the file size of the file (if possible)
+        /// </summary>
         public string FileSize
         {
             get
@@ -84,6 +87,9 @@ namespace LobsterWpf.ViewModels
             }
         }
 
+        /// <summary>
+        /// Gets the last write time of the watched node (if possible)
+        /// </summary>
         public abstract DateTime? LastWriteTime { get; }
 
         /// <summary>
