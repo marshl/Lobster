@@ -32,7 +32,7 @@
         </MenuItem>
       </Menu>
     </Grid>
-    <TabControl x:Name="ConnectionTabControl" Grid.Row="1">
+    <TabControl x:Name="ConnectionTabControl" Grid.Row="1" Background="{StaticResource BackgroundKey}">
       <!--<TabControl.ContentTemplate>
         <DataTemplate>
           <local:ConnectionControl x:Name="PrimaryConnectionControl"/>
