@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DirectoryDescriptor xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name>Xview Definitions</Name>
+  <DirectoryName>XviewDefinitions</DirectoryName>
+  <PushOnFileChange>false</PushOnFileChange>
+  <SearchRules>
+    <SearchRule xsi:type="IncludeRule">
+      <Pattern>*.xml</Pattern>
+    </SearchRule>
+  </SearchRules>
+  <DefaultDataType>CLOB</DefaultDataType>
+  <InsertStatement>
+BEGIN
+  xviewmgr.xview.load(XMLTYPE(:p_file_content_clob), 'C');  
+END;
+  </InsertStatement>
+  <UpdateStatement>
+BEGIN
+  xviewmgr.xview.load(XMLTYPE(:p_file_content_clob), 'C');
+END;
+  </UpdateStatement>
+  <DeleteStatement>
+DECLARE
+  l_count NUMBER;
+  l_xview_name VARCHAR2(30);
+  l_xview_owner VARCHAR2(30);
+  l_file_data_xml XMLTYPE := XMLTYPE(:p_file_data_clob);
+BEGIN
+  
+  SELECT
+    XMLCAST(XMLQUERY('/XVIEW_DEFINITION/XVIEW_NAME/text()' PASSING l_file_data_xml RETURNING CONTENT) AS VARCHAR2(30))
+  , XMLCAST(XMLQUERY('/XVIEW_DEFINITION/XVIEW_OWNER/text()' PASSING l_file_data_xml RETURNING CONTENT) AS VARCHAR2(30))
+  INTO
+    l_xview_name
+  , l_xview_owner
+  FROM dual;
+
+  xviewmgr.xview.command(l_xview_name, 'D');
+
+  SELECT COUNT(*)
+  INTO l_count
+  FROM xviewmgr.xview_definitions xd
+  WHERE xd.xview_name = p_xview_name
+  AND xd.last_system_message LIKE 'Success %';
+
+  IF NVL(l_count, 0) != 1 THEN
+    RAISE_APPLICATION_ERROR(-20999, p_xview_name||' drop operation was not successful!');
+  END IF;
+
+  DELETE FROM xviewmgr.xview_definitions
+  WHERE xview_name = p_xview_name;
+  
+  COMMIT;
+  
+  EXECUTE IMMEDIATE 'DROP VIEW ' || l_xview_owner || '.' || l_xview_name;
+
+END;
+  </DeleteStatement>
+  <DatabaseFileExistsStatement>
+SELECT COUNT(*)
+FROM xviewmgr.xview_definitions xd
+WHERE xd.xview_owner = XMLCAST(XMLQUERY('/XVIEW_DEFINITION/XVIEW_OWNER/text()' PASSING XMLTYPE(:p_file_content_clob) RETURNING CONTENT) AS VARCHAR2(30))
+AND xd.xview_name = XMLCAST(XMLQUERY('/XVIEW_DEFINITION/XVIEW_NAME/text()' PASSING XMLTYPE(:p_file_content_clob) RETURNING CONTENT) AS VARCHAR2(30))
+  </DatabaseFileExistsStatement>
+  <FetchStatement>
+SELECT XMLTYPE(XMLSERIALIZE(DOCUMENT xdm.xview_metadata))
+FROM xviewmgr.xview_definition_metadata xdm
+WHERE xdm.xview_owner = XMLCAST(XMLQUERY('/XVIEW_DEFINITION/XVIEW_OWNER/text()' PASSING XMLTYPE(:p_file_content_clob) RETURNING CONTENT) AS VARCHAR2(30))
+AND xdm.xview_name = XMLCAST(XMLQUERY('/XVIEW_DEFINITION/XVIEW_NAME/text()' PASSING XMLTYPE(:p_file_content_clob) RETURNING CONTENT) AS VARCHAR2(30))
+  </FetchStatement>
+</DirectoryDescriptor>

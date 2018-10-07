@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DirectoryDescriptor xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name>Mapset Definitions</Name>
+  <DirectoryName>Mapsets/Environmental</DirectoryName>
+  <IncludeSubDirectories>false</IncludeSubDirectories>
+  <PushOnFileChange>true</PushOnFileChange>
+  <SearchRules>
+    <SearchRule xsi:type="IncludeRule">
+      <Pattern>*.xml</Pattern>
+    </SearchRule>
+  </SearchRules>
+  <DefaultDataType>CLOB</DefaultDataType>
+  <InsertStatement>
+DECLARE
+  l_new_id NUMBER;
+  l_check_editable_flag VARCHAR2(5);
+  l_clob_xml XMLTYPE := XMLTYPE(:p_file_content_clob);
+BEGIN
+
+  SELECT NVL(XMLCAST(XMLQUERY('/*/EDITABLE_FLAG' PASSING l_clob_xml RETURNING CONTENT) AS VARCHAR(5)), 'false')
+  INTO l_check_editable_flag
+  FROM dual;
+  
+  IF l_check_editable_flag NOT IN ('false', 'true') THEN
+    RAISE_APPLICATION_ERROR(-20000,'Mapset flag is invalid on file; cannot load file');
+  END IF;
+  
+  INSERT INTO envmgr.mapsets(
+    id
+  , domain
+  , modified_flag
+  , editable_flag
+  , deletable_flag
+  ) VALUES (
+    envmgr.mapsets_seq.NEXTVAL
+  , XMLCAST(XMLQUERY('/*/NAME' PASSING l_clob_xml RETURNING CONTENT) AS VARCHAR2(60))
+  , NVL(XMLCAST(XMLQUERY('/*/MODIFIED_FLAG' PASSING l_clob_xml RETURNING CONTENT) AS VARCHAR2(5)), 'false')
+  , NVL(XMLCAST(XMLQUERY('/*/EDITABLE_FLAG' PASSING l_clob_xml RETURNING CONTENT) AS VARCHAR2(5)), 'false')
+  , NVL(XMLCAST(XMLQUERY('/*/DELETABLE_FLAG' PASSING l_clob_xml RETURNING CONTENT) AS VARCHAR2(5)), 'false')
+  ) RETURNING id INTO l_new_id;
+  
+  COMMIT;
+END;
+  </InsertStatement>
+  <UpdateStatement>
+DECLARE
+  l_new_id NUMBER;
+  l_id NUMBER;
+  l_editable_flag VARCHAR2(5);
+  l_check_editable_flag VARCHAR2(5);
+  l_clob_xml XMLTYPE := XMLTYPE(:p_file_content_clob);
+BEGIN
+
+  SELECT NVL(XMLCAST(XMLQUERY('/*/EDITABLE_FLAG' PASSING l_clob_xml RETURNING CONTENT) AS VARCHAR2(5)), 'false')
+  INTO l_check_editable_flag
+  FROM dual;
+  
+  IF l_check_editable_flag NOT IN ('false','true') THEN
+    RAISE_APPLICATION_ERROR (-20000,'Mapset flag is invalid on file; cannot load file');
+  END IF;
+  
+  SELECT m.id, m.editable_flag
+  INTO l_id, l_editable_flag
+  FROM envmgr.MAPSETS m 
+  WHERE m.domain = XMLCAST(XMLQUERY('/*/NAME' PASSING l_clob_xml RETURNING CONTENT) AS VARCHAR2(60));
+  
+  IF l_editable_flag = 'true' THEN
+    RAISE_APPLICATION_ERROR (-20000,'Mapset is editable on Database; cannot load file');
+  END IF;
+  
+
+  UPDATE envmgr.mapsets m
+  SET
+    m.modified_flag = NVL(XMLCAST(XMLQUERY('/*/MODIFIED_FLAG' PASSING l_clob_xml RETURNING CONTENT) AS VARCHAR2(5)), 'false')
+  , m.editable_flag = NVL(XMLCAST(XMLQUERY('/*/EDITABLE_FLAG' PASSING l_clob_xml RETURNING CONTENT) AS VARCHAR2(5)), 'false')
+  , m.deletable_flag = NVL(XMLCAST(XMLQUERY('/*/DELETABLE_FLAG' PASSING l_clob_xml RETURNING CONTENT) AS VARCHAR2(5)), 'false')
+  WHERE m.id = l_id;
+  
+  UPDATE envmgr.mapsets_history mh
+  SET
+    mh.end_date = SYSDATE
+  , mh.status_control = NULL
+  WHERE mh.mapset_id = l_id
+  AND mh.status_control = 'C';
+
+  INSERT INTO envmgr.mapsets_history(
+    id
+  , mapset_id
+  , description
+  , data
+  , start_date
+  , end_date
+  , status_control
+  , updated_by_wua_id
+  ) VALUES (
+    envmgr.mapsets_history_seq.NEXTVAL
+  , l_id
+  , XMLCAST(XMLQUERY('/*/DESCRIPTION' PASSING l_clob_xml RETURNING CONTENT) AS VARCHAR2(200))
+  , XMLQUERY('/*/map-set-list' PASSING l_clob_xml RETURNING CONTENT)
+  , SYSDATE
+  , NULL
+  , 'C'
+  , 0
+  );
+  
+  COMMIT;
+END;
+  </UpdateStatement>
+  <DeleteStatement>
+DECLARE
+  l_file_content_xml XMLTYPE := XMLTYPE(:p_file_content_clob);
+  l_mapset_id NUMBER;
+BEGIN
+
+  SELECT id
+  INTO l_mapset_id
+  FROM envmgr.mapsets
+  WHERE domain = XMLCAST(XMLQUERY('/*/NAME' PASSING l_file_content_xml RETURNING CONTENT) AS VARCHAR2(60));
+  
+  DELETE FROM envmgr.mapsets_history
+  WHERE mapset_id = l_mapset_id;
+  
+  IF SQL%ROWCOUNT != 1 THEN
+    RAISE_APPLICATION_ERROR(-20999, 'Expected to remove a single record with ID ' || l_mapset_id || ' instead deleted ' || SQL%ROWCOUNT);
+  END IF;
+  
+  DELETE FROM envmgr.mapsets
+  WHERE id = l_mapset_id;
+  
+  IF SQL%ROWCOUNT != 1 THEN
+    RAISE_APPLICATION_ERROR(-20999, 'Expected to remove a single record with ID ' || l_mapset_id || ' instead deleted ' || SQL%ROWCOUNT);
+  END IF;
+  
+  COMMIT;
+END;
+  </DeleteStatement>
+  <DatabaseFileExistsStatement>
+SELECT COUNT(*)
+FROM envmgr.env_mapsets_metadata
+WHERE domain = XMLCAST(XMLQUERY('/*/NAME' PASSING XMLTYPE(:p_file_content_clob) RETURNING CONTENT) AS VARCHAR2(60))
+  </DatabaseFileExistsStatement>
+  <FetchStatement>
+SELECT metadata
+FROM envmgr.env_mapsets_metadata
+WHERE domain = XMLCAST(XMLQUERY('/*/NAME' PASSING XMLTYPE(:p_file_content_clob) RETURNING CONTENT) AS VARCHAR2(60))
+  </FetchStatement>
+</DirectoryDescriptor>

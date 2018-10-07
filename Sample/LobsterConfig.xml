@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CodeSourceConfig xmlns:i="http://www.w3.org/2001/XMLSchema-instance" z:Id="i1" xmlns:z="http://schemas.microsoft.com/2003/10/Serialization/" xmlns="http://schemas.datacontract.org/2004/07/LobsterModel">
+  <Name>Sample CodeSource</Name>
+  <ConnectionConfigList>
+    <ConnectionConfig>
+      <AllowAutomaticClobbing>true</AllowAutomaticClobbing>
+      <Host>localhost</Host>
+      <IsRestrictedEnvironment>false</IsRestrictedEnvironment>
+      <Name>Sample Database</Name>
+      <Parent z:Ref="i1" />
+      <Port>1521</Port>
+      <SID>sampledb</SID>
+      <UsePooling>false</UsePooling>
+      <Username>username</Username>
+    </ConnectionConfig>
+  </ConnectionConfigList>
+</CodeSourceConfig>
