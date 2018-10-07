@@ -331,7 +331,7 @@ namespace LobsterModel
                 MessageLog.LogInfo($"Clob file update successful: {filepath}");
                 return;
             }
-            catch (Exception ex) when (ex is OracleException || ex is InvalidOperationException)
+            catch (Exception ex)
             {
                 MessageLog.LogError($"Clob update failed for command: {oracleCommand.CommandText} {ex}");
                 throw new FileUpdateException($"An invalid operation occurred when updating the database: {ex.Message}", ex);
@@ -366,7 +366,7 @@ namespace LobsterModel
                 command.ExecuteNonQuery();
                 command.Dispose();
             }
-            catch (Exception ex) when (ex is InvalidOperationException || ex is OracleException || ex is IOException)
+            catch (Exception ex)
             {
                 MessageLog.LogError($"Error creating new clob when executing command: {command.CommandText} {ex}");
                 throw new FileInsertException("An exception ocurred when attempting to insert a file.", ex);
@@ -451,7 +451,7 @@ namespace LobsterModel
                     throw new FileDownloadException($"Too many rows were found for the given command {oracleCommand.CommandText}");
                 }
             }
-            catch (Exception ex) when (ex is InvalidOperationException || ex is OracleException || ex is OracleNullValueException || ex is IOException)
+            catch (Exception ex)
             {
                 MessageLog.LogError($"An error occured when retrieving data when executing command {oracleCommand.CommandText} for file {sourceFilename}: {ex}");
                 throw new FileDownloadException($"An exception ocurred when downloading the file: {ex}");
@@ -478,7 +478,7 @@ namespace LobsterModel
             {
                 oracleCommand.ExecuteNonQuery();
             }
-            catch (Exception ex) when (ex is OracleException)
+            catch (Exception ex)
             {
                 MessageLog.LogError($"An error occurred when deleting the database file for the file {watchedFile.FilePath}");
                 throw new FileDeleteException($"An exception occurred when deleting the file {watchedFile.FilePath}", ex);
@@ -507,7 +507,7 @@ namespace LobsterModel
                 decimal count = (decimal)result;
                 return count >= 1;
             }
-            catch (Exception ex) when (ex is OracleException || ex is InvalidOperationException || ex is InvalidCastException || ex is ArgumentException || ex is ConnectToDatabaseException)
+            catch (Exception ex)
             {
                 MessageLog.LogError($"An exception occurred when determining whether {watchedFile.FilePath} is in the database: {ex.Message}");
                 throw new FileSynchronisationCheckException($"An exception occurred when determining whether {watchedFile.FilePath} is in the database: {ex.Message}", ex);
@@ -919,7 +919,7 @@ namespace LobsterModel
             {
                 this.UpdateDatabaseFile(watcher, e.FullPath);
             }
-            catch (Exception ex) when (ex is FileDownloadException || ex is FileUpdateException)
+            catch (Exception ex)
             {
                 this.OnAutoUpdateComplete(e.FullPath, false);
                 return;
