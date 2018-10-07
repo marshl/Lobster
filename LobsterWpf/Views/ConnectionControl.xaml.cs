@@ -266,8 +266,8 @@ namespace LobsterWpf.Views
             try
             {
                 this.ConnectionView.BaseConnection.InsertFile(watcherView.BaseWatcher, filename);
-
                 this.DisplayUpdateNotification(filename, true);
+                this.ConnectionView.SelectedNode.CheckFileSynchronisation(this.ConnectionView, watcherView);
             }
             catch (FileInsertException ex)
             {
@@ -294,6 +294,7 @@ namespace LobsterWpf.Views
             try
             {
                 this.ConnectionView.BaseConnection.DeleteDatabaseFile(watcherView.BaseWatcher, fileView.WatchedFile);
+                this.ConnectionView.SelectedNode.CheckFileSynchronisation(this.ConnectionView, watcherView);
             }
             catch (FileDeleteException ex)
             {
