@@ -149,7 +149,7 @@ WITH q1 AS (
       WHEN 'fox_import' THEN 'Fox/fox_import'
       ELSE :p_filename_without_extension
     END component_name
-  FROM q1
+  FROM dual
 )
 , q2 AS (
   SELECT
