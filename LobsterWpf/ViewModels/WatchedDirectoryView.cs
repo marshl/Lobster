@@ -18,6 +18,7 @@ namespace LobsterWpf.ViewModels
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Windows.Media;
     using LobsterModel;
 
@@ -58,7 +59,19 @@ namespace LobsterWpf.ViewModels
         /// Gets the list of child nodes.
         /// </summary>
         public List<WatchedNodeView> ChildNodes { get; }
-        
+
+        /// <summary>
+        /// Gets the last write time of the given file (if possible)
+        /// </summary>
+        public override DateTime? LastWriteTime
+        {
+            get
+            {
+                DirectoryInfo fileInfo = new DirectoryInfo(this.FilePath);
+                return fileInfo.Exists ? (DateTime?)fileInfo.LastWriteTime : null;
+            }
+        }
+
         /// <summary>
         /// Gets the colour to use for the Name of this file.
         /// </summary>

@@ -76,7 +76,16 @@ namespace LobsterWpf.ViewModels
         /// Gets the base model object.
         /// </summary>
         public WatchedFile WatchedFile { get; }
-        
+
+        public override DateTime? LastWriteTime
+        {
+            get
+            {
+                FileInfo fileInfo = new FileInfo(this.FilePath);
+                return fileInfo.Exists ? (DateTime?)fileInfo.LastWriteTime : null;
+            }
+        }
+
         /// <summary>
         /// Gets a value indicating whether this file is read only or not
         /// </summary>

@@ -16,6 +16,7 @@
 //-----------------------------------------------------------------------
 namespace LobsterWpf.ViewModels
 {
+    using System;
     using System.ComponentModel;
     using System.IO;
     using System.Windows.Media;
@@ -66,6 +67,24 @@ namespace LobsterWpf.ViewModels
                 return Path.GetFileName(this.BaseNode.FilePath);
             }
         }
+
+        public string FileSize
+        {
+            get
+            {
+                FileInfo fileInfo = new FileInfo(this.FilePath);
+                if (fileInfo.Exists)
+                {
+                    return Utils.BytesToString(fileInfo.Length);
+                }
+                else
+                {
+                    return string.Empty;
+                }
+            }
+        }
+
+        public abstract DateTime? LastWriteTime { get; }
 
         /// <summary>
         /// Gets the colour to use for the Name of this file.

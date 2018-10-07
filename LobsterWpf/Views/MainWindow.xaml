@@ -11,7 +11,6 @@
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto"/>
       <RowDefinition Height="*"/>
-      <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
 
     <Grid Grid.Row="0">
@@ -40,35 +39,5 @@
       </TabControl.ContentTemplate>-->
     </TabControl>
     <!--<local:ConnectionControl x:Name="PrimaryConnectionControl" Grid.Row="1" IsEnabled="{Binding IsEnabled, FallbackValue=false}"/>-->
-    <Grid Grid.Row="2">
-      <StatusBar DataContext="{Binding SelectedFileNode}">
-        <StatusBar.ItemsPanel>
-          <ItemsPanelTemplate>
-            <Grid>
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="50" />
-              </Grid.ColumnDefinitions>
-            </Grid>
-          </ItemsPanelTemplate>
-        </StatusBar.ItemsPanel>
-        <StatusBarItem Grid.Column="0">
-          <TextBlock Text="{Binding FilePath}"/>
-        </StatusBarItem>
-        <StatusBarItem Grid.Column="1" HorizontalContentAlignment="Right">
-          <TextBlock>
-            <TextBlock.Text>
-              <MultiBinding StringFormat="Last Modified: {0:MM/dd/yyyy}">
-                <Binding Path="LastWriteTime" />
-              </MultiBinding>
-            </TextBlock.Text>
-          </TextBlock>
-        </StatusBarItem>
-        <StatusBarItem Grid.Column="2" HorizontalContentAlignment="Right">
-          <TextBlock Text="{Binding FileSize}"/>
-        </StatusBarItem>
-      </StatusBar>
-    </Grid>
   </Grid>
 </Window>
