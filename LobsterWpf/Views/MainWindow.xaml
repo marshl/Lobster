@@ -27,6 +27,7 @@
         </MenuItem>
         <MenuItem Header="_View">
           <MenuItem Header="_Options" Click="OptionsMenuItem_Click"/>
+          <MenuItem Header="Check for _Updates" Click="CheckForUpdatesMenuItem_Click"/>
           <MenuItem Header="View _Log" Click="ViewLogMenuItem_Click"/>
         </MenuItem>
       </Menu>

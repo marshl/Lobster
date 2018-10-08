@@ -201,40 +201,53 @@ namespace LobsterWpf.Views
             this.notifyIcon.Visible = true;
 
 #if !DEBUG
-            this.UpdateCheck();
+            this.UpdateCheck(true);
 #endif
         }
 
         /// <summary>
-        /// PErforms an update check, and closes the program if an update is found.
+        /// Performs an update check, and closes the program if an update is found.
         /// </summary>
-        private void UpdateCheck()
+        /// <param name="backgroundCheck">WHether this update should be run in the background and hide the failure warning from the user.</param>
+        private void UpdateCheck(bool backgroundCheck)
         {
             GitHubUpdater updater = new GitHubUpdater("marshl", "lobster");
             Thread thread = new Thread(() =>
             {
-                bool updateExists = updater.RunUpdateCheck();
-                if (!updateExists)
+                try
                 {
-                    return;
+                    bool updateExists = updater.RunUpdateCheck();
+                    if (!updateExists)
+                    {
+                        if (!backgroundCheck)
+                        {
+                            System.Windows.Forms.MessageBox.Show("No update available");
+                        }
+
+                        return;
+                    }
+
+                    DialogResult result = System.Windows.Forms.MessageBox.Show("A newer version is available. Would you like to update now?", "Update Available", MessageBoxButtons.OKCancel);
+                    if (result != System.Windows.Forms.DialogResult.OK)
+                    {
+                        return;
+                    }
+
+                    updater.PrepareUpdate();
+
+                    // The DownloadUpdateWindow begins the update once opened
+                    this.Dispatcher.Invoke((Action)delegate
+                    {
+                        DownloadUpdateWindow window = new DownloadUpdateWindow(updater);
+                        window.Owner = this;
+                        updater.DownloadClient.DownloadFileCompleted += DownloadClient_DownloadFileCompleted;
+                        window.ShowDialog();
+                    });
                 }
-
-                DialogResult result = System.Windows.Forms.MessageBox.Show("A newer version is available. Would you like to update now?", "Update Available", MessageBoxButtons.OKCancel);
-                if (result != System.Windows.Forms.DialogResult.OK)
+                catch (Exception ex)
                 {
-                    return;
+                    System.Windows.Forms.MessageBox.Show("Error", $"An error occurred when checking for updates: {ex}");
                 }
-
-                updater.PrepareUpdate();
-
-                // The DownloadUpdateWindow begins the update once opened
-                this.Dispatcher.Invoke((Action)delegate
-                {
-                    DownloadUpdateWindow window = new DownloadUpdateWindow(updater);
-                    window.Owner = this;
-                    updater.DownloadClient.DownloadFileCompleted += DownloadClient_DownloadFileCompleted;
-                    window.ShowDialog();
-                });
             });
 
             thread.Start();
@@ -298,6 +311,16 @@ namespace LobsterWpf.Views
             SettingsWindow window = new SettingsWindow();
             window.Owner = this;
             bool? result = window.ShowDialog();
+        }
+
+        /// <summary>
+        /// The event called when the check for updates button is clicked
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The evnet arguments</param>
+        private void CheckForUpdatesMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            this.UpdateCheck(false);
         }
 
         /// <summary>
