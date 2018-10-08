@@ -65,7 +65,7 @@ namespace LobsterWpf.ViewModels
             /// Used if the file does not have a database equivalent
             /// </summary>
             LocalOnly,
-            
+
             /// <summary>
             /// used if there was an error checking the synchronisation status
             /// </summary>
@@ -134,7 +134,7 @@ namespace LobsterWpf.ViewModels
                 }
             }
         }
-       
+
         /// <summary>
         /// Gets the last synchronisation error that occurred when checking the sync status of this file.
         /// </summary>
@@ -236,25 +236,33 @@ namespace LobsterWpf.ViewModels
         /// </summary>
         /// <param name="connectionView">The connection to the database.</param>
         /// <param name="watcherView">The parent directory watcher.</param>
+        public void UpdateSyncStatus(ConnectionView connectionView, DirectoryWatcherView watcherView)
+        {
+            try
+            {
+                this.LastSyncError = null;
+                this.SyncStatus = SynchronisationStatus.Unknown;
+                bool result = this.WatchedFile.IsSynchonisedWithDatabase(connectionView.BaseConnection, watcherView.BaseWatcher);
+                this.SyncStatus = result ? SynchronisationStatus.Synchronised : SynchronisationStatus.LocalOnly;
+            }
+            catch (FileSynchronisationCheckException ex)
+            {
+                this.LastSyncError = ex;
+                this.SyncStatus = SynchronisationStatus.Error;
+            }
+        }
+
+        /// <summary>
+        /// Checks the synchronisation status of this file with the database.
+        /// </summary>
+        /// <param name="connectionView">The connection to the database.</param>
+        /// <param name="watcherView">The parent directory watcher.</param>
         public override void CheckFileSynchronisation(ConnectionView connectionView, DirectoryWatcherView watcherView)
         {
-            var th = new Thread(() =>
+            ThreadPool.QueueUserWorkItem((object state) =>
             {
-                try
-                {
-                    this.LastSyncError = null;
-                    this.SyncStatus = SynchronisationStatus.Unknown;
-                    bool result = this.WatchedFile.IsSynchonisedWithDatabase(connectionView.BaseConnection, watcherView.BaseWatcher);
-                    this.SyncStatus = result ? SynchronisationStatus.Synchronised : SynchronisationStatus.LocalOnly;
-                }
-                catch (FileSynchronisationCheckException ex)
-                {
-                    this.LastSyncError = ex;
-                    this.SyncStatus = SynchronisationStatus.Error;
-                }
+                UpdateSyncStatus(connectionView, watcherView);
             });
-
-            th.Start();
         }
     }
 }
