@@ -48,9 +48,7 @@
         <GridSplitter x:Name="gridSplitter1" HorizontalAlignment="Left" Width="5" Grid.Column="2"/>
         <TreeView Grid.Column="1" Name="fileTree" SelectedItemChanged="FileTree_SelectedItemChanged" Background="{StaticResource BackgroundKey}" ItemsSource="{Binding}">
           <TreeView.ItemContainerStyle>
-            <Style TargetType="{x:Type TreeViewItem}">
-              <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
-            </Style>
+            <Style TargetType="{x:Type TreeViewItem}"/>
           </TreeView.ItemContainerStyle>
           <TreeView.ItemTemplate>
             <HierarchicalDataTemplate ItemsSource="{Binding Path=ChildNodes}">
