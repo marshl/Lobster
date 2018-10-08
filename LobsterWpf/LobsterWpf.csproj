@@ -118,6 +118,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="BooleanAndConverter.cs" />
     <Compile Include="ViewModels\CodeSourceConfigView.cs" />
     <Compile Include="ViewModels\ConnectionConfigView.cs" />
     <Compile Include="ViewModels\DirectoryWatcherView.cs" />

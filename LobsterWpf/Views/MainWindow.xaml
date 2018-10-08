@@ -32,12 +32,6 @@
       </Menu>
     </Grid>
     <TabControl x:Name="ConnectionTabControl" Grid.Row="1" Background="{StaticResource BackgroundKey}">
-      <!--<TabControl.ContentTemplate>
-        <DataTemplate>
-          <local:ConnectionControl x:Name="PrimaryConnectionControl"/>
-        </DataTemplate>
-      </TabControl.ContentTemplate>-->
     </TabControl>
-    <!--<local:ConnectionControl x:Name="PrimaryConnectionControl" Grid.Row="1" IsEnabled="{Binding IsEnabled, FallbackValue=false}"/>-->
   </Grid>
 </Window>

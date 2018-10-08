@@ -16,6 +16,7 @@
 //-----------------------------------------------------------------------
 namespace LobsterWpf.ViewModels
 {
+    using System;
     using LobsterModel;
 
     /// <summary>
@@ -67,6 +68,17 @@ namespace LobsterWpf.ViewModels
             get
             {
                 return System.IO.Directory.Exists(this.BaseWatcher.DirectoryPath);
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this directory allows files to be deleted
+        /// </summary>
+        public bool CanDelete
+        {
+            get
+            {
+                return !string.IsNullOrEmpty(this.BaseWatcher.Descriptor.DeleteStatement);
             }
         }
     }

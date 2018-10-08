@@ -3,9 +3,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:root="clr-namespace:LobsterWpf"
              xmlns:local="clr-namespace:LobsterWpf.Views"
              mc:Ignorable="d" MinHeight="325" MinWidth="600">
-
+  <UserControl.Resources>
+    <root:BooleanAndConverter x:Key="BooleanAndConverter"/>
+  </UserControl.Resources>
   <Grid>
     <Grid.RowDefinitions>
       <RowDefinition Height="*"/>
@@ -90,7 +93,14 @@
               <TextBlock HorizontalAlignment="Center" MinHeight="15" VerticalAlignment="Bottom">Insert</TextBlock>
             </StackPanel>
           </Button>
-          <Button x:Name="deleteButton" Grid.Column="0" Height="65" Click="DeleteButton_Click" IsEnabled="{Binding Path=SelectedNode.CanBeDeleted, FallbackValue=false}" ToolTip="Deletes the database record for the file.">
+
+          <Button x:Name="deleteButton" Grid.Column="0" Height="65" Click="DeleteButton_Click" ToolTip="Deletes the database record for the file.">
+            <Button.IsEnabled>
+              <MultiBinding Converter="{StaticResource BooleanAndConverter}">
+                <Binding Path="SelectedNode.CanBeDeleted" FallbackValue="False"/>
+                <Binding Path="SelectedDirectoryWatcher.CanDelete" FallbackValue="False"/>
+              </MultiBinding>
+            </Button.IsEnabled>
             <StackPanel>
               <Image Source="{DynamicResource DeleteImageSource}" VerticalAlignment="Top" Height="30"/>
               <TextBlock HorizontalAlignment="Center" MinHeight="15" VerticalAlignment="Bottom">Delete</TextBlock>
