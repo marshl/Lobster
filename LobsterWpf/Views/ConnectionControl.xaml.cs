@@ -63,6 +63,11 @@ namespace LobsterWpf.Views
         public MainWindow ParentWindow { get; }
 
         /// <summary>
+        /// Gets or sets the <see cref="TabItem"/> that this connection control is part of
+        /// </summary>
+        public TabItem TabItem { get; set; }
+
+        /// <summary>
         /// Clears the file list and populates with the files of the currently selected clob directory.
         /// </summary>
         /// <param name="fullRebuild">WHether a full rebuild of the file list needs to be performed.</param>
@@ -109,6 +114,26 @@ namespace LobsterWpf.Views
         private void ReloadLobsterTypesMenuItem_Click(object sender, FileSystemEventArgs e)
         {
             this.ReloadLobsterTypes();
+        }
+
+        /// <summary>
+        /// The handler of the event when the Disconnect button is clicked
+        /// </summary>
+        /// <param name="sender">Teh sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void DisconnectButton_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult result = System.Windows.MessageBox.Show(
+                   $"Are you sure you want to disconnect from {this.ConnectionView.BaseConnection.Config.Name}?",
+                   "Disconnect",
+                   MessageBoxButton.OKCancel);
+
+            if (result != MessageBoxResult.OK)
+            {
+                return;
+            }
+
+            this.ParentWindow.CloseConnection(this);
         }
 
         /// <summary>

@@ -11,11 +11,31 @@
   </UserControl.Resources>
   <Grid>
     <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
       <RowDefinition Height="*"/>
       <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
-
-    <Grid Grid.Row="0" IsEnabled="{Binding IsEnabled, FallbackValue=false}">
+    <StackPanel Grid.Row="0" Background="{StaticResource BackgroundKey}" Orientation="Horizontal">
+      <Button Width="85" Margin="0" Click="PushButton_Click" IsEnabled="{Binding Path=SelectedNode.CanBeUpdated, FallbackValue=false}" ToolTip="Updates the database file with the version on your computer.">
+        <StackPanel>
+          <Image Source="{DynamicResource PushImageSource}" VerticalAlignment="Top" Height="30"/>
+          <TextBlock HorizontalAlignment="Center" MinHeight="15" VerticalAlignment="Bottom">Push</TextBlock>
+        </StackPanel>
+      </Button>
+      <Button Width="85" Click="PullButton_Click" IsEnabled="{Binding Path=SelectedNode.CanBeDownloaded, FallbackValue=false}" ToolTip="Downloads the file from the database and opens it.">
+        <StackPanel>
+          <Image Source="{DynamicResource PullImageSource}" VerticalAlignment="Top" Height="30"/>
+          <TextBlock HorizontalAlignment="Center" MinHeight="15" VerticalAlignment="Bottom">Pull</TextBlock>
+        </StackPanel>
+      </Button>
+      <Button Width="85" Click="DisconnectButton_Click" ToolTip="Closes the current connection.">
+        <StackPanel>
+          <Image Source="{DynamicResource FileNotFoundImageSource}" VerticalAlignment="Top" Height="30"/>
+          <TextBlock HorizontalAlignment="Center" MinHeight="11" VerticalAlignment="Bottom" FontSize="12">Disconnect</TextBlock>
+        </StackPanel>
+      </Button>
+    </StackPanel>
+    <Grid Grid.Row="1" IsEnabled="{Binding IsEnabled, FallbackValue=false}">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="1*"/>
         <ColumnDefinition Width="3*"/>
@@ -144,7 +164,7 @@
         </Grid>
       </Grid>
     </Grid>
-    <Grid Grid.Row="1">
+    <Grid Grid.Row="2">
       <StatusBar DataContext="{Binding SelectedNode}">
         <StatusBar.ItemsPanel>
           <ItemsPanelTemplate>

@@ -123,6 +123,18 @@ namespace LobsterWpf.Views
         }
 
         /// <summary>
+        /// Closes the given connection and removes it from the list of tabs
+        /// </summary>
+        /// <param name="connectionControl">The connectio ncontrol to close</param>
+        public void CloseConnection(ConnectionControl connectionControl)
+        {
+            connectionControl.Dispose();
+            this.ConnectionTabControl.Items.Remove(connectionControl.TabItem);
+            this.connectionControlList.Remove(connectionControl);
+            connectionControl.Dispose();
+        }
+
+        /// <summary>
         /// The method that is called when the window is initialised.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
@@ -157,12 +169,14 @@ namespace LobsterWpf.Views
                 ConnectionControl control = new ConnectionControl(connectionView, this);
 
                 this.connectionControlList.Add(control);
-                this.ConnectionTabControl.Items.Add(new TabItem()
+                var tabItem = new TabItem()
                 {
                     Content = control,
                     Header = connectionView.BaseConnection.Config.Name,
                     IsSelected = true
-                });
+                };
+                this.ConnectionTabControl.Items.Add(tabItem);
+                control.TabItem = tabItem;
             }
         }
 
