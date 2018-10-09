@@ -667,6 +667,7 @@ namespace LobsterModel
                     // Binary mode
                     if (command.ContainsParameter(FileContentBlobParameterName))
                     {
+                        fs.Position = 0;
                         byte[] fileData = new byte[fs.Length];
                         fs.Read(fileData, 0, Convert.ToInt32(fs.Length));
 
@@ -680,6 +681,7 @@ namespace LobsterModel
                     if (command.ContainsParameter(FileContentClobParameterName))
                     {
                         // Text mode
+                        fs.Position = 0;
                         var tr = new StreamReader(fs);
 
                         string contents = tr.ReadToEnd();
