@@ -22,12 +22,6 @@
           <TextBlock TextAlignment="Center" VerticalAlignment="Bottom" FontSize="12" Width="85" Text="{Binding Path=AutoUpdateText}"/>
         </StackPanel>
       </Button>
-      <Button Width="85" Click="PullButton_Click" IsEnabled="{Binding Path=SelectedNode.CanBeDownloaded, FallbackValue=false}" ToolTip="Downloads the file from the database and opens it.">
-        <StackPanel>
-          <Image Source="{DynamicResource PullImageSource}" VerticalAlignment="Top" Height="30"/>
-          <TextBlock HorizontalAlignment="Center" MinHeight="15" VerticalAlignment="Bottom" FontSize="12">Requery</TextBlock>
-        </StackPanel>
-      </Button>
       <Button Width="85" Click="ReloadLobsterTypesMenuItem_Click" ToolTip="Reload the configuration files.">
         <StackPanel>
           <Image Source="{DynamicResource RefreshImageSource}" VerticalAlignment="Top" Height="30"/>
