@@ -173,5 +173,14 @@ namespace LobsterWpf.ViewModels
                 child.CheckFileSynchronisation(connectionView, watcherView);
             }
         }
+
+        /// <summary>
+        /// Refreshes the cache of backup files from the backup directory.
+        /// </summary>
+        /// <param name="connectionView">The connection view of this directory</param>
+        public override void RefreshBackupList(ConnectionView connectionView)
+        {
+            return;
+        }
     }
 }

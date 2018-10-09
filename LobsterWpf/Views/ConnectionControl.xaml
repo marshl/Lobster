@@ -141,7 +141,7 @@
               </MultiBinding>
             </TextBlock.Text>
           </TextBlock>
-          <ListBox ItemsSource="{Binding SelectedFileNode.FileBackupList}" Grid.Row="1">
+          <ListBox ItemsSource="{Binding SelectedNode.FileBackupList}" Grid.Row="1">
             <ListBox.ItemContainerStyle>
               <Style TargetType="{x:Type ListBoxItem}">
                 <Setter Property="Focusable" Value="False"/>
@@ -150,9 +150,6 @@
             <ListBox.ItemTemplate>
               <DataTemplate>
                 <StackPanel Orientation="Horizontal">
-                  <Button Click="PushBackupButton_Click">
-                    <Image Source="{DynamicResource PushImageSource}" Width="25"/>
-                  </Button>
                   <Button Click="OpenBackupButton_Click">
                     <Image Source="{DynamicResource FolderImageSource}" Width="25"/>
                   </Button>

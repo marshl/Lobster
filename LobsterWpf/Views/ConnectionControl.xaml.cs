@@ -191,7 +191,8 @@ namespace LobsterWpf.Views
             }
 
             this.DisplayUpdateNotification(filepath, true);
-            fileView.WatchedFile.RefreshBackupList(this.ConnectionView.BaseConnection.Config.Parent);
+
+            fileView.RefreshBackupList(this.ConnectionView);
         }
 
         /// <summary>
@@ -326,6 +327,7 @@ namespace LobsterWpf.Views
         private void FileTree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             this.ConnectionView.SelectedNode = (WatchedNodeView)e.NewValue;
+            this.ConnectionView.SelectedNode?.RefreshBackupList(this.ConnectionView);
         }
 
         /// <summary>
@@ -348,29 +350,7 @@ namespace LobsterWpf.Views
                 this.ParentWindow.PlayFailureSound();
             }
         }
-
-        /// <summary>
-        /// The event for when the push file button is clicked.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments.</param>
-        private void PushBackupButton_Click(object sender, EventArgs e)
-        {
-            /*FileBackup fileBackup = ((FrameworkElement)sender).DataContext as FileBackup;
-            var clobDirView = (ClobDirectoryView)this.clobTypeListBox.SelectedItem;
-            try
-            {
-                this.connectionView.Connection.UpdateClobWithExternalFile(clobDirView.BaseClobDirectory, fileBackup.OriginalFilename, fileBackup.BackupFilename);
-            }
-            catch (FileUpdateException)
-            {
-                this.DisplayUpdateNotification(fileBackup.BackupFilename, false);
-                return;
-            }
-
-            this.DisplayUpdateNotification(fileBackup.BackupFilename, true);*/
-        }
-
+        
         /// <summary>
         /// The callback for when the last file event in the event queue is processed.
         /// </summary>

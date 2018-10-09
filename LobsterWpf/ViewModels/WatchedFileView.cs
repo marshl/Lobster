@@ -18,6 +18,7 @@ namespace LobsterWpf.ViewModels
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.IO;
     using System.Linq;
     using System.Text;
@@ -263,6 +264,25 @@ namespace LobsterWpf.ViewModels
             {
                 UpdateSyncStatus(connectionView, watcherView);
             });
+        }
+
+        /// <summary>
+        /// Refreshes the cache of backup files from the backup directory.
+        /// </summary>
+        /// <param name="connectionView">The connection view of this directory</param>
+        public override void RefreshBackupList(ConnectionView connectionView)
+        {
+            // Don't retreive backups for database only files.
+            if (this.FilePath == null)
+            {
+                return;
+            }
+
+            List<FileBackup> fileBackups = BackupLog.GetBackupsForFile(connectionView.BaseConnection.Config.Parent.CodeSourceDirectory, this.FilePath);
+            if (fileBackups != null)
+            {
+                this.FileBackupList = new ObservableCollection<FileBackup>(fileBackups.OrderByDescending(backup => backup.DateCreated));
+            }
         }
     }
 }

@@ -17,8 +17,10 @@
 namespace LobsterWpf.ViewModels
 {
     using System;
+    using System.Collections.ObjectModel;
     using System.ComponentModel;
     using System.IO;
+    using System.Windows;
     using System.Windows.Media;
     using LobsterModel;
 
@@ -27,6 +29,11 @@ namespace LobsterWpf.ViewModels
     /// </summary>
     public abstract class WatchedNodeView : INotifyPropertyChanged
     {
+        /// <summary>
+        /// The list of views of backup records (if the file is synchronised);
+        /// </summary>
+        private ObservableCollection<FileBackup> fileBackupList;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="WatchedNodeView"/> class.
         /// </summary>
@@ -88,6 +95,24 @@ namespace LobsterWpf.ViewModels
         }
 
         /// <summary>
+        /// Gets or sets the collection of backup records.
+        /// </summary>
+        public ObservableCollection<FileBackup> FileBackupList
+        {
+            get
+            {
+                Application.Current.FindResource("FolderImageSource");
+                return this.fileBackupList;
+            }
+
+            set
+            {
+                this.fileBackupList = value;
+                this.NotifyPropertyChanged("FileBackupList");
+            }
+        }
+
+        /// <summary>
         /// Gets the last write time of the watched node (if possible)
         /// </summary>
         public abstract DateTime? LastWriteTime { get; }
@@ -139,6 +164,12 @@ namespace LobsterWpf.ViewModels
         /// <param name="watcherView">The parent directory for this node.</param>
         public abstract void CheckFileSynchronisation(ConnectionView connectionView, DirectoryWatcherView watcherView);
 
+        /// <summary>
+        /// Refreshes the cache of backup files from the backup directory.
+        /// </summary>
+        /// <param name="connectionView">The connection view of this directory</param>
+        public abstract void RefreshBackupList(ConnectionView connectionView);
+    
         /// <summary>
         /// Notifies that a property has changed
         /// </summary>
