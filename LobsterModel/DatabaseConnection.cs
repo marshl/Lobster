@@ -329,12 +329,15 @@ namespace LobsterModel
 
                 trans.Commit();
                 MessageLog.LogInfo($"Clob file update successful: {filepath}");
-                return;
             }
             catch (Exception ex)
             {
                 MessageLog.LogError($"Clob update failed for command: {oracleCommand.CommandText} {ex}");
                 throw new FileUpdateException($"An invalid operation occurred when updating the database: {ex.Message}", ex);
+            }
+            finally
+            {
+                trans.Dispose();
             }
         }
 
