@@ -20,11 +20,6 @@
           <Separator/>
           <MenuItem Header="_Exit" Click="ExitMenuItem_Click" />
         </MenuItem>
-        <MenuItem Header="_Connection" IsEnabled="{Binding Path=IsEnabled, FallbackValue=false}">
-          <MenuItem Header="_Update Files Automatically" IsCheckable="True" IsChecked="{Binding Path=IsAutoUpdateEnabled, FallbackValue=True}" IsEnabled="{Binding Path=Connection.Config.AllowAutomaticUpdates}"/>
-          <MenuItem Header="_Requery Database" Click="RequeryDatabaseMenuItem_Click"/>
-          <MenuItem Header="Reload _Lobster Types" Click="ReloadLobsterTypesMenuItem_Click"/>
-        </MenuItem>
         <MenuItem Header="_View">
           <MenuItem Header="_Options" Click="OptionsMenuItem_Click"/>
           <MenuItem Header="Check for _Updates" Click="CheckForUpdatesMenuItem_Click"/>
