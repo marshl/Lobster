@@ -183,8 +183,9 @@ namespace LobsterWpf.Views
             {
                 this.ConnectionView.BaseConnection.UpdateDatabaseFile(this.ConnectionView.SelectedDirectoryWatcher.BaseWatcher, filepath);
             }
-            catch (FileUpdateException)
+            catch (FileUpdateException ex)
             {
+                System.Windows.MessageBox.Show($"An exception occurred when pushing the file: {ex}");
                 this.DisplayUpdateNotification(filepath, false);
                 return;
             }
