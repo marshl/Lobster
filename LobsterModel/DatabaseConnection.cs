@@ -94,6 +94,11 @@ namespace LobsterModel
         private const string FileContentBlobParameterName = "p_file_content_blob";
 
         /// <summary>
+        /// The parameter for the footer message placed at the bottom of some files
+        /// </summary>
+        private const string FooterMessageParameterName = "p_footer_message";
+
+        /// <summary>
         /// The file watcher for the directory where the clob types are stored.
         /// </summary>
         private FileSystemWatcher clobTypeFileWatcher;
@@ -689,12 +694,6 @@ namespace LobsterModel
 
                         string contents = tr.ReadToEnd();
 
-                        if (Settings.Default.AppendFooterToDatabaseFiles)
-                        {
-                            // TODO: Add Clob Footer Message
-                            // contents += MimeTypeList.GetClobFooterMessage(mimeType);
-                        }
-
                         OracleParameter param = new OracleParameter();
                         param.OracleDbType = OracleDbType.Clob;
                         param.Value = contents;
@@ -703,6 +702,19 @@ namespace LobsterModel
                         command.Parameters.Add(param);
                     }
                 }
+            }
+
+            if (command.ContainsParameter(FooterMessageParameterName))
+            {
+                string footer = Settings.Default.AppendFooterToDatabaseFiles ?
+                                $" Last clobbed by user {Environment.UserName}"
+                              + $" on machine {Environment.MachineName}"
+                              + $" at {DateTime.Now}"
+                              + $" (Lobster build {Utils.RetrieveLinkerTimestamp().ToShortDateString()})" : string.Empty;
+                var param = new OracleParameter();
+                param.ParameterName = FooterMessageParameterName;
+                param.Value = footer;
+                command.Parameters.Add(param);
             }
 
             foreach (OracleParameter parameter in command.Parameters)
