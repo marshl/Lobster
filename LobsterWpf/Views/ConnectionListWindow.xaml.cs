@@ -348,19 +348,6 @@ namespace LobsterWpf.Views
         }
 
         /// <summary>
-        /// The event that is called when the edit clob type button is clicked.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments.</param>
-        private void EditClobTypeButton_Click(object sender, RoutedEventArgs e)
-        {
-            /*ClobTypeListWindow window = new ClobTypeListWindow(this.CurrentConfigView.ClobTypeDirectory);
-            window.Owner = this;
-            bool? result = window.ShowDialog();
-            this.Focus();*/
-        }
-
-        /// <summary>
         /// The event that is called when the Cancel button for the config settings is clicked.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
