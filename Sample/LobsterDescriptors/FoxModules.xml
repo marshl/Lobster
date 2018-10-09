@@ -5,6 +5,7 @@
   <IncludeSubDirectories>true</IncludeSubDirectories>
   <PushOnFileChange>true</PushOnFileChange>
   <InsertStatement>
+<![CDATA[
 DECLARE
   l_filename VARCHAR2(4000) := :p_filename_without_extension;
   l_file_extension VARCHAR2(4000) := :p_file_extension;
@@ -17,9 +18,7 @@ DECLARE
 BEGIN
 
   IF l_filename = 'fox_import' THEN
-  
     l_component_name := 'Fox/fox_import';
-    
   ELSE
     
     l_component_name := 
@@ -34,6 +33,10 @@ BEGIN
   l_is_binary_file := CASE
    WHEN :p_mime_type LIKE 'image%' THEN 'Y' 
    ELSE 'N' END;
+   
+  IF l_file_extension = '.xml' THEN 
+    l_file_content_clob := l_file_content_clob || '<!-- ' || :p_footer_message || ' -->';
+  END IF;
   
   INSERT INTO envmgr.fox_components (
     name
@@ -48,8 +51,10 @@ BEGIN
   );
   
 END;
+]]>
   </InsertStatement>
   <UpdateStatement>
+<![CDATA[
 DECLARE
   l_filename VARCHAR2(4000) := :p_filename_without_extension;
   l_file_extension VARCHAR2(4000) := :p_file_extension;
@@ -62,9 +67,7 @@ DECLARE
 BEGIN
 
   IF l_filename = 'fox_import' THEN
-  
     l_component_name := 'Fox/fox_import';
-    
   ELSE
     
     l_component_name :=
@@ -79,6 +82,10 @@ BEGIN
   l_is_binary_file := CASE
    WHEN :p_mime_type LIKE 'image%' THEN 'Y' 
    ELSE 'N' END;
+    
+  IF l_file_extension = '.xml' THEN 
+    l_file_content_clob := l_file_content_clob || '<!-- ' || :p_footer_message || ' -->';
+  END IF;
   
   UPDATE envmgr.fox_components
   SET
@@ -88,6 +95,7 @@ BEGIN
   AND type = :p_mime_type;
 
 END;
+]]>
   </UpdateStatement>
   <DeleteStatement>
 DECLARE
