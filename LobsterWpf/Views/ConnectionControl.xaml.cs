@@ -46,7 +46,7 @@ namespace LobsterWpf.Views
             this.ConnectionView.BaseConnection.FileProcessingFinishedEvent += this.OnFileProcessingFinished;
             this.ConnectionView.BaseConnection.StartChangeProcessingEvent += this.OnEventProcessingStart;
             this.ConnectionView.BaseConnection.UpdateCompleteEvent += this.OnAutoUpdateComplete;
-            this.ConnectionView.BaseConnection.ClobTypeChangedEvent += this.ReloadLobsterTypesMenuItem_Click;
+            this.ConnectionView.BaseConnection.ClobTypeChangedEvent += this.OnReloadLobsterTypes;
 
             this.DataContext = this.ConnectionView;
             this.ReloadLobsterTypes();
@@ -111,7 +111,7 @@ namespace LobsterWpf.Views
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">The event arguments.</param>
-        private void ReloadLobsterTypesMenuItem_Click(object sender, FileSystemEventArgs e)
+        private void ReloadLobsterTypesMenuItem_Click(object sender, EventArgs e)
         {
             this.ReloadLobsterTypes();
         }
@@ -416,6 +416,16 @@ namespace LobsterWpf.Views
         }
 
         /// <summary>
+        /// The callback for when all lobsters need to be reloaded
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="args">The file system arguments (which file was updated)</param>
+        private void OnReloadLobsterTypes(object sender, FileSystemEventArgs args)
+        {
+            this.ReloadLobsterTypes();
+        }
+
+        /// <summary>
         /// The event for when the open file button is clicked.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
@@ -424,6 +434,19 @@ namespace LobsterWpf.Views
         {
             FileBackup fileBackup = ((FrameworkElement)sender).DataContext as FileBackup;
             Utils.OpenFileInExplorer(fileBackup.BackupFilename);
+        }
+
+        /// <summary>
+        /// The event for thwne the toggle auto-updating button is clicked
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void OnToggleAutoUpdateButton_Click(object sender, EventArgs e)
+        {
+            if (this.ConnectionView.CanAutoUpdate)
+            {
+                this.ConnectionView.IsAutoUpdateEnabled = !this.ConnectionView.IsAutoUpdateEnabled;
+            }
         }
     }
 }

@@ -27,6 +27,7 @@ namespace LobsterWpf.ViewModels
     using System;
     using System.Collections.ObjectModel;
     using System.ComponentModel;
+    using System.Windows.Media;
     using LobsterModel;
 
     /// <summary>
@@ -145,6 +146,42 @@ namespace LobsterWpf.ViewModels
             {
                 this.BaseConnection.IsAutomaticClobbingEnabled = value;
                 this.NotifyPropertyChanged("IsAutoUpdateEnabled");
+                this.NotifyPropertyChanged("AutoUpdateImageSource");
+                this.NotifyPropertyChanged("AutoUpdateText");
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this connection support auto-updating
+        /// </summary>
+        public bool CanAutoUpdate
+        {
+            get
+            {
+                return this.BaseConnection.Config.AllowAutomaticClobbing;
+            }
+        }
+
+        /// <summary>
+        /// Gets the text used for the toggle auto-updating button
+        /// </summary>
+        public string AutoUpdateText
+        {
+            get
+            {
+                return this.IsAutoUpdateEnabled ? "Autopush On" : "Autopush Off";
+            }
+        }
+
+        /// <summary>
+        /// Gets the image tha is used to represent this file.
+        /// </summary>
+        public ImageSource AutoUpdateImageSource
+        {
+            get
+            {
+                string resourceName = this.IsAutoUpdateEnabled ? "PushGreenImageSource" : "PushGreyImageSource";
+                return (ImageSource)System.Windows.Application.Current.FindResource(resourceName);
             }
         }
 
