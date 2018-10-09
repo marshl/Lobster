@@ -30,7 +30,7 @@
       </Button>
       <Button Width="85" Click="ReloadLobsterTypesMenuItem_Click" ToolTip="Reload the configuration files.">
         <StackPanel>
-          <Image Source="{DynamicResource PullImageSource}" VerticalAlignment="Top" Height="30"/>
+          <Image Source="{DynamicResource RefreshImageSource}" VerticalAlignment="Top" Height="30"/>
           <TextBlock HorizontalAlignment="Center" MinHeight="15" VerticalAlignment="Bottom" FontSize="12">Reload</TextBlock>
         </StackPanel>
       </Button>

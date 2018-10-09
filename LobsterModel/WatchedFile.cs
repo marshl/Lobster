@@ -45,7 +45,6 @@ namespace LobsterModel
             if (fileInfo.Exists)
             {
                 this.FileLength = fileInfo.Length;
-                this.IsReadOnly = fileInfo.IsReadOnly;
             }
         }
 
@@ -62,7 +61,14 @@ namespace LobsterModel
         /// <summary>
         /// Gets a value indicating whether the file this node represents is read only.
         /// </summary>
-        public bool IsReadOnly { get; private set; }
+        public bool IsReadOnly
+        {
+            get
+            {
+                FileInfo fileInfo = new FileInfo(this.FilePath);
+                return fileInfo.Exists && fileInfo.IsReadOnly;
+            }
+        }
 
         /// <summary>
         /// Gets the number of bytes in this file.

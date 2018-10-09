@@ -839,7 +839,7 @@ namespace LobsterModel
                     this.OnEventProcessingStart();
                 }
 
-                this.fileEventQueue.Add(new FileChangeEvent(watcher, args));
+                this.fileEventQueue.Add(new FileChangeEvent(watcher, watchedFile, args));
 
                 if (this.eventProcessingTimer == null)
                 {
@@ -864,7 +864,7 @@ namespace LobsterModel
                 {
                     FileChangeEvent change = this.fileEventQueue[0];
                     this.fileEventQueue.RemoveAt(0);
-                    this.ProcessFileEvent(change.Watcher, change.EventArgs);
+                    this.ProcessFileEvent(change);
                 }
             }
 
@@ -875,17 +875,16 @@ namespace LobsterModel
         /// <summary>
         /// Processes a single file event. Sending a file update to the database if necessary.
         /// </summary>
-        /// <param name="watcher">The clob directory that the event was raised from.</param>
         /// <param name="e">The event to process.</param>
-        private void ProcessFileEvent(DirectoryWatcher watcher, FileSystemEventArgs e)
+        private void ProcessFileEvent(FileChangeEvent e)
         {
-            this.LogFileEvent($"Processing file event of type {e.ChangeType} for file {e.FullPath}");
+            this.LogFileEvent($"Processing file event of type {e.EventArgs.ChangeType} for file {e.EventArgs.FullPath}");
 
-            FileInfo fileInfo = new FileInfo(e.FullPath);
+            FileInfo fileInfo = new FileInfo(e.EventArgs.FullPath);
 
-            if (e.ChangeType != WatcherChangeTypes.Changed)
+            if (e.EventArgs.ChangeType != WatcherChangeTypes.Changed)
             {
-                this.LogFileEvent($"Unsupported file event {e.ChangeType}");
+                this.LogFileEvent($"Unsupported file event {e.EventArgs.ChangeType}");
                 return;
             }
 
@@ -897,35 +896,35 @@ namespace LobsterModel
 
             if (!fileInfo.Exists)
             {
-                this.LogFileEvent($"File could not be found {e.FullPath}");
+                this.LogFileEvent($"File could not be found {e.EventArgs.FullPath}");
                 return;
             }
 
             if (fileInfo.IsReadOnly)
             {
-                this.LogFileEvent($"File is read only and will be skipped {e.FullPath}");
+                this.LogFileEvent($"File is read only and will be skipped {e.EventArgs.FullPath}");
                 return;
             }
 
-            if (!watcher.Descriptor.PushOnFileChange)
+            if (!e.Watcher.Descriptor.PushOnFileChange)
             {
                 this.LogFileEvent("The ClobType does not allow autuomatic file updates, and the file will be skipped.");
                 return;
             }
 
-            this.LogFileEvent($"Auto-updating file {e.FullPath}");
+            this.LogFileEvent($"Auto-updating file {e.EventArgs.FullPath}");
 
             try
             {
-                this.UpdateDatabaseFile(watcher, e.FullPath);
+                this.UpdateDatabaseFile(e.Watcher, e.EventArgs.FullPath);
             }
             catch (Exception ex)
             {
-                this.OnAutoUpdateComplete(e.FullPath, false, ex);
+                this.OnAutoUpdateComplete(e.EventArgs.FullPath, false, ex);
                 return;
             }
 
-            this.OnAutoUpdateComplete(e.FullPath, true, null);
+            this.OnAutoUpdateComplete(e.EventArgs.FullPath, true, null);
         }
 
         /// <summary>
@@ -1012,10 +1011,12 @@ namespace LobsterModel
             /// Initializes a new instance of the <see cref="FileChangeEvent"/> class.
             /// </summary>
             /// <param name="watcher">The watcher.</param>
+            /// <param name="watchedFile">The file that the event is for.</param>
             /// <param name="args">The args.</param>
-            public FileChangeEvent(DirectoryWatcher watcher, FileSystemEventArgs args)
+            public FileChangeEvent(DirectoryWatcher watcher, WatchedFile watchedFile, FileSystemEventArgs args)
             {
                 this.Watcher = watcher;
+                this.WatchedFile = watchedFile;
                 this.EventArgs = args;
             }
 
@@ -1023,6 +1024,11 @@ namespace LobsterModel
             /// Gets the directory watcher under which the file was that triggered the event
             /// </summary>
             public DirectoryWatcher Watcher { get; }
+
+            /// <summary>
+            /// Gets the watched file that triggered this event
+            /// </summary>
+            public WatchedFile WatchedFile { get; }
 
             /// <summary>
             /// Gets the arguments of the file change event.

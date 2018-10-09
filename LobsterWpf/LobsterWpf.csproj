@@ -300,7 +300,7 @@
     <Resource Include="Resources\Images\112_Plus_Green.ico" />
     <None Include="Resources\Images\112_Plus_Grey.ico" />
     <None Include="Resources\Images\112_Plus_Orange.ico" />
-    <None Include="Resources\Images\112_RefreshArrow_Blue.ico" />
+    <Resource Include="Resources\Images\112_RefreshArrow_Blue.ico" />
     <None Include="Resources\Images\112_UpArrowLong_Blue.ico" />
     <None Include="Resources\Images\112_UpArrowLong_Green.ico" />
     <None Include="Resources\Images\112_UpArrowLong_Grey.ico" />

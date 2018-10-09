@@ -21,6 +21,7 @@
       <BitmapImage x:Key="LockedFileImageSource"      UriSource="/Lobster;component/Resources/Images/SecurityLock.ico"/>
       <BitmapImage x:Key="NormalFileImageSource"      UriSource="/Lobster;component/Resources/Images/Generic_Document.ico"/>
       <BitmapImage x:Key="FileNotFoundImageSource"    UriSource="/Lobster;component/Resources/Images/Annotate_Blocked_large.ico"/>
+      <BitmapImage x:Key="RefreshImageSource"         UriSource="/Lobster;component/Resources/Images/112_RefreshArrow_Blue.ico"/>
       <SolidColorBrush x:Key="BackgroundKey" Color="#FF181818" />
       <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="Themes/MetroDark/MetroDark.MSControls.Core.Implicit.xaml" />
