@@ -50,7 +50,7 @@ namespace LobsterWpf.ViewModels
         }
 
         /// <summary>
-        /// Gets the directory name of the clob type.
+        /// Gets the directory name of the directory descriptor.
         /// </summary>
         public string Directory
         {

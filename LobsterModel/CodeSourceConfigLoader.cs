@@ -48,7 +48,7 @@ namespace LobsterModel
         {
             try
             {
-                Directory.CreateDirectory(Path.Combine(directory, Settings.Default.ClobTypeDirectoryName));
+                Directory.CreateDirectory(Path.Combine(directory, Settings.Default.DirectoryDescriptorFolderName));
                 newConfig = new CodeSourceConfig();
                 newConfig.FileLocation = Path.Combine(directory, Settings.Default.DatabaseConfigFileName);
                 newConfig.Name = name;
@@ -109,10 +109,10 @@ namespace LobsterModel
                 return false;
             }
 
-            DirectoryInfo lobsterTypeFolder = new DirectoryInfo(Path.Combine(directory, Settings.Default.ClobTypeDirectoryName));
+            DirectoryInfo lobsterTypeFolder = new DirectoryInfo(Path.Combine(directory, Settings.Default.DirectoryDescriptorFolderName));
             if (!lobsterTypeFolder.Exists)
             {
-                errorMessage = $"The chosen folder must contain a directory named {Settings.Default.ClobTypeDirectoryName}";
+                errorMessage = $"The chosen folder must contain a directory named {Settings.Default.DirectoryDescriptorFolderName}";
                 return false;
             }
 

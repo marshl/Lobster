@@ -50,7 +50,7 @@ namespace LobsterModel
 
             if (!Directory.Exists(this.DirectoryPath))
             {
-                throw new ClobTypeLoadException($"The ClobDirectory {this.DirectoryPath} could not be found.");
+                throw new DirectoryDescriptorLoadException($"The ClobDirectory {this.DirectoryPath} could not be found.");
             }
 
             try
@@ -59,7 +59,7 @@ namespace LobsterModel
             }
             catch (ArgumentException ex)
             {
-                throw new ClobTypeLoadException("An error occurred when creating the FileSystemWatcher", ex);
+                throw new DirectoryDescriptorLoadException("An error occurred when creating the FileSystemWatcher", ex);
             }
 
             this.fileWatcher.IncludeSubdirectories = true;
@@ -82,7 +82,7 @@ namespace LobsterModel
         public string DirectoryPath { get; }
 
         /// <summary>
-        /// Gets the ClobType that controls this directory
+        /// Gets the DirectoryDescriptor that controls this directory
         /// </summary>
         public DirectoryDescriptor Descriptor { get; }
 

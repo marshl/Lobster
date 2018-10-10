@@ -75,17 +75,17 @@ namespace LobsterModel
         }
 
         /// <summary>
-        /// Loads the clob type with the given filepath and returns it.
+        /// Loads the directory descriptor with the given filepath and returns it.
         /// </summary>
         /// <param name="filePath">The full path of the file to load.</param>
         /// <param name="directoryDescriptor">The loaded directory descriptor.</param>
         /// <returns>True uf the descriptor was loaded successfully, otherwise false.</returns>
         public bool LoadDirectoryDescriptor(string filePath, out DirectoryDescriptor directoryDescriptor)
         {
-            MessageLog.LogInfo($"Loading ClobType {filePath}");
+            MessageLog.LogInfo($"Loading DirectoryDescriptor {filePath}");
             try
             {
-                string schema = Settings.Default.ClobTypeSchemaFilename;
+                string schema = Settings.Default.DirectoryDescriptorSchemaFilename;
                 XmlSerializer xmls = new XmlSerializer(typeof(DirectoryDescriptor));
                 using (FileStream stream = new FileStream(filePath, FileMode.Open))
                 {

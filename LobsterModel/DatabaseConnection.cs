@@ -34,7 +34,7 @@ namespace LobsterModel
     using Properties;
 
     /// <summary>
-    /// Used to define how a database should be connected to, and where the ClobTypes are stored for it.
+    /// Used to manage a connection from on code source to one database, with all the methods for comparing local files with those on the database and making changes to the database
     /// </summary>
     public class DatabaseConnection : IDisposable
     {
@@ -99,9 +99,9 @@ namespace LobsterModel
         private const string FooterMessageParameterName = "p_footer_message";
 
         /// <summary>
-        /// The file watcher for the directory where the clob types are stored.
+        /// The file watcher for the directory where the directory descriptors are stored.
         /// </summary>
-        private FileSystemWatcher clobTypeFileWatcher;
+        private FileSystemWatcher directoryDescriptorFileWatcher;
 
         /// <summary>
         /// The queue of events that have triggered. 
@@ -145,14 +145,14 @@ namespace LobsterModel
                 throw new CreateConnectionException($"Could not find CodeSource directory: {this.Config.Parent.CodeSourceDirectory}");
             }
 
-            this.clobTypeFileWatcher = new FileSystemWatcher(this.Config.Parent.DirectoryDescriptorFolder);
-            this.clobTypeFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.CreationTime;
-            this.clobTypeFileWatcher.Changed += new FileSystemEventHandler(this.OnClobTypeChangeEvent);
-            this.clobTypeFileWatcher.Created += new FileSystemEventHandler(this.OnClobTypeChangeEvent);
-            this.clobTypeFileWatcher.Deleted += new FileSystemEventHandler(this.OnClobTypeChangeEvent);
-            this.clobTypeFileWatcher.Renamed += new RenamedEventHandler(this.OnClobTypeChangeEvent);
+            this.directoryDescriptorFileWatcher = new FileSystemWatcher(this.Config.Parent.DirectoryDescriptorFolder);
+            this.directoryDescriptorFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.CreationTime;
+            this.directoryDescriptorFileWatcher.Changed += new FileSystemEventHandler(this.OnDirectoryDescriptorChangeEvent);
+            this.directoryDescriptorFileWatcher.Created += new FileSystemEventHandler(this.OnDirectoryDescriptorChangeEvent);
+            this.directoryDescriptorFileWatcher.Deleted += new FileSystemEventHandler(this.OnDirectoryDescriptorChangeEvent);
+            this.directoryDescriptorFileWatcher.Renamed += new RenamedEventHandler(this.OnDirectoryDescriptorChangeEvent);
 
-            this.clobTypeFileWatcher.EnableRaisingEvents = true;
+            this.directoryDescriptorFileWatcher.EnableRaisingEvents = true;
 
             this.OpenConnection();
         }
@@ -173,9 +173,9 @@ namespace LobsterModel
         public event EventHandler<FileUpdateCompleteEventArgs> UpdateCompleteEvent;
 
         /// <summary>
-        /// The event for when a ClobType in the LobsterTypes directory has changed.
+        /// The event for when a DirectoryDescriptor in their folder has changed.
         /// </summary>
-        public event EventHandler<FileSystemEventArgs> ClobTypeChangedEvent;
+        public event EventHandler<FileSystemEventArgs> DirectoryDescriptorChangeEvent;
 
         /// <summary>
         /// The event for when an error occurs when loading the directory descriptors
@@ -220,7 +220,7 @@ namespace LobsterModel
 
             if (!Directory.Exists(config.Parent.DirectoryDescriptorFolder))
             {
-                throw new CreateConnectionException($"The clob type directory {config.Parent.DirectoryDescriptorFolder} could not be found.");
+                throw new CreateConnectionException($"The Directory Descriptor directory {config.Parent.DirectoryDescriptorFolder} could not be found.");
             }
 
             try
@@ -283,7 +283,7 @@ namespace LobsterModel
                     dirWatcher.FileChangeEvent += this.OnDirectoryWatcherFileChangeEvent;
                     this.DirectoryWatcherList.Add(dirWatcher);
                 }
-                catch (ClobTypeLoadException ex)
+                catch (DirectoryDescriptorLoadException ex)
                 {
                     MessageLog.LogError($"An error occurred when loading the DirectoryDescriptor {dirDesc.Name}: {ex}");
                 }
@@ -542,10 +542,10 @@ namespace LobsterModel
                 return;
             }
 
-            if (this.clobTypeFileWatcher != null)
+            if (this.directoryDescriptorFileWatcher != null)
             {
-                this.clobTypeFileWatcher.Dispose();
-                this.clobTypeFileWatcher = null;
+                this.directoryDescriptorFileWatcher.Dispose();
+                this.directoryDescriptorFileWatcher = null;
             }
 
             if (this.DirectoryWatcherList != null)
@@ -799,17 +799,17 @@ namespace LobsterModel
         }
 
         /// <summary>
-        /// The listener for when a file is changed within the clob type directory.
+        /// The listener for when a file is changed within the directory descriptor folder.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="args">The arguments for the event.</param>
-        private void OnClobTypeChangeEvent(object sender, FileSystemEventArgs args)
+        private void OnDirectoryDescriptorChangeEvent(object sender, FileSystemEventArgs args)
         {
             lock (this.fileEventQueue)
             {
                 lock (this.fileEventProcessingSemaphore)
                 {
-                    this.ClobTypeChangedEvent?.Invoke(this, args);
+                    this.DirectoryDescriptorChangeEvent?.Invoke(this, args);
                 }
             }
         }
@@ -925,7 +925,7 @@ namespace LobsterModel
 
             if (!e.Watcher.Descriptor.PushOnFileChange)
             {
-                this.LogFileEvent("The ClobType does not allow autuomatic file updates, and the file will be skipped.");
+                this.LogFileEvent("The Directory Descriptor does not allow autuomatic file updates, and the file will be skipped.");
                 return;
             }
 

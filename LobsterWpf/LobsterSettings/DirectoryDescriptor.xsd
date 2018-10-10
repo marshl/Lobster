@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="DirectoryDescriptor" nillable="true" type="DirectoryDescriptor" />
+  <xs:complexType name="DirectoryDescriptor">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="1" name="Name" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="DirectoryName" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="SearchRules" type="ArrayOfSearchRule" />
+      <xs:element minOccurs="1" maxOccurs="1" name="PushOnFileChange" type="xs:boolean" />
+      <xs:element minOccurs="0" maxOccurs="1" name="DefaultDataType" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="InsertStatement" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="UpdateStatement" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="DeleteStatement" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="DatabaseFileExistsStatement" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="FetchStatement" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="FetchBinaryStatement" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="FileMimeTypeStatement" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="FileDataTypeStatement" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="FilePath" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ArrayOfSearchRule">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="SearchRule" nillable="true" type="SearchRule" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="SearchRule" abstract="true">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="1" name="Pattern" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ExcludeRule">
+    <xs:complexContent mixed="false">
+      <xs:extension base="SearchRule" />
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="IncludeRule">
+    <xs:complexContent mixed="false">
+      <xs:extension base="SearchRule" />
+    </xs:complexContent>
+  </xs:complexType>
+</xs:schema>

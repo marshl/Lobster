@@ -12,7 +12,7 @@ namespace LobsterModel.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.5.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.7.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -61,13 +61,13 @@ namespace LobsterModel.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("LobsterSettings/DatabaseConfig.xsd")]
-        public string DatabaseConfigSchemaFilename {
+        [global::System.Configuration.DefaultSettingValueAttribute("LobsterSettings/CodeSourceConfig.xsd")]
+        public string CodeSourceConfigSchemaFilename {
             get {
-                return ((string)(this["DatabaseConfigSchemaFilename"]));
+                return ((string)(this["CodeSourceConfigSchemaFilename"]));
             }
             set {
-                this["DatabaseConfigSchemaFilename"] = value;
+                this["CodeSourceConfigSchemaFilename"] = value;
             }
         }
         
@@ -80,18 +80,6 @@ namespace LobsterModel.Properties {
             }
             set {
                 this["TempFileDirectory"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("LobsterSettings/ClobType.xsd")]
-        public string ClobTypeSchemaFilename {
-            get {
-                return ((string)(this["ClobTypeSchemaFilename"]));
-            }
-            set {
-                this["ClobTypeSchemaFilename"] = value;
             }
         }
         
@@ -166,18 +154,6 @@ namespace LobsterModel.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("LobsterTypes")]
-        public string ClobTypeDirectoryName {
-            get {
-                return ((string)(this["ClobTypeDirectoryName"]));
-            }
-            set {
-                this["ClobTypeDirectoryName"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("LobsterConfig.xml")]
         public string DatabaseConfigFileName {
             get {
@@ -220,6 +196,18 @@ namespace LobsterModel.Properties {
             }
             set {
                 this["LogFileEvents"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("LobsterSettings/DirectoryDescriptor.xsd")]
+        public string DirectoryDescriptorSchemaFilename {
+            get {
+                return ((string)(this["DirectoryDescriptorSchemaFilename"]));
+            }
+            set {
+                this["DirectoryDescriptorSchemaFilename"] = value;
             }
         }
     }

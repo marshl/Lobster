@@ -413,11 +413,11 @@ namespace LobsterWpf.Views
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">The event arguments.</param>
-        private void ReloadLobsterTypesMenuItem_Click(object sender, EventArgs e)
+        private void ReloadDirectoryDescriptorsMenuItem_Click(object sender, EventArgs e)
         {
             foreach (ConnectionControl control in this.connectionControlList)
             {
-                control.ReloadLobsterTypes();
+                control.ReloadDirectoryDescriptors();
             }
         }
     }

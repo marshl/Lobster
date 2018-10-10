@@ -46,10 +46,10 @@ namespace LobsterWpf.Views
             this.ConnectionView.BaseConnection.FileProcessingFinishedEvent += this.OnFileProcessingFinished;
             this.ConnectionView.BaseConnection.StartChangeProcessingEvent += this.OnEventProcessingStart;
             this.ConnectionView.BaseConnection.UpdateCompleteEvent += this.OnAutoUpdateComplete;
-            this.ConnectionView.BaseConnection.ClobTypeChangedEvent += this.OnReloadLobsterTypes;
+            this.ConnectionView.BaseConnection.DirectoryDescriptorChangeEvent += this.OnReloadDirectoryDescriptors;
 
             this.DataContext = this.ConnectionView;
-            this.ReloadLobsterTypes();
+            this.ReloadDirectoryDescriptors();
         }
 
         /// <summary>
@@ -83,7 +83,7 @@ namespace LobsterWpf.Views
         /// <summary>
         /// Reloads the LobsterTypes for this connection
         /// </summary>
-        public void ReloadLobsterTypes()
+        public void ReloadDirectoryDescriptors()
         {
             this.Dispatcher.Invoke((MethodInvoker)delegate
             {
@@ -111,9 +111,9 @@ namespace LobsterWpf.Views
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">The event arguments.</param>
-        private void ReloadLobsterTypesMenuItem_Click(object sender, EventArgs e)
+        private void ReloadDirectoryDescriptorsMenuItem_Click(object sender, EventArgs e)
         {
-            this.ReloadLobsterTypes();
+            this.ReloadDirectoryDescriptors();
         }
 
         /// <summary>
@@ -137,7 +137,7 @@ namespace LobsterWpf.Views
         }
 
         /// <summary>
-        /// The event that is called when the a different clob type is selected.
+        /// The event that is called when the a different directory descriptor is selected.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">The event arguments.</param>
@@ -401,9 +401,9 @@ namespace LobsterWpf.Views
         /// </summary>
         /// <param name="sender">The sender of the event</param>
         /// <param name="args">The file system arguments (which file was updated)</param>
-        private void OnReloadLobsterTypes(object sender, FileSystemEventArgs args)
+        private void OnReloadDirectoryDescriptors(object sender, FileSystemEventArgs args)
         {
-            this.ReloadLobsterTypes();
+            this.ReloadDirectoryDescriptors();
         }
 
         /// <summary>

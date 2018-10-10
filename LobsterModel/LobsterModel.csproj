@@ -58,7 +58,7 @@
     <Compile Include="EventArguments\DirectoryWatcherFileChangeEventArgs.cs" />
     <Compile Include="Exceptions\ClobFileLookupException.cs" />
     <Compile Include="Exceptions\ConnectToDatabaseException.cs" />
-    <Compile Include="Exceptions\ClobTypeLoadException.cs" />
+    <Compile Include="Exceptions\DirectoryDescriptorLoadException.cs" />
     <Compile Include="Exceptions\FileDeleteException.cs" />
     <Compile Include="Exceptions\FileSynchronisationCheckException.cs" />
     <Compile Include="FileBackup.cs" />

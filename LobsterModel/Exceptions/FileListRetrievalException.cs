@@ -29,7 +29,7 @@ namespace LobsterModel
     using System;
 
     /// <summary>
-    /// The exception for when an error occurs when attempting to get the list of files for a clob type.
+    /// The exception for when an error occurs when attempting to get the list of files for a directory descriptor.
     /// </summary>
     public class FileListRetrievalException : Exception
     {
