@@ -160,17 +160,6 @@ namespace LobsterModel
                 return;
             }
 
-            foreach (FileInfo fileInfo in dirInfo.GetFiles())
-            {
-                if (!validFiles.Contains(fileInfo.FullName))
-                {
-                    continue;
-                }
-
-                WatchedFile newFile = new WatchedFile(fileInfo.FullName, watchedDir);
-                watchedDir.ChildNodes.Add(newFile);
-            }
-
             foreach (DirectoryInfo dir in dirInfo.GetDirectories())
             {
                 if (!validDirectories.Contains(dir.FullName))
@@ -182,6 +171,17 @@ namespace LobsterModel
                 watchedDir.ChildNodes.Add(newDir);
 
                 this.PopulateWatchedDirectory(newDir, validFiles, validDirectories);
+            }
+
+            foreach (FileInfo fileInfo in dirInfo.GetFiles())
+            {
+                if (!validFiles.Contains(fileInfo.FullName))
+                {
+                    continue;
+                }
+
+                WatchedFile newFile = new WatchedFile(fileInfo.FullName, watchedDir);
+                watchedDir.ChildNodes.Add(newFile);
             }
         }
     }
