@@ -95,7 +95,7 @@ namespace LobsterModel
                 directoryDescriptor.FilePath = filePath;
                 return true;
             }
-            catch (Exception ex) when (ex is FileNotFoundException || ex is InvalidOperationException || ex is XmlException || ex is IOException)
+            catch (Exception ex) when (ex is FileNotFoundException || ex is InvalidOperationException || ex is XmlException || ex is IOException || ex is UnauthorizedAccessException)
             {
                 MessageLog.LogError($"An error occurred when loading the DirectoryDescriptor {filePath}: {ex}");
                 this.OnDirectoryDescriptorLoadError(new DirectoryDescriptorLoadErrorEventArgs(filePath, ex));
