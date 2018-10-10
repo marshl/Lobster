@@ -261,6 +261,7 @@ namespace LobsterWpf.Views
             this.isEditingNewConfig = true;
             ConnectionConfig newConfig = new ConnectionConfig();
             this.SelectedCodeSourceConfig.BaseConfig.ConnectionConfigList.Add(newConfig);
+            newConfig.Parent = this.SelectedCodeSourceConfig.BaseConfig;
             ConnectionConfigView newView = new ConnectionConfigView(newConfig);
             this.SelectedCodeSourceConfig.ConnectionConfigViewList.Add(newView);
             this.connectionListBox.SelectedItem = newView;
