@@ -64,7 +64,8 @@ namespace LobsterModel
         {
             instance = this;
             this.MessageList = new List<Message>();
-            this.outStream = new FileStream(Settings.Default.LogFilename, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
+            FileMode fileMode = Settings.Default.TruncateLogsOnStartup ? FileMode.Create : FileMode.Append;
+            this.outStream = new FileStream(Settings.Default.LogFilename, fileMode, FileAccess.Write, FileShare.ReadWrite);
             this.streamWriter = new StreamWriter(this.outStream);
             this.streamWriter.WriteLine();
             this.fileLock = new object();
@@ -180,7 +181,8 @@ namespace LobsterModel
             lock (this.fileLock)
             {
                 this.MessageList.Add(msg);
-                if (messageType != Message.TYPE.SENSITIVE || Settings.Default.LogSensitiveMessages)
+                if ((messageType != Message.TYPE.SENSITIVE || Settings.Default.LogSensitiveMessages) && 
+                    (messageType != Message.TYPE.INFO || Settings.Default.LogInfoMessages))
                 {
                     this.streamWriter.WriteLine(msg.ToString());
                     this.streamWriter.Flush();

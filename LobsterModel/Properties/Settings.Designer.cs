@@ -210,5 +210,29 @@ namespace LobsterModel.Properties {
                 this["DirectoryDescriptorSchemaFilename"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool LogInfoMessages {
+            get {
+                return ((bool)(this["LogInfoMessages"]));
+            }
+            set {
+                this["LogInfoMessages"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool TruncateLogsOnStartup {
+            get {
+                return ((bool)(this["TruncateLogsOnStartup"]));
+            }
+            set {
+                this["TruncateLogsOnStartup"] = value;
+            }
+        }
     }
 }

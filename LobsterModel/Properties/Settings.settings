@@ -56,5 +56,11 @@
     <Setting Name="DirectoryDescriptorSchemaFilename" Type="System.String" Scope="User">
       <Value Profile="(Default)">LobsterSettings/DirectoryDescriptor.xsd</Value>
     </Setting>
+    <Setting Name="LogInfoMessages" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="TruncateLogsOnStartup" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

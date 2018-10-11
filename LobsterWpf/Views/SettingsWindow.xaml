@@ -5,13 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LobsterWpf.Views"
         mc:Ignorable="d"
-        Title="Settings" Height="500" Width="375" MinHeight="500" MinWidth="375" ShowInTaskbar="False" Background="{StaticResource BackgroundKey}" Icon="../Resources/Images/cartoon-lobster.ico" >
+        Title="Settings" Height="400" Width="375" MinHeight="600" MinWidth="400" ShowInTaskbar="False" Background="{StaticResource BackgroundKey}" Icon="../Resources/Images/cartoon-lobster.ico" >
   <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="Auto"/>
       <ColumnDefinition Width="*"/>
     </Grid.ColumnDefinitions>
     <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
       <RowDefinition Height="Auto"/>
       <RowDefinition Height="Auto"/>
       <RowDefinition Height="Auto"/>
@@ -51,19 +53,25 @@
     <Label Grid.Row="5" Grid.Column="0" Margin="5">Log Sensitive Messages:</Label>
     <CheckBox Grid.Row="5" Grid.Column="1" IsChecked="{Binding Path=ModelSettings.LogSenstiveMessages}" Margin="5" VerticalAlignment="Center"/>
 
-    <Label Grid.Row="6" Grid.Column="0" Margin="5">File Update Timeout (ms):</Label>
-    <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding Path=ModelSettings.FileUpdateTimeoutMilliseconds}" Margin="5" PreviewTextInput="TextBox_PreviewTextInput"/>
+    <Label Grid.Row="6" Grid.Column="0" Margin="5">Log Info Messages:</Label>
+    <CheckBox Grid.Row="6" Grid.Column="1" IsChecked="{Binding Path=ModelSettings.LogInfoMessages}" Margin="5" VerticalAlignment="Center"/>
 
-    <Label Grid.Row="7" Grid.Column="0" Margin="5">Append Footer Comment:</Label>
-    <CheckBox Grid.Row="7" Grid.Column="1" IsChecked="{Binding Path=ModelSettings.AppendFooterToDatabaseFiles}" Margin="5" VerticalAlignment="Center"/>
+    <Label Grid.Row="7" Grid.Column="0" Margin="5">Truncate Logs on Startup:</Label>
+    <CheckBox Grid.Row="7" Grid.Column="1" IsChecked="{Binding Path=ModelSettings.TruncateLogsOnStartup}" Margin="5" VerticalAlignment="Center"/>
 
-    <Label Grid.Row="8" Grid.Column="0" Margin="5">Success Sound File:</Label>
-    <TextBox Grid.Row="8" Grid.Column="1" Text="{Binding Path=SuccessSoundFile}" Margin="5"/>
+    <Label Grid.Row="8" Grid.Column="0" Margin="5">File Update Timeout (ms):</Label>
+    <TextBox Grid.Row="8" Grid.Column="1" Text="{Binding Path=ModelSettings.FileUpdateTimeoutMilliseconds}" Margin="5" PreviewTextInput="TextBox_PreviewTextInput"/>
 
-    <Label Grid.Row="9" Grid.Column="0" Margin="5">Failure Sound File:</Label>
-    <TextBox Grid.Row="9" Grid.Column="1" Text="{Binding Path=FailureSoundFile}" Margin="5"/>
+    <Label Grid.Row="9" Grid.Column="0" Margin="5">Append Footer Comment:</Label>
+    <CheckBox Grid.Row="9" Grid.Column="1" IsChecked="{Binding Path=ModelSettings.AppendFooterToDatabaseFiles}" Margin="5" VerticalAlignment="Center"/>
 
-    <StackPanel Grid.Row="10" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5">
+    <Label Grid.Row="10" Grid.Column="0" Margin="5">Success Sound File:</Label>
+    <TextBox Grid.Row="10" Grid.Column="1" Text="{Binding Path=SuccessSoundFile}" Margin="5"/>
+
+    <Label Grid.Row="11" Grid.Column="0" Margin="5">Failure Sound File:</Label>
+    <TextBox Grid.Row="11" Grid.Column="1" Text="{Binding Path=FailureSoundFile}" Margin="5"/>
+
+    <StackPanel Grid.Row="12" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5">
       <Button Margin="10" Width="75" Height="20" Click="OkButton_Click">OK</Button>
       <Button Margin="10" Width="75" Height="20" Click="ApplyButton_Click">Apply</Button>
       <Button Margin="10" Width="75" Height="20" Click="CancelButton_Click">Cancel</Button>
