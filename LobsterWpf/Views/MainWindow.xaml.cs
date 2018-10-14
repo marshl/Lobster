@@ -35,7 +35,6 @@ namespace LobsterWpf.Views
     using System.Threading;
     using System.Windows;
     using System.Windows.Controls;
-    using System.Windows.Forms;
     using LobsterModel;
     using Properties;
     using ViewModels;
@@ -58,7 +57,7 @@ namespace LobsterWpf.Views
         /// <summary>
         /// The system tray icon that can be used to minimise and maximise the window.
         /// </summary>
-        private NotifyIcon notifyIcon;
+        private System.Windows.Forms.NotifyIcon notifyIcon;
 
         /// <summary>
         /// A list of the connection controls within the connection tab list.
@@ -145,7 +144,7 @@ namespace LobsterWpf.Views
             {
                 Icon icon = new Icon("Resources/Images/cartoon-lobster.ico");
 
-                this.notifyIcon = new NotifyIcon();
+                this.notifyIcon = new System.Windows.Forms.NotifyIcon();
                 this.notifyIcon.Click += new EventHandler(this.NotifyIcon_Click);
                 this.notifyIcon.Icon = icon;
             }
@@ -221,14 +220,14 @@ namespace LobsterWpf.Views
                     {
                         if (!backgroundCheck)
                         {
-                            System.Windows.Forms.MessageBox.Show("No update available");
+                            MessageBox.Show("No update available");
                         }
 
                         return;
                     }
 
-                    DialogResult result = System.Windows.Forms.MessageBox.Show("A newer version is available. Would you like to update now?", "Update Available", MessageBoxButtons.OKCancel);
-                    if (result != System.Windows.Forms.DialogResult.OK)
+                    MessageBoxResult result = MessageBox.Show("A newer version is available. Would you like to update now?", "Update Available", MessageBoxButton.OKCancel);
+                    if (result != MessageBoxResult.OK)
                     {
                         return;
                     }
@@ -246,7 +245,7 @@ namespace LobsterWpf.Views
                 }
                 catch (Exception ex)
                 {
-                    System.Windows.Forms.MessageBox.Show("Error", $"An error occurred when checking for updates: {ex}");
+                    MessageBox.Show("Error", $"An error occurred when checking for updates: {ex}");
                 }
             });
 
@@ -263,7 +262,7 @@ namespace LobsterWpf.Views
             // If there was an error, print it out
             if (e.Error != null)
             {
-                System.Windows.MessageBox.Show(e.Error.ToString(), "Update Error");
+                MessageBox.Show(e.Error.ToString(), "Update Error");
                 return;
             }
 

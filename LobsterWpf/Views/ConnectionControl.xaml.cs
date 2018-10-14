@@ -17,11 +17,11 @@
 namespace LobsterWpf.Views
 {
     using System;
+    using System.ComponentModel;
     using System.Diagnostics;
     using System.IO;
     using System.Windows;
     using System.Windows.Controls;
-    using System.Windows.Forms;
     using LobsterModel;
     using Properties;
     using ViewModels;
@@ -85,7 +85,7 @@ namespace LobsterWpf.Views
         /// </summary>
         public void ReloadDirectoryDescriptors()
         {
-            this.Dispatcher.Invoke((MethodInvoker)delegate
+            this.Dispatcher.Invoke(() =>
             {
                 this.ConnectionView.SelectedNode = null;
                 this.directoryWatcherListBox.SelectedIndex = -1;
@@ -185,7 +185,7 @@ namespace LobsterWpf.Views
             }
             catch (FileUpdateException ex)
             {
-                System.Windows.MessageBox.Show($"An exception occurred when pushing the file: {ex}");
+                MessageBox.Show($"An exception occurred when pushing the file: {ex}");
                 this.DisplayUpdateNotification(filepath, false);
                 return;
             }
@@ -217,7 +217,7 @@ namespace LobsterWpf.Views
             }
             catch (FileDownloadException ex)
             {
-                System.Windows.MessageBox.Show($"The file download failed: {ex}");
+                MessageBox.Show($"The file download failed: {ex}");
             }
         }
 
@@ -233,13 +233,22 @@ namespace LobsterWpf.Views
                 return;
             }
 
+            string tempPath = null;
+
             try
             {
                 var watcherView = (DirectoryWatcherView)this.directoryWatcherListBox.SelectedItem;
 
-                string tempPath = Utils.GetTempFilepath(this.ConnectionView.SelectedNode.FileName);
+                tempPath = Utils.GetTempFilepath(this.ConnectionView.SelectedNode.FileName);
                 this.ConnectionView.BaseConnection.DownloadDatabaseFile(watcherView.BaseWatcher, this.ConnectionView.SelectedNode.FilePath, tempPath);
+            }
+            catch (FileDownloadException ex)
+            {
+                MessageBox.Show($"The file download failed: {ex}");
+            }
 
+            try
+            {
                 string args = string.Format(
                     Settings.Default.DiffProgramArguments,
                     tempPath,
@@ -247,9 +256,9 @@ namespace LobsterWpf.Views
 
                 Process.Start(Settings.Default.DiffProgramName, args);
             }
-            catch (FileDownloadException ex)
+            catch (Exception ex)
             {
-                System.Windows.MessageBox.Show($"The file download failed: {ex}");
+                MessageBox.Show($"The diff program \"{Settings.Default.DiffProgramName}\" couldn't be started: {ex}");
             }
         }
 
@@ -288,7 +297,7 @@ namespace LobsterWpf.Views
             }
             catch (FileInsertException ex)
             {
-                System.Windows.MessageBox.Show($"The file insert failed: {ex}");
+                MessageBox.Show($"The file insert failed: {ex}");
                 this.DisplayUpdateNotification(filename, false);
             }
         }
@@ -315,7 +324,7 @@ namespace LobsterWpf.Views
             }
             catch (FileDeleteException ex)
             {
-                System.Windows.MessageBox.Show($"The file delete failed: {ex}");
+                MessageBox.Show($"The file delete failed: {ex}");
             }
         }
 
@@ -358,7 +367,7 @@ namespace LobsterWpf.Views
         /// <param name="args">The event arguments</param>
         private void OnFileProcessingFinished(object sender, FileProcessingFinishedEventArgs args)
         {
-            this.Dispatcher.Invoke((MethodInvoker)delegate
+            this.Dispatcher.Invoke(() => 
             {
                 this.ConnectionView.IsEnabled = true;
                 this.RepopulateFileListView(args.FileTreeChange);
@@ -372,7 +381,7 @@ namespace LobsterWpf.Views
         /// <param name="args">The event arguments</param>
         private void OnEventProcessingStart(object sender, FileChangeEventArgs args)
         {
-            this.Dispatcher.Invoke((MethodInvoker)delegate
+            this.Dispatcher.Invoke(() =>
             {
                 this.ConnectionView.IsEnabled = false;
             });
@@ -385,14 +394,14 @@ namespace LobsterWpf.Views
         /// <param name="args">The event arguments</param>
         private void OnAutoUpdateComplete(object sender, FileUpdateCompleteEventArgs args)
         {
-            this.Dispatcher.Invoke((MethodInvoker)delegate
+            this.Dispatcher.Invoke(() =>
             {
                 this.DisplayUpdateNotification(args.Fullpath, args.Success);
             });
 
             if (args.ExceptionThrown != null)
             {
-                System.Windows.MessageBox.Show($"An exception occurred when updating the file automatically ({args.Fullpath}): {args.ExceptionThrown}");
+                MessageBox.Show($"An exception occurred when updating the file automatically ({args.Fullpath}): {args.ExceptionThrown}");
             }
         }
 
