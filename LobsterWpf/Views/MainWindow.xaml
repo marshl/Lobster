@@ -12,7 +12,10 @@
       <RowDefinition Height="Auto"/>
       <RowDefinition Height="*"/>
     </Grid.RowDefinitions>
-
+    <MediaElement Name="successSoundElement" Height="0" Width="0"
+            LoadedBehavior="Manual" UnloadedBehavior="Stop"/>
+    <MediaElement Name="failureSoundElement" Height="0" Width="0"
+            LoadedBehavior="Manual" UnloadedBehavior="Stop"/>
     <Grid Grid.Row="0">
       <Menu>
         <MenuItem Header="_File">

@@ -347,8 +347,6 @@ namespace LobsterWpf.Views
         private void DisplayUpdateNotification(string filename, bool success)
         {
             string message = $"File update {(success ? "succeeded" : "failed")} for {Path.GetFileName(filename)}";
-            NotificationWindow nw = new NotificationWindow(message, success);
-            nw.Show();
 
             if (success)
             {
@@ -358,6 +356,9 @@ namespace LobsterWpf.Views
             {
                 this.ParentWindow.PlayFailureSound();
             }
+
+            NotificationWindow nw = new NotificationWindow(message, success);
+            nw.Show();
         }
         
         /// <summary>

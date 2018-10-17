@@ -28,10 +28,8 @@ namespace LobsterWpf.Views
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
-    using System.Diagnostics;
     using System.Drawing;
     using System.IO;
-    using System.Media;
     using System.Threading;
     using System.Windows;
     using System.Windows.Controls;
@@ -44,16 +42,6 @@ namespace LobsterWpf.Views
     /// </summary>
     public sealed partial class MainWindow : Window, IDisposable
     {
-        /// <summary>
-        /// The sound played when an automatic update is successful.
-        /// </summary>
-        private SoundPlayer successSound;
-
-        /// <summary>
-        /// The sound played when an automatic update fails.
-        /// </summary>
-        private SoundPlayer failureSound;
-
         /// <summary>
         /// The system tray icon that can be used to minimise and maximise the window.
         /// </summary>
@@ -70,16 +58,6 @@ namespace LobsterWpf.Views
         public MainWindow()
         {
             this.InitializeComponent();
-
-            try
-            {
-                this.successSound = new SoundPlayer(Path.Combine(Environment.CurrentDirectory, Settings.Default.SuccessSoundFile));
-                this.failureSound = new SoundPlayer(Path.Combine(Environment.CurrentDirectory, Settings.Default.FailureSoundFile));
-            }
-            catch (Exception ex)
-            {
-                MessageLog.LogError("An error occurred when loading the sound effects: " + ex);
-            }
         }
 
         /// <summary>
@@ -98,7 +76,16 @@ namespace LobsterWpf.Views
         {
             try
             {
-                this.successSound?.Play();
+                Uri uri;
+                var success = Uri.TryCreate(Settings.Default.SuccessSoundFile, UriKind.Absolute, out uri)
+                     || Uri.TryCreate(Settings.Default.SuccessSoundFile, UriKind.Relative, out uri);
+
+                if (success)
+                {
+                    this.successSoundElement.Source = uri;
+                    this.successSoundElement.Position = TimeSpan.MinValue;
+                    this.successSoundElement.Play();
+                }
             }
             catch (Exception ex)
             {
@@ -113,7 +100,16 @@ namespace LobsterWpf.Views
         {
             try
             {
-                this.failureSound?.Play();
+                Uri uri;
+                var success = Uri.TryCreate(Settings.Default.FailureSoundFile, UriKind.Absolute, out uri)
+                     || Uri.TryCreate(Settings.Default.FailureSoundFile, UriKind.Relative, out uri);
+
+                if (success)
+                {
+                    this.failureSoundElement.Source = uri;
+                    this.failureSoundElement.Position = TimeSpan.MinValue;
+                    this.failureSoundElement.Play();
+                }
             }
             catch (Exception ex)
             {
@@ -386,18 +382,6 @@ namespace LobsterWpf.Views
             foreach (ConnectionControl connectionControl in this.connectionControlList)
             {
                 connectionControl.Dispose();
-            }
-
-            if (this.failureSound != null)
-            {
-                this.failureSound.Dispose();
-                this.failureSound = null;
-            }
-
-            if (this.successSound != null)
-            {
-                this.successSound.Dispose();
-                this.successSound = null;
             }
 
             if (this.notifyIcon != null)
