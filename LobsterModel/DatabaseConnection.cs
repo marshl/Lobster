@@ -905,6 +905,12 @@ namespace LobsterModel
                 return;
             }
 
+            if (!this.IsFileSynchronised(e.Watcher, e.WatchedFile))
+            {
+                this.LogFileEvent("The file is not synchronised and does not need to be updated.");
+                return;
+            }
+
             if (!this.IsAutomaticClobbingEnabled)
             {
                 this.LogFileEvent($"Automatic clobbing is disabled, ignoring event.");
@@ -930,7 +936,7 @@ namespace LobsterModel
             }
 
             this.LogFileEvent($"Auto-updating file {e.EventArgs.FullPath}");
-
+            
             try
             {
                 this.UpdateDatabaseFile(e.Watcher, e.EventArgs.FullPath);
