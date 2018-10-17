@@ -16,19 +16,19 @@
       <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
     <StackPanel Grid.Row="0" Background="{StaticResource BackgroundKey}" Orientation="Horizontal">
-      <Button Width="90" Margin="0" Click="OnToggleAutoUpdateButton_Click" IsEnabled="{Binding Path=CanAutoUpdate, FallbackValue=false}" ToolTip="Updates the database file with the version on your computer.">
+      <Button Width="90" Margin="0" Click="OnToggleAutoUpdateButton_Click" IsEnabled="{Binding Path=CanAutoUpdate, FallbackValue=false}" ToolTip="Click to toggle whether a file should be automatically pushed when it is modified">
         <StackPanel Width="85" HorizontalAlignment="Center">
           <Image Source="{Binding Path=AutoUpdateImageSource}" VerticalAlignment="Top" Height="30"/>
           <TextBlock TextAlignment="Center" VerticalAlignment="Bottom" FontSize="12" Width="85" Text="{Binding Path=AutoUpdateText}"/>
         </StackPanel>
       </Button>
-      <Button Width="85" Click="ReloadDirectoryDescriptorsMenuItem_Click" ToolTip="Reload the configuration files.">
+      <Button Width="85" Click="ReloadDirectoryDescriptorsMenuItem_Click" ToolTip="Reload the descriptor files and refresh the status of the local files.">
         <StackPanel>
           <Image Source="{DynamicResource RefreshImageSource}" VerticalAlignment="Top" Height="30"/>
           <TextBlock HorizontalAlignment="Center" MinHeight="15" VerticalAlignment="Bottom" FontSize="12">Reload</TextBlock>
         </StackPanel>
       </Button>
-      <Button Width="85" Click="DisconnectButton_Click" ToolTip="Closes the current connection.">
+      <Button Width="85" Click="DisconnectButton_Click" ToolTip="Close the current connection.">
         <StackPanel>
           <Image Source="{DynamicResource FileNotFoundImageSource}" VerticalAlignment="Top" Height="30"/>
           <TextBlock HorizontalAlignment="Center" MinHeight="11" VerticalAlignment="Bottom" FontSize="12">Disconnect</TextBlock>
@@ -101,7 +101,7 @@
               <TextBlock HorizontalAlignment="Center" MinHeight="15" VerticalAlignment="Bottom">Diff</TextBlock>
             </StackPanel>
           </Button>
-          <Button x:Name="exploreButton" Grid.Column="0" Height="65" Click="ExploreButton_Click" IsEnabled="{Binding Path=SelectedNode.CanBeExploredTo, FallbackValue=false}" ToolTip="Shows the location of the file in Windows Explorer.">
+          <Button x:Name="exploreButton" Grid.Column="0" Height="65" Click="ExploreButton_Click" IsEnabled="{Binding Path=SelectedNode.CanBeExploredTo, FallbackValue=false}" ToolTip="Shows the location of the file in Explorer.">
             <StackPanel>
               <Image Source="{DynamicResource FolderImageSource}" VerticalAlignment="Top" Height="30"/>
               <TextBlock HorizontalAlignment="Center" MinHeight="15" VerticalAlignment="Bottom">Explore</TextBlock>
