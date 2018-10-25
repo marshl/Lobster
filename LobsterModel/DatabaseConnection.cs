@@ -905,12 +905,6 @@ namespace LobsterModel
                 return;
             }
 
-            if (!this.IsFileSynchronised(e.Watcher, e.WatchedFile))
-            {
-                this.LogFileEvent("The file is not synchronised and does not need to be updated.");
-                return;
-            }
-
             if (!this.IsAutomaticClobbingEnabled)
             {
                 this.LogFileEvent($"Automatic clobbing is disabled, ignoring event.");
@@ -920,6 +914,12 @@ namespace LobsterModel
             if (!fileInfo.Exists)
             {
                 this.LogFileEvent($"File could not be found {e.EventArgs.FullPath}");
+                return;
+            }
+
+            if (e.WatchedFile == null || !this.IsFileSynchronised(e.Watcher, e.WatchedFile))
+            {
+                this.LogFileEvent("The file is not synchronised and does not need to be updated.");
                 return;
             }
 

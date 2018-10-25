@@ -218,7 +218,7 @@ namespace LobsterModel
         }
 
         /// <summary>
-        /// Loads each of the  <see cref="DatabaseConfig"/> files in the connection directory, and returns the list.
+        /// Loads each of the  <see cref="CodeSourceConfig"/> files in the connection directory, and returns the list.
         /// </summary>
         public void Load()
         {
