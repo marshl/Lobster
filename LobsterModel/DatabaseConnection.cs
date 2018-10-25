@@ -258,6 +258,14 @@ namespace LobsterModel
         /// </summary>
         public void LoadDirectoryDescriptors()
         {
+            if (this.DirectoryWatcherList != null)
+            {
+                foreach (DirectoryWatcher watcher in this.DirectoryWatcherList)
+                {
+                    watcher.Dispose();
+                }
+            }
+
             this.DirectoryWatcherList = new List<DirectoryWatcher>();
             if (!Directory.Exists(this.Config.Parent.DirectoryDescriptorFolder))
             {

@@ -126,7 +126,6 @@ namespace LobsterWpf.Views
             connectionControl.Dispose();
             this.ConnectionTabControl.Items.Remove(connectionControl.TabItem);
             this.connectionControlList.Remove(connectionControl);
-            connectionControl.Dispose();
         }
 
         /// <summary>

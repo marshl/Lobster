@@ -31,7 +31,7 @@ namespace LobsterModel
     /// <summary>
     /// A class used to manage file files inside a <see cref="DirectoryDescriptor"/>.
     /// </summary>
-    public class DirectoryWatcher
+    public class DirectoryWatcher : IDisposable
     {
         /// <summary>
         /// The file system event watcher for changes in this directory.
