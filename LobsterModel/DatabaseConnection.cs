@@ -27,6 +27,7 @@ namespace LobsterModel
     using System.Collections.Generic;
     using System.Data;
     using System.IO;
+    using System.Reflection;
     using System.Security;
     using System.Threading;
     using Oracle.ManagedDataAccess.Client;
@@ -718,7 +719,9 @@ namespace LobsterModel
                                 $" Last clobbed by user {Environment.UserName}"
                               + $" on machine {Environment.MachineName}"
                               + $" at {DateTime.Now}"
-                              + $" (Lobster build {Utils.RetrieveLinkerTimestamp().ToShortDateString()})" : string.Empty;
+                              + $" (Lobster {Assembly.GetExecutingAssembly().GetName().Version.ToString()}"
+                              + $" built on {Utils.RetrieveLinkerTimestamp().ToShortDateString()})" : string.Empty;
+
                 var param = new OracleParameter();
                 param.ParameterName = FooterMessageParameterName;
                 param.Value = footer;

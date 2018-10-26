@@ -30,6 +30,7 @@ namespace LobsterModel
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
+    using System.Reflection;
     using Properties;
 
     /// <summary>
@@ -70,7 +71,7 @@ namespace LobsterModel
             this.streamWriter.WriteLine();
             this.fileLock = new object();
 
-            MessageLog.LogInfo($"Starting Lobster (build {Utils.RetrieveLinkerTimestamp()})");
+            MessageLog.LogInfo($"Starting Lobster (build {Assembly.GetExecutingAssembly().GetName().Version.ToString()} {Utils.RetrieveLinkerTimestamp()})");
         }
 
         /// <summary>
