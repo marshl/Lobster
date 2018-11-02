@@ -36,16 +36,12 @@ namespace LobsterWpf
     public partial class App : Application
     {
         /// <summary>
-        /// The message log for the duration of this app.
+        /// The event called when the application starts.
         /// </summary>
-        private MessageLog log;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="App"/> class.
-        /// </summary>
-        public App()
+        /// <param name="e">The startup event arguments.</param>
+        protected override void OnStartup(StartupEventArgs e)
         {
-            this.log = MessageLog.Initialise();
+            base.OnStartup(e);
 
 #if !DEBUG
             AppDomain currentDomain = AppDomain.CurrentDomain;
@@ -56,15 +52,6 @@ namespace LobsterWpf
             {
                 BackupLog.DeleteOldBackupFiles(Settings.Default.BackupFileLifetimeDays);
             }
-        }
-
-        /// <summary>
-        /// The event called when the application starts.
-        /// </summary>
-        /// <param name="e">The startup event arguments.</param>
-        protected override void OnStartup(StartupEventArgs e)
-        {
-            base.OnStartup(e);
 
             MainWindow mainWindow = new MainWindow();
             mainWindow.Show();

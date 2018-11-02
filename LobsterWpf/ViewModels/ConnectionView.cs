@@ -25,11 +25,9 @@
 namespace LobsterWpf.ViewModels
 {
     using System;
-    using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.ComponentModel;
-    using System.IO;
-    using System.Windows.Forms;
+    using System.Windows.Media;
     using LobsterModel;
 
     /// <summary>
@@ -38,14 +36,19 @@ namespace LobsterWpf.ViewModels
     public sealed class ConnectionView : INotifyPropertyChanged, IDisposable
     {
         /// <summary>
-        /// The file that is currently selected in the file tree view.
-        /// </summary>
-        private FileNodeView selectedFileNode;
-
-        /// <summary>
         /// Whether this connection is currently enabled in the interface or not.
         /// </summary>
         private bool isEnabled = true;
+
+        /// <summary>
+        /// The currently selected node.
+        /// </summary>
+        private WatchedNodeView selectedNode;
+
+        /// <summary>
+        /// The currently selected <see cref="DirectoryWatcherView"/>.
+        /// </summary>
+        private DirectoryWatcherView selectedDirectoryWatcher;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConnectionView"/> class.
@@ -53,65 +56,51 @@ namespace LobsterWpf.ViewModels
         /// <param name="con">The model connection this object is viewing.</param>
         public ConnectionView(DatabaseConnection con)
         {
-            this.Connection = con;
-            this.ExpandedDirectoryNames = new List<string>();
-
-            foreach (ClobDirectory clobDir in con.ClobDirectoryList)
-            {
-                this.ClobDirectories.Add(new ClobDirectoryView(this.Connection, clobDir));
-            }
+            this.BaseConnection = con;
+            this.SetDirectoryWatcherViews();
         }
 
         /// <summary>
         /// The event to be raised when a property is changed.
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
-
+        
         /// <summary>
-        /// The different display modes.
+        /// Gets or sets the currently selected node.
         /// </summary>
-        public enum DisplayMode
-        {
-            /// <summary>
-            /// Files will be shown as a tree view of local files (linked to their database files where possible).
-            /// </summary>
-            LocalFiles,
-
-            /// <summary>
-            /// Files will be shown as a list of database files (linked to their local files where possible).
-            /// </summary>
-            DatabaseFiles,
-        }
-
-        /// <summary>
-        /// Gets the list of directory names that have been expanded.
-        /// </summary>
-        public List<string> ExpandedDirectoryNames { get; }
-
-        /// <summary>
-        /// Gets the connection model for this view.
-        /// </summary>
-        public DatabaseConnection Connection { get; private set; }
-
-        /// <summary>
-        /// Gets or sets the root level file for the currently selected clob directory.
-        /// </summary>
-        public FileNodeView RootFile { get; set; }
-
-        /// <summary>
-        /// Gets or sets the currenclty selected file in this connection.
-        /// </summary>
-        public FileNodeView SelectedFileNode
+        public WatchedNodeView SelectedNode
         {
             get
             {
-                return this.selectedFileNode;
+                return this.selectedNode;
             }
 
             set
             {
-                this.selectedFileNode = value;
-                this.NotifyPropertyChanged("SelectedFileNode");
+                this.selectedNode = value;
+                this.NotifyPropertyChanged("SelectedNode");
+            }
+        }
+
+        /// <summary>
+        /// Gets the connection model for this view.
+        /// </summary>
+        public DatabaseConnection BaseConnection { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the current selected directroy watcher.
+        /// </summary>
+        public DirectoryWatcherView SelectedDirectoryWatcher
+        {
+            get
+            {
+                return this.selectedDirectoryWatcher;
+            }
+
+            set
+            {
+                this.selectedDirectoryWatcher = value;
+                this.NotifyPropertyChanged("SelectedDirectoryWatcher");
             }
         }
 
@@ -121,9 +110,9 @@ namespace LobsterWpf.ViewModels
         public bool ShowReadOnlyFiles { get; set; } = true;
 
         /// <summary>
-        /// Gets or sets the list of clob types currently found for this connection.
+        /// Gets the root directory.
         /// </summary>
-        public ObservableCollection<ClobDirectoryView> ClobDirectories { get; set; } = new ObservableCollection<ClobDirectoryView>();
+        public WatchedDirectoryView RootDirectoryView { get; private set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether this connection is currently enabled.
@@ -150,82 +139,107 @@ namespace LobsterWpf.ViewModels
         {
             get
             {
-                return this.Connection.IsAutomaticClobbingEnabled;
+                return this.BaseConnection.IsAutomaticClobbingEnabled;
             }
 
             set
             {
-                this.Connection.IsAutomaticClobbingEnabled = value;
+                this.BaseConnection.IsAutomaticClobbingEnabled = value;
                 this.NotifyPropertyChanged("IsAutoUpdateEnabled");
+                this.NotifyPropertyChanged("AutoUpdateImageSource");
+                this.NotifyPropertyChanged("AutoUpdateText");
             }
         }
 
         /// <summary>
-        /// Gets or sets the way files are displayed in the interface.
+        /// Gets a value indicating whether this connection support auto-updating
         /// </summary>
-        public DisplayMode CurrentDisplayMode { get; set; } = DisplayMode.LocalFiles;
-
-        /// <summary>
-        /// Populates the root file with files from the given clob directory.
-        /// </summary>
-        /// <param name="clobDir">The directory to populate the file list for.</param>
-        public void PopulateFileTreeForClobDirectory(ClobDirectory clobDir)
+        public bool CanAutoUpdate
         {
-            if (clobDir == null)
+            get
             {
-                if (this.RootFile != null)
-                {
-                    this.RootFile.Children = null;
-                }
-
-                this.RootFile = null;
-                return;
+                return this.BaseConnection.Config.AllowAutomaticClobbing;
             }
-
-            if (!clobDir.Directory.Exists)
-            {
-                return;
-            }
-
-            if (this.CurrentDisplayMode == DisplayMode.LocalFiles)
-            {
-                this.RootFile = new LocalFileView(this, clobDir, clobDir.Directory.FullName, clobDir.ClobType.IncludeSubDirectories);
-            }
-            else if (this.CurrentDisplayMode == DisplayMode.DatabaseFiles)
-            {
-                this.RootFile = new DatabaseFileView(this, null, null);
-                this.RootFile.Children = new ObservableCollection<FileNodeView>();
-
-                FileInfo[] files = clobDir.Directory.GetFiles(".", SearchOption.AllDirectories);
-
-                foreach (DBClobFile df in clobDir.DatabaseFileList)
-                {
-                    FileInfo fileInfo = Array.Find(files, x => x.Name.Equals(df.Filename, StringComparison.OrdinalIgnoreCase));
-                    if (!this.ShowReadOnlyFiles && fileInfo != null && fileInfo.IsReadOnly)
-                    {
-                        continue;
-                    }
-
-                    DatabaseFileView dfv = new DatabaseFileView(this, df, fileInfo?.FullName);
-                    this.RootFile.Children.Add(dfv);
-                }
-            }
-
-            this.NotifyPropertyChanged("RootFile");
         }
 
         /// <summary>
-        /// Reloads the ClobTypes for the current connection.
+        /// Gets the text used for the toggle auto-updating button
         /// </summary>
-        public void ReloadClobTypes()
+        public string AutoUpdateText
         {
-            this.Connection.ReloadClobTypes();
-            this.ClobDirectories.Clear();
-
-            foreach (ClobDirectory clobDir in this.Connection.ClobDirectoryList)
+            get
             {
-                this.ClobDirectories.Add(new ClobDirectoryView(this.Connection, clobDir));
+                return this.IsAutoUpdateEnabled ? "Autopush On" : "Autopush Off";
             }
+        }
+
+        /// <summary>
+        /// Gets the image tha is used to represent this file.
+        /// </summary>
+        public ImageSource AutoUpdateImageSource
+        {
+            get
+            {
+                string resourceName = this.IsAutoUpdateEnabled ? "PushGreenImageSource" : "PushGreyImageSource";
+                return (ImageSource)System.Windows.Application.Current.FindResource(resourceName);
+            }
+        }
+
+        /// <summary>
+        /// Gets the directory watchers for this connection.
+        /// </summary>
+        public ObservableCollection<DirectoryWatcherView> DirectoryWatchers { get; private set; }
+
+        /// <summary>
+        /// Reloads the <see cref="DirectoryWatcherView"/> list for this view.
+        /// </summary>
+        public void SetDirectoryWatcherViews()
+        {
+            this.DirectoryWatchers = new ObservableCollection<DirectoryWatcherView>();
+            foreach (DirectoryWatcher watchedDir in this.BaseConnection.DirectoryWatcherList)
+            {
+                this.DirectoryWatchers.Add(new DirectoryWatcherView(watchedDir));
+            }
+
+            this.NotifyPropertyChanged("DirectoryWatchers");
+        }
+
+        /// <summary>
+        /// Changes the current directory watcher.
+        /// </summary>
+        /// <param name="dirWatcherFiew">The <see cref="DirectoryWatcherView"/> to change to.</param>
+        public void ChangeCurrentDirectoryWatcher(DirectoryWatcherView dirWatcherFiew)
+        {
+            this.SelectedDirectoryWatcher = dirWatcherFiew;
+            this.PopulateRootDirectory();
+        }
+
+        /// <summary>
+        /// Repopulates the file list with the files in the connection.
+        /// </summary>
+        public void PopulateRootDirectory()
+        {
+            if (this.SelectedDirectoryWatcher == null)
+            {
+                this.RootDirectoryView = null;
+            }
+            else
+            {
+                this.RootDirectoryView = new WatchedDirectoryView(this.SelectedDirectoryWatcher.BaseWatcher.RootDirectory);
+                this.RootDirectoryView.CheckFileSynchronisation(this, this.SelectedDirectoryWatcher);
+            }
+
+            this.NotifyPropertyChanged("RootDirectoryView");
+        }
+
+        /// <summary>
+        /// Reloads the DirectoryDescriptors for the current connection.
+        /// </summary>
+        public void ReloadDirectoryDescriptors()
+        {
+            this.ChangeCurrentDirectoryWatcher(null);
+            this.BaseConnection.LoadDirectoryDescriptors();
+            this.SetDirectoryWatcherViews();
         }
 
         /// <summary>
@@ -248,10 +262,10 @@ namespace LobsterWpf.ViewModels
                 return;
             }
 
-            if (this.Connection != null)
+            if (this.BaseConnection != null)
             {
-                this.Connection.Dispose();
-                this.Connection = null;
+                this.BaseConnection.Dispose();
+                this.BaseConnection = null;
             }
         }
 
@@ -264,10 +278,7 @@ namespace LobsterWpf.ViewModels
         /// parameter causes the property name of the caller to be substituted as an argument.</remarks>
         private void NotifyPropertyChanged(string propertyName = "")
         {
-            if (this.PropertyChanged != null)
-            {
-                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

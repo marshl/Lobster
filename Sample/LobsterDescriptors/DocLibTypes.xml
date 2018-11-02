@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DirectoryDescriptor xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name>Doc Lib Types</Name>
+  <DirectoryName>DocLibTypes</DirectoryName>
+  <IncludeSubDirectories>true</IncludeSubDirectories>
+  <PushOnFileChange>true</PushOnFileChange>
+  <SearchRules>
+    <SearchRule xsi:type="IncludeRule">
+      <Pattern>*.xml</Pattern>
+    </SearchRule>
+  </SearchRules>
+  <DefaultDataType>CLOB</DefaultDataType>
+  <InsertStatement>
+INSERT INTO doclibmgr.document_library_types (
+  id
+, mnemonic
+, xml_data
+, created_datetime
+) VALUES (
+  doclibmgr.document_library_sequence.NEXTVAL
+, :p_filename_without_extension
+, XMLTYPE(:p_file_content_clob)
+, SYSDATE
+)
+  </InsertStatement>
+  <UpdateStatement>
+UPDATE doclibmgr.document_library_types dlt
+SET dlt.xml_data = XMLTYPE(:p_file_content_clob)
+WHERE dlt.document_library_type = :p_filename_without_extension
+  </UpdateStatement>
+  <DeleteStatement>
+DELETE FROM doclibmgr.document_library_types dlt
+WHERE dlt.document_library_type = :p_filename_without_extension
+  </DeleteStatement>
+  <DatabaseFileExistsStatement>
+SELECT COUNT(*)
+FROM doclibmgr.document_library_types dlt
+WHERE dlt.document_library_type = :p_filename_without_extension
+  </DatabaseFileExistsStatement>
+  <FetchStatement>
+SELECT dlt.xml_data
+FROM doclibmgr.document_library_types dlt
+WHERE dlt.document_library_type = :p_filename_without_extension
+  </FetchStatement>
+</DirectoryDescriptor>

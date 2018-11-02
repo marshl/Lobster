@@ -83,21 +83,19 @@ namespace LobsterWpf.Views
             }
 
             System.Drawing.Rectangle workingArea = System.Windows.Forms.Screen.PrimaryScreen.WorkingArea;
-            this.Left = workingArea.Right - this.ActualWidth;
-            this.Top = workingArea.Top - (this.ActualHeight * (this.windowIndex + 1));
+            this.Left = workingArea.Right - this.Width;
+            this.Top = workingArea.Bottom - this.ActualHeight;
 
             this.Dispatcher.BeginInvoke(
                 DispatcherPriority.ApplicationIdle,
                 new Action(() =>
             {
                 Matrix transform = PresentationSource.FromVisual(this).CompositionTarget.TransformFromDevice;
-                Point corner = transform.Transform(new Point(workingArea.Right, workingArea.Bottom));
-                this.Left = corner.X;
-                this.Top = corner.Y - (this.ActualHeight * (this.windowIndex + 1));
+                Point screenCorner = transform.Transform(new Point(workingArea.Right, workingArea.Bottom));
 
                 TimeSpan slideDuration = new TimeSpan(0, 0, 0, 0, 250);
                 TimeSpan pauseDuration = new TimeSpan(0, 0, 0, 1, 0);
-                TimeSpan fadeDuration = new TimeSpan(0, 0, 0, 2, 0);
+                TimeSpan fadeDuration = new TimeSpan(0, 0, 0, 1, 0);
 
                 var sb = new Storyboard { Duration = new Duration(slideDuration + fadeDuration + pauseDuration) };
 
@@ -107,13 +105,13 @@ namespace LobsterWpf.Views
                 heightAnimation.Duration = new Duration(slideDuration);
                 fadeAnimation.Duration = new Duration(fadeDuration);
 
-                heightAnimation.KeyFrames.Add(new EasingDoubleKeyFrame(corner.X, KeyTime.FromTimeSpan(TimeSpan.Zero)));
-                heightAnimation.KeyFrames.Add(new EasingDoubleKeyFrame(corner.X - this.ActualWidth, KeyTime.FromTimeSpan(slideDuration)));
+                heightAnimation.KeyFrames.Add(new EasingDoubleKeyFrame(screenCorner.Y, KeyTime.FromTimeSpan(TimeSpan.Zero)));
+                heightAnimation.KeyFrames.Add(new EasingDoubleKeyFrame(screenCorner.Y - (this.ActualHeight * (windowIndex + 1)), KeyTime.FromTimeSpan(slideDuration)));
                 fadeAnimation.KeyFrames.Add(new EasingDoubleKeyFrame(1, KeyTime.FromTimeSpan(slideDuration + pauseDuration)));
                 fadeAnimation.KeyFrames.Add(new EasingDoubleKeyFrame(0, KeyTime.FromTimeSpan(fadeDuration)));
 
                 Storyboard.SetTarget(heightAnimation, this);
-                Storyboard.SetTargetProperty(heightAnimation, new PropertyPath(Window.LeftProperty));
+                Storyboard.SetTargetProperty(heightAnimation, new PropertyPath(Window.TopProperty));
 
                 Storyboard.SetTarget(fadeAnimation, this);
                 Storyboard.SetTargetProperty(fadeAnimation, new PropertyPath(Window.OpacityProperty));

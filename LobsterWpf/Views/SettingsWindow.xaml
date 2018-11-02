@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LobsterWpf.Views"
         mc:Ignorable="d"
-        Title="Settings" Height="500" Width="375" MinHeight="500" MinWidth="375" ShowInTaskbar="False" Background="{StaticResource BackgroundKey}" Icon="../Resources/Images/cartoon-lobster.ico" >
+        Title="Settings" Height="450" Width="450" MinHeight="600" MinWidth="400" ShowInTaskbar="False" Background="{StaticResource BackgroundKey}" Icon="../Resources/Images/cartoon-lobster.ico" >
   <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="Auto"/>
@@ -22,48 +22,149 @@
       <RowDefinition Height="Auto"/>
       <RowDefinition Height="Auto"/>
       <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
       <RowDefinition Height="*"/>
     </Grid.RowDefinitions>
 
     <StackPanel Orientation="Horizontal"  Grid.Row="0" Grid.Column="0">
-      <Label Margin="5">Backup Files:</Label>
+      <Label Margin="5">
+        <Label.Content>Backup Files:</Label.Content>
+        <Label.ToolTip>
+          <TextBlock TextWrapping="Wrap" MaxWidth="300">
+          If checked, then any file pushed to the database will first have a backup taken of it and stored in the LObster installation folder.
+          </TextBlock>
+        </Label.ToolTip>
+      </Label>
       <CheckBox IsChecked="{Binding Path=ModelSettings.IsBackupEnabled}" Margin="5,10,5,0"/>
-
     </StackPanel>
-    
+
     <DockPanel Grid.Row="1" Grid.ColumnSpan="2">
-      <Label Margin="5">Delete Backups:</Label>
+      <Label Margin="5">
+        <Label.Content>Delete Backups:</Label.Content>
+        <Label.ToolTip>
+          <TextBlock TextWrapping="Wrap" MaxWidth="300">
+          If checked, then any backup files older than the specified number of days will be deleted when Lobster is started.
+          </TextBlock>
+        </Label.ToolTip>
+      </Label>
       <CheckBox Name="DeleteBackupsCheckbox" IsChecked="{Binding Path=DeleteBackups}" Margin="5,10,0,0"/>
-      <Label Margin="0,5">after </Label>
+      <Label Margin="0,5">after</Label>
       <TextBox Margin="5,5,5,10.333" Width="41" Text="{Binding Path=BackupTimeoutDays}" IsEnabled="{Binding ElementName=DeleteBackupsCheckbox, Path=IsChecked}"/>
       <Label Margin="0,5,5,5">days.</Label>
     </DockPanel>
 
-    <Label Grid.Row="2" Grid.Column="0" Margin="5">Diffable Extensions:</Label>
+    <Label Grid.Row="2" Grid.Column="0" Margin="5">
+      <Label.Content>Diff Program:</Label.Content>
+      <Label.ToolTip>
+        <TextBlock TextWrapping="Wrap" MaxWidth="300">
+          The program to be used when diffing the file. 
+          If the program is on your PATH then only the name of the program is needed,
+          otherwise the full path of the program should be set.
+        </TextBlock>
+      </Label.ToolTip>
+    </Label>
     <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Path=DiffProgramName}" Margin="5"/>
 
-    <Label Grid.Row="3" Grid.Column="0" Margin="5">Diff Program Arguments:</Label>
+    <Label Grid.Row="3" Grid.Column="0" Margin="5">
+      <Label.Content>Diff Program Arguments:</Label.Content>
+      <Label.ToolTip>
+        <TextBlock TextWrapping="Wrap" MaxWidth="300">
+          The arguments to the file program. {0} will be substituted for the database file and {1} will be substituted for the local file. 
+          It is best to wrap the files in quotes in case there are spaces in the path.
+        </TextBlock>
+      </Label.ToolTip>
+    </Label>
     <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Path=DiffProgramArguments}" Margin="5"/>
 
-    <Label Grid.Row="4" Grid.Column="0" Margin="5">Diffable Extensions:</Label>
-    <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Path=DiffableExtensions}" Margin="5"/>
-
-    <Label Grid.Row="5" Grid.Column="0" Margin="5">Log Sensitive Messages:</Label>
+    <Label Grid.Row="5" Grid.Column="0" Margin="5">
+      <Label.Content>Log Sensitive Messages:</Label.Content>
+      <Label.ToolTip>
+        <TextBlock TextWrapping="Wrap" MaxWidth="300">
+          If chcked, then sensitive messages such as the database connection string will be logged to file.
+        </TextBlock>
+      </Label.ToolTip>
+    </Label>
     <CheckBox Grid.Row="5" Grid.Column="1" IsChecked="{Binding Path=ModelSettings.LogSenstiveMessages}" Margin="5" VerticalAlignment="Center"/>
 
-    <Label Grid.Row="6" Grid.Column="0" Margin="5">File Update Timeout (ms):</Label>
-    <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding Path=ModelSettings.FileUpdateTimeoutMilliseconds}" Margin="5" PreviewTextInput="TextBox_PreviewTextInput"/>
+    <Label Grid.Row="6" Grid.Column="0" Margin="5">
+      <Label.Content>Log Info Messages:</Label.Content>
+      <Label.ToolTip>
+        <TextBlock TextWrapping="Wrap" MaxWidth="300">
+          If chcked, then information messages will be logged. 
+          This includes every connection made to the database, every file synchronisation check and every parameter passed to an SQL statement. 
+          The log file will grow very quickly if this is chcked, and should only be done so for debugging purposes.
+        </TextBlock>
+      </Label.ToolTip>
+    </Label>
+    <CheckBox Grid.Row="6" Grid.Column="1" IsChecked="{Binding Path=ModelSettings.LogInfoMessages}" Margin="5" VerticalAlignment="Center"/>
 
-    <Label Grid.Row="7" Grid.Column="0" Margin="5">Append Footer Comment:</Label>
-    <CheckBox Grid.Row="7" Grid.Column="1" IsChecked="{Binding Path=ModelSettings.AppendFooterToDatabaseFiles}" Margin="5" VerticalAlignment="Center"/>
+    <Label Grid.Row="7" Grid.Column="0" Margin="5">
+      <Label.Content>Truncate Logs on Startup:</Label.Content>
+      <Label.ToolTip>
+        <TextBlock TextWrapping="Wrap" MaxWidth="300">
+          If checked then the log file will be truncated when the program is started.
+        </TextBlock>
+      </Label.ToolTip>
+    </Label>
+    <CheckBox Grid.Row="7" Grid.Column="1" IsChecked="{Binding Path=ModelSettings.TruncateLogsOnStartup}" Margin="5" VerticalAlignment="Center"/>
 
-    <Label Grid.Row="8" Grid.Column="0" Margin="5">Success Sound File:</Label>
-    <TextBox Grid.Row="8" Grid.Column="1" Text="{Binding Path=SuccessSoundFile}" Margin="5"/>
+    <Label Grid.Row="8" Grid.Column="0" Margin="5">
+      <Label.Content>File Update Timeout (ms):</Label.Content>
+      <Label.ToolTip>
+        <TextBlock TextWrapping="Wrap" MaxWidth="300">
+          The time that Lobster waits before pushing a file to the database after it has been updated. 
+          On slow systems this value may need to be increased or Lobster may push an earlier version before the file is saved or its readonly status changed.
+        </TextBlock>
+      </Label.ToolTip>
+    </Label>
+    <TextBox Grid.Row="8" Grid.Column="1" Text="{Binding Path=ModelSettings.FileUpdateTimeoutMilliseconds}" Margin="5" PreviewTextInput="TextBox_PreviewTextInput"/>
 
-    <Label Grid.Row="9" Grid.Column="0" Margin="5">Failure Sound File:</Label>
-    <TextBox Grid.Row="9" Grid.Column="1" Text="{Binding Path=FailureSoundFile}" Margin="5"/>
+    <Label Grid.Row="9" Grid.Column="0" Margin="5">
+      <Label.Content>Append Footer Comment:</Label.Content>
+      <Label.ToolTip>
+        <TextBlock TextWrapping="Wrap" MaxWidth="300">
+          If checked then a message can be appended to files inserted or updated to the database.
+        </TextBlock>
+      </Label.ToolTip>
+    </Label>
+    <CheckBox Grid.Row="9" Grid.Column="1" IsChecked="{Binding Path=ModelSettings.AppendFooterToDatabaseFiles}" Margin="5" VerticalAlignment="Center"/>
 
-    <StackPanel Grid.Row="10" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5">
+    <Label Grid.Row="10" Grid.Column="0" Margin="5">
+      <Label.Content>Success Sound File:</Label.Content>
+      <Label.ToolTip>
+        <TextBlock TextWrapping="Wrap" MaxWidth="300">
+          The media (audio or video) file that should be played when an automatic operation is successful.
+        </TextBlock>
+      </Label.ToolTip>
+    </Label>
+    <Grid Grid.Row="10" Grid.Column="1" HorizontalAlignment="Stretch" Margin="5">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="50"/>
+      </Grid.ColumnDefinitions>
+      <TextBox Grid.Column="0" Text="{Binding Path=SuccessSoundFile}" Name="successFileTextField"/>
+      <Button Grid.Column="1" HorizontalAlignment="Right" Width="40" Click="PickSuccessSoundFile_Click">...</Button>
+    </Grid>
+
+    <Label Grid.Row="11" Grid.Column="0" Margin="5">
+      <Label.Content>Failure Sound File:</Label.Content>
+      <Label.ToolTip>
+        <TextBlock TextWrapping="Wrap" MaxWidth="300">
+          The media (audio or video) file that should be played when an automatic operation fails.
+        </TextBlock>
+      </Label.ToolTip>
+    </Label>
+    <Grid Grid.Row="11" Grid.Column="1" HorizontalAlignment="Stretch" Margin="5">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="50"/>
+      </Grid.ColumnDefinitions>
+      <TextBox Grid.Column="0" Text="{Binding Path=FailureSoundFile}" Name="failureFileTextField"/>
+      <Button Grid.Column="1" HorizontalAlignment="Right" Width="40" Click="PickFailureSoundFile_Click">...</Button>
+    </Grid>
+
+    <StackPanel Grid.Row="12" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5">
       <Button Margin="10" Width="75" Height="20" Click="OkButton_Click">OK</Button>
       <Button Margin="10" Width="75" Height="20" Click="ApplyButton_Click">Apply</Button>
       <Button Margin="10" Width="75" Height="20" Click="CancelButton_Click">Cancel</Button>

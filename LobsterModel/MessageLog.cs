@@ -30,6 +30,7 @@ namespace LobsterModel
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
+    using System.Reflection;
     using Properties;
 
     /// <summary>
@@ -37,6 +38,11 @@ namespace LobsterModel
     /// </summary>
     public sealed class MessageLog : IDisposable
     {
+        /// <summary>
+        /// The instance of this <see cref="MessageLog"/>
+        /// </summary>
+        private static MessageLog instance;
+
         /// <summary>
         /// The file stream this logger writes to.
         /// </summary>
@@ -57,21 +63,32 @@ namespace LobsterModel
         /// </summary>
         private MessageLog()
         {
-            MessageLog.Instance = this;
-
+            instance = this;
             this.MessageList = new List<Message>();
-            this.outStream = new FileStream(Settings.Default.LogFilename, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
+            FileMode fileMode = Settings.Default.TruncateLogsOnStartup ? FileMode.Create : FileMode.Append;
+            this.outStream = new FileStream(Settings.Default.LogFilename, fileMode, FileAccess.Write, FileShare.ReadWrite);
             this.streamWriter = new StreamWriter(this.outStream);
             this.streamWriter.WriteLine();
             this.fileLock = new object();
 
-            MessageLog.LogInfo($"Starting Lobster (build {Utils.RetrieveLinkerTimestamp()})");
+            MessageLog.LogInfo($"Starting Lobster (build {Assembly.GetExecutingAssembly().GetName().Version.ToString()} {Utils.RetrieveLinkerTimestamp()})");
         }
 
         /// <summary>
         /// Gets the instance of this logger.
         /// </summary>
-        public static MessageLog Instance { get; private set; }
+        public static MessageLog Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = new MessageLog();
+                }
+
+                return instance;
+            }
+        }
 
         /// <summary>
         /// Gets the messages that have been created by this program since startup.
@@ -82,20 +99,6 @@ namespace LobsterModel
         /// Gets or sets the listener of events this log raises (such as when a new message is received).
         /// </summary>
         public IMessageLogEventListener EventListener { get; set; }
-
-        /// <summary>
-        /// Initalizes a new instance of the <see cref="MessageLog"/> class.
-        /// </summary>
-        /// <returns>The old instance of the log if it exists. Otherwise the new instance.</returns>
-        public static MessageLog Initialise()
-        {
-            if (Instance == null)
-            {
-                Instance = new MessageLog();
-            }
-
-            return Instance;
-        }
 
         /// <summary>
         /// Flushes the stream buffer.
@@ -142,13 +145,20 @@ namespace LobsterModel
         }
 
         /// <summary>
+        /// Executes the log file
+        /// </summary>
+        public static void OpenLogFile()
+        {
+            System.Diagnostics.Process.Start(Settings.Default.LogFilename);
+        }
+
+        /// <summary>
         /// Closes his message log
         /// </summary>
         public static void Close()
         {
             MessageLog.LogInfo("Lobster Stopped");
             Instance.Dispose();
-            Instance = null;
         }
 
         /// <summary>
@@ -168,14 +178,15 @@ namespace LobsterModel
         private void InternalLog(Message.TYPE messageType, string message)
         {
             Message msg = new Message(message, messageType, DateTime.Now);
-            this.MessageList.Add(msg);
 
-            if (messageType != Message.TYPE.SENSITIVE || Settings.Default.LogSensitiveMessages)
+            lock (this.fileLock)
             {
-                lock (this.fileLock)
+                this.MessageList.Add(msg);
+                if ((messageType != Message.TYPE.SENSITIVE || Settings.Default.LogSensitiveMessages) && 
+                    (messageType != Message.TYPE.INFO || Settings.Default.LogInfoMessages))
                 {
-                    Console.WriteLine(msg.ToString());
                     this.streamWriter.WriteLine(msg.ToString());
+                    this.streamWriter.Flush();
                 }
             }
 
@@ -208,7 +219,7 @@ namespace LobsterModel
                 this.outStream = null;
             }
 
-            MessageLog.Instance = null;
+            instance = null;
         }
 
         /// <summary>

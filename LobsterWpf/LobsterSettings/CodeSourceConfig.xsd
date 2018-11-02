@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="CodeSourceConfig" nillable="true" type="CodeSourceConfig" />
+  <xs:complexType name="CodeSourceConfig">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="1" name="Name" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="ConnectionConfigList" type="ArrayOfConnectionConfig" />
+      <xs:element minOccurs="0" maxOccurs="1" name="FileLocation" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ArrayOfConnectionConfig">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="ConnectionConfig" nillable="true" type="ConnectionConfig" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ConnectionConfig">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="1" name="Name" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="Host" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="Port" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="SID" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="Username" type="xs:string" />
+      <xs:element minOccurs="1" maxOccurs="1" name="UsePooling" type="xs:boolean" />
+      <xs:element minOccurs="1" maxOccurs="1" name="AllowAutomaticClobbing" type="xs:boolean" />
+      <xs:element minOccurs="0" maxOccurs="1" name="Parent" type="CodeSourceConfig" />
+      <xs:element minOccurs="1" maxOccurs="1" name="IsRestrictedEnvironment" type="xs:boolean" />
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

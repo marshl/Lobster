@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DirectoryDescriptor xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name>Work Request Types</Name>
+  <DirectoryName>ApplicationMetadata/WorkRequestTypes</DirectoryName>
+  <PushOnFileChange>true</PushOnFileChange>
+  <SearchRules>
+    <SearchRule xsi:type="IncludeRule">
+      <Pattern>*.xml</Pattern>
+    </SearchRule>
+  </SearchRules>
+  <DefaultDataType>CLOB</DefaultDataType>
+  <InsertStatement>
+MERGE INTO iconmgr.work_request_types wrt
+USING (
+  SELECT
+    t.mnem
+  , t.full_name
+  , t.xml_data
+  FROM XMLTABLE('/WORK_REQUEST_TYPE' 
+    PASSING XMLTYPE(:p_file_content_clob)
+    COLUMNS
+      mnem      VARCHAR2(20)  PATH '/*/MNEM/text()' 
+    , full_name VARCHAR2(100) PATH '/*/FULL_NAME/text()'
+    , xml_data  XMLTYPE       PATH '.'
+  ) t
+) wrt_file
+ON (wrt_file.mnem = wrt.mnem)
+WHEN NOT MATCHED THEN INSERT (
+  mnem
+, full_name
+, xml_data
+) VALUES (
+  wrt_file.mnem
+, wrt_file.full_name
+, wrt_file.xml_data
+)
+  </InsertStatement>
+  <UpdateStatement>
+MERGE INTO iconmgr.work_request_types wrt
+USING (
+  SELECT
+    t.mnem
+  , t.full_name
+  , t.xml_data
+  FROM XMLTABLE('/WORK_REQUEST_TYPE' 
+    PASSING XMLTYPE(:p_file_content_clob)
+    COLUMNS
+      mnem      VARCHAR2(20)  PATH 'MNEM/text()' 
+    , full_name VARCHAR2(100) PATH 'FULL_NAME/text()'
+    , xml_data  XMLTYPE       PATH '.'
+  ) t
+) wrt_file
+ON (wrt_file.mnem = wrt.mnem)
+WHEN MATCHED THEN UPDATE
+  SET
+    wrt.full_name = wrt_file.full_name
+  , wrt.xml_data  = wrt_file.xml_data
+  </UpdateStatement>
+  <DeleteStatement>
+DELETE FROM iconmgr.work_request_types wrt
+WHERE wrt.mnem = XMLCAST(XMLQUERY('/*/MNEM/text()' PASSING XMLTYPE(:p_file_content_clob) RETURNING CONTENT) AS VARCHAR2(20))
+  </DeleteStatement>
+  <DatabaseFileExistsStatement>
+SELECT COUNT(*)
+FROM iconmgr.work_request_types wrt
+WHERE wrt.mnem = XMLCAST(XMLQUERY('/*/MNEM/text()' PASSING XMLTYPE(:p_file_content_clob) RETURNING CONTENT) AS VARCHAR2(20))
+  </DatabaseFileExistsStatement>
+  <FetchStatement>
+SELECT xml_data
+FROM iconmgr.work_request_types wrt
+WHERE wrt.mnem = XMLCAST(XMLQUERY('/*/MNEM/text()' PASSING XMLTYPE(:p_file_content_clob) RETURNING CONTENT) AS VARCHAR2(20))
+  </FetchStatement>
+</DirectoryDescriptor>

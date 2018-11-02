@@ -27,6 +27,7 @@ namespace LobsterWpf.Views
     using System.Text.RegularExpressions;
     using System.Windows;
     using System.Windows.Input;
+    using Microsoft.Win32;
     using ViewModels;
 
     /// <summary>
@@ -93,6 +94,36 @@ namespace LobsterWpf.Views
         {
             Regex regex = new Regex("[^0-9]+");
             e.Handled = !regex.IsMatch(e.Text);
+        }
+
+        /// <summary>
+        /// The event called when the success file picker dialog button is clicked
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void PickSuccessSoundFile_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new OpenFileDialog();
+            var result = dialog.ShowDialog();
+            if (result.GetValueOrDefault(false))
+            {
+                this.successFileTextField.Text = this.Settings.SuccessSoundFile = dialog.FileName;
+            }
+        }
+
+        /// <summary>
+        /// The event called when the failure file picker dialog button is clicked
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void PickFailureSoundFile_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new OpenFileDialog();
+            var result = dialog.ShowDialog();
+            if (result.GetValueOrDefault(false))
+            {
+                this.failureFileTextField.Text = this.Settings.FailureSoundFile = dialog.FileName;
+            }
         }
     }
 }

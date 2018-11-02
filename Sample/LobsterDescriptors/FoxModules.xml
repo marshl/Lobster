@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DirectoryDescriptor xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name>FOX Modules</Name>
+  <DirectoryName>FoxModules</DirectoryName>
+  <IncludeSubDirectories>true</IncludeSubDirectories>
+  <PushOnFileChange>true</PushOnFileChange>
+  <InsertStatement>
+<![CDATA[
+DECLARE
+  l_filename VARCHAR2(4000) := :p_filename_without_extension;
+  l_file_extension VARCHAR2(4000) := :p_file_extension;
+  
+  l_file_content_blob BLOB := :p_file_content_blob;
+  l_file_content_clob CLOB := :p_file_content_clob;
+  l_is_binary_file CHAR;
+  
+  l_component_name VARCHAR2(4000);
+BEGIN
+
+  IF l_filename = 'fox_import' THEN
+    l_component_name := 'Fox/fox_import';
+  ELSE
+    
+    l_component_name := 
+      CASE 
+        WHEN :p_mime_type LIKE 'image%' THEN 'img/'
+        WHEN l_file_extension = '.css' THEN 'css/'
+        WHEN l_file_extension = '.js' THEN 'js/'
+      END || l_filename; 
+    
+  END IF;
+  
+  l_is_binary_file := CASE
+   WHEN :p_mime_type LIKE 'image%' THEN 'Y' 
+   ELSE 'N' END;
+   
+  IF l_file_extension = '.xml' THEN 
+    l_file_content_clob := l_file_content_clob || '<!-- ' || :p_footer_message || ' -->';
+  END IF;
+  
+  INSERT INTO envmgr.fox_components (
+    name
+  , type
+  , data
+  , bindata
+  ) VALUES (
+    l_component_name
+  , :p_mime_type
+  , CASE WHEN l_is_binary_file = 'N' THEN l_file_content_clob END
+  , CASE WHEN l_is_binary_file = 'Y' THEN l_file_content_blob END
+  );
+  
+END;
+]]>
+  </InsertStatement>
+  <UpdateStatement>
+<![CDATA[
+DECLARE
+  l_filename VARCHAR2(4000) := :p_filename_without_extension;
+  l_file_extension VARCHAR2(4000) := :p_file_extension;
+  
+  l_file_content_blob BLOB := :p_file_content_blob;
+  l_file_content_clob CLOB := :p_file_content_clob;
+  l_is_binary_file CHAR;
+  
+  l_component_name VARCHAR2(4000);
+BEGIN
+
+  IF l_filename = 'fox_import' THEN
+    l_component_name := 'Fox/fox_import';
+  ELSE
+    
+    l_component_name :=
+      CASE 
+        WHEN :p_mime_type LIKE 'image%' THEN 'img/'
+        WHEN l_file_extension = '.css' THEN 'css/'
+        WHEN l_file_extension = '.js' THEN 'js/'
+      END || l_filename; 
+    
+  END IF;
+  
+  l_is_binary_file := CASE
+   WHEN :p_mime_type LIKE 'image%' THEN 'Y' 
+   ELSE 'N' END;
+    
+  IF l_file_extension = '.xml' THEN 
+    l_file_content_clob := l_file_content_clob || '<!-- ' || :p_footer_message || ' -->';
+  END IF;
+  
+  UPDATE envmgr.fox_components
+  SET
+    data = CASE WHEN l_is_binary_file = 'N' THEN l_file_content_clob END
+  , bindata = CASE WHEN l_is_binary_file = 'Y' THEN l_file_content_blob END
+  WHERE name = l_component_name
+  AND type = :p_mime_type;
+
+END;
+]]>
+  </UpdateStatement>
+  <DeleteStatement>
+DECLARE
+  l_filename VARCHAR2(4000) := :p_filename_without_extension;
+  l_file_extension VARCHAR2(4000) := :p_file_extension;
+  
+  l_component_name VARCHAR2(4000);
+BEGIN
+
+  IF l_filename = 'fox_import' THEN
+  
+    l_component_name := 'Fox/fox_import';
+    
+  ELSE
+    
+    l_component_name :=
+      CASE 
+        WHEN :p_mime_type LIKE 'image%' THEN 'img/'
+        WHEN l_file_extension = '.css' THEN 'css/'
+        WHEN l_file_extension = '.js' THEN 'js/'
+      END || l_filename; 
+    
+  END IF;
+  
+  DELETE FROM envmgr.fox_components
+  WHERE name = l_component_name
+  AND type = :p_mime_type;
+
+END;
+  </DeleteStatement>
+  <DatabaseFileExistsStatement>
+WITH q1 AS (
+  SELECT
+    CASE :p_filename_without_extension
+      WHEN 'fox_import' THEN 'Fox/fox_import'
+      ELSE :p_filename_without_extension
+    END component_name
+  FROM dual
+)
+, q2 AS (
+  SELECT
+    CASE 
+      WHEN :p_mime_type LIKE 'image%' THEN 'img/'
+      WHEN :p_file_extension = '.css' THEN 'css/'
+      WHEN :p_file_extension = '.js' THEN 'js/'
+    END || q1.component_name component_name 
+  FROM q1
+)
+SELECT COUNT(*) result
+FROM q2
+JOIN envmgr.fox_components fcf
+ON name = q2.component_name
+AND type = :p_mime_type
+  </DatabaseFileExistsStatement>
+  <FetchStatement>
+WITH q1 AS (
+  SELECT
+    CASE :p_filename_without_extension
+      WHEN 'fox_import' THEN 'Fox/fox_import'
+      ELSE :p_filename_without_extension
+    END component_name
+  FROM dual
+)
+, q2 AS (
+  SELECT
+    CASE 
+      WHEN :p_mime_type LIKE 'image%' THEN 'img/'
+      WHEN :p_file_extension= '.css' THEN 'css/'
+      WHEN :p_file_extension = '.js' THEN 'js/'
+    END || q1.component_name component_name 
+  FROM q1
+)
+SELECT fcf.data
+FROM q2
+JOIN envmgr.fox_components fcf
+ON name = q2.component_name
+AND type = :p_mime_type
+  </FetchStatement>
+  <FetchBinaryStatement>
+WITH q1 AS (
+  SELECT
+    CASE :p_filename_without_extension
+      WHEN 'fox_import' THEN 'Fox/fox_import'
+      ELSE :p_filename_without_extension
+    END component_name
+  FROM dual
+)
+, q2 AS (
+  SELECT
+    CASE 
+      WHEN :p_mime_type LIKE 'image%' THEN 'img/'
+      WHEN :p_file_extension = '.css' THEN 'css/'
+      WHEN :p_file_extension = '.js' THEN 'js/'
+    END || q1.component_name component_name 
+  FROM q1
+)
+SELECT fcf.bindata
+FROM q2
+JOIN envmgr.fox_components fcf
+ON name = q2.component_name
+AND type = :p_mime_type
+  </FetchBinaryStatement>
+  <FileDataTypeStatement>
+WITH q1 AS (
+  SELECT
+    CASE :p_filename_without_extension
+      WHEN 'fox_import' THEN 'Fox/fox_import'
+      ELSE :p_filename_without_extension
+    END component_name
+  FROM dual
+)
+, q2 AS (
+  SELECT
+    CASE 
+      WHEN :p_mime_type LIKE 'image%' THEN 'img/'
+      WHEN :p_file_extension = '.css' THEN 'css/'
+      WHEN :p_file_extension = '.js' THEN 'js/'
+    END || q1.component_name component_name 
+  FROM q1
+)
+SELECT
+CASE WHEN :p_mime_type LIKE 'image%'
+  THEN 'BLOB'
+  ELSE 'CLOB'
+END datatype 
+FROM q2
+JOIN envmgr.fox_components fcf
+ON name = q2.component_name
+AND type = :p_mime_type
+  </FileDataTypeStatement>
+  <FileMimeTypeStatement>
+SELECT
+CASE LOWER(:p_file_extension)
+  WHEN '.xml' THEN 'module'
+  WHEN '.html' THEN 'text/html'
+  WHEN '.htm' THEN 'text/html'
+  WHEN '.scss' THEN 'text/css'
+  WHEN '.css' THEN 'text/css'
+  WHEN '.png' THEN 'image/png'
+  WHEN '.gif' THEN 'image/gif'
+  WHEN '.jpg' THEN 'image/jpg'
+  WHEN '.jpeg' THEN 'image/jpg'
+  WHEN '.js' THEN 'text/javascript'
+  WHEN '.ico' THEN 'image/x-icon' 
+  WHEN '.mustache' THEN 'text/mustache'     
+  WHEN '.swf' THEN 'application/x-shockwave-flash'
+END
+FROM dual
+  </FileMimeTypeStatement>
+</DirectoryDescriptor>

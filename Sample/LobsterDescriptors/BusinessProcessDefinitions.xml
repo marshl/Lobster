@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DirectoryDescriptor xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name>Business Process Definitions</Name>
+  <DirectoryName>BusinessProcessDefinitions</DirectoryName>
+  <IncludeSubDirectories>false</IncludeSubDirectories>
+  <PushOnFileChange>false</PushOnFileChange>
+  <SearchRules>
+    <SearchRule xsi:type="IncludeRule">
+      <Pattern>*.xml</Pattern>
+    </SearchRule>
+    <SearchRule xsi:type="ExcludeRule">
+      <Pattern>*.xsd</Pattern>
+    </SearchRule>
+  </SearchRules>
+  <DefaultDataType>CLOB</DefaultDataType>
+  <InsertStatement>
+DECLARE
+  l_xml XMLTYPE := XMLTYPE(:p_file_content_clob);
+  l_short_name VARCHAR2(4000);
+  l_process_id NUMBER;
+BEGIN
+  
+  SELECT XMLCAST(XMLQUERY('/*/SHORT_NAME/text()' PASSING l_xml RETURNING CONTENT) AS VARCHAR2(4000))
+  INTO l_short_name
+  FROM dual;
+  
+  SELECT NVL(MAX(bp.id), 0) + 1
+  INTO l_process_id
+  FROM bpmmgr.business_processes bp;
+    
+  INSERT INTO bpmmgr.business_processes (
+    id
+  , short_name
+  ) VALUES (
+    l_process_id
+  , l_short_name
+  );
+  
+  INSERT INTO bpmmgr.business_process_definitions (
+    id
+  , bp_id
+  , start_datetime
+  , xml_data
+  ) VALUES (
+    l_process_id
+  , l_process_id
+  , SYSDATE
+  , l_xml
+  );
+  
+END;
+  </InsertStatement>
+  <UpdateStatement>
+DECLARE
+  l_xml XMLTYPE := XMLTYPE(:p_file_content_clob);
+  l_short_name VARCHAR2(4000);
+  l_process_id NUMBER;
+BEGIN
+  
+  SELECT XMLCAST(XMLQUERY('/*/SHORT_NAME/text()' PASSING l_xml RETURNING CONTENT) AS VARCHAR2(4000))
+  INTO l_short_name
+  FROM dual;
+  
+  SELECT bp.id
+  INTO l_process_id
+  FROM bpmmgr.business_processes bp
+  WHERE bp.short_name = l_short_name;
+  
+  UPDATE bpmmgr.business_process_definitions bpd 
+  SET
+    start_datetime = SYSDATE
+  , xml_data = l_xml
+  WHERE bpd.bp_id = l_process_id;
+END;
+  </UpdateStatement>
+  <DeleteStatement>
+DECLARE
+  l_xml XMLTYPE := XMLTYPE(:p_file_content_clob);
+  l_short_name VARCHAR2(4000);
+  l_process_id NUMBER;
+BEGIN
+  
+  SELECT XMLCAST(XMLQUERY('/*/SHORT_NAME/text()' PASSING l_xml RETURNING CONTENT) AS VARCHAR2(4000))
+  INTO l_short_name
+  FROM dual;
+    
+  SELECT bp.id
+  INTO l_process_id
+  FROM bpmmgr.business_processes bp
+  WHERE bp.short_name = l_short_name;
+  
+  DELETE FROM bpmmgr.business_process_definitions bpd
+  WHERE bpd.bp_id = l_process_id;
+  
+  DELETE FROM bpmmgr.business_processes bp
+  WHERE bp.id = l_process_id;
+END;
+  </DeleteStatement>
+  <DatabaseFileExistsStatement>
+SELECT COUNT(*)
+FROM bpmmgr.business_processes bp
+JOIN bpmmgr.business_process_definitions bpd
+  ON bp.id = bpd.bp_id
+WHERE bp.short_name = XMLCAST(XMLQUERY('/*/SHORT_NAME/text()' PASSING XMLTYPE(:p_file_content_clob) RETURNING CONTENT) AS VARCHAR2(4000))
+  </DatabaseFileExistsStatement>
+  <FetchStatement>
+SELECT bpd.xml_data
+FROM bpmmgr.business_processes bp
+JOIN bpmmgr.business_process_definitions bpd
+  ON bp.id = bpd.bp_id
+WHERE bp.short_name = XMLCAST(XMLQUERY('/*/SHORT_NAME/text()' PASSING XMLTYPE(:p_file_content_clob) RETURNING CONTENT) AS VARCHAR2(4000))
+  </FetchStatement>
+</DirectoryDescriptor>

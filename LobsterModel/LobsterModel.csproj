@@ -34,12 +34,12 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Oracle.ManagedDataAccess, Version=4.121.2.0, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=MSIL">
-      <HintPath>..\packages\Oracle.ManagedDataAccess.12.1.24160719\lib\net40\Oracle.ManagedDataAccess.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Oracle.ManagedDataAccess, Version=4.122.18.3, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=MSIL">
+      <HintPath>..\packages\Oracle.ManagedDataAccess.18.3.0\lib\net40\Oracle.ManagedDataAccess.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -49,15 +49,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BackupLog.cs" />
-    <Compile Include="ClobDirectory.cs" />
+    <Compile Include="CodeSourceConfigLoader.cs" />
     <Compile Include="ConnectionConfig.cs" />
-    <Compile Include="EventArguments\ClobDirectoryFileChangeEventArgs.cs" />
+    <Compile Include="DirectoryDescriptor.cs" />
+    <Compile Include="DirectoryDescriptorLoader.cs" />
+    <Compile Include="DirectoryWatcher.cs" />
+    <Compile Include="EventArguments\DirectoryWatcherFileChangeEventArgs.cs" />
     <Compile Include="Exceptions\ClobFileLookupException.cs" />
-    <Compile Include="ClobType.cs" />
-    <Compile Include="Column.cs" />
-    <Compile Include="Exceptions\ColumnNotFoundException.cs" />
     <Compile Include="Exceptions\ConnectToDatabaseException.cs" />
-    <Compile Include="Exceptions\ClobTypeLoadException.cs" />
+    <Compile Include="Exceptions\DirectoryDescriptorLoadException.cs" />
+    <Compile Include="Exceptions\FileDeleteException.cs" />
+    <Compile Include="Exceptions\FileSynchronisationCheckException.cs" />
     <Compile Include="FileBackup.cs" />
     <Compile Include="EventArguments\FileChangeEventArgs.cs" />
     <Compile Include="Exceptions\FileDownloadException.cs" />
@@ -66,21 +68,16 @@
     <Compile Include="EventArguments\FileProcessingFinishedEventArgs.cs" />
     <Compile Include="Exceptions\FileUpdateException.cs" />
     <Compile Include="IMessageLogEventListener.cs" />
-    <Compile Include="Exceptions\MimeTypeNotFoundException.cs" />
-    <Compile Include="EventArguments\MimeTypeRequestEventArgs.cs" />
-    <Compile Include="EventArguments\TableRequestEventArgs.cs" />
     <Compile Include="CodeSourceConfig.cs" />
+    <Compile Include="SearchRule.cs" />
     <Compile Include="SerializableObject.cs" />
-    <Compile Include="Exceptions\SetConnectionException.cs" />
+    <Compile Include="Exceptions\CreateConnectionException.cs" />
     <Compile Include="SettingsView.cs" />
     <Compile Include="EventArguments\FileUpdateCompleteEventArgs.cs" />
-    <Compile Include="SqlBuilder.cs" />
     <Compile Include="SqlExtensions.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="DatabaseConnection.cs" />
-    <Compile Include="DBClobFile.cs" />
     <Compile Include="MessageLog.cs" />
-    <Compile Include="MimeTypeList.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
@@ -89,7 +86,9 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Table.cs" />
+    <Compile Include="WatchedDirectory.cs" />
+    <Compile Include="WatchedFile.cs" />
+    <Compile Include="WatchedNode.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -98,6 +97,9 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

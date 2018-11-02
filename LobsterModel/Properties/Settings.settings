@@ -11,14 +11,11 @@
     <Setting Name="BackupEnabled" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="DatabaseConfigSchemaFilename" Type="System.String" Scope="User">
-      <Value Profile="(Default)">LobsterSettings/DatabaseConfig.xsd</Value>
+    <Setting Name="CodeSourceConfigSchemaFilename" Type="System.String" Scope="User">
+      <Value Profile="(Default)">LobsterSettings/CodeSourceConfig.xsd</Value>
     </Setting>
     <Setting Name="TempFileDirectory" Type="System.String" Scope="User">
       <Value Profile="(Default)">temp</Value>
-    </Setting>
-    <Setting Name="ClobTypeSchemaFilename" Type="System.String" Scope="User">
-      <Value Profile="(Default)">LobsterSettings/ClobType.xsd</Value>
     </Setting>
     <Setting Name="BackupDirectory" Type="System.String" Scope="User">
       <Value Profile="(Default)">backup</Value>
@@ -44,17 +41,26 @@
     <Setting Name="AppendFooterToDatabaseFiles" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="LogFileEvents" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
-    </Setting>
-    <Setting Name="ClobTypeDirectoryName" Type="System.String" Scope="User">
-      <Value Profile="(Default)">LobsterTypes</Value>
-    </Setting>
     <Setting Name="DatabaseConfigFileName" Type="System.String" Scope="User">
       <Value Profile="(Default)">LobsterConfig.xml</Value>
     </Setting>
     <Setting Name="CodeSourceDirectories" Type="System.Collections.Specialized.StringCollection" Scope="User">
       <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="DirectoryDescriptorFolderName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">LobsterDescriptors</Value>
+    </Setting>
+    <Setting Name="LogFileEvents" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="DirectoryDescriptorSchemaFilename" Type="System.String" Scope="User">
+      <Value Profile="(Default)">LobsterSettings/DirectoryDescriptor.xsd</Value>
+    </Setting>
+    <Setting Name="LogInfoMessages" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="TruncateLogsOnStartup" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
     </Setting>
   </Settings>
 </SettingsFile>

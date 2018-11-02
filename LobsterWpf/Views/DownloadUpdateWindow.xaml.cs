@@ -27,7 +27,6 @@ namespace LobsterWpf.Views
     using System.ComponentModel;
     using System.Net;
     using System.Windows;
-    using System.Windows.Forms;
 
     /// <summary>
     /// Interaction logic for DownloadUpdateWindow.xaml
@@ -74,7 +73,7 @@ namespace LobsterWpf.Views
         /// <param name="e">The download progress arguments.</param>
         private void WebClient_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
         {
-            this.Dispatcher.Invoke((MethodInvoker)delegate
+            this.Dispatcher.Invoke(() =>
             {
                 this.DownloadProgressBar.Value = e.BytesReceived;
                 this.DownloadProgressBar.Maximum = e.TotalBytesToReceive;

@@ -165,10 +165,24 @@ namespace LobsterWpf.Views
         /// </summary>
         private void LoadCodeSourceConfigs()
         {
-            List<CodeSourceConfigView> configViews = CodeSourceConfig.GetConfigList().Select(item => new CodeSourceConfigView(item)).ToList();
+            CodeSourceConfigLoader configLoader = new CodeSourceConfigLoader();
+            configLoader.CodeSourceLoadErrorEvent += this.OnCodeSourceConfigLoadError;
+            configLoader.Load();
+
+            List<CodeSourceConfigView> configViews = configLoader.CodeSourceConfigList.Select(item => new CodeSourceConfigView(item)).ToList();
             this.CodeSourceConfigList = new ObservableCollection<CodeSourceConfigView>(configViews);
             this.NotifyPropertyChanged("CodeSourceConfigList");
             this.NotifyPropertyChanged("SelectedConnectionConfig");
+        }
+
+        /// <summary>
+        /// Handles the event of an error occurring when loading a CodeSourceConfig file.
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void OnCodeSourceConfigLoadError(object sender, CodeSourceConfigLoader.CodeSourceLoadErrorEventArgs e)
+        {
+            MessageBox.Show($"An error occurred when loading the CodeSourceConfig file '{e.FilePath}': {e.ExceptionObj?.Message}");
         }
 
         /// <summary>
@@ -247,6 +261,7 @@ namespace LobsterWpf.Views
             this.isEditingNewConfig = true;
             ConnectionConfig newConfig = new ConnectionConfig();
             this.SelectedCodeSourceConfig.BaseConfig.ConnectionConfigList.Add(newConfig);
+            newConfig.Parent = this.SelectedCodeSourceConfig.BaseConfig;
             ConnectionConfigView newView = new ConnectionConfigView(newConfig);
             this.SelectedCodeSourceConfig.ConnectionConfigViewList.Add(newView);
             this.connectionListBox.SelectedItem = newView;
@@ -290,11 +305,23 @@ namespace LobsterWpf.Views
 
             try
             {
-                this.DatabaseConnection = DatabaseConnection.CreateDatabaseConnection(config, password);
-                this.DialogResult = true;
-                this.Close();
+                bool loadSuccess = true;
+
+                var databaseConnection = DatabaseConnection.CreateDatabaseConnection(config, password);
+                databaseConnection.ConnectionLoadErrorEvent += (object sender, DatabaseConnection.ConnectionLoadErrorEventArgs e) =>
+                {
+                    MessageBox.Show(e.ErrorMessage);
+                    loadSuccess = false;
+                };
+
+                if (loadSuccess)
+                {
+                    this.DatabaseConnection = databaseConnection;
+                    this.DialogResult = true;
+                    this.Close();
+                }
             }
-            catch (SetConnectionException ex)
+            catch (CreateConnectionException ex)
             {
                 MessageBox.Show($"{ex.Message}");
             }
@@ -317,21 +344,8 @@ namespace LobsterWpf.Views
             SecureString password = win.textField.SecurePassword;
             Exception ex = null;
             bool result = this.SelectedConnectionConfig.TestConnection(password, ref ex);
-            string message = result ? "Connection test successful" : "Connection test unsuccessful.\n" + ex;
+            string message = result ? "Connection test successful" : "Connection test unsuccessful:\n" + ex.Message;
             MessageBox.Show(message);
-        }
-
-        /// <summary>
-        /// The event that is called when the edit clob type button is clicked.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments.</param>
-        private void EditClobTypeButton_Click(object sender, RoutedEventArgs e)
-        {
-            /*ClobTypeListWindow window = new ClobTypeListWindow(this.CurrentConfigView.ClobTypeDirectory);
-            window.Owner = this;
-            bool? result = window.ShowDialog();
-            this.Focus();*/
         }
 
         /// <summary>
@@ -478,13 +492,13 @@ namespace LobsterWpf.Views
             }
 
             string errorMessage = null;
-            if (!CodeSourceConfig.ValidateCodeSourceLocation(dlg.FileName, ref errorMessage))
+            if (!CodeSourceConfigLoader.ValidateCodeSourceLocation(dlg.FileName, ref errorMessage))
             {
                 MessageBox.Show(errorMessage);
                 return;
             }
 
-            CodeSourceConfig.AddCodeSourceDirectory(dlg.FileName);
+            CodeSourceConfigLoader.AddCodeSourceDirectory(dlg.FileName);
             this.LoadCodeSourceConfigs();
         }
 
@@ -502,7 +516,7 @@ namespace LobsterWpf.Views
             }
 
             string errorMessage = null;
-            if (!CodeSourceConfig.ValidateNewCodeSourceLocation(dlg.FileName, ref errorMessage))
+            if (!CodeSourceConfigLoader.ValidateNewCodeSourceLocation(dlg.FileName, ref errorMessage))
             {
                 MessageBox.Show(errorMessage);
                 return;
@@ -516,7 +530,7 @@ namespace LobsterWpf.Views
             }
 
             CodeSourceConfig codeSourceConfig = null;
-            if (!CodeSourceConfig.InitialiseCodeSourceDirectory(dlg.FileName, nameWindow.CodeSourceName, ref codeSourceConfig))
+            if (!CodeSourceConfigLoader.InitialiseCodeSourceDirectory(dlg.FileName, nameWindow.CodeSourceName, ref codeSourceConfig))
             {
                 return;
             }
@@ -533,7 +547,7 @@ namespace LobsterWpf.Views
         {
             if (this.codeSourceListBox.SelectedItem != null)
             {
-                CodeSourceConfig.RemoveCodeSource(this.SelectedCodeSourceConfig.BaseConfig.CodeSourceDirectory);
+                CodeSourceConfigLoader.RemoveCodeSource(this.SelectedCodeSourceConfig.BaseConfig.CodeSourceDirectory);
                 this.CodeSourceConfigList.Remove((CodeSourceConfigView)this.codeSourceListBox.SelectedItem);
             }
         }

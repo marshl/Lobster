@@ -64,6 +64,38 @@ namespace LobsterModel
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether messages with the [INFO] type should be written out to the log
+        /// </summary>
+        public bool LogInfoMessages
+        {
+            get
+            {
+                return Settings.Default.LogInfoMessages;
+            }
+            
+            set
+            {
+                Settings.Default.LogInfoMessages = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether log files should be truncated when the program is started
+        /// </summary>
+        public bool TruncateLogsOnStartup
+        {
+            get
+            {
+                return Settings.Default.TruncateLogsOnStartup;
+            }
+
+            set
+            {
+                Settings.Default.TruncateLogsOnStartup = value;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the duration during which file events for files already updated should be ignored.
         /// </summary>
         public int FileUpdateTimeoutMilliseconds

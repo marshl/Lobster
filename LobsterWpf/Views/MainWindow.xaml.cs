@@ -28,14 +28,11 @@ namespace LobsterWpf.Views
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
-    using System.Diagnostics;
     using System.Drawing;
     using System.IO;
-    using System.Media;
     using System.Threading;
     using System.Windows;
     using System.Windows.Controls;
-    using System.Windows.Forms;
     using LobsterModel;
     using Properties;
     using ViewModels;
@@ -46,24 +43,14 @@ namespace LobsterWpf.Views
     public sealed partial class MainWindow : Window, IDisposable
     {
         /// <summary>
-        /// The view of the current connection, if crrently connected.
-        /// </summary>
-        private ConnectionView connectionView;
-
-        /// <summary>
-        /// The sound played when an automatic update is successful.
-        /// </summary>
-        private SoundPlayer successSound;
-
-        /// <summary>
-        /// The sound played when an automatic update fails.
-        /// </summary>
-        private SoundPlayer failureSound;
-
-        /// <summary>
         /// The system tray icon that can be used to minimise and maximise the window.
         /// </summary>
-        private NotifyIcon notifyIcon;
+        private System.Windows.Forms.NotifyIcon notifyIcon;
+
+        /// <summary>
+        /// A list of the connection controls within the connection tab list.
+        /// </summary>
+        private List<ConnectionControl> connectionControlList = new List<ConnectionControl>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow"/> class.
@@ -71,9 +58,6 @@ namespace LobsterWpf.Views
         public MainWindow()
         {
             this.InitializeComponent();
-
-            this.successSound = new SoundPlayer(Path.Combine(Environment.CurrentDirectory, @"Resources\Audio\success.wav"));
-            this.failureSound = new SoundPlayer(Path.Combine(Environment.CurrentDirectory, @"Resources\Audio\failure.wav"));
         }
 
         /// <summary>
@@ -83,6 +67,65 @@ namespace LobsterWpf.Views
         {
             this.Dispose(true);
             GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Plays a success sound
+        /// </summary>
+        public void PlaySuccessSound()
+        {
+            try
+            {
+                Uri uri;
+                var success = Uri.TryCreate(Settings.Default.SuccessSoundFile, UriKind.Absolute, out uri)
+                     || Uri.TryCreate(Settings.Default.SuccessSoundFile, UriKind.Relative, out uri);
+
+                if (success)
+                {
+                    this.successSoundElement.Source = uri;
+                    this.successSoundElement.Position = TimeSpan.MinValue;
+                    this.successSoundElement.Play();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageLog.LogError(ex.ToString());
+            }
+        }
+
+        /// <summary>
+        /// Plays a failure sound
+        /// </summary>
+        public void PlayFailureSound()
+        {
+            try
+            {
+                Uri uri;
+                var success = Uri.TryCreate(Settings.Default.FailureSoundFile, UriKind.Absolute, out uri)
+                     || Uri.TryCreate(Settings.Default.FailureSoundFile, UriKind.Relative, out uri);
+
+                if (success)
+                {
+                    this.failureSoundElement.Source = uri;
+                    this.failureSoundElement.Position = TimeSpan.MinValue;
+                    this.failureSoundElement.Play();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageLog.LogError(ex.ToString());
+            }
+        }
+
+        /// <summary>
+        /// Closes the given connection and removes it from the list of tabs
+        /// </summary>
+        /// <param name="connectionControl">The connectio ncontrol to close</param>
+        public void CloseConnection(ConnectionControl connectionControl)
+        {
+            connectionControl.Dispose();
+            this.ConnectionTabControl.Items.Remove(connectionControl.TabItem);
+            this.connectionControlList.Remove(connectionControl);
         }
 
         /// <summary>
@@ -96,7 +139,7 @@ namespace LobsterWpf.Views
             {
                 Icon icon = new Icon("Resources/Images/cartoon-lobster.ico");
 
-                this.notifyIcon = new NotifyIcon();
+                this.notifyIcon = new System.Windows.Forms.NotifyIcon();
                 this.notifyIcon.Click += new EventHandler(this.NotifyIcon_Click);
                 this.notifyIcon.Icon = icon;
             }
@@ -116,21 +159,18 @@ namespace LobsterWpf.Views
             bool? result = window.ShowDialog();
             if (result.HasValue && result.Value)
             {
-                if (this.connectionView != null)
-                {
-                    this.connectionView.Dispose();
-                }
+                ConnectionView connectionView = new ConnectionView(window.DatabaseConnection);
+                ConnectionControl control = new ConnectionControl(connectionView, this);
 
-                this.ConnectionContainer.DataContext = this.connectionView = new ConnectionView(window.DatabaseConnection);
-                this.connectionView.SelectedFileNode = null;
-                this.RepopulateFileListView(true);
-                
-                this.connectionView.Connection.FileProcessingFinishedEvent += this.OnFileProcessingFinished;
-                this.connectionView.Connection.RequestMimeTypeEvent += this.PromptForMimeType;
-                this.connectionView.Connection.RequestTableEvent += this.PromptForTable;
-                this.connectionView.Connection.StartChangeProcessingEvent += this.OnEventProcessingStart;
-                this.connectionView.Connection.UpdateCompleteEvent += this.OnAutoUpdateComplete;
-                this.connectionView.Connection.ClobTypeChangedEvent += this.ReloadLobsterTypesMenuItem_Click;
+                this.connectionControlList.Add(control);
+                var tabItem = new TabItem()
+                {
+                    Content = control,
+                    Header = connectionView.BaseConnection.Config.Name,
+                    IsSelected = true
+                };
+                this.ConnectionTabControl.Items.Add(tabItem);
+                control.TabItem = tabItem;
             }
         }
 
@@ -155,40 +195,53 @@ namespace LobsterWpf.Views
             this.notifyIcon.Visible = true;
 
 #if !DEBUG
-            this.UpdateCheck();
+            this.UpdateCheck(true);
 #endif
         }
 
         /// <summary>
-        /// PErforms an update check, and closes the program if an update is found.
+        /// Performs an update check, and closes the program if an update is found.
         /// </summary>
-        private void UpdateCheck()
+        /// <param name="backgroundCheck">WHether this update should be run in the background and hide the failure warning from the user.</param>
+        private void UpdateCheck(bool backgroundCheck)
         {
             GitHubUpdater updater = new GitHubUpdater("marshl", "lobster");
             Thread thread = new Thread(() =>
             {
-                bool updateExists = updater.RunUpdateCheck();
-                if (!updateExists)
+                try
                 {
-                    return;
+                    bool updateExists = updater.RunUpdateCheck();
+                    if (!updateExists)
+                    {
+                        if (!backgroundCheck)
+                        {
+                            MessageBox.Show("No update available");
+                        }
+
+                        return;
+                    }
+
+                    MessageBoxResult result = MessageBox.Show("A newer version is available. Would you like to update now?", "Update Available", MessageBoxButton.OKCancel);
+                    if (result != MessageBoxResult.OK)
+                    {
+                        return;
+                    }
+
+                    updater.PrepareUpdate();
+
+                    // The DownloadUpdateWindow begins the update once opened
+                    this.Dispatcher.Invoke((Action)delegate
+                    {
+                        DownloadUpdateWindow window = new DownloadUpdateWindow(updater);
+                        window.Owner = this;
+                        updater.DownloadClient.DownloadFileCompleted += DownloadClient_DownloadFileCompleted;
+                        window.ShowDialog();
+                    });
                 }
-
-                DialogResult result = System.Windows.Forms.MessageBox.Show("A newer version is available. Would you like to update now?", "Update Available", MessageBoxButtons.OKCancel);
-                if (result != System.Windows.Forms.DialogResult.OK)
+                catch (Exception ex)
                 {
-                    return;
+                    MessageBox.Show("Error", $"An error occurred when checking for updates: {ex}");
                 }
-
-                updater.PrepareUpdate();
-
-                // The DownloadUpdateWindow begins the update once opened
-                this.Dispatcher.Invoke((Action)delegate
-                {
-                    DownloadUpdateWindow window = new DownloadUpdateWindow(updater);
-                    window.Owner = this;
-                    updater.DownloadClient.DownloadFileCompleted += DownloadClient_DownloadFileCompleted;
-                    window.ShowDialog();
-                });
             });
 
             thread.Start();
@@ -204,7 +257,7 @@ namespace LobsterWpf.Views
             // If there was an error, print it out
             if (e.Error != null)
             {
-                System.Windows.MessageBox.Show(e.Error.ToString(), "Update Error");
+                MessageBox.Show(e.Error.ToString(), "Update Error");
                 return;
             }
 
@@ -229,263 +282,6 @@ namespace LobsterWpf.Views
         }
 
         /// <summary>
-        /// The event that is called when the a different clob type is selected.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments.</param>
-        private void ClobTypeListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            this.RepopulateFileListView(true);
-        }
-
-        /// <summary>
-        /// Clears the file list and populates with the files of the currently selected clob directory.
-        /// </summary>
-        /// <param name="fullRebuild">WHether a full rebuild of the file list needs to be performed.</param>
-        private void RepopulateFileListView(bool fullRebuild)
-        {
-            if (this.clobTypeListBox.SelectedIndex == -1)
-            {
-                this.connectionView.PopulateFileTreeForClobDirectory(null);
-                this.localFileTreeView.ItemsSource = null;
-                return;
-            }
-
-            if (this.connectionView == null)
-            {
-                return;
-            }
-
-            ClobDirectoryView clobDirView = (ClobDirectoryView)this.clobTypeListBox.SelectedItem;
-
-            if (fullRebuild)
-            {
-                this.connectionView.PopulateFileTreeForClobDirectory(clobDirView.BaseClobDirectory);
-            }
-            else
-            {
-                this.connectionView.RootFile.RefreshFileInformation(true);
-            }
-
-            this.localFileTreeView.ItemsSource = this.connectionView.RootFile.Children;
-        }
-
-        /// <summary>
-        /// The event that is called when the show/hide readonly files checkbox is checked or unchecked.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments</param>
-        private void HideReadonlyCheckbox_Toggled(object sender, RoutedEventArgs e)
-        {
-            this.RepopulateFileListView(true);
-        }
-
-        /// <summary>
-        /// The event that is called when the push file button is clicked.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments.</param>
-        private void PushButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (this.connectionView.SelectedFileNode == null)
-            {
-                return;
-            }
-
-            var clobDirView = (ClobDirectoryView)this.clobTypeListBox.SelectedItem;
-            string filename = this.connectionView.SelectedFileNode.FilePath;
-
-            FileInfo fi = new FileInfo(filename);
-            if (fi.IsReadOnly)
-            {
-                MessageBoxResult result = System.Windows.MessageBox.Show(
-                    $"{this.connectionView.SelectedFileNode.DisplayName} is locked. Are you sure you want to clob it?",
-                    "File is Locked",
-                    MessageBoxButton.OKCancel);
-
-                if (result != MessageBoxResult.OK)
-                {
-                    return;
-                }
-            }
-
-            try
-            {
-                this.connectionView.Connection.SendUpdateClobMessage(clobDirView.BaseClobDirectory, filename);
-            }
-            catch (FileUpdateException)
-            {
-                this.DisplayUpdateNotification(filename, false);
-                return;
-            }
-
-            this.DisplayUpdateNotification(filename, true);
-            this.connectionView.SelectedFileNode.RefreshBackupList();
-        }
-
-        /// <summary>
-        /// The event that is called when the pull file button is clicked.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments.</param>
-        private void PullButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (this.connectionView?.SelectedFileNode?.DatabaseFile == null)
-            {
-                return;
-            }
-
-            try
-            {
-                string resultPath = this.connectionView.Connection.SendDownloadClobDataToFileMessage(this.connectionView.SelectedFileNode.DatabaseFile);
-                Process.Start(resultPath);
-            }
-            catch (FileDownloadException ex)
-            {
-                System.Windows.MessageBox.Show($"The file download failed: {ex}");
-            }
-        }
-
-        /// <summary>
-        /// The event that is called when the 
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments.</param>
-        private void DiffButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (this.connectionView?.SelectedFileNode?.DatabaseFile == null)
-            {
-                return;
-            }
-
-            try
-            {
-                string filename = this.connectionView.SelectedFileNode.FilePath;
-                string downloadedFile = this.connectionView.Connection.SendDownloadClobDataToFileMessage(this.connectionView.SelectedFileNode.DatabaseFile);
-                string args = string.Format(
-                    Settings.Default.DiffProgramArguments,
-                    downloadedFile,
-                    filename);
-
-                Process.Start(Settings.Default.DiffProgramName, args);
-            }
-            catch (FileDownloadException ex)
-            {
-                System.Windows.MessageBox.Show(ex.Message);
-                return;
-            }
-        }
-
-        /// <summary>
-        /// The event that is called when the explore button is clicked.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments.</param>
-        private void ExploreButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (this.connectionView.SelectedFileNode != null)
-            {
-                Utils.OpenFileInExplorer(this.connectionView.SelectedFileNode.FilePath);
-            }
-        }
-
-        /// <summary>
-        /// The event that is called when the insert file button is clicked.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments.</param>
-        private void InsertButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (this.connectionView.SelectedFileNode != null)
-            {
-                var clobDirView = (ClobDirectoryView)this.clobTypeListBox.SelectedItem;
-                string filename = this.connectionView.SelectedFileNode.FilePath;
-                try
-                {
-                    DBClobFile databaseFile = null;
-                    bool result = this.connectionView.Connection.SendInsertClobMessage(clobDirView.BaseClobDirectory, filename, ref databaseFile);
-
-                    if (result)
-                    {
-                        this.DisplayUpdateNotification(filename, true);
-                        this.connectionView.SelectedFileNode.DatabaseFile = databaseFile;
-                        this.connectionView.SelectedFileNode.RefreshFileInformation(false);
-                    }
-                }
-                catch (FileInsertException ex)
-                {
-                    System.Windows.MessageBox.Show($"The file insert failed: {ex}");
-                    this.DisplayUpdateNotification(filename, false);
-                }
-            }
-        }
-
-        /// <summary>
-        /// The event that is called when a different file is selected.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments.</param>
-        private void LocalFileTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
-        {
-            this.connectionView.SelectedFileNode = (FileNodeView)e.NewValue;
-            this.connectionView.SelectedFileNode?.RefreshBackupList();
-        }
-
-        /// <summary>
-        /// Displays a notification window showing the status of a file update.
-        /// </summary>
-        /// <param name="filename">The full path of the file that was updated.</param>
-        /// <param name="success">Whether the file was updated successfulyl or not.</param>
-        private void DisplayUpdateNotification(string filename, bool success)
-        {
-            string message = "File update " + (success ? "succeeded" : "failed") + " for " + Path.GetFileName(filename);
-            NotificationWindow nw = new NotificationWindow(message, success);
-            nw.Show();
-
-            try
-            {
-                (success ? this.successSound : this.failureSound).Play();
-            }
-            catch (FileNotFoundException ex)
-            {
-                MessageLog.LogError($"An error occurred when attempting to play a sound: {ex}");
-            }
-        }
-
-        /// <summary>
-        /// The event for when the push file button is clicked.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments.</param>
-        private void PushBackupButton_Click(object sender, EventArgs e)
-        {
-            FileBackup fileBackup = ((FrameworkElement)sender).DataContext as FileBackup;
-            var clobDirView = (ClobDirectoryView)this.clobTypeListBox.SelectedItem;
-            try
-            {
-                this.connectionView.Connection.UpdateClobWithExternalFile(clobDirView.BaseClobDirectory, fileBackup.OriginalFilename, fileBackup.BackupFilename);
-            }
-            catch (FileUpdateException)
-            {
-                this.DisplayUpdateNotification(fileBackup.BackupFilename, false);
-                return;
-            }
-
-            this.DisplayUpdateNotification(fileBackup.BackupFilename, true);
-        }
-
-        /// <summary>
-        /// The event for when the open file button is clicked.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments.</param>
-        private void OpenBackupButton_Click(object sender, EventArgs e)
-        {
-            FileBackup fileBackup = ((FrameworkElement)sender).DataContext as FileBackup;
-            Utils.OpenFileInExplorer(fileBackup.BackupFilename);
-        }
-
-        /// <summary>
         /// The event for when the requery database menu item is clicked.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
@@ -493,25 +289,10 @@ namespace LobsterWpf.Views
         private void RequeryDatabaseMenuItem_Click(object sender, RoutedEventArgs e)
         {
             List<FileListRetrievalException> errorList = new List<FileListRetrievalException>();
-
-            this.connectionView.Connection.GetDatabaseFileLists(ref errorList);
-            this.RepopulateFileListView(true);
-        }
-
-        /// <summary>
-        /// The event for when either of the display mode radio buttons are clicked.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event arguments.</param>
-        private void OnToggleViewModeRadioClicked(object sender, RoutedEventArgs e)
-        {
-            if (this.connectionView == null)
+            foreach (ConnectionControl control in this.connectionControlList)
             {
-                return;
+                control.RepopulateFileListView(true);
             }
-
-            this.connectionView.CurrentDisplayMode = this.LocalOnlyFilesRadio.IsChecked.Value ? ConnectionView.DisplayMode.LocalFiles : ConnectionView.DisplayMode.DatabaseFiles;
-            this.RepopulateFileListView(true);
         }
 
         /// <summary>
@@ -527,21 +308,23 @@ namespace LobsterWpf.Views
         }
 
         /// <summary>
-        /// The event called when the settings button is clicked, opening a new settings window.
+        /// The event called when the check for updates button is clicked
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The evnet arguments</param>
+        private void CheckForUpdatesMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            this.UpdateCheck(false);
+        }
+
+        /// <summary>
+        /// The event called when the View Log button is clicked
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">The event arguments.</param>
-        private void MessagesMenuItem_Click(object sender, RoutedEventArgs e)
+        private void ViewLogMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageListWindow.Instance != null)
-            {
-                MessageListWindow.Instance.Activate();
-            }
-            else
-            {
-                MessageListWindow window = new MessageListWindow();
-                window.Show();
-            }
+            MessageLog.OpenLogFile();
         }
 
         /// <summary>
@@ -581,11 +364,6 @@ namespace LobsterWpf.Views
         /// <param name="e">The event arguments.</param>
         private void Window_Closing(object sender, CancelEventArgs e)
         {
-            if (MessageListWindow.Instance != null)
-            {
-                MessageListWindow.Instance.Close();
-            }
-
             this.Dispose();
         }
 
@@ -600,22 +378,9 @@ namespace LobsterWpf.Views
                 return;
             }
 
-            if (this.connectionView != null)
+            foreach (ConnectionControl connectionControl in this.connectionControlList)
             {
-                this.connectionView.Dispose();
-                this.connectionView = null;
-            }
-
-            if (this.failureSound != null)
-            {
-                this.failureSound.Dispose();
-                this.failureSound = null;
-            }
-
-            if (this.successSound != null)
-            {
-                this.successSound.Dispose();
-                this.successSound = null;
+                connectionControl.Dispose();
             }
 
             if (this.notifyIcon != null)
@@ -626,91 +391,16 @@ namespace LobsterWpf.Views
         }
 
         /// <summary>
-        /// The callback for when a automatic file update is completed.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="args">The event arguments</param>
-        private void OnAutoUpdateComplete(object sender, FileUpdateCompleteEventArgs args)
-        {
-            this.Dispatcher.Invoke((MethodInvoker)delegate
-            {
-                this.DisplayUpdateNotification(args.Fullpath, args.Success);
-            });
-        }
-
-        /// <summary>
-        /// The callback for when the user needs to select a table to insert a file into.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="args">The event arguments</param>
-        private void PromptForTable(object sender, TableRequestEventArgs args)
-        {
-            TableSelectorWindow tsw = new TableSelectorWindow(args.FullPath, args.Tables);
-            tsw.Owner = this;
-            bool? result = tsw.ShowDialog();
-            if (result ?? false)
-            {
-                args.SelectedTable = tsw.SelectedTable;
-            }
-        }
-
-        /// <summary>
-        /// The callback for when the user is needed to select a mime type for a file to be inserted as.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="args">The event arguments</param>
-        private void PromptForMimeType(object sender, MimeTypeRequestEventArgs args)
-        {
-            MimeTypeSelectorWindow msw = new MimeTypeSelectorWindow(args.FullPath, args.MimeTypes);
-            msw.Owner = this;
-            bool? result = msw.ShowDialog();
-            if (result ?? false)
-            {
-                args.SelectedMimeType = msw.SelectedMimeType;
-            }
-        }
-
-        /// <summary>
-        /// The callback for when a file event is initially received.
-        /// </summary>\
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="args">The event arguments</param>
-        private void OnEventProcessingStart(object sender, FileChangeEventArgs args)
-        {
-            this.Dispatcher.Invoke((MethodInvoker)delegate
-            {
-                this.connectionView.IsEnabled = false;
-            });
-        }
-
-        /// <summary>
-        /// The callback for when the last file event in the event queue is processed.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="args">The event arguments</param>
-        private void OnFileProcessingFinished(object sender, FileProcessingFinishedEventArgs args)
-        {
-            this.Dispatcher.Invoke((MethodInvoker)delegate
-            {
-                this.connectionView.IsEnabled = true;
-                this.RepopulateFileListView(args.FileTreeChange);
-            });
-        }
-
-        /// <summary>
         /// The handler for when the Reload Lobster Types menu item is clicked.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">The event arguments.</param>
-        private void ReloadLobsterTypesMenuItem_Click(object sender, EventArgs e)
+        private void ReloadDirectoryDescriptorsMenuItem_Click(object sender, EventArgs e)
         {
-            this.Dispatcher.Invoke((MethodInvoker)delegate
+            foreach (ConnectionControl control in this.connectionControlList)
             {
-                this.connectionView.ReloadClobTypes();
-                this.connectionView.SelectedFileNode = null;
-                this.clobTypeListBox.SelectedIndex = -1;
-                this.RepopulateFileListView(true);
-            });
+                control.ReloadDirectoryDescriptors();
+            }
         }
     }
 }

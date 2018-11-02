@@ -25,8 +25,9 @@ namespace LobsterModel
 {
     using System;
     using System.Collections.Generic;
+    using System.Data;
     using System.IO;
-    using System.Linq;
+    using System.Reflection;
     using System.Security;
     using System.Threading;
     using Oracle.ManagedDataAccess.Client;
@@ -34,20 +35,80 @@ namespace LobsterModel
     using Properties;
 
     /// <summary>
-    /// Used to define how a database should be connected to, and where the ClobTypes are stored for it.
+    /// Used to manage a connection from on code source to one database, with all the methods for comparing local files with those on the database and making changes to the database
     /// </summary>
     public class DatabaseConnection : IDisposable
     {
         /// <summary>
-        /// The file watcher for the directory where the clob types are stored.
+        /// The number of characters of a database parameter that will be logged (all the rest will be truncated)
         /// </summary>
-        private FileSystemWatcher clobTypeFileWatcher;
+        private const int ParameterLogLength = 255;
+
+        /// <summary>
+        /// The parameter for the name of the file (including the file extension)
+        /// </summary>
+        private const string FilenameParameterName = "p_filename";
+
+        /// <summary>
+        /// The parameter for the name of the file without the extension
+        /// </summary>
+        private const string FilenameWithoutExtensionParameterName = "p_filename_without_extension";
+
+        /// <summary>
+        /// The parameter for the extension of the file (exlcuding the .)
+        /// </summary>
+        private const string FileExtensionParameterName = "p_file_extension";
+
+        /// <summary>
+        /// The parameter for the path of the file, relative to the CodeSource directory
+        /// </summary>
+        private const string RelativePathParameterName = "p_relative_path";
+
+        /// <summary>
+        /// The parameter for the parent directory of the file
+        /// </summary>
+        private const string ParentDirectoryParameterName = "p_parent_directory";
+
+        /// <summary>
+        /// The parameter for the full path of the file
+        /// </summary>
+        private const string FullPathParameterName = "p_full_path";
+
+        /// <summary>
+        /// The parameter for the mime type of the file (has to be computed using another SQL statement)
+        /// </summary>
+        private const string MimeTypeParameterName = "p_mime_type";
+
+        /// <summary>
+        /// The parameter for the data type of the file (has to be computed using another SQL statement)
+        /// </summary>
+        private const string DataTypeParameterName = "p_data_type";
+
+        /// <summary>
+        /// The parameter for the CLOB data of the file
+        /// </summary>
+        private const string FileContentClobParameterName = "p_file_content_clob";
+
+        /// <summary>
+        /// The parameter for the BLOB data of the file
+        /// </summary>
+        private const string FileContentBlobParameterName = "p_file_content_blob";
+
+        /// <summary>
+        /// The parameter for the footer message placed at the bottom of some files
+        /// </summary>
+        private const string FooterMessageParameterName = "p_footer_message";
+
+        /// <summary>
+        /// The file watcher for the directory where the directory descriptors are stored.
+        /// </summary>
+        private FileSystemWatcher directoryDescriptorFileWatcher;
 
         /// <summary>
         /// The queue of events that have triggered. 
         /// Events are popped off and processed one at a time by the fileEventThread.
         /// </summary>
-        private List<FileSystemEventArgs> fileEventQueue = new List<FileSystemEventArgs>();
+        private List<FileChangeEvent> fileEventQueue = new List<FileChangeEvent>();
 
         /// <summary>
         /// A value indicating whether any of the current stack of file events require a file tree change (file delete/create/rename).
@@ -60,9 +121,14 @@ namespace LobsterModel
         private object fileEventProcessingSemaphore = new object();
 
         /// <summary>
-        /// The internal mime type list.
+        /// The cached connection to the database.
         /// </summary>
-        private MimeTypeList mimeTypeList;
+        private OracleConnection storedConnection;
+
+        /// <summary>
+        /// The thread which is delayed after a time after the last file change event, and which processes the changes.
+        /// </summary>
+        private Timer eventProcessingTimer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseConnection"/> class.
@@ -75,21 +141,21 @@ namespace LobsterModel
             this.IsAutomaticClobbingEnabled = this.Config.AllowAutomaticClobbing;
             this.Password = password;
 
-            bool result = Utils.DeserialiseXmlFileUsingSchema("LobsterSettings/MimeTypes.xml", null, out this.mimeTypeList);
-
             if (!Directory.Exists(this.Config.Parent.CodeSourceDirectory))
             {
-                throw new SetConnectionException($"Could not find CodeSource directory: {this.Config.Parent.CodeSourceDirectory}");
+                throw new CreateConnectionException($"Could not find CodeSource directory: {this.Config.Parent.CodeSourceDirectory}");
             }
 
-            this.clobTypeFileWatcher = new FileSystemWatcher(this.Config.Parent.ClobTypeDirectory);
-            this.clobTypeFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.CreationTime;
-            this.clobTypeFileWatcher.Changed += new FileSystemEventHandler(this.OnClobTypeChangeEvent);
-            this.clobTypeFileWatcher.Created += new FileSystemEventHandler(this.OnClobTypeChangeEvent);
-            this.clobTypeFileWatcher.Deleted += new FileSystemEventHandler(this.OnClobTypeChangeEvent);
-            this.clobTypeFileWatcher.Renamed += new RenamedEventHandler(this.OnClobTypeChangeEvent);
+            this.directoryDescriptorFileWatcher = new FileSystemWatcher(this.Config.Parent.DirectoryDescriptorFolder);
+            this.directoryDescriptorFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.CreationTime;
+            this.directoryDescriptorFileWatcher.Changed += new FileSystemEventHandler(this.OnDirectoryDescriptorChangeEvent);
+            this.directoryDescriptorFileWatcher.Created += new FileSystemEventHandler(this.OnDirectoryDescriptorChangeEvent);
+            this.directoryDescriptorFileWatcher.Deleted += new FileSystemEventHandler(this.OnDirectoryDescriptorChangeEvent);
+            this.directoryDescriptorFileWatcher.Renamed += new RenamedEventHandler(this.OnDirectoryDescriptorChangeEvent);
 
-            this.clobTypeFileWatcher.EnableRaisingEvents = true;
+            this.directoryDescriptorFileWatcher.EnableRaisingEvents = true;
+
+            this.OpenConnection();
         }
 
         /// <summary>
@@ -108,35 +174,14 @@ namespace LobsterModel
         public event EventHandler<FileUpdateCompleteEventArgs> UpdateCompleteEvent;
 
         /// <summary>
-        /// The event for when a Table selection is required by the user.
+        /// The event for when a DirectoryDescriptor in their folder has changed.
         /// </summary>
-        public event EventHandler<TableRequestEventArgs> RequestTableEvent;
+        public event EventHandler<FileSystemEventArgs> DirectoryDescriptorChangeEvent;
 
         /// <summary>
-        /// The event for when a mime type is needed.
+        /// The event for when an error occurs when loading the directory descriptors
         /// </summary>
-        public event EventHandler<MimeTypeRequestEventArgs> RequestMimeTypeEvent;
-
-        /// <summary>
-        /// The event for when a ClobType in the LobsterTypes directory has changed.
-        /// </summary>
-        public event EventHandler<FileSystemEventArgs> ClobTypeChangedEvent;
-
-        /// <summary>
-        /// Gets or sets the list of mime types that are used to translate from file names to database mnemonics and vice-sersa.
-        /// </summary>
-        public MimeTypeList MimeTypeList
-        {
-            get
-            {
-                return this.mimeTypeList;
-            }
-
-            set
-            {
-                this.mimeTypeList = value;
-            }
-        }
+        public event EventHandler<ConnectionLoadErrorEventArgs> ConnectionLoadErrorEvent;
 
         /// <summary>
         /// Gets the list of temporary files that have been downloaded so far.
@@ -147,12 +192,12 @@ namespace LobsterModel
         /// <summary>
         /// Gets the configuration file for this connection.
         /// </summary>
-        public ConnectionConfig Config { get; private set; }
+        public ConnectionConfig Config { get; }
 
         /// <summary>
-        /// Gets the list of ClobDirectories for each ClobType located in directory in the configuration settings.
+        /// Gets the list of watchers for this connection.
         /// </summary>
-        public List<ClobDirectory> ClobDirectoryList { get; private set; }
+        public List<DirectoryWatcher> DirectoryWatcherList { get; private set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the database should be automatically updated when a file is changed.
@@ -173,6 +218,12 @@ namespace LobsterModel
         public static DatabaseConnection CreateDatabaseConnection(ConnectionConfig config, SecureString password)
         {
             MessageLog.LogInfo($"Changing connection to {config.Name}");
+
+            if (!Directory.Exists(config.Parent.DirectoryDescriptorFolder))
+            {
+                throw new CreateConnectionException($"The Directory Descriptor directory {config.Parent.DirectoryDescriptorFolder} could not be found.");
+            }
+
             try
             {
                 OracleConnection con = config.OpenSqlConnection(password);
@@ -180,423 +231,206 @@ namespace LobsterModel
             }
             catch (ConnectToDatabaseException ex)
             {
-                throw new SetConnectionException($"A connection could not be made to the database: {ex.Message}", ex);
-            }
-
-            if (config.Parent.ClobTypeDirectory == null || !Directory.Exists(config.Parent.ClobTypeDirectory))
-            {
-                throw new SetConnectionException($"The clob type directory {config.Parent.ClobTypeDirectory} could not be found.");
+                throw new CreateConnectionException($"A test connection could not be made to the database: {ex.Message}", ex);
             }
 
             DatabaseConnection databaseConnection = new DatabaseConnection(config, password);
-
-            List<ClobTypeLoadException> errors = new List<ClobTypeLoadException>();
-            List<FileListRetrievalException> fileLoadErrors = new List<FileListRetrievalException>();
-
-            databaseConnection.LoadClobTypes(ref errors);
-            databaseConnection.GetDatabaseFileLists(ref fileLoadErrors);
-
-            MessageLog.LogInfo("Connection change successful");
+            databaseConnection.LoadDirectoryDescriptors();
 
             return databaseConnection;
         }
 
         /// <summary>
-        /// Loads each of the xml files in the ClobTypeDir (if they are valid).
+        /// Opens a connection to the database.
         /// </summary>
-        /// <param name="errors">Any errors that are raised during loading.</param>
-        public void LoadClobTypes(ref List<ClobTypeLoadException> errors)
+        /// <returns>The connection to the database.</returns>
+        public OracleConnection OpenConnection()
         {
-            string clobTypeDir = this.Config.Parent.ClobTypeDirectory;
-
-            this.ClobDirectoryList = new List<ClobDirectory>();
-            if (!Directory.Exists(this.Config.Parent.ClobTypeDirectory))
+            if (this.storedConnection == null || this.storedConnection.State == ConnectionState.Closed || this.storedConnection.State == ConnectionState.Broken)
             {
-                MessageLog.LogWarning($"The directory {clobTypeDir} could not be found when loading connection {this.Config.Name}");
-                errors.Add(new ClobTypeLoadException($"The directory {clobTypeDir} could not be found when loading connection {this.Config.Name}"));
+                this.storedConnection = this.Config.OpenSqlConnection(this.Password);
+            }
+
+            return this.storedConnection;
+        }
+
+        /// <summary>
+        /// Loads the <see cref="DirectoryDescriptor"/>s in the CodeSource folder of this connection.
+        /// </summary>
+        public void LoadDirectoryDescriptors()
+        {
+            if (this.DirectoryWatcherList != null)
+            {
+                foreach (DirectoryWatcher watcher in this.DirectoryWatcherList)
+                {
+                    watcher.Dispose();
+                }
+            }
+
+            this.DirectoryWatcherList = new List<DirectoryWatcher>();
+            if (!Directory.Exists(this.Config.Parent.DirectoryDescriptorFolder))
+            {
+                string errorMsg = $"The directory {this.Config.Parent.DirectoryDescriptorFolder} could not be found loading connection {this.Config.Name}";
+                MessageLog.LogWarning(errorMsg);
+                this.OnConnectionLoadError(errorMsg);
                 return;
             }
 
-            List<ClobType> clobTypes = ClobType.GetClobTypeList(clobTypeDir);
-            clobTypes.ForEach(x => x.Initialise());
+            var dirDescLoader = new DirectoryDescriptorLoader(this.Config.Parent.DirectoryDescriptorFolder);
+            dirDescLoader.DirectoryDescriptorLoadError += (object sender, DirectoryDescriptorLoader.DirectoryDescriptorLoadErrorEventArgs e) =>
+            {
+                this.OnConnectionLoadError($"An error occurred when loading DirectoryDescriptor {e.FilePath}: {e.RaisedException}");
+            };
 
-            foreach (ClobType clobType in clobTypes)
+            var dirDescList = dirDescLoader.GetDirectoryDescriptorList();
+
+            foreach (var dirDesc in dirDescList)
             {
                 try
                 {
-                    ClobDirectory clobDir = new ClobDirectory(this.Config.Parent.CodeSourceDirectory, clobType);
-                    clobDir.FileChangeEvent += this.OnClobDirectoryFileChangeEvent;
-                    this.ClobDirectoryList.Add(clobDir);
+                    DirectoryWatcher dirWatcher = new DirectoryWatcher(this.Config.Parent.CodeSourceDirectory, dirDesc);
+                    dirWatcher.FileChangeEvent += this.OnDirectoryWatcherFileChangeEvent;
+                    this.DirectoryWatcherList.Add(dirWatcher);
                 }
-                catch (ClobTypeLoadException ex)
+                catch (DirectoryDescriptorLoadException ex)
                 {
-                    MessageLog.LogError($"An error occurred when loading the ClobType {clobType.Directory}: {ex}");
+                    MessageLog.LogError($"An error occurred when loading the DirectoryDescriptor {dirDesc.Name}: {ex}");
                 }
             }
         }
 
         /// <summary>
-        /// Signal a request for a table type to the event subscribers.
-        /// Used for finding which table a file that can be inserted into multiple tables should be inserted into.
+        /// Updates a file in the database using its synchronised local version.
         /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="fullpath">The full name of the file being inserted.</param>
-        /// <param name="tables">The list of table that the user can select from.</param>
-        /// <returns>The user selected table (if any)</returns>
-        public Table OnTableRequest(object sender, string fullpath, Table[] tables)
+        /// <param name="watcher">The watcher of the file to update.</param>
+        /// <param name="filepath">The file to update.</param>
+        public void UpdateDatabaseFile(DirectoryWatcher watcher, string filepath)
         {
-            var handler = this.RequestTableEvent;
-            if (handler != null)
+            OracleConnection oracleConnection = this.OpenConnection();
+
+            if (Settings.Default.BackupEnabled)
             {
-                var args = new TableRequestEventArgs(fullpath, tables);
-                handler(sender, args);
-
-                return args.SelectedTable;
-            }
-
-            return null;
-        }
-
-        /// <summary>
-        /// Used to signal a mime type request to event listeners.
-        /// For inserting a new record into a mime type controlled table.
-        /// </summary>
-        /// <param name="sender">The sender of the event</param>
-        /// <param name="fullpath">The fullpath of the file that requires a mime type to be specified.</param>
-        /// <param name="mimeTypes">The list of possible mime types that can be used.</param>
-        /// <returns>The mime type to insert the new record as.</returns>
-        public string OnMimeTypeRequest(object sender, string fullpath, string[] mimeTypes)
-        {
-            var handler = this.RequestMimeTypeEvent;
-            if (handler != null)
-            {
-                var args = new MimeTypeRequestEventArgs(fullpath, mimeTypes);
-                handler(sender, args);
-
-                return args.SelectedMimeType;
-            }
-
-            return null;
-        }
-
-        /// <summary>
-        /// Reloads the list of ClobTypes without destorying the connection.
-        /// </summary>
-        public void ReloadClobTypes()
-        {
-            List<ClobTypeLoadException> errors = new List<ClobTypeLoadException>();
-            List<FileListRetrievalException> fileLoadErrors = new List<FileListRetrievalException>();
-            this.LoadClobTypes(ref errors);
-            this.GetDatabaseFileLists(ref fileLoadErrors);
-        }
-
-        /// <summary>
-        /// Queries the database for all files in all ClobDireectories and stores them in the directory.
-        /// </summary>
-        /// <param name="errorList">The list of errors that were encountered when getting the database files.</param>
-        public void GetDatabaseFileLists(ref List<FileListRetrievalException> errorList)
-        {
-            OracleConnection oracleConnection = this.Config.OpenSqlConnection(this.Password);
-            if (oracleConnection == null)
-            {
-                MessageLog.LogError("Connection failed, cannot diff files with database.");
-                return;
-            }
-
-            foreach (ClobDirectory clobDir in this.ClobDirectoryList)
-            {
-                if (!clobDir.Directory.Exists)
-                {
-                    continue;
-                }
-
                 try
                 {
-                    this.GetDatabaseFileListForDirectory(clobDir, oracleConnection);
+                    this.BackupFile(watcher, filepath);
                 }
-                catch (FileListRetrievalException ex)
+                catch (FileDownloadException ex)
                 {
-                    errorList.Add(ex);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Updates the database record of the target file with the data from the source file (which are normally the same file).
-        /// </summary>
-        /// <param name="clobDir">The directoy that the file reside in.</param>
-        /// <param name="targetFilename">The file to update the database record for.</param>
-        /// <param name="sourceFilename">The file to get the data fro the update the record with.</param>
-        public void UpdateClobWithExternalFile(ClobDirectory clobDir, string targetFilename, string sourceFilename)
-        {
-            try
-            {
-                OracleConnection oracleConnection = this.Config.OpenSqlConnection(this.Password);
-                DBClobFile clobFile = clobDir?.GetDatabaseFileForFullpath(targetFilename);
-
-                if (Settings.Default.BackupEnabled)
-                {
-                    this.BackupClobFile(oracleConnection, clobFile, targetFilename);
-                }
-
-                this.UpdateDatabaseClob(sourceFilename, clobFile, clobDir, oracleConnection);
-                oracleConnection.Dispose();
-            }
-            catch (Exception ex) when (ex is ConnectToDatabaseException || ex is ClobFileLookupException || ex is FileDownloadException)
-            {
-                throw new FileUpdateException("An error occurred when connecting to the database.", ex);
-            }
-        }
-
-        /// <summary>
-        /// Downloads a copy of the given DBClobFile and stores a copy in the backup folder located in settings.
-        /// </summary>
-        /// <param name="oracleConnection">The database connection to download the file with.</param>
-        /// <param name="clobFile">The file information that is going to be backed up.</param>
-        /// <param name="fullpath">The path of the file as it exists locally.</param>
-        public void BackupClobFile(OracleConnection oracleConnection, DBClobFile clobFile, string fullpath)
-        {
-            FileInfo backupFile = BackupLog.AddBackup(this.Config.Parent.CodeSourceDirectory, fullpath);
-            this.DownloadClobDataToFile(clobFile, oracleConnection, backupFile.FullName);
-        }
-
-        /// <summary>
-        /// Updates a database file with its local content.
-        /// </summary>
-        /// <param name="clobDir">The directory that the file was updated in.</param>
-        /// <param name="fullpath">The file to update.</param>
-        public void SendUpdateClobMessage(ClobDirectory clobDir, string fullpath)
-        {
-            this.UpdateClobWithExternalFile(clobDir, fullpath, fullpath);
-        }
-
-        /// <summary>
-        /// Inserts the given file into the database, polling the event listener 
-        /// for table and mimetype information if required.
-        /// </summary>
-        /// <param name="clobDir">The directory the file resides in.</param>
-        /// <param name="fullpath">The path of the file to insert.</param>
-        /// <param name="returnFile">The database file that represents what was just inserted.</param>
-        /// <returns>A value indicating whether the insert was followed through.</returns>
-        public bool SendInsertClobMessage(ClobDirectory clobDir, string fullpath, ref DBClobFile returnFile)
-        {
-            Table table = null;
-            if (clobDir.ClobType.Tables.Count > 1)
-            {
-                table = this.OnTableRequest(this, fullpath, clobDir.ClobType.Tables.ToArray());
-                if (table == null)
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                table = clobDir.ClobType.Tables[0];
-            }
-
-            string mimeType = null;
-            Column mimeTypeColumn;
-            Column dataColumn;
-            if (table.TryGetColumnWithPurpose(Column.Purpose.MIME_TYPE, out mimeTypeColumn)
-                && table.TryGetColumnWithPurpose(Column.Purpose.CLOB_DATA, out dataColumn))
-            {
-                mimeType = this.OnMimeTypeRequest(this, fullpath, dataColumn.MimeTypeList.ToArray());
-
-                if (mimeType == null)
-                {
-                    return false;
+                    MessageLog.LogError($"An exception occurred when attempting to backup the file: {ex}");
+                    throw new FileUpdateException("An exception occurred when backing up the file.", ex);
                 }
             }
 
-            OracleConnection oracleConnection = this.Config.OpenSqlConnection(this.Password);
-            try
-            {
-                DBClobFile databaseFile = this.InsertDatabaseClob(fullpath, clobDir, table, mimeType, oracleConnection);
-                clobDir.DatabaseFileList.Add(databaseFile);
-                returnFile = databaseFile;
-            }
-            finally
-            {
-                oracleConnection.Dispose();
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// Public access for downloading database files.
-        /// </summary>
-        /// <param name="databaseFile">The file name to download the file for.</param>
-        /// <returns>The path of the resulting file.</returns>
-        public string SendDownloadClobDataToFileMessage(DBClobFile databaseFile)
-        {
-            OracleConnection oracleConnection = this.Config.OpenSqlConnection(this.Password);
-            if (oracleConnection == null)
-            {
-                return null;
-            }
-
-            string filepath = Utils.GetTempFilepath(databaseFile.Filename);
-            try
-            {
-                this.DownloadClobDataToFile(databaseFile, oracleConnection, filepath);
-                this.TempFileList.Add(filepath);
-                return filepath;
-            }
-            finally
-            {
-                oracleConnection.Dispose();
-            }
-        }
-
-        /// <summary>
-        /// Converts the name of a local file to a suitable database mnemonic.
-        /// </summary>
-        /// <param name="fullpath">The file to convert.</param>
-        /// <param name="table">The table the file would be inserted into.</param>
-        /// <param name="mimeType">The mime type the file would be inserted as.</param>
-        /// <returns>The database mnemonic representation of the file.</returns>
-        public string ConvertFilenameToMnemonic(string fullpath, Table table, string mimeType)
-        {
-            string mnemonic = Path.GetFileNameWithoutExtension(fullpath);
-
-            // If the table stores mime types, then the mnemonic will also need to have 
-            // the prefix representation of the mime type prefixed to it.
-            Column mimeTypeColumn;
-            if (table.TryGetColumnWithPurpose(Column.Purpose.MIME_TYPE, out mimeTypeColumn))
-            {
-                MimeTypeList.MimeType mt = this.MimeTypeList.MimeTypes.Find(x => x.Name.Equals(mimeType));
-                if (mt == null)
-                {
-                    throw new MimeTypeNotFoundException($"Unknown mime-to-prefix key {mimeType}");
-                }
-
-                if (!string.IsNullOrEmpty(mt.Prefix))
-                {
-                    mnemonic = $"{mt.Prefix}/{mnemonic}";
-                }
-            }
-
-            return mnemonic;
-        }
-
-        /// <summary>
-        /// Inserts the given local file into the database.
-        /// </summary>
-        /// <param name="fullpath">The path of the file to insert ito the database.</param>
-        /// <param name="clobDir">The clob directory that the file is being inserted into.</param>
-        /// <param name="table">The table to insert the file into.</param>
-        /// <param name="mimeType">The mimetype to insert the file as.</param>
-        /// <param name="oracleConnection">The Oracle connection to use.</param>
-        /// <returns>True if the file was inserted successfully, otherwise false.</returns>
-        public DBClobFile InsertDatabaseClob(string fullpath, ClobDirectory clobDir, Table table, string mimeType, OracleConnection oracleConnection)
-        {
-            OracleCommand command = oracleConnection.CreateCommand();
-
-            // Execute the insert in a transaction so that if inserting the child record fails, the parent insert can be rolled back
             OracleTransaction trans = oracleConnection.BeginTransaction();
-            string mnemonic = this.ConvertFilenameToMnemonic(fullpath, table, mimeType);
+            OracleCommand oracleCommand = oracleConnection.CreateCommand();
 
-            bool usingCustomLoader = table.CustomStatements?.UpsertStatement != null;
-
-            // First insert the parent record in the table (if applicable)
-            if (table.ParentTable != null && !usingCustomLoader)
-            {
-                try
-                {
-                    command.CommandText = SqlBuilder.BuildInsertParentStatement(table, mnemonic);
-                    MessageLog.LogInfo($"Executing Insert query on parent table: {command.CommandText}");
-                    command.ExecuteNonQuery();
-                    command.Dispose();
-                }
-                catch (Exception e) when (e is InvalidOperationException || e is OracleException)
-                {
-                    MessageLog.LogError($"Error creating new clob when executing command: {command.CommandText} {e}");
-                    throw new FileInsertException("An exception ocurred when attempting to insert a file into the parent table.", e);
-                }
-            }
-
-            command = oracleConnection.CreateCommand();
-            if (usingCustomLoader)
-            {
-                command.CommandText = table.CustomStatements.UpsertStatement;
-
-                if (command.CommandText.Contains(":name"))
-                {
-                    command.Parameters.Add(new OracleParameter(":name", Path.GetFileName(fullpath)));
-                }
-            }
-            else
-            {
-                command.CommandText = SqlBuilder.BuildInsertChildStatement(table, mnemonic, mimeType);
-            }
+            oracleCommand.CommandText = watcher.Descriptor.UpdateStatement;
+            this.BindParametersToCommand(oracleConnection, oracleCommand, watcher, filepath);
 
             try
             {
-                command.Parameters.Add(SqlBuilder.CreateFileDataParameter(fullpath, table, mimeType));
-                MessageLog.LogInfo($"Executing insert query: {command.CommandText}");
+                MessageLog.LogInfo($"Executing Update query: {oracleCommand.CommandText}");
+                int rowsAffected = oracleCommand.ExecuteNonQuery();
+
+                // Ensure that only one row was affected by the uopdate.
+                // If the update statement was an anonymous block, then -1 is returned, which can be ignored
+                if (rowsAffected != 1 && rowsAffected != -1)
+                {
+                    trans.Rollback();
+                    MessageLog.LogError($"In invalid number of rows ({rowsAffected}) were updated for command: {oracleCommand.CommandText}");
+                    throw new FileUpdateException($"{rowsAffected} rows were affected during the update (expected only 1). The transaction has been rolled back.");
+                }
+
+                trans.Commit();
+                MessageLog.LogInfo($"Clob file update successful: {filepath}");
+            }
+            catch (Exception ex)
+            {
+                MessageLog.LogError($"Clob update failed for command: {oracleCommand.CommandText} {ex}");
+                throw new FileUpdateException($"An invalid operation occurred when updating the database: {ex.Message}", ex);
+            }
+            finally
+            {
+                trans.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Backs up a single file using its watcher
+        /// </summary>
+        /// <param name="watcher">The watcher that manages the file to be backed up.</param>
+        /// <param name="filename">The file to backup.</param>
+        public void BackupFile(DirectoryWatcher watcher, string filename)
+        {
+            FileInfo backupFile = BackupLog.AddBackup(this.Config.Parent.CodeSourceDirectory, filename);
+            this.DownloadDatabaseFile(watcher, filename, backupFile.FullName);
+        }
+
+        /// <summary>
+        /// Inserts a single file into the database
+        /// </summary>
+        /// <param name="watcher">The watcer that manages the file to be inserted.</param>
+        /// <param name="filepath">The path od the file to insert.</param>
+        public void InsertFile(DirectoryWatcher watcher, string filepath)
+        {
+            OracleConnection oracleConnection = this.OpenConnection();
+            OracleCommand command = oracleConnection.CreateCommand();
+            command.CommandText = watcher.Descriptor.InsertStatement;
+            this.BindParametersToCommand(oracleConnection, command, watcher, filepath);
+
+            try
+            {
                 command.ExecuteNonQuery();
                 command.Dispose();
-                trans.Commit();
             }
-            catch (Exception e) when (e is InvalidOperationException || e is OracleException || e is IOException || e is ColumnNotFoundException)
+            catch (Exception ex)
             {
-                // Discard the insert made into the parent table
-                trans.Rollback();
-                MessageLog.LogError($"Error creating new clob when executing command: {command.CommandText} {e}");
-                throw new FileInsertException("An exception ocurred when attempting to insert a file into the child table.", e);
+                MessageLog.LogError($"Error creating new clob when executing command: {command.CommandText} {ex}");
+                throw new FileInsertException("An exception ocurred when attempting to insert a file.", ex);
             }
 
-            DBClobFile clobFile = new DBClobFile(table, mnemonic, mimeType, Path.GetFileName(fullpath));
-            MessageLog.LogInfo($"Clob file creation successful: {fullpath}");
-            return clobFile;
+            MessageLog.LogInfo($"Clob file creation successful: {filepath}");
         }
 
         /// <summary>
-        /// Downloads the current content of a file on the database to a local temp file.
+        /// Downloads the contents of a file stored in the database to a local directory.
         /// </summary>
-        /// <param name="clobFile">The file to download.</param>
-        /// <param name="oracleConnection">The connection to use.</param>
-        /// <param name="filename">The filepath to download the data into.</param>
-        public void DownloadClobDataToFile(DBClobFile clobFile, OracleConnection oracleConnection, string filename)
+        /// <param name="watcher">The directory watcher of the file to downlaod.</param>
+        /// <param name="sourceFilename">The file to download the data for.</param>
+        /// <param name="outputFile">The file to download the data to.</param>
+        public void DownloadDatabaseFile(DirectoryWatcher watcher, string sourceFilename, string outputFile)
         {
-            OracleCommand command = oracleConnection.CreateCommand();
+            OracleConnection connection = this.OpenConnection();
 
-            Table table = clobFile.ParentTable;
-            Column column = null;
+            MessageLog.LogInfo($"Downlloading the database file for {sourceFilename}{(sourceFilename != outputFile ? " to " + outputFile : "")}");
+            OracleCommand oracleCommand = connection.CreateCommand();
+
             try
             {
-                if (table.CustomStatements?.DownloadStatement != null)
+                string dataType = this.GetDataTypeForFile(watcher, sourceFilename);
+                if (dataType == "BLOB")
                 {
-                    command.CommandText = table.CustomStatements.DownloadStatement;
+                    oracleCommand.CommandText = watcher.Descriptor.FetchBinaryStatement;
                 }
                 else
                 {
-                    column = clobFile.GetDataColumn();
-                    command.CommandText = SqlBuilder.BuildGetDataCommand(table, clobFile);
+                    oracleCommand.CommandText = watcher.Descriptor.FetchStatement;
                 }
 
-                command.Parameters.Add("mnemonic", clobFile.Mnemonic);
-            }
-            catch (ColumnNotFoundException e)
-            {
-                MessageLog.LogError($"The data colum could not be found when creating the download data statement: {e}");
-                throw new FileDownloadException("The statement could not be constructed.", e);
-            }
+                this.BindParametersToCommand(connection, oracleCommand, watcher, sourceFilename);
 
-            try
-            {
-                OracleDataReader reader = command.ExecuteReader();
+                OracleDataReader reader = oracleCommand.ExecuteReader();
 
                 if (!reader.Read())
                 {
-                    MessageLog.LogError($"No data found on clob retrieval of {clobFile.Mnemonic} when executing command: {command.CommandText}");
-                    throw new FileDownloadException($"No data was found for the given command {command.CommandText}");
+                    string msg = $"No data found on clob retrieval of {sourceFilename} when executing command: {oracleCommand.CommandText}";
+                    MessageLog.LogError(msg);
+                    throw new FileDownloadException(msg);
                 }
 
-                using (FileStream fs = Utils.WaitForFile(filename, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
+                using (FileStream fs = Utils.WaitForFile(outputFile, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
                 {
-                    if (column?.DataType == Column.Datatype.BLOB)
+                    if (dataType == "BLOB")
                     {
                         byte[] b = new byte[reader.GetBytes(0, 0, null, 0, int.MaxValue)];
                         reader.GetBytes(0, 0, b, 0, b.Length);
@@ -604,11 +438,19 @@ namespace LobsterModel
                     }
                     else
                     {
-                        string result = reader.GetString(0);
-                        using (StreamWriter streamWriter = new StreamWriter(fs))
+                        try
                         {
-                            streamWriter.NewLine = "\n";
-                            streamWriter.Write(result);
+                            string result = reader.GetString(0);
+                            using (StreamWriter streamWriter = new StreamWriter(fs))
+                            {
+                                streamWriter.NewLine = "\n";
+                                streamWriter.Write(result);
+                            }
+                        }
+                        catch (InvalidCastException ex)
+                        {
+                            MessageLog.LogError($"There was an error casting the result to a string: {ex}");
+                            throw new FileDownloadException("An exception occurred when casting the result to a string", ex);
                         }
                     }
                 }
@@ -622,159 +464,70 @@ namespace LobsterModel
                 {
                     // Too many rows
                     reader.Close();
-                    MessageLog.LogError($"Too many rows found on clob retrieval of {clobFile.Mnemonic}");
-                    throw new FileDownloadException($"Too many rows were found for the given command {command.CommandText}");
+                    MessageLog.LogError($"Too many rows found on clob retrieval of {sourceFilename}");
+                    throw new FileDownloadException($"Too many rows were found for the given command {oracleCommand.CommandText}");
                 }
             }
-            catch (Exception e) when (e is InvalidOperationException || e is OracleException || e is OracleNullValueException || e is IOException)
+            catch (Exception ex)
             {
-                MessageLog.LogError($"Error retrieving data when executing command {command.CommandText} {e}");
-                throw new FileDownloadException($"An exception ocurred when executing the command {command.CommandText}");
+                MessageLog.LogError($"An error occured when retrieving data when executing command {oracleCommand.CommandText} for file {sourceFilename}: {ex}");
+                throw new FileDownloadException($"An exception ocurred when downloading the file: {ex}");
             }
         }
 
         /// <summary>
-        /// Finds all DBClobFIles from the tables in the given ClobDirectory and populates its lists with them.
+        /// Deletes a watched file from the database.
         /// </summary>
-        /// <param name="clobDir">The directory to get the file lists for.</param>
-        /// <param name="oracleConnection">The Oracle connection to use.</param>
-        public void GetDatabaseFileListForDirectory(ClobDirectory clobDir, OracleConnection oracleConnection)
+        /// <param name="dirWatcher">The directory watcher that manages the file.</param>
+        /// <param name="watchedFile">The file to delete.</param>
+        public void DeleteDatabaseFile(DirectoryWatcher dirWatcher, WatchedFile watchedFile)
         {
-            clobDir.DatabaseFileList = new List<DBClobFile>();
-            ClobType ct = clobDir.ClobType;
-            OracleCommand oracleCommand = oracleConnection.CreateCommand();
+            MessageLog.LogInfo($"Deleing the database file of {watchedFile.FilePath}");
 
-            foreach (Table table in ct.Tables)
+            OracleConnection connection = this.OpenConnection();
+            OracleCommand oracleCommand = connection.CreateCommand();
+
+            oracleCommand.CommandText = dirWatcher.Descriptor.DeleteStatement;
+
+            this.BindParametersToCommand(connection, oracleCommand, dirWatcher, watchedFile.FilePath);
+
+            try
             {
-                if (table.CustomStatements?.FileListStatement != null)
-                {
-                    oracleCommand.CommandText = table.CustomStatements.FileListStatement;
-                }
-                else
-                {
-                    oracleCommand.CommandText = SqlBuilder.GetFileListCommand(table);
-                }
-
-                this.ProcessFileList(clobDir, oracleCommand, table);
+                oracleCommand.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                MessageLog.LogError($"An error occurred when deleting the database file for the file {watchedFile.FilePath}");
+                throw new FileDeleteException($"An exception occurred when deleting the file {watchedFile.FilePath}", ex);
             }
         }
 
         /// <summary>
-        /// Process the given SQL command to get files for a clob directory.
+        /// Gets whether the given file is synchronised with the database or not.
         /// </summary>
-        /// <param name="clobDirectory">The clob directory to add the file to.</param>
-        /// <param name="oracleCommand">The command to execut.</param>
-        /// <param name="table">The table to insert with.</param>
-        public void ProcessFileList(ClobDirectory clobDirectory, OracleCommand oracleCommand, Table table)
+        /// <param name="dirWatcher">The directory watcher that manages the file.</param>
+        /// <param name="watchedFile">The file to check for synchronisation.</param>
+        /// <returns>True if the file exists on the database, otherwise false.</returns>
+        public bool IsFileSynchronised(DirectoryWatcher dirWatcher, WatchedFile watchedFile)
         {
+            MessageLog.LogInfo($"Checking file synchronisation of {watchedFile.FilePath}");
             try
             {
-                OracleDataReader reader = oracleCommand.ExecuteReader();
-                while (reader.Read())
-                {
-                    string mnemonic = reader.GetString(0);
-                    string mimeType = null;
+                OracleConnection oracleConnection = this.OpenConnection();
+                OracleCommand oracleCommand = oracleConnection.CreateCommand();
 
-                    if (reader.FieldCount > 1)
-                    {
-                        mimeType = reader.GetString(1);
-                    }
+                oracleCommand.CommandText = dirWatcher.Descriptor.DatabaseFileExistsStatement;
+                this.BindParametersToCommand(oracleConnection, oracleCommand, dirWatcher, watchedFile.FilePath);
 
-                    DBClobFile databaseFile = new DBClobFile(
-                        parentTable: table,
-                        mnemonic: mnemonic,
-                        mimetype: mimeType,
-                        filename: this.ConvertMnemonicToFilename(mnemonic, table, mimeType));
-
-                    clobDirectory.DatabaseFileList.Add(databaseFile);
-                }
-
-                reader.Close();
+                MessageLog.LogInfo($"Executing file existence query: {oracleCommand.CommandText}");
+                object result = oracleCommand.ExecuteScalar();
+                decimal count = (decimal)result;
+                return count >= 1;
             }
-            catch (Exception e) when (e is InvalidOperationException || e is OracleException || e is ColumnNotFoundException)
+            catch (Exception ex)
             {
-                MessageLog.LogError($"Error retrieving file lists from database for {clobDirectory.ClobType.Name} when executing command {oracleCommand.CommandText}: {e}");
-                throw new FileListRetrievalException($"Error retrieving file lists from database for {clobDirectory.ClobType.Name} when executing command {oracleCommand.CommandText}", e);
-            }
-            finally
-            {
-                oracleCommand.Dispose();
-            }
-        }
-
-        /// <summary>
-        /// Inserts the given file into the database.
-        /// If the insert is successful, then the database information about that file will be set.
-        /// </summary>
-        /// <param name="fullpath">The path of the local file to use as the dat asource.</param>
-        /// <param name="clobFile">The file to insert into the database.</param>
-        /// <param name="clobDir">The clob directory that the file is being inserted into.</param>
-        /// <param name="oracleConnection">The Oracle connction to use.</param>
-        public void UpdateDatabaseClob(string fullpath, DBClobFile clobFile, ClobDirectory clobDir, OracleConnection oracleConnection)
-        {
-            OracleTransaction trans = oracleConnection.BeginTransaction();
-            OracleCommand command = oracleConnection.CreateCommand();
-            Table table = clobFile.ParentTable;
-
-            bool usingCustomLoader = table.CustomStatements?.UpsertStatement != null;
-            if (usingCustomLoader)
-            {
-                command.CommandText = table.CustomStatements.UpsertStatement;
-
-                if (command.CommandText.Contains(":name"))
-                {
-                    command.Parameters.Add(new OracleParameter(":name", Path.GetFileName(fullpath)));
-                }
-            }
-            else
-            {
-                try
-                {
-                    command.CommandText = SqlBuilder.BuildUpdateStatement(table, clobFile);
-                }
-                catch (ColumnNotFoundException e)
-                {
-                    MessageLog.LogError($"The data column couldn't be found when building the update statement: {e}");
-                    throw new FileUpdateException("The Clob Column could not be found.", e);
-                }
-            }
-
-            try
-            {
-                command.Parameters.Add(SqlBuilder.CreateFileDataParameter(fullpath, clobFile.ParentTable, clobFile.MimeType));
-            }
-            catch (IOException e)
-            {
-                MessageLog.LogError($"Clob update failed with  for command {command.CommandText} {e}");
-                throw new FileUpdateException("An IOException ocurred when attempting to add the file as a data parameter.", e);
-            }
-
-            int rowsAffected;
-            try
-            {
-                MessageLog.LogInfo($"Executing Update query: {command.CommandText}");
-                rowsAffected = command.ExecuteNonQuery();
-
-                // The row check can't be relied upon when using a custom loader, as it may be in an anonymous block
-                if (rowsAffected != 1 && !usingCustomLoader)
-                {
-                    trans.Rollback();
-                    MessageLog.LogError($"In invalid number of rows ({rowsAffected}) were updated for command: {command.CommandText}");
-
-                    throw new FileUpdateException($"{rowsAffected} rows were affected during the update (expected only 1). The transaction has been rolled back.");
-                }
-
-                trans.Commit();
-                command.Dispose();
-                MessageLog.LogInfo($"Clob file update successful: {fullpath}");
-                clobFile.LastUpdatedTime = DateTime.Now;
-                return;
-            }
-            catch (Exception e) when (e is OracleException || e is InvalidOperationException)
-            {
-                trans.Rollback();
-                MessageLog.LogError($"Clob update failed for command: {command.CommandText} {e}");
-                throw new FileUpdateException($"An invalid operation occurred when updating the database: {e.Message}", e);
+                MessageLog.LogError($"An exception occurred when determining whether {watchedFile.FilePath} is in the database: {ex.Message}");
+                throw new FileSynchronisationCheckException($"An exception occurred when determining whether {watchedFile.FilePath} is in the database: {ex.Message}", ex);
             }
         }
 
@@ -798,20 +551,20 @@ namespace LobsterModel
                 return;
             }
 
-            if (this.clobTypeFileWatcher != null)
+            if (this.directoryDescriptorFileWatcher != null)
             {
-                this.clobTypeFileWatcher.Dispose();
-                this.clobTypeFileWatcher = null;
+                this.directoryDescriptorFileWatcher.Dispose();
+                this.directoryDescriptorFileWatcher = null;
             }
 
-            if (this.ClobDirectoryList != null)
+            if (this.DirectoryWatcherList != null)
             {
-                foreach (ClobDirectory clobDir in this.ClobDirectoryList)
+                foreach (DirectoryWatcher watcher in this.DirectoryWatcherList)
                 {
-                    clobDir.Dispose();
+                    watcher.Dispose();
                 }
 
-                this.ClobDirectoryList = null;
+                this.DirectoryWatcherList = null;
             }
 
             foreach (string filename in this.TempFileList)
@@ -821,50 +574,279 @@ namespace LobsterModel
                     MessageLog.LogInfo($"Deleting temporary file {filename}");
                     File.Delete(filename);
                 }
-                catch (IOException)
+                catch (IOException ex)
                 {
-                    MessageLog.LogInfo($"An error occurred when deleting temporary file {filename}");
+                    MessageLog.LogInfo($"An error occurred when deleting temporary file {filename}: {ex}");
                 }
+            }
+
+            this.eventProcessingTimer?.Dispose();
+            this.eventProcessingTimer = null;
+
+            if (this.storedConnection != null)
+            {
+                this.storedConnection.Close();
+                this.storedConnection.Dispose();
+                this.storedConnection = null;
             }
         }
 
         /// <summary>
-        /// The listener for when a file is changed within the clob type directory.
+        /// Closes the current connection to the database.
+        /// </summary>
+        private void CloseConnection()
+        {
+            this.storedConnection.Close();
+            this.storedConnection = null;
+        }
+
+        /// <summary>
+        /// Binds all available parameters to the given command.
+        /// This can be called by itself if the data type of the file is required (this can cause an infinite loop if the data type SQL needs the data type)
+        /// </summary>
+        /// <param name="connection">The Oracle connection to use.</param>
+        /// <param name="command">The command to bind parameters to.</param>
+        /// <param name="watcher">The parent directory watcher of the file.</param>
+        /// <param name="path">The path of the file to bind the parameters for.</param>
+        private void BindParametersToCommand(OracleConnection connection, OracleCommand command, DirectoryWatcher watcher, string path)
+        {
+            MessageLog.LogInfo($"Binding parameters to command: \n{command.CommandText}");
+
+            command.BindByName = true;
+
+            if (command.ContainsParameter(FilenameParameterName))
+            {
+                var param = new OracleParameter(FilenameParameterName, Path.GetFileName(path));
+                command.Parameters.Add(param);
+            }
+
+            if (command.ContainsParameter(FilenameWithoutExtensionParameterName))
+            {
+                var param = new OracleParameter(FilenameWithoutExtensionParameterName, Path.GetFileNameWithoutExtension(path));
+                command.Parameters.Add(param);
+            }
+
+            if (command.ContainsParameter(FileExtensionParameterName))
+            {
+                var param = new OracleParameter(FileExtensionParameterName, Path.GetExtension(path));
+                command.Parameters.Add(param);
+            }
+
+            if (command.ContainsParameter(RelativePathParameterName))
+            {
+                Uri baseUri = new Uri(watcher.DirectoryPath);
+                Uri fileUri = new Uri(path);
+                Uri relativeUri = baseUri.MakeRelativeUri(fileUri);
+                var param = new OracleParameter(RelativePathParameterName, relativeUri.OriginalString);
+                command.Parameters.Add(param);
+            }
+
+            if (command.ContainsParameter(ParentDirectoryParameterName))
+            {
+                var param = new OracleParameter(ParentDirectoryParameterName, new FileInfo(path).Directory.Name);
+                command.Parameters.Add(param);
+            }
+
+            if (command.ContainsParameter(FullPathParameterName))
+            {
+                var param = new OracleParameter(FullPathParameterName, path);
+                command.Parameters.Add(param);
+            }
+
+            if (command.ContainsParameter(MimeTypeParameterName))
+            {
+                string mimeType = this.GetMimeTypeForFile(watcher, path);
+                var param = new OracleParameter();
+                param.ParameterName = MimeTypeParameterName;
+                param.Value = mimeType;
+                command.Parameters.Add(param);
+            }
+
+            // You need to be very careful here, if the GetDataTypeForFile query needs the data type parameter, an infinite loop will occur
+            if (command.ContainsParameter(DataTypeParameterName))
+            {
+                string dataType = this.GetDataTypeForFile(watcher, path);
+                var param = new OracleParameter();
+                param.ParameterName = DataTypeParameterName;
+                param.Value = dataType;
+                command.Parameters.Add(param);
+            }
+
+            if (command.ContainsParameter(FileContentClobParameterName) || command.ContainsParameter(FileContentBlobParameterName))
+            {
+                // Wait for the file to unlock
+                using (FileStream fs = Utils.WaitForFile(
+                    path,
+                    FileMode.Open,
+                    FileAccess.Read,
+                    FileShare.ReadWrite))
+                {
+                    // Binary mode
+                    if (command.ContainsParameter(FileContentBlobParameterName))
+                    {
+                        fs.Position = 0;
+                        byte[] fileData = new byte[fs.Length];
+                        fs.Read(fileData, 0, Convert.ToInt32(fs.Length));
+
+                        OracleParameter param = new OracleParameter();
+                        param.Value = fileData;
+                        param.OracleDbType = OracleDbType.Blob;
+                        param.ParameterName = FileContentBlobParameterName;
+                        command.Parameters.Add(param);
+                    }
+
+                    if (command.ContainsParameter(FileContentClobParameterName))
+                    {
+                        // Text mode
+                        fs.Position = 0;
+                        var tr = new StreamReader(fs);
+
+                        string contents = tr.ReadToEnd();
+
+                        OracleParameter param = new OracleParameter();
+                        param.OracleDbType = OracleDbType.Clob;
+                        param.Value = contents;
+                        param.OracleDbType = OracleDbType.Clob;
+                        param.ParameterName = FileContentClobParameterName;
+                        command.Parameters.Add(param);
+                    }
+                }
+            }
+
+            if (command.ContainsParameter(FooterMessageParameterName))
+            {
+                string footer = Settings.Default.AppendFooterToDatabaseFiles ?
+                                $" Last clobbed by user {Environment.UserName}"
+                              + $" on machine {Environment.MachineName}"
+                              + $" at {DateTime.Now}"
+                              + $" (Lobster {Assembly.GetExecutingAssembly().GetName().Version.ToString()}"
+                              + $" built on {Utils.RetrieveLinkerTimestamp().ToShortDateString()})" : string.Empty;
+
+                var param = new OracleParameter();
+                param.ParameterName = FooterMessageParameterName;
+                param.Value = footer;
+                command.Parameters.Add(param);
+            }
+
+            foreach (OracleParameter parameter in command.Parameters)
+            {
+                string parameterValue = parameter.Value.ToString();
+                parameterValue = parameterValue.Substring(0, parameterValue.Length < ParameterLogLength ? parameterValue.Length : ParameterLogLength);
+                MessageLog.LogInfo($"Added parameter '{parameter.ParameterName}' with value '{parameterValue}'");
+            }
+        }
+
+        /// <summary>
+        /// Queries the database for the data type for the content of the given file.
+        /// </summary>
+        /// <param name="watcher">The directory watcher that the given file is the parent of.</param>
+        /// <param name="path">The path of the file to find the data type for.</param>
+        /// <returns>"BLOB" if the given file is a binary file, otherwise "CLOB".</returns>
+        private string GetDataTypeForFile(DirectoryWatcher watcher, string path)
+        {
+            OracleConnection connection = this.OpenConnection();
+
+            if (watcher.Descriptor.FileDataTypeStatement == null)
+            {
+                if (watcher.Descriptor.DefaultDataType == null)
+                {
+                    // Default to CLOB if there is no default or statement
+                    return "CLOB";
+                }
+                else
+                {
+                    // Use the default if there is no statement (but there is a default)
+                    return watcher.Descriptor.DefaultDataType;
+                }
+            }
+
+            // Otherwise use the statement
+            OracleCommand command = connection.CreateCommand();
+            command.CommandText = watcher.Descriptor.FileDataTypeStatement;
+            if (command.ContainsParameter(DataTypeParameterName))
+            {
+                throw new InvalidOperationException($"The FileDataTypeStatement cannot contain the '{DataTypeParameterName}' parameter");
+            }
+
+            this.BindParametersToCommand(connection, command, watcher, path);
+
+            object result = command.ExecuteScalar();
+
+            if (!(result is string))
+            {
+                throw new InvalidOperationException("The FileDataTypeStatement should return a single string");
+            }
+
+            return (string)result;
+        }
+
+        /// <summary>
+        /// Queries the database for the mimetype of the given file
+        /// </summary>
+        /// <param name="watcher">The directory watcher that the given file is the parent of.</param>
+        /// <param name="path">The path of the file to find the data type for.</param>
+        /// <returns>The mime type of the file</returns>
+        private string GetMimeTypeForFile(DirectoryWatcher watcher, string path)
+        {
+            OracleConnection connection = this.OpenConnection();
+
+            OracleCommand command = connection.CreateCommand();
+            command.CommandText = watcher.Descriptor.FileMimeTypeStatement;
+            if (command.ContainsParameter(MimeTypeParameterName))
+            {
+                throw new InvalidOperationException($"The FileDataTypeStatement cannot contain the '{DataTypeParameterName}' parameter");
+            }
+
+            this.BindParametersToCommand(connection, command, watcher, path);
+
+            object result = command.ExecuteScalar();
+
+            if (!(result is string))
+            {
+                throw new InvalidOperationException($"No MimeType was returned for {path}");
+            }
+
+            return (string)result;
+        }
+
+        /// <summary>
+        /// The listener for when a file is changed within the directory descriptor folder.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="args">The arguments for the event.</param>
-        private void OnClobTypeChangeEvent(object sender, FileSystemEventArgs args)
+        private void OnDirectoryDescriptorChangeEvent(object sender, FileSystemEventArgs args)
         {
             lock (this.fileEventQueue)
             {
                 lock (this.fileEventProcessingSemaphore)
                 {
-                    this.ClobTypeChangedEvent?.Invoke(this, args);
+                    this.DirectoryDescriptorChangeEvent?.Invoke(this, args);
                 }
             }
         }
 
         /// <summary>
-        /// The listener when a child ClobDirectory raises a file change event.
+        /// Called when a file changes in a watched directory.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
-        /// <param name="args">The event arguments.</param>
-        private void OnClobDirectoryFileChangeEvent(object sender, ClobDirectoryFileChangeEventArgs args)
+        /// <param name="args">The event arguments</param>
+        private void OnDirectoryWatcherFileChangeEvent(object sender, DirectoryWatcherFileChangeEventArgs args)
         {
-            Thread thread = new Thread(() => this.EnqueueFileEvent(args.ClobDir, args.Args));
+            Thread thread = new Thread(() => this.EnqueueFileEvent(args.Watcher, args.WatchedFile, args.Args));
             thread.Start();
         }
 
         /// <summary>
         /// Takes a single file event, and pushes it onto the event stack, before processing that event.
         /// </summary>
-        /// <param name="clobDirectory">The directory from where the event originated.</param>
+        /// <param name="watcher">The directory from where the event originated.</param>
+        /// <param name="watchedFile">The file that caused the event.</param>
         /// <param name="args">The event arguments.</param>
-        private void EnqueueFileEvent(ClobDirectory clobDirectory, FileSystemEventArgs args)
+        private void EnqueueFileEvent(DirectoryWatcher watcher, WatchedFile watchedFile, FileSystemEventArgs args)
         {
             this.LogFileEvent($"File change event of type {args.ChangeType} for file {args.FullPath} with a write time of " + File.GetLastWriteTime(args.FullPath).ToString("yyyy-MM-dd HH:mm:ss.fff"));
 
-            lock (this.fileEventQueue)
+            lock (this.fileEventProcessingSemaphore)
             {
                 if (args.ChangeType != WatcherChangeTypes.Changed)
                 {
@@ -873,7 +855,7 @@ namespace LobsterModel
 
                 // Ignore the event if it is already in the event list.
                 // This often occurs, as most programs invoke several file change events when saving.
-                if (this.fileEventQueue.Find(x => x.FullPath.Equals(args.FullPath, StringComparison.OrdinalIgnoreCase)) != null)
+                if (this.fileEventQueue.Find(x => x.EventArgs.FullPath.Equals(args.FullPath, StringComparison.OrdinalIgnoreCase)) != null)
                 {
                     this.LogFileEvent("Ignoring event, as it is already in the list.");
                     return;
@@ -885,43 +867,52 @@ namespace LobsterModel
                     this.OnEventProcessingStart();
                 }
 
-                this.fileEventQueue.Add(args);
+                this.fileEventQueue.Add(new FileChangeEvent(watcher, watchedFile, args));
+
+                if (this.eventProcessingTimer == null)
+                {
+                    this.eventProcessingTimer = new Timer(_ => this.BulkProcessFileEvents());
+                }
+
+                // Start the delayed event (or restart if it has already been started)
+                this.eventProcessingTimer.Change(TimeSpan.FromMilliseconds(Settings.Default.FileUpdateTimeoutMilliseconds), TimeSpan.Zero);
             }
+        }
 
-            this.LogFileEvent("Awaiting semaphore...");
-
+        /// <summary>
+        /// Processes all file events waiting in the queue.
+        /// This method is run on <see cref="eventProcessingTimer"/>.
+        /// </summary>
+        private void BulkProcessFileEvents()
+        {
+            this.eventProcessingTimer.Change(Timeout.Infinite, Timeout.Infinite);
             lock (this.fileEventProcessingSemaphore)
             {
-                this.LogFileEvent("Lock achieved, processing event.");
-                this.ProcessFileEvent(clobDirectory, args);
-
-                lock (this.fileEventQueue)
+                while (this.fileEventQueue.Count > 0)
                 {
-                    this.fileEventQueue.Remove(args);
-                    if (this.fileEventQueue.Count == 0)
-                    {
-                        this.LogFileEvent("Event stack empty.");
-                        this.OnFileProcessingFinished(this.fileTreeChangeInQueue);
-                        this.fileTreeChangeInQueue = false;
-                    }
+                    FileChangeEvent change = this.fileEventQueue[0];
+                    this.fileEventQueue.RemoveAt(0);
+                    this.ProcessFileEvent(change);
                 }
             }
+
+            this.LogFileEvent("Event stack empty.");
+            this.OnFileProcessingFinished(this.fileTreeChangeInQueue);
         }
 
         /// <summary>
         /// Processes a single file event. Sending a file update to the database if necessary.
         /// </summary>
-        /// <param name="clobDirectory">The clob directory that the event was raised from.</param>
         /// <param name="e">The event to process.</param>
-        private void ProcessFileEvent(ClobDirectory clobDirectory, FileSystemEventArgs e)
+        private void ProcessFileEvent(FileChangeEvent e)
         {
-            this.LogFileEvent($"Processing file event of type {e.ChangeType} for file {e.FullPath}");
+            this.LogFileEvent($"Processing file event of type {e.EventArgs.ChangeType} for file {e.EventArgs.FullPath}");
 
-            FileInfo fileInfo = new FileInfo(e.FullPath);
+            FileInfo fileInfo = new FileInfo(e.EventArgs.FullPath);
 
-            if (e.ChangeType != WatcherChangeTypes.Changed)
+            if (e.EventArgs.ChangeType != WatcherChangeTypes.Changed)
             {
-                this.LogFileEvent($"Unsupported file event {e.ChangeType}");
+                this.LogFileEvent($"Unsupported file event {e.EventArgs.ChangeType}");
                 return;
             }
 
@@ -933,55 +924,41 @@ namespace LobsterModel
 
             if (!fileInfo.Exists)
             {
-                this.LogFileEvent($"File could not be found {e.FullPath}");
+                this.LogFileEvent($"File could not be found {e.EventArgs.FullPath}");
+                return;
+            }
+
+            if (e.WatchedFile == null || !this.IsFileSynchronised(e.Watcher, e.WatchedFile))
+            {
+                this.LogFileEvent("The file is not synchronised and does not need to be updated.");
                 return;
             }
 
             if (fileInfo.IsReadOnly)
             {
-                this.LogFileEvent($"File is read only and will be skipped {e.FullPath}");
+                this.LogFileEvent($"File is read only and will be skipped {e.EventArgs.FullPath}");
                 return;
             }
 
-            if (!clobDirectory.ClobType.AllowAutomaticUpdates)
+            if (!e.Watcher.Descriptor.PushOnFileChange)
             {
-                this.LogFileEvent("The ClobType does not allow autuomatic file updates, and the file will be skipped.");
+                this.LogFileEvent("The Directory Descriptor does not allow autuomatic file updates, and the file will be skipped.");
                 return;
             }
 
-            // "IncludeSubDirectories" check
-            if (!clobDirectory.ClobType.IncludeSubDirectories && fileInfo.Directory.FullName != clobDirectory.Directory.FullName)
-            {
-                this.LogFileEvent("The ClobType does not include sub directories, and the file will be skipped.");
-                return;
-            }
-
-            DBClobFile clobFile = clobDirectory.GetDatabaseFileForFullpath(e.FullPath);
-            if (clobFile == null)
-            {
-                this.LogFileEvent($"The file does not have a DBClobFile and will be skipped {e.FullPath}");
-                return;
-            }
-
-            if (clobFile.LastUpdatedTime.AddMilliseconds(Settings.Default.FileUpdateTimeoutMilliseconds) > DateTime.Now)
-            {
-                this.LogFileEvent("The file was updated within the cooldown period, and will be skipped.");
-                return;
-            }
-
-            this.LogFileEvent($"Auto-updating file {e.FullPath}");
-
+            this.LogFileEvent($"Auto-updating file {e.EventArgs.FullPath}");
+            
             try
             {
-                this.SendUpdateClobMessage(clobDirectory, e.FullPath);
+                this.UpdateDatabaseFile(e.Watcher, e.EventArgs.FullPath);
             }
-            catch (FileUpdateException)
+            catch (Exception ex)
             {
-                this.OnAutoUpdateComplete(e.FullPath, false);
+                this.OnAutoUpdateComplete(e.EventArgs.FullPath, false, ex);
                 return;
             }
 
-            this.OnAutoUpdateComplete(e.FullPath, true);
+            this.OnAutoUpdateComplete(e.EventArgs.FullPath, true, null);
         }
 
         /// <summary>
@@ -1011,10 +988,11 @@ namespace LobsterModel
         /// </summary>
         /// <param name="filename">The path of the file that was updated.</param>
         /// <param name="success">Whether the update was a success or not.</param>
-        private void OnAutoUpdateComplete(string filename, bool success)
+        /// <param name="ex">The exception that was thrown (on failure)</param>
+        private void OnAutoUpdateComplete(string filename, bool success, Exception ex)
         {
             var handler = this.UpdateCompleteEvent;
-            FileUpdateCompleteEventArgs args = new FileUpdateCompleteEventArgs(filename, success);
+            FileUpdateCompleteEventArgs args = new FileUpdateCompleteEventArgs(filename, success, ex);
             handler?.Invoke(this, args);
         }
 
@@ -1030,42 +1008,66 @@ namespace LobsterModel
         }
 
         /// <summary>
-        /// Converts the mnemonic of a file on the database to the local filename that it would represent.
+        /// Signals that an error occurred when loading the directory descriptors
         /// </summary>
-        /// <param name="mnemonic">The database mnemonic.</param>
-        /// <param name="table">The table the mnemonic is from (can be null).</param>
-        /// <param name="mimeType">The mime type of the database file, if applicable.</param>
-        /// <returns>The name as converted from the mnemonic.</returns>
-        private string ConvertMnemonicToFilename(string mnemonic, Table table, string mimeType)
+        /// <param name="errorMessage">The message for the error that occurred.</param>
+        private void OnConnectionLoadError(string errorMessage)
         {
-            string filename = mnemonic;
-            string prefix = null;
+            this.ConnectionLoadErrorEvent?.Invoke(this, new ConnectionLoadErrorEventArgs(errorMessage));
+        }
 
-            if (mnemonic.Contains('/'))
+        /// <summary>
+        /// The arguments in case of an error during connection creation.
+        /// </summary>
+        public class ConnectionLoadErrorEventArgs : EventArgs
+        {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="ConnectionLoadErrorEventArgs"/> class. 
+            /// </summary>
+            /// <param name="errorMessage">The error message.</param>
+            public ConnectionLoadErrorEventArgs(string errorMessage)
             {
-                prefix = mnemonic.Substring(0, mnemonic.LastIndexOf('/'));
-                filename = mnemonic.Substring(mnemonic.LastIndexOf('/') + 1);
+                this.ErrorMessage = errorMessage;
             }
 
-            // Assume xml data types for tables without a datatype column, or a prefix
-            Column mimeTypeColumn;
-            if (table == null || !table.TryGetColumnWithPurpose(Column.Purpose.MIME_TYPE, out mimeTypeColumn) || prefix == null)
+            /// <summary>
+            /// Gets the message of this event.
+            /// </summary>
+            public string ErrorMessage { get; }
+        }
+
+        /// <summary>
+        /// A class used to cache file events until they are processed by the <see cref="eventProcessingTimer"/>. 
+        /// </summary>
+        private class FileChangeEvent
+        {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="FileChangeEvent"/> class.
+            /// </summary>
+            /// <param name="watcher">The watcher.</param>
+            /// <param name="watchedFile">The file that the event is for.</param>
+            /// <param name="args">The args.</param>
+            public FileChangeEvent(DirectoryWatcher watcher, WatchedFile watchedFile, FileSystemEventArgs args)
             {
-                filename += table?.DefaultExtension ?? ".xml";
-            }
-            else
-            {
-                MimeTypeList.MimeType mt = this.MimeTypeList.MimeTypes.Find(x => x.Name.Equals(mimeType));
-
-                if (mt == null)
-                {
-                    throw new MimeTypeNotFoundException($"Unkown mime-to-extension key {mimeType}");
-                }
-
-                filename += mt.Extension;
+                this.Watcher = watcher;
+                this.WatchedFile = watchedFile;
+                this.EventArgs = args;
             }
 
-            return filename;
+            /// <summary>
+            /// Gets the directory watcher under which the file was that triggered the event
+            /// </summary>
+            public DirectoryWatcher Watcher { get; }
+
+            /// <summary>
+            /// Gets the watched file that triggered this event
+            /// </summary>
+            public WatchedFile WatchedFile { get; }
+
+            /// <summary>
+            /// Gets the arguments of the file change event.
+            /// </summary>
+            public FileSystemEventArgs EventArgs { get; }
         }
     }
 }

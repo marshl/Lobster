@@ -6,7 +6,10 @@
     <ResourceDictionary>
       <BitmapImage x:Key="FolderImageSource"          UriSource="/Lobster;component/Resources/Images/folder_open.ico"/>
       <BitmapImage x:Key="InsertImageSource"          UriSource="/Lobster;component/Resources/Images/112_Plus_Green.ico"/>
+      <BitmapImage x:Key="DeleteImageSource"          UriSource="/Lobster;component/Resources/Images/delete.ico"/>
       <BitmapImage x:Key="MergeImageSource"           UriSource="/Lobster;component/Resources/Images/041_Sort.ico"/>
+      <BitmapImage x:Key="PushGreyImageSource"        UriSource="/Lobster;component/Resources/Images/112_UpArrowShort_Grey.ico"/>
+      <BitmapImage x:Key="PushGreenImageSource"      UriSource="/Lobster;component/Resources/Images/112_UpArrowShort_Green.ico"/>
       <BitmapImage x:Key="PushImageSource"            UriSource="/Lobster;component/Resources/Images/112_UpArrowShort_Orange.ico"/>
       <BitmapImage x:Key="PullImageSource"            UriSource="/Lobster;component/Resources/Images/010_LowPriority.ico"/>
       <BitmapImage x:Key="WarningImageSource"         UriSource="/Lobster;component/Resources/Images/Annotate_Warning.ico"/>
@@ -18,6 +21,7 @@
       <BitmapImage x:Key="LockedFileImageSource"      UriSource="/Lobster;component/Resources/Images/SecurityLock.ico"/>
       <BitmapImage x:Key="NormalFileImageSource"      UriSource="/Lobster;component/Resources/Images/Generic_Document.ico"/>
       <BitmapImage x:Key="FileNotFoundImageSource"    UriSource="/Lobster;component/Resources/Images/Annotate_Blocked_large.ico"/>
+      <BitmapImage x:Key="RefreshImageSource"         UriSource="/Lobster;component/Resources/Images/112_RefreshArrow_Blue.ico"/>
       <SolidColorBrush x:Key="BackgroundKey" Color="#FF181818" />
       <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="Themes/MetroDark/MetroDark.MSControls.Core.Implicit.xaml" />

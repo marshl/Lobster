@@ -26,8 +26,8 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>2.6.0.%2a</ApplicationVersion>
+    <ApplicationRevision>6</ApplicationRevision>
+    <ApplicationVersion>3.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -53,14 +53,9 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>
-    </ApplicationIcon>
+    <ApplicationIcon>Resources\Images\cartoon-lobster.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DotNetZip, Version=1.10.1.0, Culture=neutral, PublicKeyToken=6583c7c814667745, processorArchitecture=MSIL">
-      <HintPath>..\packages\DotNetZip.1.10.1\lib\net20\DotNetZip.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Microsoft.WindowsAPICodePack, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\WindowsAPICodePack.1.1.0\lib\Microsoft.WindowsAPICodePack.dll</HintPath>
       <Private>True</Private>
@@ -81,17 +76,15 @@
       <HintPath>..\packages\WindowsAPICodePack.1.1.0\lib\Microsoft.WindowsAPICodePack.ShellExtensions.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="RestSharp, Version=105.2.3.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\RestSharp.105.2.3\lib\net45\RestSharp.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Windows.Controls.Input.Toolkit, Version=3.5.40128.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Infragistics.Themes.MetroDark.Wpf.1.0.0\lib\net40\System.Windows.Controls.Input.Toolkit.dll</HintPath>
       <Private>True</Private>
@@ -123,54 +116,31 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="ViewModels\ClobDirectoryView.cs" />
+    <Compile Include="BooleanAndConverter.cs" />
     <Compile Include="ViewModels\CodeSourceConfigView.cs" />
     <Compile Include="ViewModels\ConnectionConfigView.cs" />
+    <Compile Include="ViewModels\DirectoryWatcherView.cs" />
+    <Compile Include="ViewModels\WatchedDirectoryView.cs" />
+    <Compile Include="ViewModels\WatchedFileView.cs" />
+    <Compile Include="ViewModels\WatchedNodeView.cs" />
     <Compile Include="Views\AddCodeSourceWindow.xaml.cs">
       <DependentUpon>AddCodeSourceWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\ClobTypeListWindow.xaml.cs">
-      <DependentUpon>ClobTypeListWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\CodeSourceNameWindow.xaml.cs">
       <DependentUpon>CodeSourceNameWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\ColumnListWindow.xaml.cs">
-      <DependentUpon>ColumnListWindow.xaml</DependentUpon>
+    <Compile Include="Views\ConnectionControl.xaml.cs">
+      <DependentUpon>ConnectionControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ViewModels\ColumnView.cs" />
-    <Compile Include="ViewModels\DatabaseFileView.cs" />
     <Compile Include="Views\DownloadUpdateWindow.xaml.cs">
       <DependentUpon>DownloadUpdateWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\EditClobTypeWindow.xaml.cs">
-      <DependentUpon>EditClobTypeWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\EditColumnWindow.xaml.cs">
-      <DependentUpon>EditColumnWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\EditTableWindow.xaml.cs">
-      <DependentUpon>EditTableWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="GitHubUpdater.cs" />
     <Compile Include="InverseBooleanConverter.cs" />
-    <Compile Include="ViewModels\LocalFileView.cs" />
-    <Compile Include="Views\MessageListWindow.xaml.cs">
-      <DependentUpon>MessageListWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="ViewModels\MessageLogView.cs" />
-    <Compile Include="ViewModels\MessageView.cs" />
     <Compile Include="ViewModels\SettingsView.cs" />
     <Compile Include="Views\SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\TableListWindow.xaml.cs">
-      <DependentUpon>TableListWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\TableSelectorWindow.xaml.cs">
-      <DependentUpon>TableSelectorWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="ViewModels\TableView.cs" />
     <Compile Include="Views\PasswordPromptWindow.xaml.cs">
       <DependentUpon>PasswordPromptWindow.xaml</DependentUpon>
     </Compile>
@@ -178,15 +148,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\ClobTypeListWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Views\CodeSourceNameWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\ColumnListWindow.xaml">
+    <Page Include="Views\ConnectionControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -198,18 +164,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\EditClobTypeWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\EditColumnWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\EditTableWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -218,37 +172,19 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ViewModels\ClobTypeView.cs" />
     <Compile Include="Views\ConnectionListWindow.xaml.cs">
       <DependentUpon>ConnectionListWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\ConnectionView.cs" />
-    <Compile Include="ViewModels\FileNodeView.cs" />
     <Compile Include="Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Views\MessageListWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\MimeTypeSelectorWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Views\NotificationWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\SettingsWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\TableListWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\TableSelectorWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -274,9 +210,6 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Views\MimeTypeSelectorWindow.xaml.cs">
-      <DependentUpon>MimeTypeSelectorWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Views\NotificationWindow.xaml.cs">
       <DependentUpon>NotificationWindow.xaml</DependentUpon>
     </Compile>
@@ -365,13 +298,13 @@
     <Resource Include="Resources\Images\112_Plus_Green.ico" />
     <None Include="Resources\Images\112_Plus_Grey.ico" />
     <None Include="Resources\Images\112_Plus_Orange.ico" />
-    <None Include="Resources\Images\112_RefreshArrow_Blue.ico" />
+    <Resource Include="Resources\Images\112_RefreshArrow_Blue.ico" />
     <None Include="Resources\Images\112_UpArrowLong_Blue.ico" />
     <None Include="Resources\Images\112_UpArrowLong_Green.ico" />
     <None Include="Resources\Images\112_UpArrowLong_Grey.ico" />
     <None Include="Resources\Images\112_UpArrowShort_Blue.ico" />
-    <None Include="Resources\Images\112_UpArrowShort_Green.ico" />
-    <None Include="Resources\Images\112_UpArrowShort_Grey.ico" />
+    <Resource Include="Resources\Images\112_UpArrowShort_Green.ico" />
+    <Resource Include="Resources\Images\112_UpArrowShort_Grey.ico" />
     <Resource Include="Resources\Images\112_UpArrowShort_Orange.ico" />
     <None Include="Resources\Images\125_FullView.ico" />
     <None Include="Resources\Images\126_Edit.ico" />
@@ -401,7 +334,7 @@
     <None Include="Resources\Images\Close.ico" />
     <None Include="Resources\Images\copy.ico" />
     <None Include="Resources\Images\CPU.ico" />
-    <None Include="Resources\Images\delete.ico" />
+    <Resource Include="Resources\Images\delete.ico" />
     <None Include="Resources\Images\Favorites.ico" />
     <None Include="Resources\Images\FloppyDisk.ico" />
     <None Include="Resources\Images\folder.ico" />

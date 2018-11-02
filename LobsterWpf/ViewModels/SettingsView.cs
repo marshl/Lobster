@@ -77,25 +77,6 @@ namespace LobsterWpf.ViewModels
                 Settings.Default.DiffProgramArguments = value;
             }
         }
-
-        /// <summary>
-        /// Gets or sets a the extensions that a file must have to be diffed (space delimeted string).
-        /// </summary>
-        public string DiffableExtensions
-        {
-            get
-            {
-                string[] array = new string[Settings.Default.DiffableExtensions.Count];
-                Settings.Default.DiffableExtensions.CopyTo(array, 0);
-                return string.Join(" ", array);
-            }
-
-            set
-            {
-                Settings.Default.DiffableExtensions = new StringCollection();
-                Settings.Default.DiffableExtensions.AddRange(value.Split(' '));
-            }
-        }
         
         /// <summary>
         /// Gets or sets the path of the file used as a success sound effect.

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DirectoryDescriptor xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name>NavBar Action Groups</Name>
+  <DirectoryName>NavBarActionGroups</DirectoryName>
+  <PushOnFileChange>true</PushOnFileChange>
+  <SearchRules>
+    <SearchRule xsi:type="IncludeRule">
+      <Pattern>*.xml</Pattern>
+    </SearchRule>
+  </SearchRules>
+  <DefaultDataType>CLOB</DefaultDataType>
+  <InsertStatement>
+INSERT INTO envmgr.nav_bar_action_groups (
+  mnem
+, xml_data
+) VALUES (
+  :p_filename_without_extension
+, XMLTYPE(:p_file_content_clob)
+)
+  </InsertStatement>
+  <UpdateStatement>
+UPDATE envmgr.nav_bar_action_groups
+SET xml_data = XMLTYPE(:p_file_content_clob)
+WHERE mnem = :p_filename_without_extension
+  </UpdateStatement>
+  <DeleteStatement>
+DELETE FROM envmgr.nav_bar_action_groups
+WHERE mnem = :p_filename_without_extension
+  </DeleteStatement>
+  <DatabaseFileExistsStatement>
+SELECT COUNT(*)
+FROM envmgr.nav_bar_action_groups
+WHERE mnem = :p_filename_without_extension
+  </DatabaseFileExistsStatement>
+  <FetchStatement>
+SELECT xml_data
+FROM envmgr.nav_bar_action_groups
+WHERE mnem = :p_filename_without_extension
+  </FetchStatement>
+</DirectoryDescriptor>

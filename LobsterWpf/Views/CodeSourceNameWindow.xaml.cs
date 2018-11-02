@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="filename.cs" company="marshl">
+// <copyright file="CodeSourceNameWindow.xaml.cs" company="marshl">
 // Copyright 2016, Liam Marshall, marshl.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,13 +27,24 @@ namespace LobsterWpf.Views
     /// </summary>
     public partial class CodeSourceNameWindow : Window
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CodeSourceNameWindow"/> class.
+        /// </summary>
         public CodeSourceNameWindow()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
 
+        /// <summary>
+        /// Gets the CodeSource name that the user entered.
+        /// </summary>
         public string CodeSourceName { get; private set; }
 
+        /// <summary>
+        /// Handles the event when the dialog OK button is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
         private void OkButton_Click(object sender, RoutedEventArgs e)
         {
             this.CodeSourceName = this.codeSourceNameField.Text;
@@ -41,6 +52,11 @@ namespace LobsterWpf.Views
             this.Close();
         }
 
+        /// <summary>
+        /// Handles the event when the dialog Cancel button is clicked.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
             this.DialogResult = false;

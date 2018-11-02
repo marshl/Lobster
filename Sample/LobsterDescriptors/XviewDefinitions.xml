@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DirectoryDescriptor xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name>Xview Definitions</Name>
+  <DirectoryName>XviewDefinitions</DirectoryName>
+  <PushOnFileChange>false</PushOnFileChange>
+  <SearchRules>
+    <SearchRule xsi:type="IncludeRule">
+      <Pattern>*.xml</Pattern>
+    </SearchRule>
+  </SearchRules>
+  <DefaultDataType>CLOB</DefaultDataType>
+  <InsertStatement>
+BEGIN
+  xviewmgr.xview.load(XMLTYPE(:p_file_content_clob), 'C');  
+END;
+  </InsertStatement>
+  <UpdateStatement>
+BEGIN
+  xviewmgr.xview.load(XMLTYPE(:p_file_content_clob), 'C');
+END;
+  </UpdateStatement>
+  <DatabaseFileExistsStatement>
+SELECT COUNT(*)
+FROM xviewmgr.xview_definitions xd
+WHERE xd.xview_owner = XMLCAST(XMLQUERY('/XVIEW_DEFINITION/XVIEW_OWNER/text()' PASSING XMLTYPE(:p_file_content_clob) RETURNING CONTENT) AS VARCHAR2(30))
+AND xd.xview_name = XMLCAST(XMLQUERY('/XVIEW_DEFINITION/XVIEW_NAME/text()' PASSING XMLTYPE(:p_file_content_clob) RETURNING CONTENT) AS VARCHAR2(30))
+  </DatabaseFileExistsStatement>
+  <FetchStatement>
+SELECT XMLTYPE(XMLSERIALIZE(DOCUMENT xdm.xview_metadata))
+FROM xviewmgr.xview_definition_metadata xdm
+WHERE xdm.xview_owner = XMLCAST(XMLQUERY('/XVIEW_DEFINITION/XVIEW_OWNER/text()' PASSING XMLTYPE(:p_file_content_clob) RETURNING CONTENT) AS VARCHAR2(30))
+AND xdm.xview_name = XMLCAST(XMLQUERY('/XVIEW_DEFINITION/XVIEW_NAME/text()' PASSING XMLTYPE(:p_file_content_clob) RETURNING CONTENT) AS VARCHAR2(30))
+  </FetchStatement>
+</DirectoryDescriptor>

@@ -28,10 +28,12 @@ namespace LobsterModel
         /// </summary>
         /// <param name="fullpath">The file that was updated.</param>
         /// <param name="success">Whether the file update succeeded or not.</param>
-        public FileUpdateCompleteEventArgs(string fullpath, bool success)
+        /// <param name="ex">The Exception thrown if a failure occurred</param>
+        public FileUpdateCompleteEventArgs(string fullpath, bool success, Exception ex)
         {
             this.Fullpath = fullpath;
             this.Success = success;
+            this.ExceptionThrown = ex;
         }
 
         /// <summary>
@@ -43,5 +45,10 @@ namespace LobsterModel
         /// Gets a value indicating whether the file updated succeeded or not.
         /// </summary>
         public bool Success { get; }
+
+        /// <summary>
+        /// Gets the Exception that was thrown if the update failed
+        /// </summary>
+        public Exception ExceptionThrown { get; }
     }
 }
