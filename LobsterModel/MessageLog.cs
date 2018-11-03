@@ -75,6 +75,11 @@ namespace LobsterModel
         }
 
         /// <summary>
+        /// The event for when a message is 
+        /// </summary>
+        public event EventHandler<MessageLogEventArgs> EventListener;
+
+        /// <summary>
         /// Gets the instance of this logger.
         /// </summary>
         public static MessageLog Instance
@@ -94,11 +99,6 @@ namespace LobsterModel
         /// Gets the messages that have been created by this program since startup.
         /// </summary>
         public List<Message> MessageList { get; private set; }
-
-        /// <summary>
-        /// Gets or sets the listener of events this log raises (such as when a new message is received).
-        /// </summary>
-        public IMessageLogEventListener EventListener { get; set; }
 
         /// <summary>
         /// Flushes the stream buffer.
@@ -182,7 +182,7 @@ namespace LobsterModel
             lock (this.fileLock)
             {
                 this.MessageList.Add(msg);
-                if ((messageType != Message.TYPE.SENSITIVE || Settings.Default.LogSensitiveMessages) && 
+                if ((messageType != Message.TYPE.SENSITIVE || Settings.Default.LogSensitiveMessages) &&
                     (messageType != Message.TYPE.INFO || Settings.Default.LogInfoMessages))
                 {
                     this.streamWriter.WriteLine(msg.ToString());
@@ -190,10 +190,9 @@ namespace LobsterModel
                 }
             }
 
-            if (this.EventListener != null)
-            {
-                this.EventListener.OnNewMessage(msg);
-            }
+            var handler = this.EventListener;
+            var args = new MessageLogEventArgs(msg);
+            handler?.Invoke(this, args);
         }
 
         /// <summary>

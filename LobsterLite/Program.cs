@@ -36,15 +36,24 @@ namespace LobsterLite
         /// <returns>A nonzero value if an error occurred, otherwise 0</returns>
         public static int Main(string[] args)
         {
-            MessageLog messageLog = MessageLog.Initialise();
-
             bool showHelp = false;
 
             var optionSet = new OptionSet()
             {
                 { "h|help",  "show this message and exit",
                   v => showHelp = v != null },
+                //{"codesource=", "The code source directory", (string path) => codeSourcePath = path }
             };
+
+            /*
+             * options:
+             * codesource 
+             * codesource update file
+             * codesource insert file
+             * codesource delete file
+             */
+
+            MessageLog.Instance.EventListener += new EventHandler<MessageLogEventArgs>(delegate (Object o, MessageLogEventArgs e) { Console.WriteLine(e.Message.ToString()); });
 
             List<string> extra;
             try
@@ -53,9 +62,8 @@ namespace LobsterLite
             }
             catch (OptionException e)
             {
-                Console.Write("gman: ");
                 Console.WriteLine(e.Message);
-                Console.WriteLine("Try `gman --help' for more information.");
+                Console.WriteLine("Try '--help' for more information.");
                 return 1;
             }
 
@@ -65,7 +73,7 @@ namespace LobsterLite
                 return 0;
             }
 
-            if (extra.Count < 2)
+            /*if (extra.Count < 2)
             {
                 Console.WriteLine("Not enough arguments.");
                 Program.ShowHelp(optionSet);
@@ -76,21 +84,15 @@ namespace LobsterLite
                 Console.WriteLine("Too many arguments");
                 Program.ShowHelp(optionSet);
                 return 1;
-            }
+            }*/
 
             string codeSourcePath = extra?[0];
-            string password = extra?[1];
-            if (codeSourcePath == null || password == null)
+            if (codeSourcePath == null)
             {
                 ShowHelp(optionSet);
                 return 1;
             }
 
-            SecureString securePassword = new SecureString();
-            foreach (char c in password)
-            {
-                securePassword.AppendChar(c);
-            }
 
             var exitEvent = new ManualResetEvent(false);
 
@@ -100,9 +102,12 @@ namespace LobsterLite
                 exitEvent.Set();
             };
 
-            bool result = Run(codeSourcePath, securePassword);
+            bool result = Run(codeSourcePath);
+            if (result)
+            {
+                exitEvent.WaitOne();
+            }
 
-            exitEvent.WaitOne();
             MessageLog.Close();
             return result ? 0 : 1;
         }
@@ -113,7 +118,7 @@ namespace LobsterLite
         /// <param name="codeSourcePath">The directory of the CodeSource folder to use.</param>
         /// <param name="password">The password to connect to the database with.</param>
         /// <returns>Returns true if no error occurred, otherwise false.</returns>
-        private static bool Run(string codeSourcePath, SecureString password)
+        private static bool Run(string codeSourcePath)
         {
             if (!Directory.Exists(codeSourcePath))
             {
@@ -130,14 +135,52 @@ namespace LobsterLite
                 return false;
             }
 
-            CodeSourceConfig config = CodeSourceConfig.LoadCodeSourceConfig(configFile.FullName);
+            CodeSourceConfigLoader loader = new CodeSourceConfigLoader();
+            CodeSourceConfig config;
+            loader.LoadCodeSourceConfig(codeSourcePath, out config);
             if (config == null)
             {
                 MessageLog.LogError("The database configuration file could not be loaded.");
                 return false;
             }
 
-            //DatabaseConnection connection = DatabaseConnection.CreateDatabaseConnection(config, password);
+            if (config.ConnectionConfigList.Count == 0)
+            {
+                MessageLog.LogError("No connection configurations were found in the CodeSource config");
+                return false;
+            }
+
+            Console.WriteLine($"PLease select a connection [0-{config.ConnectionConfigList.Count - 1}]:");
+            for (int i = 0; i < config.ConnectionConfigList.Count; ++i)
+            {
+                var connectionConfig = config.ConnectionConfigList[i];
+                Console.WriteLine($"{i}) {connectionConfig.Name} ({connectionConfig.Host}:{connectionConfig.Port}:{connectionConfig.SID})");
+            }
+
+            int connectionIndex;
+            if (!Int32.TryParse(Console.ReadLine(), out connectionIndex) || connectionIndex < 0 || connectionIndex >= config.ConnectionConfigList.Count)
+            {
+                MessageLog.LogError("Invalid selection");
+                return false;
+            }
+
+            var selectedConfig = config.ConnectionConfigList[connectionIndex];
+            Console.WriteLine("Please enter the password");
+            string password = Console.ReadLine();
+            SecureString securePassword = new SecureString();
+            foreach (char c in password)
+            {
+                securePassword.AppendChar(c);
+            }
+            try
+            {
+                var connection = DatabaseConnection.CreateDatabaseConnection(selectedConfig, securePassword);
+            }
+            catch (CreateConnectionException ex)
+            {
+                Console.WriteLine($"An error occurred when connecting to the database: {ex}");
+                return false;
+            }
 
             return true;
         }
