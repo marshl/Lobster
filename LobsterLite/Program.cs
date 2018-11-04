@@ -22,6 +22,7 @@ namespace LobsterLite
     using System.Security;
     using System.Threading;
     using LobsterModel;
+    using System.Linq;
     using Mono.Options;
 
     /// <summary>
@@ -38,27 +39,29 @@ namespace LobsterLite
         {
             bool showHelp = false;
 
+            string fileToDelete = null;
+            string fileToUpdate = null;
+            string fileToInsert = null;
+
             var optionSet = new OptionSet()
             {
                 { "h|help",  "show this message and exit",
                   v => showHelp = v != null },
-                //{"codesource=", "The code source directory", (string path) => codeSourcePath = path }
+                 { "d|delete=",
+                    "The file to delete",
+                  (string v) => fileToDelete = v },
+                 { "u|update=",
+                    "The file to update",
+                  (string v) => fileToUpdate = v },
+                 { "i|insert=",
+                    "The file to insert",
+                  (string v) => fileToInsert = v },
             };
 
-            /*
-             * options:
-             * codesource 
-             * codesource update file
-             * codesource insert file
-             * codesource delete file
-             */
-
-            MessageLog.Instance.EventListener += new EventHandler<MessageLogEventArgs>(delegate (Object o, MessageLogEventArgs e) { Console.WriteLine(e.Message.ToString()); });
-
-            List<string> extra;
+            List<string> extraArguments;
             try
             {
-                extra = optionSet.Parse(args);
+                extraArguments = optionSet.Parse(args);
             }
             catch (OptionException e)
             {
@@ -73,43 +76,100 @@ namespace LobsterLite
                 return 0;
             }
 
-            /*if (extra.Count < 2)
-            {
-                Console.WriteLine("Not enough arguments.");
-                Program.ShowHelp(optionSet);
-                return 1;
-            }
-            else if (extra.Count > 2)
+            MessageLog.Instance.EventListener += new EventHandler<MessageLogEventArgs>(delegate (Object o, MessageLogEventArgs e) { Console.WriteLine(e.Message.ToString()); });
+
+            bool result = true;
+            int argumentCount = new[] { fileToDelete, fileToUpdate, fileToInsert }.Count(x => x != null);
+            if (argumentCount > 1)
             {
                 Console.WriteLine("Too many arguments");
-                Program.ShowHelp(optionSet);
                 return 1;
-            }*/
+            }
 
-            string codeSourcePath = extra?[0];
+            string codeSourcePath = extraArguments?[0];
             if (codeSourcePath == null)
             {
                 ShowHelp(optionSet);
                 return 1;
             }
 
+            DatabaseConnection databaseConnection;
+            result = OpenDatabaseConnection(codeSourcePath, out databaseConnection);
 
-            var exitEvent = new ManualResetEvent(false);
-
-            Console.CancelKeyPress += (sender, eventArgs) =>
-            {
-                eventArgs.Cancel = true;
-                exitEvent.Set();
-            };
-
-            bool result = Run(codeSourcePath);
             if (result)
             {
-                exitEvent.WaitOne();
+                if (argumentCount == 1)
+                {
+                    string filepath = new[] { fileToDelete, fileToUpdate, fileToInsert }.First(x => x != null);
+                    Tuple<DirectoryWatcher, WatchedFile> tuple = databaseConnection.GetWatchedNodeForPath(filepath);
+                    try
+                    {
+                        if (tuple == null)
+                        {
+                            Console.WriteLine($"The file could not be found: {filepath}");
+                            result = false;
+                        }
+                        else if (fileToDelete != null)
+                        {
+                            databaseConnection.DeleteDatabaseFile(tuple.Item1, tuple.Item2);
+                        }
+                        else if (fileToUpdate != null)
+                        {
+                            databaseConnection.UpdateDatabaseFile(tuple.Item1, filepath);
+                        }
+                        else if (fileToInsert != null)
+                        {
+                            databaseConnection.InsertFile(tuple.Item1, filepath);
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        Console.WriteLine($"An exception occurred: {ex}");
+                        result = false;
+                    }
+                }
+                else
+                {
+                    var exitEvent = new ManualResetEvent(false);
+                    Console.CancelKeyPress += (sender, eventArgs) =>
+                    {
+                        eventArgs.Cancel = true;
+                        exitEvent.Set();
+                    };
+                    exitEvent.WaitOne();
+                }
             }
 
             MessageLog.Close();
             return result ? 0 : 1;
+        }
+
+        public static SecureString GetPassword()
+        {
+            Console.WriteLine("Enter teh password:");
+            var pwd = new SecureString();
+            while (true)
+            {
+                ConsoleKeyInfo i = Console.ReadKey(true);
+                if (i.Key == ConsoleKey.Enter)
+                {
+                    break;
+                }
+                else if (i.Key == ConsoleKey.Backspace)
+                {
+                    if (pwd.Length > 0)
+                    {
+                        pwd.RemoveAt(pwd.Length - 1);
+                        Console.Write("\b \b");
+                    }
+                }
+                else if (i.KeyChar != '\u0000') // KeyChar == '\u0000' if the key pressed does not correspond to a printable character, e.g. F1, Pause-Break, etc
+                {
+                    pwd.AppendChar(i.KeyChar);
+                    Console.Write("*");
+                }
+            }
+            return pwd;
         }
 
         /// <summary>
@@ -118,8 +178,9 @@ namespace LobsterLite
         /// <param name="codeSourcePath">The directory of the CodeSource folder to use.</param>
         /// <param name="password">The password to connect to the database with.</param>
         /// <returns>Returns true if no error occurred, otherwise false.</returns>
-        private static bool Run(string codeSourcePath)
+        private static bool OpenDatabaseConnection(string codeSourcePath, out DatabaseConnection databaseConnection)
         {
+            databaseConnection = null;
             if (!Directory.Exists(codeSourcePath))
             {
                 MessageLog.LogError($"Could not find directory {codeSourcePath}");
@@ -165,16 +226,10 @@ namespace LobsterLite
             }
 
             var selectedConfig = config.ConnectionConfigList[connectionIndex];
-            Console.WriteLine("Please enter the password");
-            string password = Console.ReadLine();
-            SecureString securePassword = new SecureString();
-            foreach (char c in password)
-            {
-                securePassword.AppendChar(c);
-            }
+            var securePassword = GetPassword();
             try
             {
-                var connection = DatabaseConnection.CreateDatabaseConnection(selectedConfig, securePassword);
+                databaseConnection = DatabaseConnection.CreateDatabaseConnection(selectedConfig, securePassword);
             }
             catch (CreateConnectionException ex)
             {

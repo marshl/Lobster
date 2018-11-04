@@ -31,7 +31,6 @@ namespace LobsterModel
     using System.Security;
     using System.Threading;
     using Oracle.ManagedDataAccess.Client;
-    using Oracle.ManagedDataAccess.Types;
     using Properties;
 
     /// <summary>
@@ -532,6 +531,24 @@ namespace LobsterModel
         }
 
         /// <summary>
+        /// Gets the <see cref="DirectoryWatcher"/> and the <see cref="WatchedFile"/> for the file with the given path, if it exists
+        /// </summary>
+        /// <param name="filepath">The full path of the file to find.</param>
+        /// <returns>A tuple with the <see cref="DirectoryWatcher"/> and the <see cref="WatchedFile"/> respecively if the file exists, otherwise null </returns>
+        public Tuple<DirectoryWatcher, WatchedFile> GetWatchedNodeForPath(string filepath)
+        {
+            foreach (var watchedDir in this.DirectoryWatcherList)
+            {
+                if (watchedDir.RootDirectory.FindNode(filepath) is WatchedFile node)
+                {
+                    return Tuple.Create(watchedDir, node);
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Disposes this object.
         /// </summary>
         public void Dispose()
@@ -947,7 +964,7 @@ namespace LobsterModel
             }
 
             this.LogFileEvent($"Auto-updating file {e.EventArgs.FullPath}");
-            
+
             try
             {
                 this.UpdateDatabaseFile(e.Watcher, e.EventArgs.FullPath);
