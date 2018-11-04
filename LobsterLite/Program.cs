@@ -14,15 +14,23 @@
 // limitations under the License.
 // </copyright>
 //-----------------------------------------------------------------------
+//
+//      There was Eru, the One, who in Arda is called Ilúvatar; and he 
+//      made first the Ainur, the Holy Ones, that were the offspring of 
+//      his thought, and they were with him before aught else was made.
+//      
+//      [ _The Silmarillion_, "Ainulindalë, The Music of the Ainur"]
+// 
+//-----------------------------------------------------------------------
 namespace LobsterLite
 {
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Security;
     using System.Threading;
     using LobsterModel;
-    using System.Linq;
     using Mono.Options;
 
     /// <summary>
@@ -48,13 +56,13 @@ namespace LobsterLite
                 { "h|help",  "show this message and exit",
                   v => showHelp = v != null },
                  { "d|delete=",
-                    "The file to delete",
+                    "Deletes the given file from the database",
                   (string v) => fileToDelete = v },
-                 { "u|update=",
-                    "The file to update",
+                 { "p|push=",
+                    "Pushes the given file to the database",
                   (string v) => fileToUpdate = v },
                  { "i|insert=",
-                    "The file to insert",
+                    "Inserts the given file into the database",
                   (string v) => fileToInsert = v },
             };
 
@@ -70,15 +78,19 @@ namespace LobsterLite
                 return 1;
             }
 
-            if (showHelp)
+            // If the number of arguments is wrong, then show the help
+            if (showHelp || extraArguments.Count != 1)
             {
                 Program.ShowHelp(optionSet);
                 return 0;
             }
 
-            MessageLog.Instance.EventListener += new EventHandler<MessageLogEventArgs>(delegate (Object o, MessageLogEventArgs e) { Console.WriteLine(e.Message.ToString()); });
+            // Any messages logged should also be written to the console
+            MessageLog.Instance.EventListener += new EventHandler<MessageLogEventArgs>((object o, MessageLogEventArgs e) =>
+            {
+                Console.WriteLine(e.Message.ToString());
+            });
 
-            bool result = true;
             int argumentCount = new[] { fileToDelete, fileToUpdate, fileToInsert }.Count(x => x != null);
             if (argumentCount > 1)
             {
@@ -93,23 +105,31 @@ namespace LobsterLite
                 return 1;
             }
 
-            DatabaseConnection databaseConnection;
-            result = OpenDatabaseConnection(codeSourcePath, out databaseConnection);
+            bool result = OpenDatabaseConnection(codeSourcePath, out DatabaseConnection databaseConnection);
 
+            // If the database connection was successful
             if (result)
             {
+                // If the user wants to delete/update/insert a file
                 if (argumentCount == 1)
                 {
+                    // Disable auto-pushing
+                    databaseConnection.Config.AllowAutomaticClobbing = false;
+
+                    // Get the path from among those arguments
                     string filepath = new[] { fileToDelete, fileToUpdate, fileToInsert }.First(x => x != null);
+
+                    // And get the managed objects for that file
                     Tuple<DirectoryWatcher, WatchedFile> tuple = databaseConnection.GetWatchedNodeForPath(filepath);
+                    if (tuple == null)
+                    {
+                        Console.WriteLine($"The file could not be found: {filepath}");
+                        return 1;
+                    }
+
                     try
                     {
-                        if (tuple == null)
-                        {
-                            Console.WriteLine($"The file could not be found: {filepath}");
-                            result = false;
-                        }
-                        else if (fileToDelete != null)
+                        if (fileToDelete != null)
                         {
                             databaseConnection.DeleteDatabaseFile(tuple.Item1, tuple.Item2);
                         }
@@ -122,20 +142,22 @@ namespace LobsterLite
                             databaseConnection.InsertFile(tuple.Item1, filepath);
                         }
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         Console.WriteLine($"An exception occurred: {ex}");
-                        result = false;
+                        return 1;
                     }
                 }
                 else
                 {
+                    // Otherwise keep the connection open and wait for files to change
                     var exitEvent = new ManualResetEvent(false);
                     Console.CancelKeyPress += (sender, eventArgs) =>
                     {
                         eventArgs.Cancel = true;
                         exitEvent.Set();
                     };
+                    MessageLog.LogInfo("Awaiting file updates. Press Ctrl+C to exit");
                     exitEvent.WaitOne();
                 }
             }
@@ -144,9 +166,14 @@ namespace LobsterLite
             return result ? 0 : 1;
         }
 
-        public static SecureString GetPassword()
+        /// <summary>
+        /// Prompts the user for a password and returns it as a <see cref="SecureString"/>
+        /// </summary>
+        /// <remarks><see cref="https://stackoverflow.com/questions/3404421/password-masking-console-application"/></remarks>
+        /// <returns>The password the user entered</returns>
+        public static SecureString PromptforPassword()
         {
-            Console.WriteLine("Enter teh password:");
+            Console.WriteLine("Enter password:");
             var pwd = new SecureString();
             while (true)
             {
@@ -163,21 +190,24 @@ namespace LobsterLite
                         Console.Write("\b \b");
                     }
                 }
-                else if (i.KeyChar != '\u0000') // KeyChar == '\u0000' if the key pressed does not correspond to a printable character, e.g. F1, Pause-Break, etc
+                else if (i.KeyChar != '\u0000')
                 {
+                    // KeyChar == '\u0000' if the key pressed does not correspond to a printable character, e.g. F1, Pause-Break, etc
                     pwd.AppendChar(i.KeyChar);
                     Console.Write("*");
                 }
             }
+
             return pwd;
         }
 
         /// <summary>
-        /// Executes the program with the given arguments
+        /// Opens a database connection for the given CodeSource.
+        /// The user will be prompted to select which connection should be used and the password for it.
         /// </summary>
-        /// <param name="codeSourcePath">The directory of the CodeSource folder to use.</param>
-        /// <param name="password">The password to connect to the database with.</param>
-        /// <returns>Returns true if no error occurred, otherwise false.</returns>
+        /// <param name="codeSourcePath">The full path of the CodeSource directory to open the connection for.</param>
+        /// <param name="databaseConnection">The created <see cref="DatabaseConnection"/> if it is opened successfully, otherwise null.</param>
+        /// <returns>True if the database connection is opened successfully, otherwise false.</returns>
         private static bool OpenDatabaseConnection(string codeSourcePath, out DatabaseConnection databaseConnection)
         {
             databaseConnection = null;
@@ -219,14 +249,14 @@ namespace LobsterLite
             }
 
             int connectionIndex;
-            if (!Int32.TryParse(Console.ReadLine(), out connectionIndex) || connectionIndex < 0 || connectionIndex >= config.ConnectionConfigList.Count)
+            if (!int.TryParse(Console.ReadLine(), out connectionIndex) || connectionIndex < 0 || connectionIndex >= config.ConnectionConfigList.Count)
             {
                 MessageLog.LogError("Invalid selection");
                 return false;
             }
 
             var selectedConfig = config.ConnectionConfigList[connectionIndex];
-            var securePassword = GetPassword();
+            var securePassword = PromptforPassword();
             try
             {
                 databaseConnection = DatabaseConnection.CreateDatabaseConnection(selectedConfig, securePassword);
@@ -246,7 +276,8 @@ namespace LobsterLite
         /// <param name="optionSet">The option set to display the help for.</param>
         private static void ShowHelp(OptionSet optionSet)
         {
-            Console.WriteLine("Usage: LobsterLite CodeSource password [OPTIONS]");
+            Console.WriteLine("Usage: .\\LobsterLite.exe CodeSource [--command filepath]");
+            Console.WriteLine("If no commands are given, then this program will wait for files to be changed and the automatically push them.");
             optionSet.WriteOptionDescriptions(Console.Out);
         }
     }
