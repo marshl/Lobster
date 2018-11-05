@@ -29,7 +29,7 @@
         <RowDefinition Height="*"/>
         <RowDefinition Height="Auto"/>
       </Grid.RowDefinitions>
-      <Label Grid.Row="0" Content="Codesource Directories" FontSize="16"/>
+      <Label Grid.Row="0" Content="CodeSource Directories" FontSize="16"/>
       <ListBox Name="codeSourceListBox" Grid.Row="1" ItemsSource="{Binding CodeSourceConfigList}" SelectionChanged="CodeSourceListBox_SelectionChanged">
         <ListBox.ItemTemplate>
           <DataTemplate DataType="CodeSourceConfigView">
