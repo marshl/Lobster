@@ -17,7 +17,7 @@ Lobster uses the "CodeSource directories" which are directories which contain a 
 
 ## Using Lobster
 
-Once you have chosen a connection, you will see the main Lobster screen, divided into three columns. The first column shows the directories under the CodeSource directory. Select one of these and the middle column will show the files in that directory.
+Once you have chosen a connection, you will see the main Lobster screen, divided into three columns. The first column shows the directories under the CodeSource directory. Select one of these and the middle column will show the files in that directory. If you don't have any directories in the left hand list, you will have to add some DirectoryDescriptor files to the LobsterDescriptors directory in your CodeSource folder. Some example files are included in the installation folder under "Samples". See the wiki on more information on how to create your own.
 
 ### Local files
 
