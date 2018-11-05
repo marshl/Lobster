@@ -15,12 +15,11 @@
 // </copyright>
 //-----------------------------------------------------------------------
 //
-//      There was Eru, the One, who in Arda is called Ilúvatar; and he 
-//      made first the Ainur, the Holy Ones, that were the offspring of 
-//      his thought, and they were with him before aught else was made.
-//      
-//      [ _The Silmarillion_, "Ainulindalë, The Music of the Ainur"]
-// 
+//       "There need not be, there would not be, any real change in our designs, only in our means."
+//        - Saruman
+//
+//      [_The Lord of the Rings_, II / ii: "The Council of Elrond"]
+//
 //-----------------------------------------------------------------------
 namespace LobsterLite
 {
