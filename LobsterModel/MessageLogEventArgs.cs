@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="IMessageLogEventListener.cs" company="marshl">
+// <copyright file="MessageLogEventArgs.cs" company="marshl">
 // Copyright 2016, Liam Marshall, marshl.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,15 +22,25 @@
 //-----------------------------------------------------------------------
 namespace LobsterModel
 {
+    using System;
+
     /// <summary>
     /// The interface for listeneing to events on the MessageLog
     /// </summary>
-    public interface IMessageLogEventListener
+    public class MessageLogEventArgs : EventArgs
     {
         /// <summary>
-        /// The event raised when a new message is received.
+        /// Initializes a new instance of the <see cref="MessageLogEventArgs"/> class.
         /// </summary>
-        /// <param name="msg">The new message.</param>
-        void OnNewMessage(MessageLog.Message msg);
+        /// <param name="msg">The message for this event</param>
+        public MessageLogEventArgs(MessageLog.Message msg)
+        {
+            this.Message = msg;
+        }
+
+        /// <summary>
+        /// Gets the message for this event
+        /// </summary>
+        public MessageLog.Message Message { get; }
     }
 }
