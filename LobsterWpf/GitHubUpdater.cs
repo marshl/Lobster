@@ -98,7 +98,7 @@ namespace LobsterWpf
             IRestResponse response = restClient.Execute(restRequest);
             if (response.StatusCode != HttpStatusCode.OK)
             {
-                MessageLog.LogWarning($"An error occured when attempting to query GitHub: Http Status Code {response.StatusCode}");
+                MessageLog.LogWarning($"An error occurred when attempting to query GitHub: Http Status Code {response.StatusCode}");
                 return false;
             }
 

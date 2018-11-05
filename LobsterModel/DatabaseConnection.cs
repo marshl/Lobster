@@ -469,7 +469,7 @@ namespace LobsterModel
             }
             catch (Exception ex)
             {
-                MessageLog.LogError($"An error occured when retrieving data when executing command {oracleCommand.CommandText} for file {sourceFilename}: {ex}");
+                MessageLog.LogError($"An error occurred when retrieving data when executing command {oracleCommand.CommandText} for file {sourceFilename}: {ex}");
                 throw new FileDownloadException($"An exception ocurred when downloading the file: {ex}");
             }
         }
