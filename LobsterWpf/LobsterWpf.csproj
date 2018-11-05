@@ -364,6 +364,7 @@ rd "$(ProjectDir)$(OutDir)temp"
 xcopy /s /y "$(ProjectDir)LobsterSettings" "$(ProjectDir)$(OutDir)LobsterSettings"
 xcopy /y "$(ProjectDir)..\README.md" "$(ProjectDir)$(OutDir)"
 xcopy /y "$(ProjectDir)..\release_notes.md" "$(ProjectDir)$(OutDir)"
+xcopy /y /E "$(ProjectDir)..\Sample" "$(ProjectDir)$(OutDir)\Sample\"
 del /q "$(ProjectDir)$(OutDir)lobster.log"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
