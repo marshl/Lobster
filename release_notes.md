@@ -1,3 +1,8 @@
+## Release 3.1.1
+##### Released: 12-11-2018
+#### Bug Fixes
+ - Fixed the auto-updater not working over TLS
+
 ## Release 3.1.0
 ##### Released: 12-11-2018
 
@@ -21,7 +26,7 @@
  - User created file update success/failure sounds can now be any format playable by Windows Media Player
  - Added samples to the release folder
  
-#### Bug FIxes
+#### Bug Fixes
  - Fixed failure/success sounds not being customisable
  - Fixed a crash that would occur if the user supplied diff program arguments are incorrect
 #### Appearance
