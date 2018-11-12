@@ -93,6 +93,9 @@ namespace LobsterWpf
         /// <returns>True if there is a newer release available.</returns>
         public bool RunUpdateCheck()
         {
+            // specify to use TLS 1.2 as default connection
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
             RestClient restClient = new RestClient("https://api.github.com");
             var restRequest = new RestRequest($"/repos/{this.username}/{this.repository}/releases/latest", Method.GET);
             IRestResponse response = restClient.Execute(restRequest);
@@ -113,7 +116,7 @@ namespace LobsterWpf
             }
 
             Regex regex = new Regex("(?<year>[0-9]{4})-(?<month>[0-9]{2})-(?<day>[0-9]{2})");
-            Match match = regex.Match(this.release.PublishedAt);
+            Match match = regex.Match(this.release.CreatedAt);
             if (!match.Success)
             {
                 MessageLog.LogWarning("An error occurred when attempting to extract the publish date");
