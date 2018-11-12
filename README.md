@@ -36,7 +36,7 @@ The right hand column shows the backup log for the currently selected file. When
 Connections are opened in tabs, and you can be have multiple connections open at the same time in multiple tabs. Each connection has some controls across the top you can use:
 - **Autopush** toggles whether files should be pushed to the database automatically when changed. This can be changed in the  level or the DirectoryDescriptor level as well.
 - **Reload** loads the DirectoryDescriptor configuration files and resynchronises with the list of local files. If you created a new file while Lobster was open and you want to insert it, you'll have to press Reload so that Lobster can find that new local file.
-- **Disconnect** closes teh connection to the database. This will mean any further changes to local file won't be automatically pushed.
+- **Disconnect** closes the connection to the database. This will mean any further changes to local file won't be automatically pushed.
 
 
 ## LobsterLite

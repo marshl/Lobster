@@ -215,7 +215,7 @@ namespace LobsterWpf.Views
                     {
                         if (!backgroundCheck)
                         {
-                            MessageBox.Show("No update available");
+                            MessageBox.Show("You are running the latest version of Lobster.");
                         }
 
                         return;
